@@ -208,14 +208,16 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
   border:1px solid var(--line2);font-size:10px;font-weight:700}
 .dguide summary:hover{color:var(--ink)}
 .dguide[open] summary{color:var(--ink)}
-.dguide .dg{position:absolute;left:0;top:calc(100% + 8px);z-index:30;width:min(460px,100%);padding:14px 16px;border-radius:14px;
+.dguide .dg{position:absolute;left:0;top:calc(100% + 8px);z-index:30;width:min(540px,100%);padding:14px 16px;border-radius:14px;
   background:var(--board);border:1px solid var(--line2);box-shadow:0 14px 36px rgba(0,0,0,.5);animation:shUp .15s ease-out}
 .dguide p{margin:0 0 10px;line-height:1.6}
 .dguide p b{color:var(--ink)}
 .dguide ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
 .dguide li{display:flex;align-items:center;gap:12px}
 .dguide li .dlv{min-width:118px}
-.dguide li > span:last-child{font-family:"JetBrains Mono",monospace;font-size:12px}
+.dguide li{align-items:flex-start}
+.dguide li .dlv{padding-top:1px}
+.dguide li > span:last-child{font-size:12.5px;line-height:1.55;color:var(--ink2)}
 @keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* 패키징 보기 */
