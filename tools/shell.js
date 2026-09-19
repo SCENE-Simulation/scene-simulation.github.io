@@ -65,10 +65,12 @@
   show(cur());
 
   // ===== 컬렉션 정보: 출시 달 · 수집 난이도 =====
-  // ym: 출시 연-월, types: 종류 수, price: 1개 가격
+  // desc: 페이지 설명(홈 카드에도 그대로 표시), ym: 출시 연-월, types: 종류 수, price: 1개 가격
   // diff: 수집 난이도(1~5). 비용과 판매 기간·물량 같은 조건을 함께 보고 운영자가 직접 정함
   var COLS = {
-    cu405: { ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4 }
+    cu405: {
+      desc: 'CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.',
+      ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4 }
   };
   var DIFF = [
     { label: '쉬움',       c: '#47d19a', desc: '적은 비용으로 금방 모을 수 있고, 구하기도 어렵지 않습니다.' },
@@ -97,6 +99,11 @@
     });
     return s + '</ul></div></details>';
   }
+  document.querySelectorAll('[data-desc]').forEach(function(el){
+    var d = COLS[el.getAttribute('data-desc')];
+    el.textContent = d.desc;
+    if (el.classList.contains('cdesc')) el.title = d.desc;
+  });
   document.querySelectorAll('.hc[data-col]').forEach(function(card){
     var x = info(card.getAttribute('data-col'));
     card.setAttribute('data-ym', x.d.ym);

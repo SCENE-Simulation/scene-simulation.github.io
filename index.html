@@ -650,6 +650,10 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .pk-ph span:not(.chip){font-size:12.5px;color:var(--ink2)}
 .pk-ph .chip{align-self:center}
 
+/* 홈 카드 설명: 두 줄 넘으면 말줄임 */
+.hc p.cdesc{flex:0 0 auto;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+.hc .st2{margin-top:auto;padding-top:4px}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -711,7 +715,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
       <div class="k">COLLECTION BOOK</div>
       <h2>CU 리센느 405빵 콜라보</h2>
       <div class="meta"></div>
-      <p>실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 모은 만큼 카드가 빛나고, 칭호도 얻을 수 있습니다.</p>
+      <p class="cdesc" data-desc="cu405"></p>
       <div class="st2"><span><b data-mirror="c-own">0/27</b>보유</span><span><b data-mirror="c-cnt">0회</b>구매</span></div>
       <span class="go">도감 열기 →</span>
     </a>
@@ -812,7 +816,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 </div>
 <div id="page-col">
 <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
-<p class="sec-d">CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.</p>
+<p class="sec-d" data-desc="cu405"></p>
 <div class="cmeta" data-col="cu405"></div>
 <details class="pkg"><summary>패키징 보기</summary><div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div></div></details>
   <div class="chead2">
@@ -1868,10 +1872,12 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
   show(cur());
 
   // ===== 컬렉션 정보: 출시 달 · 수집 난이도 =====
-  // ym: 출시 연-월, types: 종류 수, price: 1개 가격
+  // desc: 페이지 설명(홈 카드에도 그대로 표시), ym: 출시 연-월, types: 종류 수, price: 1개 가격
   // diff: 수집 난이도(1~5). 비용과 판매 기간·물량 같은 조건을 함께 보고 운영자가 직접 정함
   var COLS = {
-    cu405: { ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4 }
+    cu405: {
+      desc: 'CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.',
+      ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4 }
   };
   var DIFF = [
     { label: '쉬움',       c: '#47d19a', desc: '적은 비용으로 금방 모을 수 있고, 구하기도 어렵지 않습니다.' },
@@ -1900,6 +1906,11 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
     });
     return s + '</ul></div></details>';
   }
+  document.querySelectorAll('[data-desc]').forEach(function(el){
+    var d = COLS[el.getAttribute('data-desc')];
+    el.textContent = d.desc;
+    if (el.classList.contains('cdesc')) el.title = d.desc;
+  });
   document.querySelectorAll('.hc[data-col]').forEach(function(card){
     var x = info(card.getAttribute('data-col'));
     card.setAttribute('data-ym', x.d.ym);

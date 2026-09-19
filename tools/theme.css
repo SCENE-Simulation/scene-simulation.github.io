@@ -235,3 +235,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .pk-ph svg{width:30px;height:30px}
 .pk-ph span:not(.chip){font-size:12.5px;color:var(--ink2)}
 .pk-ph .chip{align-self:center}
+
+/* 홈 카드 설명: 두 줄 넘으면 말줄임 */
+.hc p.cdesc{flex:0 0 auto;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+.hc .st2{margin-top:auto;padding-top:4px}
