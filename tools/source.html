@@ -476,11 +476,11 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
 <div id="page-col">
   <div class="snote" id="c-note"><span class="ic" aria-hidden="true">!</span><div class="tx"><b>기록은 <em>저장</em> 버튼을 눌러야 저장됩니다.</b><span id="c-note-s">저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.</span></div></div>
   <div class="chead2">
-    <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
-    <div class="m"><b id="c-won">0원</b><span>누적 금액</span></div>
-    <div class="m"><b id="c-own">0/27</b><span>보유 종수 · 중복 <span id="c-dup">0</span>장</span></div>
+    <div class="m" id="m-cnt"><span class="mk">구매 횟수</span><b id="c-cnt">0회</b><small>빵 구매 기준</small></div>
+    <div class="m" id="m-won"><span class="mk">누적 금액</span><b id="c-won">0원</b><small>빵 구매 + 중고 구매</small></div>
+    <div class="m" id="m-own"><span class="mk">보유 종수</span><b id="c-own">0/27</b><small>중복 <span id="c-dup">0</span>장</small><span class="mbar"><i id="c-ownbar"></i></span></div>
     <div class="sp"><button class="p" id="c-savebtn">저장</button><button id="c-reset">전체 초기화</button></div>
-    <div class="badges" id="c-badges"></div>
+    <div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n" id="c-ach-n">0 / 0</span></div><div class="badges" id="c-badges"></div></div>
   </div>
   <div class="cledger">
     <div class="lg" id="lg-buy"><div class="t">빵 구매 · 2,500원</div>
@@ -962,6 +962,7 @@ function colRender(){
   });
   document.getElementById('c-usedwon').textContent='누적 '+won(usedWon())+'원';
   document.getElementById('c-own').textContent=t0.own+'/27';
+  document.getElementById('c-ownbar').style.width=(t0.own/N*100)+'%';
   document.getElementById('c-dup').textContent=won(t0.dup);
   for(var i=0;i<N;i++){
     colTiles[i].el.classList.toggle('have',COL[i]>0);
@@ -1089,12 +1090,21 @@ function achCtx(){
   return {buy:LG.buy,trade:LG.trade,used:LG.used,own:own,maxDup:maxDup,
           money:totalWon()};
 }
+// 칭호 뱃지: 종류별 색, 단계가 높을수록 화려하게 (숨은 칭호는 홀로그램)
+var ACHCAT=[['buy','#ecd25b'],['tr','#47d19a'],['us','#e96387'],['dup','#a080d0'],['own','#55a1e7'],['money','#e09050']];
+var ACHRANK={buy10:1,buy50:2,buy105:3,buy200:4,tr3:1,tr10:2,tr25:3,us1:1,us5:2,us15:3,dup6:2,dup10:3,own14:2,own27:4,money:2};
+function achColor(id){for(var k=0;k<ACHCAT.length;k++)if(id.indexOf(ACHCAT[k][0])===0)return ACHCAT[k][1];return null;}
 function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
   var got=ACHDEF.filter(function(a){return ACH[a.id];});
+  var cnt=document.getElementById('c-ach-n'); if(cnt)cnt.textContent=got.length+' / '+ACHDEF.length;
   box.innerHTML = got.length
-    ? got.map(function(a){return '<span class="bd" title="'+a.d+'">'+a.n+'</span>';}).join('')
-    : '<span class="bd hid">칭호 없음 · 기록을 쌓아 보십시오</span>';
+    ? got.map(function(a){
+        var c=achColor(a.id), r=ACHRANK[a.id]||4;
+        return '<span class="bdg'+(c?'':' holo')+'" data-r="'+r+'"'+(c?' style="--bc:'+c+'"':'')+' title="'+a.n+' · '+a.d+'">'
+          +'<span class="em"><i>'+(c?'✦':'✧')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
+      }).join('')
+    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 기록을 쌓으면 칭호가 생깁니다</span>';
 }
 function achAward(id,silent){
   if(ACH[id])return;

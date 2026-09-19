@@ -718,6 +718,58 @@ body.has-sfloat #totop{bottom:84px}
 .clog .list div.pend .tg{color:var(--pink-t);font-weight:700}
 .clog .list .wn{margin-left:6px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--gold-t)}
 
+/* ===== 컬렉션 상단: 통계 타일 · 버튼 · 칭호 ===== */
+.chead2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 150px;grid-template-areas:"cnt won own sp" "ach ach ach ach";
+  gap:10px;padding:12px;align-items:stretch}
+#m-cnt{grid-area:cnt} #m-won{grid-area:won} #m-own{grid-area:own}
+.chead2 .sp{grid-area:sp;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.chead2 .sp button{flex:1;min-height:44px}
+.chead2 .m{position:relative;overflow:hidden;min-width:0;display:flex;flex-direction:column;gap:3px;padding:14px 16px 13px;
+  border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
+.chead2 .m::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--tc,rgba(255,255,255,.08));transition:background .3s}
+.chead2 .m .mk{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink2)}
+.chead2 .m .mk::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tc,var(--dim));
+  box-shadow:0 0 8px color-mix(in srgb,var(--tc,transparent) 70%,transparent)}
+.chead2 .m b{margin:2px 0 0;font-size:clamp(20px,2.6vw,27px);line-height:1.2;color:var(--tc,var(--ink2));transition:color .3s;
+  text-shadow:0 0 16px color-mix(in srgb,var(--tc,transparent) 30%,transparent)}
+.chead2 .m[data-lv="5"] b{text-shadow:0 0 18px color-mix(in srgb,var(--tc) 55%,transparent)}
+.chead2 .m small{font-size:12px;color:var(--ink2)}
+.chead2 .m small span{font-size:inherit;color:inherit}
+.chead2 .m .mbar{display:block;margin-top:auto;padding-top:8px;height:12px;background:none}
+.chead2 .m .mbar::before{content:"";display:block;height:4px;border-radius:3px;background:rgba(255,255,255,.08)}
+.chead2 .m .mbar i{display:block;height:4px;margin-top:-4px;width:0;border-radius:3px;background:var(--tc,var(--mint));transition:width .4s ease}
+.chead2 .m.done b{background:linear-gradient(100deg,#f6b93c,#fff3c8,#f6b93c);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
+  color:transparent;animation:sheen 2.4s linear infinite}
+.cach{grid-area:ach;padding:12px 14px 14px;border-radius:12px;background:rgba(0,0,0,.2);border:1px solid var(--line)}
+.cach-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cach-t{font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--gold-t)}
+.cach-n{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink2)}
+.cach .badges{display:flex;flex-wrap:wrap;gap:8px;margin:0;width:auto}
+.bdg{--bc:#ecd25b;display:inline-flex;align-items:center;gap:10px;padding:5px 14px 5px 5px;border-radius:999px;cursor:default;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--bc) 24%,transparent),color-mix(in srgb,var(--bc) 7%,transparent));
+  border:1px solid color-mix(in srgb,var(--bc) 55%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.bdg .em{flex:0 0 32px;width:32px;height:32px;display:grid;place-items:center;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  background:linear-gradient(160deg,#fff 0%,var(--bc) 42%,color-mix(in srgb,var(--bc) 55%,#000) 100%)}
+.bdg .em i{font-style:normal;font-size:14px;line-height:1;color:rgba(20,20,22,.85)}
+.bdg .bt{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.bdg .bt b{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.bdg .bt small{font-size:11px;color:var(--ink2);white-space:nowrap}
+.bdg[data-r="2"]{border-width:1.5px}
+.bdg[data-r="3"]{border-width:1.5px;box-shadow:0 0 14px color-mix(in srgb,var(--bc) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.14)}
+.bdg[data-r="4"]{border-width:1.5px;background:linear-gradient(110deg,color-mix(in srgb,var(--bc) 18%,transparent) 20%,color-mix(in srgb,var(--bc) 42%,transparent) 45%,color-mix(in srgb,var(--bc) 18%,transparent) 70%);
+  background-size:240% 100%;animation:sheen 3s linear infinite;box-shadow:0 0 18px color-mix(in srgb,var(--bc) 40%,transparent)}
+.bdg.holo{--bc:#c1a8ea;border-color:rgba(255,255,255,.35);
+  background:linear-gradient(110deg,rgba(255,120,200,.22),rgba(110,230,255,.22),rgba(255,240,140,.22),rgba(180,140,255,.22));background-size:300% 100%;animation:sheen 4s linear infinite}
+.bdg.holo .em{background:conic-gradient(from 20deg,#ff8ad0,#8ee8ff,#fff08c,#b48cff,#ff8ad0)}
+.bdg-empty{font-size:12.5px;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){.bdg,.chead2 .m.done b{animation:none}}
+@media (max-width:760px){
+  .chead2{grid-template-columns:1fr 1fr;grid-template-areas:"cnt own" "won won" "sp sp" "ach ach"}
+  .chead2 .sp{flex-direction:row}
+  .chead2 .m{padding:12px 13px 11px}
+}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -888,11 +940,11 @@ body.has-sfloat #totop{bottom:84px}
 <div class="xt" data-col="cu405"></div>
   <div class="snote" id="c-note"><span class="ic" aria-hidden="true">!</span><div class="tx"><b>기록은 <em>저장</em> 버튼을 눌러야 저장됩니다.</b><span id="c-note-s">저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.</span></div></div>
   <div class="chead2">
-    <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
-    <div class="m"><b id="c-won">0원</b><span>누적 금액</span></div>
-    <div class="m"><b id="c-own">0/27</b><span>보유 종수 · 중복 <span id="c-dup">0</span>장</span></div>
+    <div class="m" id="m-cnt"><span class="mk">구매 횟수</span><b id="c-cnt">0회</b><small>빵 구매 기준</small></div>
+    <div class="m" id="m-won"><span class="mk">누적 금액</span><b id="c-won">0원</b><small>빵 구매 + 중고 구매</small></div>
+    <div class="m" id="m-own"><span class="mk">보유 종수</span><b id="c-own">0/27</b><small>중복 <span id="c-dup">0</span>장</small><span class="mbar"><i id="c-ownbar"></i></span></div>
     <div class="sp"><button class="p" id="c-savebtn">저장</button><button id="c-reset">전체 초기화</button></div>
-    <div class="badges" id="c-badges"></div>
+    <div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n" id="c-ach-n">0 / 0</span></div><div class="badges" id="c-badges"></div></div>
   </div>
   <div class="cledger">
     <div class="lg" id="lg-buy"><div class="t">빵 구매 · 2,500원</div>
@@ -1381,6 +1433,7 @@ function colRender(){
   });
   document.getElementById('c-usedwon').textContent='누적 '+won(usedWon())+'원';
   document.getElementById('c-own').textContent=t0.own+'/27';
+  document.getElementById('c-ownbar').style.width=(t0.own/N*100)+'%';
   document.getElementById('c-dup').textContent=won(t0.dup);
   for(var i=0;i<N;i++){
     colTiles[i].el.classList.toggle('have',COL[i]>0);
@@ -1508,12 +1561,21 @@ function achCtx(){
   return {buy:LG.buy,trade:LG.trade,used:LG.used,own:own,maxDup:maxDup,
           money:totalWon()};
 }
+// 칭호 뱃지: 종류별 색, 단계가 높을수록 화려하게 (숨은 칭호는 홀로그램)
+var ACHCAT=[['buy','#ecd25b'],['tr','#47d19a'],['us','#e96387'],['dup','#a080d0'],['own','#55a1e7'],['money','#e09050']];
+var ACHRANK={buy10:1,buy50:2,buy105:3,buy200:4,tr3:1,tr10:2,tr25:3,us1:1,us5:2,us15:3,dup6:2,dup10:3,own14:2,own27:4,money:2};
+function achColor(id){for(var k=0;k<ACHCAT.length;k++)if(id.indexOf(ACHCAT[k][0])===0)return ACHCAT[k][1];return null;}
 function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
   var got=ACHDEF.filter(function(a){return ACH[a.id];});
+  var cnt=document.getElementById('c-ach-n'); if(cnt)cnt.textContent=got.length+' / '+ACHDEF.length;
   box.innerHTML = got.length
-    ? got.map(function(a){return '<span class="bd" title="'+a.d+'">'+a.n+'</span>';}).join('')
-    : '<span class="bd hid">칭호 없음 · 기록을 쌓아 보십시오</span>';
+    ? got.map(function(a){
+        var c=achColor(a.id), r=ACHRANK[a.id]||4;
+        return '<span class="bdg'+(c?'':' holo')+'" data-r="'+r+'"'+(c?' style="--bc:'+c+'"':'')+' title="'+a.n+' · '+a.d+'">'
+          +'<span class="em"><i>'+(c?'✦':'✧')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
+      }).join('')
+    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 기록을 쌓으면 칭호가 생깁니다</span>';
 }
 function achAward(id,silent){
   if(ACH[id])return;
@@ -2163,6 +2225,27 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
       cards.forEach(function(el){ grid.appendChild(el); });
     });
   });
+
+  // 컬렉션 통계: 값이 커질수록 색이 바뀜 (회색 → 민트 → 연두 → 금 → 주황 → 분홍)
+  var TINT = {
+    'c-cnt': [[1, '#47d19a'], [27, '#99ce64'], [60, '#ecd25b'], [105, '#e09050'], [150, '#e96387']],
+    'c-won': [[1, '#47d19a'], [50000, '#99ce64'], [100000, '#ecd25b'], [262500, '#e09050'], [400000, '#e96387']],
+    'c-own': [[1, '#47d19a'], [9, '#99ce64'], [18, '#ecd25b'], [27, '#f6b93c']]
+  };
+  function tint(){
+    Object.keys(TINT).forEach(function(id){
+      var el = document.getElementById(id); if (!el) return;
+      var v = parseInt(el.textContent.split('/')[0].replace(/\D/g, ''), 10) || 0, c = null, lv = 0;
+      TINT[id].forEach(function(s, i){ if (v >= s[0]) { c = s[1]; lv = i + 1; } });
+      var tile = el.closest('.m');
+      if (c) tile.style.setProperty('--tc', c); else tile.style.removeProperty('--tc');
+      tile.setAttribute('data-lv', lv);
+      tile.classList.toggle('done', id === 'c-own' && v >= 27);
+    });
+  }
+  var tobs = new MutationObserver(tint);
+  Object.keys(TINT).forEach(function(id){ var el = document.getElementById(id); if (el) tobs.observe(el, { childList: true, characterData: true, subtree: true }); });
+  tint();
 
   // 홈의 컬렉션 요약을 도감 숫자와 연동
   function sync(){

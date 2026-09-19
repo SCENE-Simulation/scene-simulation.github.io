@@ -303,3 +303,55 @@ body.has-sfloat #totop{bottom:84px}
 .clog .list div.pend{color:var(--ink)}
 .clog .list div.pend .tg{color:var(--pink-t);font-weight:700}
 .clog .list .wn{margin-left:6px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--gold-t)}
+
+/* ===== 컬렉션 상단: 통계 타일 · 버튼 · 칭호 ===== */
+.chead2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 150px;grid-template-areas:"cnt won own sp" "ach ach ach ach";
+  gap:10px;padding:12px;align-items:stretch}
+#m-cnt{grid-area:cnt} #m-won{grid-area:won} #m-own{grid-area:own}
+.chead2 .sp{grid-area:sp;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.chead2 .sp button{flex:1;min-height:44px}
+.chead2 .m{position:relative;overflow:hidden;min-width:0;display:flex;flex-direction:column;gap:3px;padding:14px 16px 13px;
+  border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
+.chead2 .m::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--tc,rgba(255,255,255,.08));transition:background .3s}
+.chead2 .m .mk{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--ink2)}
+.chead2 .m .mk::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tc,var(--dim));
+  box-shadow:0 0 8px color-mix(in srgb,var(--tc,transparent) 70%,transparent)}
+.chead2 .m b{margin:2px 0 0;font-size:clamp(20px,2.6vw,27px);line-height:1.2;color:var(--tc,var(--ink2));transition:color .3s;
+  text-shadow:0 0 16px color-mix(in srgb,var(--tc,transparent) 30%,transparent)}
+.chead2 .m[data-lv="5"] b{text-shadow:0 0 18px color-mix(in srgb,var(--tc) 55%,transparent)}
+.chead2 .m small{font-size:12px;color:var(--ink2)}
+.chead2 .m small span{font-size:inherit;color:inherit}
+.chead2 .m .mbar{display:block;margin-top:auto;padding-top:8px;height:12px;background:none}
+.chead2 .m .mbar::before{content:"";display:block;height:4px;border-radius:3px;background:rgba(255,255,255,.08)}
+.chead2 .m .mbar i{display:block;height:4px;margin-top:-4px;width:0;border-radius:3px;background:var(--tc,var(--mint));transition:width .4s ease}
+.chead2 .m.done b{background:linear-gradient(100deg,#f6b93c,#fff3c8,#f6b93c);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
+  color:transparent;animation:sheen 2.4s linear infinite}
+.cach{grid-area:ach;padding:12px 14px 14px;border-radius:12px;background:rgba(0,0,0,.2);border:1px solid var(--line)}
+.cach-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cach-t{font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--gold-t)}
+.cach-n{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink2)}
+.cach .badges{display:flex;flex-wrap:wrap;gap:8px;margin:0;width:auto}
+.bdg{--bc:#ecd25b;display:inline-flex;align-items:center;gap:10px;padding:5px 14px 5px 5px;border-radius:999px;cursor:default;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--bc) 24%,transparent),color-mix(in srgb,var(--bc) 7%,transparent));
+  border:1px solid color-mix(in srgb,var(--bc) 55%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.bdg .em{flex:0 0 32px;width:32px;height:32px;display:grid;place-items:center;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  background:linear-gradient(160deg,#fff 0%,var(--bc) 42%,color-mix(in srgb,var(--bc) 55%,#000) 100%)}
+.bdg .em i{font-style:normal;font-size:14px;line-height:1;color:rgba(20,20,22,.85)}
+.bdg .bt{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.bdg .bt b{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.bdg .bt small{font-size:11px;color:var(--ink2);white-space:nowrap}
+.bdg[data-r="2"]{border-width:1.5px}
+.bdg[data-r="3"]{border-width:1.5px;box-shadow:0 0 14px color-mix(in srgb,var(--bc) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.14)}
+.bdg[data-r="4"]{border-width:1.5px;background:linear-gradient(110deg,color-mix(in srgb,var(--bc) 18%,transparent) 20%,color-mix(in srgb,var(--bc) 42%,transparent) 45%,color-mix(in srgb,var(--bc) 18%,transparent) 70%);
+  background-size:240% 100%;animation:sheen 3s linear infinite;box-shadow:0 0 18px color-mix(in srgb,var(--bc) 40%,transparent)}
+.bdg.holo{--bc:#c1a8ea;border-color:rgba(255,255,255,.35);
+  background:linear-gradient(110deg,rgba(255,120,200,.22),rgba(110,230,255,.22),rgba(255,240,140,.22),rgba(180,140,255,.22));background-size:300% 100%;animation:sheen 4s linear infinite}
+.bdg.holo .em{background:conic-gradient(from 20deg,#ff8ad0,#8ee8ff,#fff08c,#b48cff,#ff8ad0)}
+.bdg-empty{font-size:12.5px;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){.bdg,.chead2 .m.done b{animation:none}}
+@media (max-width:760px){
+  .chead2{grid-template-columns:1fr 1fr;grid-template-areas:"cnt own" "won won" "sp sp" "ach ach"}
+  .chead2 .sp{flex-direction:row}
+  .chead2 .m{padding:12px 13px 11px}
+}

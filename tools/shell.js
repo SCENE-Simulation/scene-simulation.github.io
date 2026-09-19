@@ -180,6 +180,27 @@
     });
   });
 
+  // 컬렉션 통계: 값이 커질수록 색이 바뀜 (회색 → 민트 → 연두 → 금 → 주황 → 분홍)
+  var TINT = {
+    'c-cnt': [[1, '#47d19a'], [27, '#99ce64'], [60, '#ecd25b'], [105, '#e09050'], [150, '#e96387']],
+    'c-won': [[1, '#47d19a'], [50000, '#99ce64'], [100000, '#ecd25b'], [262500, '#e09050'], [400000, '#e96387']],
+    'c-own': [[1, '#47d19a'], [9, '#99ce64'], [18, '#ecd25b'], [27, '#f6b93c']]
+  };
+  function tint(){
+    Object.keys(TINT).forEach(function(id){
+      var el = document.getElementById(id); if (!el) return;
+      var v = parseInt(el.textContent.split('/')[0].replace(/\D/g, ''), 10) || 0, c = null, lv = 0;
+      TINT[id].forEach(function(s, i){ if (v >= s[0]) { c = s[1]; lv = i + 1; } });
+      var tile = el.closest('.m');
+      if (c) tile.style.setProperty('--tc', c); else tile.style.removeProperty('--tc');
+      tile.setAttribute('data-lv', lv);
+      tile.classList.toggle('done', id === 'c-own' && v >= 27);
+    });
+  }
+  var tobs = new MutationObserver(tint);
+  Object.keys(TINT).forEach(function(id){ var el = document.getElementById(id); if (el) tobs.observe(el, { childList: true, characterData: true, subtree: true }); });
+  tint();
+
   // 홈의 컬렉션 요약을 도감 숫자와 연동
   function sync(){
     document.querySelectorAll('[data-mirror]').forEach(function(el){
