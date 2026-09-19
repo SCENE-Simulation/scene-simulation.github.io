@@ -32,9 +32,7 @@ rep('<div id="page-col">',
   '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
   '<p class="sec-d" data-desc="cu405"></p>\n' +
   '<div class="cmeta" data-col="cu405"></div>\n' +
-  '<details class="pkg"><summary>패키징 보기</summary><div class="pk">' +
-  '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div>' +
-  '</div></details>');
+  '<div class="xt" data-col="cu405"></div>');
 
 // 본문 닫기 + 모바일 하단 탭 바
 rep('</div>\n<div class="mask" id="mask" hidden>',

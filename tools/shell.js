@@ -66,11 +66,14 @@
 
   // ===== 컬렉션 정보: 출시 달 · 수집 난이도 =====
   // desc: 페이지 설명(홈 카드에도 그대로 표시), ym: 출시 연-월, types: 종류 수, price: 1개 가격
+  // pkg: 패키징 이미지 [{src, cap}], news: 관련 기사 [{title, src(언론사), date, url}] — 비어 있으면 SOON
   // diff: 수집 난이도(1~5). 비용과 판매 기간·물량 같은 조건을 함께 보고 운영자가 직접 정함
   var COLS = {
     cu405: {
       desc: 'CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.',
-      ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4 }
+      ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4,
+      pkg: [],
+      news: [] }
   };
   var DIFF = [
     { label: '쉬움',       c: '#47d19a', desc: '적은 비용으로 금방 모을 수 있고, 구하기도 어렵지 않습니다.' },
@@ -118,6 +121,43 @@
       + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>'
       + '<div class="mt"><span class="mk">수집 난이도</span>' + bars(x.lv, x.t) + '<small>비용 · 구하기 종합 · 5단계 중 ' + x.lv + '</small></div>';
     box.innerHTML = html;
+  });
+  // 패키징 보기 · 관련 기사 보기: 하나를 펼치면 다른 하나는 닫힘
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  function soonBox(icon, text){
+    return '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg><span>' + text + '</span><span class="chip">SOON</span></div>';
+  }
+  document.querySelectorAll('.xt[data-col]').forEach(function(x){
+    var d = COLS[x.getAttribute('data-col')], pkg = d.pkg || [], news = d.news || [];
+    var tabs = [
+      { k: 'pkg', icon: 'i-box', label: '패키징 보기', n: pkg.length,
+        body: '<div class="pk">' + (pkg.length ? pkg.map(function(p){
+            return '<figure><img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+              + (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>';
+          }).join('') : soonBox('i-img', '패키징 이미지 준비 중')) + '</div>' },
+      { k: 'news', icon: 'i-news', label: '관련 기사 보기', n: news.length,
+        body: news.length ? '<div class="nws">' + news.map(function(a){
+            return '<a class="nw" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">'
+              + '<span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
+              + '<span class="nw-m">' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span>'
+              + '<svg><use href="#i-ext"/></svg></a>';
+          }).join('') + '</div>' : '<div class="pk">' + soonBox('i-news', '관련 기사 준비 중') + '</div>' }
+    ];
+    x.innerHTML = '<div class="xt-bar">' + tabs.map(function(t){
+        return '<button type="button" class="xt-b" data-x="' + t.k + '" aria-expanded="false">'
+          + '<svg class="xi"><use href="#' + t.icon + '"/></svg>' + t.label
+          + (t.n ? '<span class="xt-c">' + t.n + '</span>' : '<span class="xt-c soon">SOON</span>')
+          + '<svg class="xv"><use href="#i-chev"/></svg></button>';
+      }).join('') + '</div>'
+      + tabs.map(function(t){ return '<div class="xt-p" data-x="' + t.k + '" hidden>' + t.body + '</div>'; }).join('');
+    x.addEventListener('click', function(e){
+      var b = e.target.closest('.xt-b'); if (!b) return;
+      var k = b.getAttribute('data-x'), open = b.getAttribute('aria-expanded') !== 'true';
+      x.querySelectorAll('.xt-b').forEach(function(o){ o.setAttribute('aria-expanded', String(open && o === b)); });
+      x.querySelectorAll('.xt-p').forEach(function(p){ p.hidden = !(open && p.getAttribute('data-x') === k); });
+    });
   });
   var slot = document.getElementById('dguide-slot');
   if (slot) slot.outerHTML = guide();
