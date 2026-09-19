@@ -187,7 +187,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .seg button.on{background:rgba(255,255,255,.12);color:var(--ink)}
 
 /* 컬렉션 페이지 상단 정보 타일 */
-.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 18px}
+.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 10px}
 @media (max-width:560px){.cmeta{grid-template-columns:1fr 1fr}.cmeta .mt > b{font-size:17px}.cmeta .dlv b{font-size:14px}}
 .cmeta .mt{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .cmeta .mk{font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--ink2)}
@@ -217,3 +217,19 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .dguide li .dlv{min-width:118px}
 .dguide li > span:last-child{font-family:"JetBrains Mono",monospace;font-size:12px}
 @keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 패키징 보기 */
+.pkg{margin:0 0 18px;font-size:12.5px;color:var(--ink2)}
+.pkg summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:4px 0}
+.pkg summary::-webkit-details-marker{display:none}
+.pkg summary::before{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(-45deg);margin:0 3px 0 2px;transition:transform .15s ease}
+.pkg[open] summary::before{transform:rotate(45deg)}
+.pkg summary:hover,.pkg[open] summary{color:var(--ink)}
+.pk{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px;animation:shUp .15s ease-out}
+.pk img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+.pk-ph{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;
+  border:1.5px dashed var(--line2);background:var(--glass);color:var(--dim)}
+.pk-ph svg{width:30px;height:30px}
+.pk-ph span:not(.chip){font-size:12.5px;color:var(--ink2)}
+.pk-ph .chip{align-self:center}

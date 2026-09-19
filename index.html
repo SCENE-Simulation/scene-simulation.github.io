@@ -601,7 +601,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .seg button.on{background:rgba(255,255,255,.12);color:var(--ink)}
 
 /* 컬렉션 페이지 상단 정보 타일 */
-.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 18px}
+.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 10px}
 @media (max-width:560px){.cmeta{grid-template-columns:1fr 1fr}.cmeta .mt > b{font-size:17px}.cmeta .dlv b{font-size:14px}}
 .cmeta .mt{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .cmeta .mk{font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--ink2)}
@@ -632,6 +632,22 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .dguide li > span:last-child{font-family:"JetBrains Mono",monospace;font-size:12px}
 @keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
+/* 패키징 보기 */
+.pkg{margin:0 0 18px;font-size:12.5px;color:var(--ink2)}
+.pkg summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:4px 0}
+.pkg summary::-webkit-details-marker{display:none}
+.pkg summary::before{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(-45deg);margin:0 3px 0 2px;transition:transform .15s ease}
+.pkg[open] summary::before{transform:rotate(45deg)}
+.pkg summary:hover,.pkg[open] summary{color:var(--ink)}
+.pk{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px;animation:shUp .15s ease-out}
+.pk img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+.pk-ph{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;
+  border:1.5px dashed var(--line2);background:var(--glass);color:var(--dim)}
+.pk-ph svg{width:30px;height:30px}
+.pk-ph span:not(.chip){font-size:12.5px;color:var(--ink2)}
+.pk-ph .chip{align-self:center}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -642,6 +658,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
     <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
     <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="9.5" r="1.8"/><path d="M21 16l-5.5-5.5L5 20"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
@@ -795,6 +812,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
 <p class="sec-d">CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.</p>
 <div class="cmeta" data-col="cu405"></div>
+<details class="pkg"><summary>패키징 보기</summary><div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div></div></details>
   <div class="chead2">
     <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
     <div class="m"><b id="c-won">0원</b><span>누적 금액</span></div>
@@ -1896,10 +1914,10 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
   document.querySelectorAll('.cmeta[data-col]').forEach(function(box){
     var x = info(box.getAttribute('data-col'));
     var html = '<div class="mt"><span class="mk">출시</span><b>' + x.ym + '</b><small>' + x.ymK + '</small></div>'
+      + '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
+      + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>'
       + '<div class="mt"><span class="mk">수집 난이도</span>' + bars(x.lv, x.t) + '<small>비용 기준 · 5단계 중 ' + x.lv + '</small></div>';
     if (x.d.get) html += '<div class="mt"><span class="mk">구하기 난이도</span>' + bars(x.d.get, DIFF[x.d.get - 1]) + '<small>물량 · 판매 기간 기준</small></div>';
-    html += '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
-      + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>';
     box.innerHTML = html;
   });
   var slot = document.getElementById('dguide-slot');

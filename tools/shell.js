@@ -113,10 +113,10 @@
   document.querySelectorAll('.cmeta[data-col]').forEach(function(box){
     var x = info(box.getAttribute('data-col'));
     var html = '<div class="mt"><span class="mk">출시</span><b>' + x.ym + '</b><small>' + x.ymK + '</small></div>'
+      + '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
+      + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>'
       + '<div class="mt"><span class="mk">수집 난이도</span>' + bars(x.lv, x.t) + '<small>비용 기준 · 5단계 중 ' + x.lv + '</small></div>';
     if (x.d.get) html += '<div class="mt"><span class="mk">구하기 난이도</span>' + bars(x.d.get, DIFF[x.d.get - 1]) + '<small>물량 · 판매 기간 기준</small></div>';
-    html += '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
-      + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>';
     box.innerHTML = html;
   });
   var slot = document.getElementById('dguide-slot');

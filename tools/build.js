@@ -31,7 +31,10 @@ rep('<div id="page-sim" hidden>',
 rep('<div id="page-col">',
   '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
   '<p class="sec-d">CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.</p>\n' +
-  '<div class="cmeta" data-col="cu405"></div>');
+  '<div class="cmeta" data-col="cu405"></div>\n' +
+  '<details class="pkg"><summary>패키징 보기</summary><div class="pk">' +
+  '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div>' +
+  '</div></details>');
 
 // 본문 닫기 + 모바일 하단 탭 바
 rep('</div>\n<div class="mask" id="mask" hidden>',
