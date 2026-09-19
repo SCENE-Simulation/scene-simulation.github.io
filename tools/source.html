@@ -489,14 +489,14 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
       <div class="ctr"><button data-k="trade" data-d="-1">−</button><span class="n">0</span><button class="m" data-k="trade" data-d="1">+</button></div></div>
     <div class="lg" id="lg-used"><div class="t">중고 구매 · 장당 <input id="c-uprice" type="text" inputmode="numeric" autocomplete="off" value="15,000" aria-label="중고 구매가(장당)">원</div>
       <div class="ctr"><button data-k="used" data-d="-1">−</button><span class="n">0</span><button class="m" data-k="used" data-d="1">+</button></div>
-      <div class="uw" id="c-usedwon">누적 0원</div></div>
+      <div class="uw"><b id="c-usedwon">누적 0원</b><button type="button" class="uhint" id="c-usedhint">건별 금액은 <u>기록 로그</u>에서 수정할 수 있습니다</button></div></div>
+  </div>
+  <div class="lgx">
+    <button type="button" class="xt-b" id="c-logbtn" aria-expanded="false" aria-controls="c-logp"><svg class="xi"><use href="#i-log"/></svg>기록 로그<span class="xt-c" id="c-logn">0</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button>
+    <div class="clog" id="c-logp" hidden><div class="list" id="c-log"><div class="em">기록이 없습니다.</div></div></div>
   </div>
   <div class="csum" id="c-sum"><span class="stars" id="sum-stars"></span></div>
   <div id="c-body"></div>
-  <div class="clog">
-    <h4>카운트 로그</h4>
-    <div class="list" id="c-log"><div class="em">기록이 없습니다.</div></div>
-  </div>
   <p class="csave" id="c-save">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>
   <div class="sfloat" id="c-float" hidden><span class="sf-t">저장하지 않은 변경 <b id="c-float-n">0</b>건</span><button id="c-revert">되돌리기</button><button class="p" id="c-savebtn2">저장</button></div>
 </div>
@@ -919,35 +919,141 @@ function colTotals(){var c=0,o=0;for(var i=0;i<N;i++){c+=COL[i];if(COL[i]>0)o++;
 var KNAME={buy:'빵 구매',trade:'교환',used:'중고 구매',adj:'수량 조정',reset:'전체 초기화'};
 function kLabel(k,d){return (d<0&&k!=='adj')?KNAME[k]+' 취소':KNAME[k];}
 function two(n){return n<10?'0'+n:''+n;}
-function logLine(e,tag,cls){
-  if(e.k==='reset') return '<div'+(cls?' class="'+cls+'"':'')+'><span class="tg">'+tag+'</span>전체 초기화</div>';
-  var what=(e.i==null)?'':' <b>'+(e.i+1)+'. '+CNAME[e.i]+'</b>';
-  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원</span>':'';
-  return '<div'+(cls?' class="'+cls+'"':'')+'><span class="tg">'+tag+'</span>'+kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+money+'</div>';
+// EDITING: 수정 중인 기록, EDITS: 저장된 기록을 고친 횟수(저장 전 변경으로 셈)
+var EDITING=null, EDITS=0;
+function newId(){return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function cardName(i){return (i+1)+'. '+CNAME[i];}
+function unitOf(e){return (e.k==='used'&&e.d)?Math.round(Math.abs(e.w||0)/Math.abs(e.d)):0;}
+function logText(e){
+  if(e.k==='reset') return '전체 초기화';
+  var what=(e.i==null)?'':' <b>'+cardName(e.i)+'</b>';
+  var give=(e.give&&e.give.length)?' <span class="gv">↔ 내줌 '+e.give.map(cardName).join(', ')+'</span>':'';
+  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원'+(Math.abs(e.d)>1?' (장당 '+won(unitOf(e))+')':'')+'</span>':'';
+  return kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+give+money+(e.ed?' <span class="edt">수정됨</span>':'');
+}
+function editForm(e){
+  var h='<div class="ledit">';
+  if(e.i!=null){
+    h+='<label class="lf"><span>카드</span><select class="le-card">';
+    for(var i=0;i<N;i++) h+='<option value="'+i+'"'+(i===e.i?' selected':'')+'>'+cardName(i)+'</option>';
+    h+='</select></label>';
+  }
+  h+='<label class="lf"><span>'+(e.d<0?'취소 수량':'수량')+'</span><input class="le-qty" type="number" min="1" max="99" value="'+Math.abs(e.d)+'"></label>';
+  if(e.k==='used') h+='<label class="lf"><span>장당 금액</span><span class="lp"><input class="le-price" type="text" inputmode="numeric" autocomplete="off" value="'+won(unitOf(e)||LG.uprice)+'">원</span></label>';
+  if(e.give&&e.give.length) h+='<div class="lf ro"><span>내준 카드</span><b>'+e.give.map(cardName).join(', ')+'</b></div>';
+  h+='<div class="le-btns"><button type="button" class="le-del">기록 삭제</button><button type="button" class="le-cancel">취소</button><button type="button" class="p le-ok">적용</button></div>';
+  return h+'<p class="le-note">적용하면 카드 수량과 금액도 함께 바뀝니다. 저장을 눌러야 확정됩니다.</p></div>';
+}
+function logRow(e,tag,pend){
+  var h='<div class="lrow'+(pend?' pend':'')+(EDITING===e.id?' editing':'')+'"><span class="tg">'+tag+'</span><span class="lt">'+logText(e)+'</span>'
+    +(e.k==='reset'?'':'<button type="button" class="led" data-id="'+e.id+'">'+(EDITING===e.id?'닫기':'수정')+'</button>')+'</div>';
+  return h+(EDITING===e.id?editForm(e):'');
 }
 function logRender(){
-  var box=document.getElementById('c-log');
-  if(!LOG.length&&!PEND.length){box.innerHTML='<div class="em">기록이 없습니다.</div>';return;}
+  var box=document.getElementById('c-log'), n=LOG.length+PEND.length;
+  var cn=document.getElementById('c-logn'); if(cn)cn.textContent=n;
+  if(!n){box.innerHTML='<div class="em">기록이 없습니다.</div>';return;}
   var h='';
-  for(var p=PEND.length-1;p>=0;p--) h+=logLine(PEND[p],'저장 전','pend');
+  for(var p=PEND.length-1;p>=0;p--) h+=logRow(PEND[p],'저장 전',true);
   for(var k=LOG.length-1;k>=0;k--){
     var d=new Date(LOG[k].t);
-    h+=logLine(LOG[k],(d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes()));
+    h+=logRow(LOG[k],(d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes()),false);
   }
   box.innerHTML=h;
+  var pi=box.querySelector('.le-price'); if(pi) numFmt(pi);
 }
-function addLog(kind,idx,delta,w){
-  PEND.push({t:Date.now(),k:kind,i:(idx==null?null:idx),d:delta,w:w||0});
+function addLog(kind,idx,delta,w,id){
+  var e={id:id||newId(),t:Date.now(),k:kind,i:(idx==null?null:idx),d:delta,w:w||0};
+  PEND.push(e);
   logRender();
+  return e;
 }
+// 기록 하나의 효과를 적용(sign=1)하거나 되돌림(sign=-1)
+function usedRemove(e,n){
+  var L=LG.usedList,w=0,unit=unitOf(e);
+  for(var c=0;c<n&&L.length;c++){
+    var j=-1,a;
+    for(a=L.length-1;a>=0;a--) if(L[a].g===e.id){j=a;break;}
+    if(j<0&&unit) for(a=L.length-1;a>=0;a--) if(L[a].i===e.i&&L[a].p===unit){j=a;break;}
+    if(j<0) for(a=L.length-1;a>=0;a--) if(L[a].i===e.i){j=a;break;}
+    if(j<0) for(a=L.length-1;a>=0;a--) if(L[a].i==null){j=a;break;}
+    if(j<0) j=L.length-1;
+    w+=L[j].p; L.splice(j,1);
+  }
+  return w;
+}
+function applyEntry(e,sign){
+  if(e.k==='reset') return;
+  var d=sign*e.d;
+  if(e.i!=null) COL[e.i]=Math.max(0,Math.min(999,COL[e.i]+d));
+  if(e.give) e.give.forEach(function(g){COL[g]=Math.max(0,Math.min(999,COL[g]-sign));});
+  if(e.k==='buy'||e.k==='trade') LG[e.k]=Math.max(0,Math.min(9999,LG[e.k]+d));
+  if(e.k==='used'){
+    var n=Math.abs(d);
+    if(d>0){ var unit=unitOf(e)||LG.uprice; for(var c=0;c<n;c++) LG.usedList.push({i:e.i,p:unit,g:e.id}); }
+    else usedRemove(e,n);
+    LG.used=LG.usedList.length;
+  }
+}
+function findEntry(id){
+  for(var a=0;a<PEND.length;a++) if(PEND[a].id===id) return {e:PEND[a],arr:PEND,at:a};
+  for(var b=0;b<LOG.length;b++) if(LOG[b].id===id) return {e:LOG[b],arr:LOG,at:b};
+  return null;
+}
+function logChanged(f){
+  if(f.arr===LOG) EDITS++;
+  EDITING=null;
+  colRender(); logRender(); achRender(); colDirty(); checkCelebrate(true); achCheck(true);
+}
+function editApply(id,form){
+  var f=findEntry(id); if(!f) return;
+  var e=f.e, sg=e.d<0?-1:1;
+  var q=Math.max(1,Math.min(99,parseInt(form.querySelector('.le-qty').value,10)||1));
+  var cs=form.querySelector('.le-card'), pi=form.querySelector('.le-price');
+  applyEntry(e,-1);
+  if(cs) e.i=+cs.value;
+  e.d=sg*q;
+  if(e.k==='used') e.w=sg*q*numVal(pi);
+  else if(e.k==='buy') e.w=sg*q*PRICE;
+  applyEntry(e,1);
+  e.ed=true;
+  logChanged(f);
+}
+function editDelete(id){
+  var f=findEntry(id); if(!f) return;
+  applyEntry(f.e,-1);
+  f.arr.splice(f.at,1);
+  logChanged(f);
+}
+document.getElementById('c-log').addEventListener('click',function(ev){
+  var t=ev.target, id;
+  if(t.closest('.led')){ id=t.closest('.led').getAttribute('data-id'); EDITING=(EDITING===id)?null:id; logRender(); return; }
+  var form=t.closest('.ledit'); if(!form) return;
+  id=EDITING;
+  if(t.closest('.le-cancel')){ EDITING=null; logRender(); }
+  else if(t.closest('.le-ok')) editApply(id,form);
+  else if(t.closest('.le-del')) editDelete(id);
+});
+function logOpen(open){
+  var b=document.getElementById('c-logbtn'), p=document.getElementById('c-logp');
+  if(open==null) open=p.hidden;
+  p.hidden=!open; b.setAttribute('aria-expanded',String(open));
+}
+document.getElementById('c-logbtn').onclick=function(){ logOpen(); };
+document.getElementById('c-usedhint').onclick=function(){
+  logOpen(true);
+  document.getElementById('c-logbtn').scrollIntoView({behavior:'smooth',block:'start'});
+};
 // 같은 카드·경로의 저장 전 변경을 합쳐서, 서로 상쇄된 건 빼고 남김
 function netPend(){
   var out=[], at={};
   PEND.forEach(function(e){
     if(e.k==='reset'){ out=[{t:e.t,k:'reset',i:null,d:0,w:0}]; at={}; return; }
-    var key=e.k+'|'+e.i;
-    if(at[key]==null){ at[key]=out.length; out.push({t:e.t,k:e.k,i:e.i,d:0,w:0}); }
+    var key=(e.give&&e.give.length)?'x|'+e.id:(e.k==='used'?'used|'+e.i+'|'+unitOf(e):e.k+'|'+e.i);
+    if(at[key]==null){ at[key]=out.length; out.push({id:e.id,t:e.t,k:e.k,i:e.i,d:0,w:0}); }
     var o=out[at[key]]; o.d+=e.d; o.w+=e.w; o.t=e.t;
+    if(e.give) o.give=e.give.slice();
+    if(e.ed) o.ed=true;
   });
   return out.filter(function(o){return o.k==='reset'||o.d!==0;});
 }
@@ -1209,7 +1315,85 @@ function spawnSpark(tile,p,lv){
 })();
 var mask=document.getElementById('mask'), mBody=document.getElementById('m-body'),
     mTitle=document.getElementById('m-title'), mSub=document.getElementById('m-sub');
-function modalClose(){mask.hidden=true;mBody.innerHTML='';}
+function modalClose(){mask.hidden=true;mBody.innerHTML='';modalAct(null);}
+// 창 머리의 "닫기" 왼쪽에 붙는 버튼
+function modalAct(label,fn,disabled){
+  var old=document.getElementById('m-act'); if(old) old.parentNode.removeChild(old);
+  if(!label) return null;
+  var b=document.createElement('button'); b.id='m-act'; b.className='m'; b.textContent=label; b.disabled=!!disabled; b.onclick=fn;
+  var cl=document.getElementById('m-close'); cl.parentNode.insertBefore(b,cl);
+  return b;
+}
+function cardBtn(i){
+  var b=document.createElement('button'); b.type='button'; b.className='mcard'+(isLand(i)?' land':'');
+  var im=document.createElement('img'); im.src=SRC[i]; im.alt=''; if(isPix(i))im.className='pix';
+  var nm=document.createElement('div'); nm.className='cn'; nm.textContent=cardName(i);
+  var q=document.createElement('div'); q.className='cq'; q.textContent='x'+COL[i];
+  b.appendChild(im); b.appendChild(nm); b.appendChild(q);
+  return b;
+}
+// 교환: ① 내준 카드 고르기(중복 표시) → "교환 포카" → ② 받은 카드 고르기
+// getIdx가 있으면(카드 타일에서 시작) 받은 카드는 이미 정해져 있으므로 ①에서 바로 완료
+function tradeFlow(getIdx,qty){
+  var sel=[];
+  function page1(){
+    mTitle.textContent='교환 · 내준 카드';
+    mSub.textContent=getIdx==null?'교환으로 내준 카드를 고르십시오.':('받은 카드: '+cardName(getIdx));
+    var act=modalAct(getIdx==null?'교환 포카 →':'교환 완료',function(){ if(getIdx==null) page2(); else done(getIdx); },getIdx==null&&!sel.length);
+    mBody.innerHTML='';
+    var bar=document.createElement('div'); bar.className='tbar';
+    var dupN=0; for(var k=0;k<N;k++) if(COL[k]>=2) dupN++;
+    bar.innerHTML='<span class="tk dup">중복 카드 '+dupN+'종</span><span class="tk sel">선택 <b>0</b>장</span><span class="tn">중복 카드가 금색으로 표시됩니다. 여러 장을 고를 수 있습니다.</span>';
+    mBody.appendChild(bar);
+    var g=document.createElement('div'); g.className='mgrid tgrid';
+    for(var i=0;i<N;i++)(function(i){
+      var b=cardBtn(i);
+      if(COL[i]===0){ b.classList.add('off'); b.disabled=true; }
+      if(COL[i]>=2){ b.classList.add('dup'); var t=document.createElement('span'); t.className='tdup'; t.textContent='중복 '+(COL[i]-1); b.appendChild(t); }
+      if(sel.indexOf(i)>=0) b.classList.add('sel');
+      b.onclick=function(){
+        var at=sel.indexOf(i);
+        if(at>=0) sel.splice(at,1); else sel.push(i);
+        b.classList.toggle('sel',at<0);
+        bar.querySelector('.sel b').textContent=sel.length;
+        if(getIdx==null) act.disabled=!sel.length;
+      };
+      g.appendChild(b);
+    })(i);
+    mBody.appendChild(g);
+    if(getIdx==null){
+      var sk=document.createElement('button'); sk.type='button'; sk.className='tskip'; sk.textContent='내준 카드 없이 받은 카드만 기록하기';
+      sk.onclick=function(){ sel=[]; page2(); };
+      mBody.appendChild(sk);
+    }
+    mask.hidden=false; mBody.scrollTop=0;
+  }
+  function page2(){
+    mTitle.textContent='교환 · 받은 카드';
+    mSub.textContent=sel.length?('내준 카드 '+sel.length+'장 · 받은 카드를 고르십시오.'):'받은 카드를 고르십시오.';
+    modalAct('← 이전',page1);
+    mBody.innerHTML='';
+    var g=document.createElement('div'); g.className='mgrid';
+    for(var i=0;i<N;i++)(function(i){
+      var b=cardBtn(i);
+      b.onclick=function(){ done(i); };
+      g.appendChild(b);
+    })(i);
+    mBody.appendChild(g); mBody.scrollTop=0;
+  }
+  function done(i){ modalClose(); applyTrade(i,qty||1,sel.slice()); }
+  page1();
+}
+function applyTrade(idx,qty,give){
+  var e={id:newId(),t:Date.now(),k:'trade',i:idx,d:qty,w:0};
+  if(give.length) e.give=give;
+  var prev=COL[idx];
+  applyEntry(e,1);
+  PEND.push(e);
+  logRender(); colRender(); colDirty();
+  colFx(idx,prev===0);
+  checkCelebrate(false); achCheck(false);
+}
 document.getElementById('m-close').onclick=modalClose;
 mask.addEventListener('click',function(e){if(e.target===mask)modalClose();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!mask.hidden)modalClose();});
@@ -1325,15 +1509,15 @@ function applyLoss(kind,idx,qty){
 
 function applyGain(kind,idx,qty,price){
   qty=Math.max(1,Math.min(99,qty||1));
-  var w=0;
+  var w=0, eid=newId();
   if(kind==='used'){
     var p=(price==null)?LG.uprice:price;
-    for(var n=0;n<qty;n++) LG.usedList.push({i:idx,p:p});
+    for(var n=0;n<qty;n++) LG.usedList.push({i:idx,p:p,g:eid});
     LG.used=LG.usedList.length; w=p*qty;
   }else if(kind!=='adj'){ LG[kind]=Math.min(9999,LG[kind]+qty); if(kind==='buy') w=qty*PRICE; }
   var prev=COL[idx];
   COL[idx]=Math.min(999,COL[idx]+qty);
-  addLog(kind,idx,qty,w);
+  addLog(kind,idx,qty,w,eid);
   colRender(); colDirty();
   colFx(idx,prev===0);
   checkCelebrate(false);
@@ -1366,11 +1550,12 @@ function colLoad(d){
   }else{ LG.buy=d&&d.counts?colTotals().cnt:0; LG.trade=0; LG.usedList=[]; }
   LG.used=LG.usedList.length;
   LOG=(d&&d.log)?d.log.slice(-200):[];
+  LOG.forEach(function(e,n){ if(!e.id) e.id='L'+n+'_'+e.t; });
   ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
 }
 function colDirty(){ colStatus(); }
 function colStatus(){
-  var n=PEND.length, dirty=n>0;
+  var n=PEND.length+EDITS, dirty=n>0;
   var note=document.getElementById('c-note'), s=document.getElementById('c-note-s');
   note.classList.toggle('dirty',dirty);
   if(dirty) s.textContent='저장하지 않은 변경이 '+n+'건 있습니다. 저장하지 않고 페이지를 나가면 사라집니다.';
@@ -1385,7 +1570,7 @@ function colStatus(){
 function colSave(){
   var el=document.getElementById('c-save');
   LOG=LOG.concat(netPend()); if(LOG.length>200)LOG.splice(0,LOG.length-200);
-  PEND=[];
+  PEND=[]; EDITS=0; EDITING=null;
   var payload=colSnap();
   SAVED=JSON.stringify(payload); savedAt=Date.now();
   try{localStorage.setItem('bread27:collection',SAVED);}catch(e){}
@@ -1398,7 +1583,7 @@ function colSave(){
 }
 function colRevert(){
   colLoad(SAVED?JSON.parse(SAVED):null);
-  PEND=[];
+  PEND=[]; EDITS=0; EDITING=null;
   colRender(); logRender(); achRender(); checkCelebrate(true); colStatus();
 }
 var colSum=[];
@@ -1436,7 +1621,7 @@ function colBuildGrid(){
     var nn=document.createElement('span'); nn.className='n'; nn.textContent='0';
     var pb=document.createElement('button'); pb.className='p'; pb.textContent='+'; pb.setAttribute('aria-label',label(i)+' 수량 증가');
     mb.onclick=function(){ if(COL[i]<=0)return; pickSource(i,'loss',function(k,q){applyLoss(k,i,q);}); };
-    pb.onclick=function(){ pickSource(i,'gain',function(k,q){applyGain(k,i,q);}); };
+    pb.onclick=function(){ pickSource(i,'gain',function(k,q,p){ if(k==='trade') tradeFlow(i,q); else applyGain(k,i,q,p); }); };
     ctr.appendChild(mb); ctr.appendChild(nn); ctr.appendChild(pb);
     frame.appendChild(pic);
     d.style.setProperty('--hd1',(5.5+Math.random()*4.5).toFixed(1)+'s');
@@ -1510,7 +1695,10 @@ colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
 Array.prototype.forEach.call(document.querySelectorAll('.cledger .ctr button'),function(b){
   b.onclick=function(){
     var k=b.getAttribute('data-k'), d=+b.getAttribute('data-d');
-    if(d>0){ pickCard(k,function(i){applyGain(k,i,1,k==='used'?numVal(document.getElementById('c-uprice')):null);}); return; }
+    if(d>0){
+      if(k==='trade'){ tradeFlow(null,1); return; }
+      pickCard(k,function(i){applyGain(k,i,1,k==='used'?numVal(document.getElementById('c-uprice')):null);}); return;
+    }
     if(LG[k]<=0) return;
     var w=0;
     if(k==='used') w=-usedTake(null,1);
@@ -1528,7 +1716,7 @@ document.getElementById('c-reset').onclick=function(){
 document.getElementById('c-savebtn').onclick=colSave;
 document.getElementById('c-savebtn2').onclick=colSave;
 document.getElementById('c-revert').onclick=colRevert;
-window.addEventListener('beforeunload',function(e){ if(PEND.length){ e.preventDefault(); e.returnValue=''; } });
+window.addEventListener('beforeunload',function(e){ if(PEND.length||EDITS){ e.preventDefault(); e.returnValue=''; } });
 // 탭 전환
 var tabS=document.getElementById('tab-sim'), tabC=document.getElementById('tab-col');
 function goTab(col,quiet){
