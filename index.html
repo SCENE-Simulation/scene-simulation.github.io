@@ -435,15 +435,6 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
   padding-top:calc(16px + env(safe-area-inset-top,0px));
   overflow-y:auto;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;z-index:40}
 .mn{margin-left:var(--sbw);min-height:100vh;background:var(--main)}
-.sb-box{background:var(--glass);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;margin-bottom:12px;
-  box-shadow:0 8px 28px rgba(0,0,0,.32),0 2px 6px rgba(0,0,0,.18)}
-.sb-box .k{font-size:10.5px;letter-spacing:.14em;color:var(--ink2);margin-bottom:8px}
-.sb-box .row2{display:flex;align-items:center;gap:7px;font-family:"JetBrains Mono",monospace;font-size:14px;font-weight:700;color:var(--ink)}
-.sb-box .row2::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--pink)}
-.sb-box .row2.b::before{background:var(--gold)}
-.sb-box .row2 small{font-family:"Pretendard Variable",sans-serif;font-weight:500;font-size:12px;color:var(--ink2)}
-.sb-box .pg{height:5px;background:rgba(255,255,255,.08);border-radius:3px;margin:10px 0 2px;overflow:hidden}
-.sb-box .pg i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--gold));border-radius:3px;transition:width .4s ease}
 .nv{display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:10px;color:var(--ink);
   text-decoration:none;font-size:14px;font-weight:500;border:1px solid transparent;cursor:pointer}
 .nv svg{width:17px;height:17px;flex:0 0 17px;color:var(--ink2)}
@@ -464,7 +455,6 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .hd .lg{margin:0;font-size:clamp(36px,7vw,64px);font-weight:800;letter-spacing:-.04em;line-height:1.05;color:#fff;
   text-shadow:0 0 18px rgba(255,255,255,.35),0 0 42px rgba(233,99,135,.35)}
 .hd .lg em{font-style:normal;color:var(--pink-t)}
-.hd .cap{margin-top:14px;font-size:11.5px;letter-spacing:.2em;color:var(--ink2)}
 
 /* 본문 폭 */
 .wrap,.home{max-width:980px;margin:0 auto;padding:22px 20px 56px}
@@ -578,12 +568,6 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 </svg>
 
 <aside class="sb" aria-label="메뉴">
-  <div class="sb-box">
-    <div class="k">MY COLLECTION</div>
-    <div class="row2"><span data-mirror="c-own">0/27</span><small>보유 종</small></div>
-    <div class="row2 b" style="margin-top:6px"><span data-mirror="c-won">0원</span></div>
-    <div class="pg"><i id="sb-pg"></i></div>
-  </div>
   <a class="nv" href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
   <hr>
   <a class="nv" href="?tab=gacha" data-tab="gacha"><svg><use href="#i-gacha"/></svg>뽑기 시뮬레이터</a>
@@ -596,12 +580,11 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 <main class="mn">
 <header class="hd">
   <a href="?tab=home" data-tab="home"><p class="lg">센둥이 <em>시뮬레이터</em></p></a>
-  <div class="cap">리센느 빵카드 27종 시뮬레이터 · SENDUNGI SIMULATOR</div>
 </header>
 
 <section class="home" id="v-home">
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
-  <p class="intro">빵 속 카드 27종, 다 모으려면 빵을 몇 개나 사야 할까요? 가상으로 뽑아 보고, 실제로 모은 카드는 도감에 기록해 보세요.</p>
+  <p class="intro">이 사이트는 아이돌 그룹 리센느와 관련된 시뮬레이션 및 계산기 등 다양한 도구들을 활용할 수 있는 사이트입니다.</p>
   <div class="hgrid">
     <a class="hc" href="?tab=gacha" data-tab="gacha" style="--c:#e96387">
       <div class="k"><svg><use href="#i-gacha"/></svg>BREAD GACHA 27</div>
@@ -1710,17 +1693,12 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
   window.addEventListener('popstate', function(){ show(cur()); });
   show(cur());
 
-  // 사이드바·홈의 컬렉션 요약을 도감 숫자와 연동
+  // 홈의 컬렉션 요약을 도감 숫자와 연동
   function sync(){
     document.querySelectorAll('[data-mirror]').forEach(function(el){
       var src = document.getElementById(el.getAttribute('data-mirror'));
       if (src) el.textContent = src.textContent;
     });
-    var own = document.getElementById('c-own'), pg = document.getElementById('sb-pg');
-    if (own && pg) {
-      var m = own.textContent.match(/(\d+)\s*\/\s*(\d+)/);
-      if (m) pg.style.width = (100 * m[1] / m[2]) + '%';
-    }
   }
   var obs = new MutationObserver(sync);
   ['c-own', 'c-won', 'c-cnt'].forEach(function(id){

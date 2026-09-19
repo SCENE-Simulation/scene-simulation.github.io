@@ -28,17 +28,12 @@
   window.addEventListener('popstate', function(){ show(cur()); });
   show(cur());
 
-  // 사이드바·홈의 컬렉션 요약을 도감 숫자와 연동
+  // 홈의 컬렉션 요약을 도감 숫자와 연동
   function sync(){
     document.querySelectorAll('[data-mirror]').forEach(function(el){
       var src = document.getElementById(el.getAttribute('data-mirror'));
       if (src) el.textContent = src.textContent;
     });
-    var own = document.getElementById('c-own'), pg = document.getElementById('sb-pg');
-    if (own && pg) {
-      var m = own.textContent.match(/(\d+)\s*\/\s*(\d+)/);
-      if (m) pg.style.width = (100 * m[1] / m[2]) + '%';
-    }
   }
   var obs = new MutationObserver(sync);
   ['c-own', 'c-won', 'c-cnt'].forEach(function(id){
