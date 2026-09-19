@@ -444,8 +444,20 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .nv.off{color:var(--dim);cursor:default}
 .nv.off:hover{background:none}
 .nv.off svg{color:var(--dim)}
-.nv .bd{margin-left:-4px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
-.sb hr{border:0;border-top:1px solid var(--line);margin:8px 6px;width:auto}
+.bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
+/* 메뉴 그룹: 컬렉션 북 / 장난감 */
+.grp{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.gl{display:flex;align-items:center;gap:10px;padding:0 12px 8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
+.gl svg{width:16px;height:16px}
+.nv.sub{padding:7px 12px 7px 38px;font-size:13.5px}
+.yr summary{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 14px;border-radius:10px;cursor:pointer;list-style:none;
+  font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--ink)}
+.yr summary::-webkit-details-marker{display:none}
+.yr summary:hover{background:var(--glass)}
+.yr summary .cv{width:14px;height:14px;color:var(--ink2);transition:transform .15s ease}
+.yr[open] summary .cv{transform:rotate(90deg)}
+.yr summary .bd{font-family:"Pretendard Variable",sans-serif}
+.yr .nv.sub{padding-left:36px}
 .sb .ft{margin-top:auto;padding:12px 8px 0;font-size:11px;line-height:1.6;color:var(--dim)}
 .sb .ft b{color:var(--ink2);font-weight:600}
 
@@ -462,7 +474,11 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 
 /* 섹션 헤더 */
 .sec{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 8px}
-.sec-t{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--ink)}
+.home .sec{margin:28px 0 12px}
+.home .sec:first-child{margin-top:4px}
+.sec-t .cr{color:var(--dim);font-weight:500;margin:0 2px}
+.sec-t .lt{letter-spacing:0}
+.sec-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;letter-spacing:.05em;color:var(--ink)}
 .sec-t svg{width:16px;height:16px;color:var(--ink)}
 .sec-d{margin:0 0 18px;font-size:13.5px;line-height:1.65;color:var(--ink2);max-width:72ch}
 
@@ -536,7 +552,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .mem span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:1px}
 
 /* 모바일 하단 탭 바 */
-.bb{display:none}
+.bb,.bsheet{display:none}
 @media (max-width:900px){
   .sb{display:none}
   .mn{margin-left:0;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
@@ -547,14 +563,23 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
     gap:2px;padding:6px;border-radius:22px;background:rgba(44,44,46,.82);border:1px solid rgba(255,255,255,.14);
     backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.45);
     width:max-content;max-width:calc(100vw - 24px)}
-  .bb a{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px;padding:7px 8px;border-radius:16px;
+  .bb a,.bb button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px;padding:7px 8px;border-radius:16px;
     font-size:10.5px;font-weight:500;color:var(--ink2);text-decoration:none}
-  .bb a svg{width:20px;height:20px}
-  .bb a.on{background:rgba(255,255,255,.1);color:var(--ink)}
+  .bb button{font:500 10.5px "Pretendard Variable",sans-serif!important;border:0!important;background:none;cursor:pointer}
+  .bb button:hover{background:none}
+  .bb a svg,.bb button svg{width:20px;height:20px}
+  .bb a.on,.bb button.on,.bb button.open{background:rgba(255,255,255,.1);color:var(--ink)}
   .bb a.off{color:var(--dim)}
+  .bsheet:not([hidden]){display:block;position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:59;
+    max-height:60vh;overflow-y:auto;padding:6px 8px 10px;border-radius:20px;background:rgba(44,44,46,.94);
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 30px rgba(0,0,0,.5);
+    animation:shUp .18s ease-out}
+  .bsheet .grp{margin:0;padding-top:10px;border:0}
+  .bsheet .nv.sub,.bsheet .yr summary{padding-top:10px;padding-bottom:10px}
+  @keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   #totop{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 }
-@media (max-width:360px){.bb a{min-width:54px}}
+@media (max-width:360px){.bb a,.bb button{min-width:54px}}
 
 </style>
 </head>
@@ -563,17 +588,37 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
     <symbol id="i-gacha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="11" height="15" rx="2"/><path d="M8 21h10a2 2 0 0 0 2-2V7"/><path d="M10.5 8.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L7.6 10.3l2-.3z"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></symbol>
+    <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
     <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
 
 <aside class="sb" aria-label="메뉴">
   <a class="nv" href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
-  <hr>
-  <a class="nv" href="?tab=gacha" data-tab="gacha"><svg><use href="#i-gacha"/></svg>뽑기 시뮬레이터</a>
-  <a class="nv" href="?tab=collection" data-tab="collection"><svg><use href="#i-book"/></svg>실물 컬랙션 북</a>
-  <hr>
-  <span class="nv off" aria-disabled="true"><svg><use href="#i-yt"/></svg>조회수 예측기 <span class="bd">SOON</span></span>
+
+  <div class="grp" id="grp-col" data-grp="col">
+    <div class="gl"><svg><use href="#i-book"/></svg>컬렉션 북</div>
+    <details class="yr">
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2024<span class="bd">SOON</span></summary>
+    </details>
+    <details class="yr">
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2025<span class="bd">SOON</span></summary>
+    </details>
+    <details class="yr" open>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2026</summary>
+      <a class="nv sub" href="?tab=cu405" data-tab="cu405">CU 리센느 405빵 콜라보</a>
+      <span class="nv sub off" aria-disabled="true">나랑드 콜라보<span class="bd">SOON</span></span>
+      <span class="nv sub off" aria-disabled="true">도미노 콜라보<span class="bd">SOON</span></span>
+    </details>
+  </div>
+
+  <div class="grp" id="grp-toy" data-grp="toy">
+    <div class="gl"><svg><use href="#i-toy"/></svg>장난감</div>
+    <a class="nv sub" href="?tab=gacha" data-tab="gacha">빵뽑기 시뮬레이션</a>
+    <span class="nv sub off" aria-disabled="true">조회수 예측기<span class="bd">SOON</span></span>
+  </div>
+
   <div class="ft">MADE BY <b>비효율주의자</b><br>OF <b>여자 아이돌 컨텐츠 마이너갤러리</b></div>
 </aside>
 
@@ -585,27 +630,43 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 <section class="home" id="v-home">
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
   <p class="intro">이 사이트는 아이돌 그룹 리센느와 관련된 시뮬레이션 및 계산기 등 다양한 도구들을 활용할 수 있는 사이트입니다.</p>
+
+  <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div></div>
   <div class="hgrid">
-    <a class="hc" href="?tab=gacha" data-tab="gacha" style="--c:#e96387">
-      <div class="k"><svg><use href="#i-gacha"/></svg>BREAD GACHA 27</div>
-      <h2>뽑기 시뮬레이터</h2>
-      <p>빵을 한 개씩 또는 10개씩 뜯어 보세요. 쓴 돈, 중복 장수, 컴플리트까지 남은 예상 비용을 바로 계산해 줍니다.</p>
-      <span class="go">뽑으러 가기 →</span>
-    </a>
-    <a class="hc" href="?tab=collection" data-tab="collection" style="--c:#47d19a">
-      <div class="k"><svg><use href="#i-book"/></svg>COLLECTION BOOK</div>
-      <h2>실물 컬랙션 북</h2>
+    <a class="hc" href="?tab=cu405" data-tab="cu405" style="--c:#47d19a">
+      <div class="k">2026 · COLLECTION BOOK</div>
+      <h2>CU 리센느 405빵 콜라보</h2>
       <p>실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 모은 만큼 카드가 빛나고, 칭호도 얻을 수 있습니다.</p>
       <div class="st2"><span><b data-mirror="c-own">0/27</b>보유</span><span><b data-mirror="c-cnt">0회</b>구매</span></div>
       <span class="go">도감 열기 →</span>
     </a>
     <div class="hc soon" style="--c:#6e6e73">
-      <div class="k"><svg><use href="#i-yt"/></svg>VIEW PREDICTOR</div>
-      <h2>유튜브 조회수 예측기</h2>
-      <p>곧 추가될 예정입니다.</p>
-      <span class="chip">준비 중</span>
+      <div class="k">COLLECTION BOOK</div>
+      <h2>나랑드 콜라보</h2>
+      <span class="chip">SOON</span>
+    </div>
+    <div class="hc soon" style="--c:#6e6e73">
+      <div class="k">COLLECTION BOOK</div>
+      <h2>도미노 콜라보</h2>
+      <span class="chip">SOON</span>
     </div>
   </div>
+
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감</div></div>
+  <div class="hgrid">
+    <a class="hc" href="?tab=gacha" data-tab="gacha" style="--c:#e96387">
+      <div class="k"><svg><use href="#i-gacha"/></svg>BREAD GACHA 27</div>
+      <h2>빵뽑기 시뮬레이션</h2>
+      <p>빵을 한 개씩 또는 10개씩 뜯어 보세요. 쓴 돈, 중복 장수, 컴플리트까지 남은 예상 비용을 바로 계산해 줍니다.</p>
+      <span class="go">뽑으러 가기 →</span>
+    </a>
+    <div class="hc soon" style="--c:#6e6e73">
+      <div class="k"><svg><use href="#i-yt"/></svg>VIEW PREDICTOR</div>
+      <h2>조회수 예측기</h2>
+      <span class="chip">SOON</span>
+    </div>
+  </div>
+
   <div class="mem" aria-label="멤버">
     <span style="--c:#04a06e">원이</span><span style="--c:#dcdcdc">리브</span><span style="--c:#2b99c4">미나미</span><span style="--c:#ecd25b">메이</span><span style="--c:#ba92db">제나</span>
   </div>
@@ -621,7 +682,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
   <button id="tab-sim">뽑기 시뮬레이터</button>
 </div>
 <div id="page-sim" hidden>
-<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-gacha"/></svg>BREAD GACHA</div></div>
+<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">빵뽑기 시뮬레이션</span></div></div>
 <p class="sec-d">빵 1개에 카드 1장, 카드는 27종입니다. 멤버 5명 × 4종 = 20종에 스페셜 7종을 더한 구성이며, 한 장이 나올 확률은 모두 1/27입니다.</p>
 <div class="board">
   <div class="top">
@@ -675,7 +736,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 <p class="rec" id="rec">완성 기록 없음</p>
 </div>
 <div id="page-col">
-<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>COLLECTION BOOK</div></div>
+<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
 <p class="sec-d">실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 기록은 지금 쓰는 브라우저에 자동 저장됩니다.</p>
   <div class="chead2">
     <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
@@ -703,11 +764,11 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 
 </div>
 </main>
+<div class="bsheet" id="bsheet" hidden></div>
 <nav class="bb" aria-label="하단 메뉴">
   <a href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
-  <a href="?tab=gacha" data-tab="gacha"><svg><use href="#i-gacha"/></svg>뽑기</a>
-  <a href="?tab=collection" data-tab="collection"><svg><use href="#i-book"/></svg>컬렉션</a>
-  <a class="off" aria-disabled="true"><svg><use href="#i-yt"/></svg>조회수</a>
+  <button type="button" data-open="grp-col"><svg><use href="#i-book"/></svg>컬렉션 북</button>
+  <button type="button" data-open="grp-toy"><svg><use href="#i-toy"/></svg>장난감</button>
 </nav>
 <div class="mask" id="mask" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
@@ -1664,32 +1725,66 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
 </script>
 <script>
 (function(){
-  var TABS = { home: 1, gacha: 1, collection: 1 };
+  // 탭 → 원본 페이지 버튼. collection은 예전 주소 호환용
+  var TABS = { home: null, cu405: 'tab-col', gacha: 'tab-sim' };
+  var ALIAS = { collection: 'cu405' };
   var home = document.getElementById('v-home'), app = document.getElementById('v-app');
-  var bSim = document.getElementById('tab-sim'), bCol = document.getElementById('tab-col');
+  var sheet = document.getElementById('bsheet');
 
   function cur(){
     var t = new URLSearchParams(location.search).get('tab');
-    return TABS[t] ? t : 'home';
+    t = ALIAS[t] || t;
+    return t in TABS ? t : 'home';
   }
   function show(t){
     home.hidden = t !== 'home';
     app.hidden = t === 'home';
-    if (t === 'gacha') bSim.click();
-    if (t === 'collection') bCol.click();
-    document.querySelectorAll('[data-tab]').forEach(function(a){
-      a.classList.toggle('on', a.getAttribute('data-tab') === t && !a.closest('.hd,.home'));
+    if (TABS[t]) document.getElementById(TABS[t]).click();
+    document.querySelectorAll('.sb [data-tab], .bsheet [data-tab], .bb [data-tab]').forEach(function(a){
+      a.classList.toggle('on', a.getAttribute('data-tab') === t);
     });
+    // 하단 탭 바: 현재 페이지가 속한 그룹 버튼 강조
+    document.querySelectorAll('.bb [data-open]').forEach(function(b){
+      var g = document.getElementById(b.getAttribute('data-open'));
+      b.classList.toggle('on', !!g.querySelector('[data-tab="' + t + '"]'));
+    });
+    closeSheet();
     window.scrollTo(0, 0);
   }
+
+  // 모바일 하단 시트: 사이드바 그룹을 그대로 복제해서 보여줌
+  function closeSheet(){
+    sheet.hidden = true;
+    document.querySelectorAll('.bb [data-open]').forEach(function(b){ b.classList.remove('open'); });
+  }
+  function openSheet(id, btn){
+    if (!sheet.hidden && sheet.getAttribute('data-for') === id) { closeSheet(); return; }
+    sheet.innerHTML = '';
+    var g = document.getElementById(id).cloneNode(true);
+    g.removeAttribute('id');
+    sheet.appendChild(g);
+    sheet.setAttribute('data-for', id);
+    sheet.querySelectorAll('[data-tab]').forEach(function(a){
+      a.classList.toggle('on', a.getAttribute('data-tab') === cur());
+    });
+    sheet.hidden = false;
+    btn.classList.add('open');
+  }
+
   document.addEventListener('click', function(e){
+    var ob = e.target.closest('.bb [data-open]');
+    if (ob) { openSheet(ob.getAttribute('data-open'), ob); return; }
     var a = e.target.closest('a[data-tab]');
-    if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    e.preventDefault();
-    var t = a.getAttribute('data-tab');
-    if (t !== cur()) history.pushState(null, '', '?tab=' + t);
-    show(t);
+    if (a && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      e.preventDefault();
+      var t = a.getAttribute('data-tab');
+      if (t !== cur()) history.pushState(null, '', '?tab=' + t);
+      show(t);
+      return;
+    }
+    if (!sheet.hidden && !e.target.closest('.bsheet')) closeSheet();
   });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSheet(); });
   window.addEventListener('popstate', function(){ show(cur()); });
   show(cur());
 
@@ -1701,12 +1796,13 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
     });
   }
   var obs = new MutationObserver(sync);
-  ['c-own', 'c-won', 'c-cnt'].forEach(function(id){
+  ['c-own', 'c-cnt'].forEach(function(id){
     var el = document.getElementById(id);
     if (el) obs.observe(el, { childList: true, characterData: true, subtree: true });
   });
   sync();
 })();
+
 </script>
 </body>
 </html>
