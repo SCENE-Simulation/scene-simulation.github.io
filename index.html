@@ -444,7 +444,7 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .nv.off{color:var(--dim);cursor:default}
 .nv.off:hover{background:none}
 .nv.off svg{color:var(--dim)}
-.bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
+.nv .bd,.yr summary .bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
 /* 메뉴 그룹: 컬렉션 북 / 장난감 */
 .grp{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .gl{display:flex;align-items:center;gap:10px;padding:0 12px 8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
@@ -654,6 +654,52 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .hc p.cdesc{flex:0 0 auto;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
 .hc .st2{margin-top:auto;padding-top:4px}
 
+/* ===== 저장 방식 안내 · 저장 버튼 ===== */
+.snote{display:flex;align-items:flex-start;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:12px;
+  background:var(--gold-soft);border:1px solid rgba(236,210,91,.35);border-left:4px solid var(--gold)}
+.snote .ic{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#1c1c1e;font-weight:800;font-size:13px}
+.snote .tx{display:flex;flex-direction:column;gap:3px}
+.snote b{font-size:14.5px;font-weight:700;color:var(--ink)}
+.snote b em{font-style:normal;color:var(--gold-t);padding:0 5px;border-radius:5px;background:rgba(236,210,91,.18)}
+.snote span{font-size:12.5px;color:var(--ink2)}
+.snote.dirty{background:var(--pink-soft);border-color:rgba(233,99,135,.4);border-left-color:var(--pink);animation:notePulse 2s ease-in-out infinite}
+.snote.dirty .ic{background:var(--pink);color:#fff}
+.snote.dirty b em{color:var(--pink-t);background:rgba(233,99,135,.18)}
+.snote.dirty span{color:var(--ink)}
+@keyframes notePulse{0%,100%{box-shadow:0 0 0 rgba(233,99,135,0)}50%{box-shadow:0 0 18px rgba(233,99,135,.28)}}
+.chead2 .sp{flex-direction:column;align-items:stretch;min-width:120px}
+#c-savebtn{padding:11px 16px;font-size:15px}
+#c-savebtn:disabled{opacity:1;background:var(--glass);color:var(--mint-t);border-color:rgba(71,209,154,.3)!important}
+#c-savebtn:disabled::before{content:"✓ "}
+.sfloat{position:fixed;z-index:70;left:calc(50% + var(--sbw)/2);transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-radius:16px;width:max-content;max-width:calc(100vw - 24px);
+  background:rgba(44,44,46,.94);border:1px solid rgba(233,99,135,.45);box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 0 3px rgba(233,99,135,.12);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);animation:shUp .18s ease-out}
+.sfloat .sf-t{font-size:13.5px;color:var(--ink);margin-right:6px;white-space:nowrap}
+.sfloat .sf-t b{color:var(--pink-t);font-family:"JetBrains Mono",monospace}
+.sfloat button{padding:8px 14px;font-size:14px;white-space:nowrap}
+body.has-sfloat #totop{bottom:84px}
+@media (max-width:900px){
+  .sfloat{left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  body.has-sfloat #totop{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:420px){.sfloat{padding-left:12px}.sfloat .sf-t{font-size:12.5px}.sfloat button{padding:8px 11px}}
+
+/* 중고 구매가 */
+.cledger .lg .t input,#c-uprice{width:88px;text-align:right;font-family:"JetBrains Mono",monospace;font-weight:700;padding:3px 6px}
+.cledger .uw{margin-top:7px;font-size:12px;color:var(--ink2);text-align:right}
+.mup{flex-wrap:wrap}
+.mup .upw{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink2)}
+.mup input{width:120px;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:rgba(0,0,0,.25);color:var(--ink);
+  font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:700;text-align:right}
+.mup input:focus{outline:2px solid var(--mint);outline-offset:1px}
+.mup .uh{flex-basis:100%;font-size:12px;color:var(--ink2)}
+
+/* 로그: 저장 전 항목 */
+.clog .list div.pend{color:var(--ink)}
+.clog .list div.pend .tg{color:var(--pink-t);font-weight:700}
+.clog .list .wn{margin-left:6px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--gold-t)}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -819,11 +865,12 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 <p class="sec-d" data-desc="cu405"></p>
 <div class="cmeta" data-col="cu405"></div>
 <details class="pkg"><summary>패키징 보기</summary><div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div></div></details>
+  <div class="snote" id="c-note"><span class="ic" aria-hidden="true">!</span><div class="tx"><b>기록은 <em>저장</em> 버튼을 눌러야 저장됩니다.</b><span id="c-note-s">저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.</span></div></div>
   <div class="chead2">
     <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
     <div class="m"><b id="c-won">0원</b><span>누적 금액</span></div>
     <div class="m"><b id="c-own">0/27</b><span>보유 종수 · 중복 <span id="c-dup">0</span>장</span></div>
-    <div class="sp"><button id="c-reset">전체 초기화</button></div>
+    <div class="sp"><button class="p" id="c-savebtn">저장</button><button id="c-reset">전체 초기화</button></div>
     <div class="badges" id="c-badges"></div>
   </div>
   <div class="cledger">
@@ -831,8 +878,9 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
       <div class="ctr"><button data-k="buy" data-d="-1">−</button><span class="n">0</span><button class="p" data-k="buy" data-d="1">+</button></div></div>
     <div class="lg" id="lg-trade"><div class="t">교환 · 0원</div>
       <div class="ctr"><button data-k="trade" data-d="-1">−</button><span class="n">0</span><button class="m" data-k="trade" data-d="1">+</button></div></div>
-    <div class="lg" id="lg-used"><div class="t">중고 구매 · <input id="c-uprice" type="number" min="0" step="500" value="15000">원</div>
-      <div class="ctr"><button data-k="used" data-d="-1">−</button><span class="n">0</span><button class="m" data-k="used" data-d="1">+</button></div></div>
+    <div class="lg" id="lg-used"><div class="t">중고 구매 · 장당 <input id="c-uprice" type="text" inputmode="numeric" autocomplete="off" value="15,000" aria-label="중고 구매가(장당)">원</div>
+      <div class="ctr"><button data-k="used" data-d="-1">−</button><span class="n">0</span><button class="m" data-k="used" data-d="1">+</button></div>
+      <div class="uw" id="c-usedwon">누적 0원</div></div>
   </div>
   <div class="csum" id="c-sum"><span class="stars" id="sum-stars"></span></div>
   <div id="c-body"></div>
@@ -840,7 +888,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
     <h4>카운트 로그</h4>
     <div class="list" id="c-log"><div class="em">기록이 없습니다.</div></div>
   </div>
-  <p class="csave" id="c-save">기록은 자동 저장됩니다.</p>
+  <p class="csave" id="c-save">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>
+  <div class="sfloat" id="c-float" hidden><span class="sf-t">저장하지 않은 변경 <b id="c-float-n">0</b>건</span><button id="c-revert">되돌리기</button><button class="p" id="c-savebtn2">저장</button></div>
 </div>
 
 </div>
@@ -1243,38 +1292,73 @@ document.getElementById('breset').onclick=function(){
 
 
 // ================= 컬렉션(실물 기록) =================
-var COL=new Array(N).fill(0), LG={buy:0,trade:0,used:0,uprice:15000}, LOG=[];
+var COL=new Array(N).fill(0), LG={buy:0,trade:0,used:0,uprice:15000,usedList:[]}, LOG=[];
+// PEND: 아직 저장하지 않은 변경, SAVED: 마지막으로 저장한 상태(JSON)
+var PEND=[], SAVED=null, savedAt=null;
+function usedWon(){var s=0;LG.usedList.forEach(function(u){s+=u.p;});return s;}
+function totalWon(){return LG.buy*PRICE+usedWon();}
+// 천 단위 쉼표 입력칸
+function numVal(inp){var v=parseInt(String(inp.value).replace(/\D/g,''),10);return isNaN(v)?0:v;}
+function numFmt(inp,onChange){
+  inp.addEventListener('input',function(){
+    var pos=inp.selectionStart==null?inp.value.length:inp.selectionStart;
+    var right=inp.value.slice(pos).replace(/\D/g,'').length;
+    var digits=inp.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'').slice(0,8);
+    var out=digits?(+digits).toLocaleString('ko-KR'):'';
+    inp.value=out;
+    var p=out.length,c=0; while(p>0&&c<right){p--; if(/\d/.test(out[p]))c++;}
+    try{inp.setSelectionRange(p,p);}catch(e){}
+    if(onChange)onChange(numVal(inp));
+  });
+  inp.addEventListener('blur',function(){inp.value=won(numVal(inp));});
+}
 var colDoc=null, colTimer=null, colTiles=[], colProgs=[];
 function colTotals(){var c=0,o=0;for(var i=0;i<N;i++){c+=COL[i];if(COL[i]>0)o++;}return {cnt:c,own:o,dup:c-o};}
-var KNAME={buy:'빵 구매',trade:'교환',used:'중고 구매',adj:'수량 조정'};
+var KNAME={buy:'빵 구매',trade:'교환',used:'중고 구매',adj:'수량 조정',reset:'전체 초기화'};
 function kLabel(k,d){return (d<0&&k!=='adj')?KNAME[k]+' 취소':KNAME[k];}
 function two(n){return n<10?'0'+n:''+n;}
+function logLine(e,tag,cls){
+  if(e.k==='reset') return '<div'+(cls?' class="'+cls+'"':'')+'><span class="tg">'+tag+'</span>전체 초기화</div>';
+  var what=(e.i==null)?'':' <b>'+(e.i+1)+'. '+CNAME[e.i]+'</b>';
+  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원</span>':'';
+  return '<div'+(cls?' class="'+cls+'"':'')+'><span class="tg">'+tag+'</span>'+kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+money+'</div>';
+}
 function logRender(){
   var box=document.getElementById('c-log');
-  if(!LOG.length){box.innerHTML='<div class="em">기록이 없습니다.</div>';return;}
+  if(!LOG.length&&!PEND.length){box.innerHTML='<div class="em">기록이 없습니다.</div>';return;}
   var h='';
+  for(var p=PEND.length-1;p>=0;p--) h+=logLine(PEND[p],'저장 전','pend');
   for(var k=LOG.length-1;k>=0;k--){
-    var e=LOG[k], d=new Date(e.t);
-    var when=(d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes());
-    var what=(e.i==null)?'':' <b>'+(e.i+1)+'. '+CNAME[e.i]+'</b>';
-    h+='<div><span class="tg">'+when+'</span>'+kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+'</div>';
+    var d=new Date(LOG[k].t);
+    h+=logLine(LOG[k],(d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes()));
   }
   box.innerHTML=h;
 }
-function addLog(kind,idx,delta){
-  LOG.push({t:Date.now(),k:kind,i:(idx==null?null:idx),d:delta});
-  if(LOG.length>200)LOG.splice(0,LOG.length-200);
+function addLog(kind,idx,delta,w){
+  PEND.push({t:Date.now(),k:kind,i:(idx==null?null:idx),d:delta,w:w||0});
   logRender();
+}
+// 같은 카드·경로의 저장 전 변경을 합쳐서, 서로 상쇄된 건 빼고 남김
+function netPend(){
+  var out=[], at={};
+  PEND.forEach(function(e){
+    if(e.k==='reset'){ out=[{t:e.t,k:'reset',i:null,d:0,w:0}]; at={}; return; }
+    var key=e.k+'|'+e.i;
+    if(at[key]==null){ at[key]=out.length; out.push({t:e.t,k:e.k,i:e.i,d:0,w:0}); }
+    var o=out[at[key]]; o.d+=e.d; o.w+=e.w; o.t=e.t;
+  });
+  return out.filter(function(o){return o.k==='reset'||o.d!==0;});
 }
 function colRender(){
   var t0=colTotals();
-  var money=LG.buy*PRICE+LG.used*(LG.uprice||0);
+  var money=totalWon();
   document.getElementById('c-cnt').textContent=won(LG.buy)+'회';
   document.getElementById('c-won').textContent=won(money)+'원';
   ['buy','trade','used'].forEach(function(k){
     document.querySelector('#lg-'+k+' .n').textContent=won(LG[k]);
     document.querySelector('#lg-'+k+' .ctr button[data-d="-1"]').disabled=(LG[k]===0);
   });
+  document.getElementById('c-usedwon').textContent='누적 '+won(usedWon())+'원';
   document.getElementById('c-own').textContent=t0.own+'/27';
   document.getElementById('c-dup').textContent=won(t0.dup);
   for(var i=0;i<N;i++){
@@ -1401,7 +1485,7 @@ function achCtx(){
   var own=0,maxDup=0;
   for(var i=0;i<N;i++){ if(COL[i]>0)own++; if(COL[i]>maxDup)maxDup=COL[i]; }
   return {buy:LG.buy,trade:LG.trade,used:LG.used,own:own,maxDup:maxDup,
-          money:LG.buy*PRICE+LG.used*(LG.uprice||0)};
+          money:totalWon()};
 }
 function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
@@ -1565,6 +1649,14 @@ function pickSource(idx,mode,cb){
   q.appendChild(lb); q.appendChild(st); q.appendChild(ps);
   mBody.appendChild(q);
 
+  var upIn=null;
+  if(!loss){
+    var up=document.createElement('div'); up.className='mqty mup';
+    up.innerHTML='<span class="lb">중고 구매가 (장당)</span><span class="upw"><input type="text" inputmode="numeric" autocomplete="off" aria-label="중고 구매가(장당)"><span>원</span></span><span class="uh">중고 구매를 고를 때만 적용됩니다.</span>';
+    upIn=up.querySelector('input'); upIn.value=won(LG.uprice);
+    mBody.appendChild(up);
+  }
+
   var wrap=document.createElement('div'); wrap.className='msrc';
   var opts=loss?[
     {k:'buy',  t:'빵 구매 취소', s:'구매 횟수 −N · 금액도 차감', c:'p'},
@@ -1574,38 +1666,63 @@ function pickSource(idx,mode,cb){
   ]:[
     {k:'buy',  t:'빵 구매',     s:'구매 횟수 +N · 장당 '+won(PRICE)+'원', c:'p'},
     {k:'trade',t:'교환',        s:'교환 +N · 추가 비용 없음', c:'m'},
-    {k:'used', t:'중고 구매',   s:'중고 +N · 장당 '+won(LG.uprice)+'원', c:'m'},
+    {k:'used', t:'중고 구매',   s:'중고 +N · 장당 <span class="upv">'+won(LG.uprice)+'</span>원', c:'m'},
     {k:'adj',  t:'수량만 조정', s:'구매·금액 기록 없이 카드 수량만 +N', c:''}
   ];
   opts.forEach(function(o){
     var b=document.createElement('button'); if(o.c)b.className=o.c;
     b.innerHTML=o.t+'<small>'+o.s+'</small>';
-    b.onclick=function(){modalClose();cb(o.k,qty);};
+    b.onclick=function(){
+      var price=null;
+      if(o.k==='used'&&upIn){ price=numVal(upIn); setUprice(price); }
+      modalClose(); cb(o.k,qty,price);
+    };
     wrap.appendChild(b);
   });
   mBody.appendChild(wrap);
+  if(upIn){ var upv=wrap.querySelector('.upv'); numFmt(upIn,function(v){ if(upv) upv.textContent=won(v); }); }
   setQ(1);
   mask.hidden=false;
 }
 
+// 중고 구매 취소: 그 카드의 가장 최근 중고 구매부터 되돌리고, 낸 금액만큼 차감
+function usedTake(idx,qty){
+  var w=0;
+  for(var n=0;n<qty&&LG.usedList.length;n++){
+    var j=-1, L=LG.usedList;
+    for(var a=L.length-1;a>=0;a--) if(L[a].i===idx){j=a;break;}
+    if(j<0) for(var b2=L.length-1;b2>=0;b2--) if(L[b2].i==null){j=b2;break;}
+    if(j<0) j=L.length-1;
+    w+=L[j].p; L.splice(j,1);
+  }
+  LG.used=LG.usedList.length;
+  return w;
+}
 function applyLoss(kind,idx,qty){
   qty=Math.max(1,Math.min(COL[idx],qty||1));
   if(qty<=0)return;
   COL[idx]-=qty;
-  if(kind!=='adj') LG[kind]=Math.max(0,LG[kind]-qty);
-  addLog(kind,idx,-qty);
-  colRender(); colSave();
+  var w=0;
+  if(kind==='used') w=-usedTake(idx,qty);
+  else if(kind!=='adj'){ var took=Math.min(LG[kind],qty); LG[kind]-=took; if(kind==='buy') w=-took*PRICE; }
+  addLog(kind,idx,-qty,w);
+  colRender(); colDirty();
   checkCelebrate(true);
   achCheck(true);
 }
 
-function applyGain(kind,idx,qty){
+function applyGain(kind,idx,qty,price){
   qty=Math.max(1,Math.min(99,qty||1));
-  if(kind!=='adj') LG[kind]=Math.min(9999,LG[kind]+qty);
+  var w=0;
+  if(kind==='used'){
+    var p=(price==null)?LG.uprice:price;
+    for(var n=0;n<qty;n++) LG.usedList.push({i:idx,p:p});
+    LG.used=LG.usedList.length; w=p*qty;
+  }else if(kind!=='adj'){ LG[kind]=Math.min(9999,LG[kind]+qty); if(kind==='buy') w=qty*PRICE; }
   var prev=COL[idx];
   COL[idx]=Math.min(999,COL[idx]+qty);
-  addLog(kind,idx,qty);
-  colRender(); colSave();
+  addLog(kind,idx,qty,w);
+  colRender(); colDirty();
   colFx(idx,prev===0);
   checkCelebrate(false);
   achCheck(false);
@@ -1619,22 +1736,58 @@ function colFx(i,isNew){
 function colSet(i,v){
   var prev=COL[i];
   COL[i]=Math.max(0,Math.min(999,v));
-  colRender(); colSave();
+  colRender(); colDirty();
   if(COL[i]>prev) colFx(i, prev===0);
 }
+function colSnap(){
+  return {counts:COL.slice(),ledger:{buy:LG.buy,trade:LG.trade,used:LG.used,uprice:LG.uprice,usedList:LG.usedList.slice()},
+    log:LOG.slice(-200),ach:ACH,updated:new Date().toISOString()};
+}
+function colLoad(d){
+  for(var i=0;i<N;i++)COL[i]=(d&&d.counts&&d.counts[i])||0;
+  var g=d&&d.ledger;
+  if(g){
+    LG.buy=g.buy||0; LG.trade=g.trade||0;
+    var up=g.uprice==null?15000:g.uprice;
+    // 예전 기록(중고 단가 하나)은 그 단가로 건수만큼 옮김
+    LG.usedList=g.usedList?g.usedList.slice():Array.apply(null,Array(g.used||0)).map(function(){return {i:null,p:up};});
+  }else{ LG.buy=d&&d.counts?colTotals().cnt:0; LG.trade=0; LG.usedList=[]; }
+  LG.used=LG.usedList.length;
+  LOG=(d&&d.log)?d.log.slice(-200):[];
+  ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
+}
+function colDirty(){ colStatus(); }
+function colStatus(){
+  var n=PEND.length, dirty=n>0;
+  var note=document.getElementById('c-note'), s=document.getElementById('c-note-s');
+  note.classList.toggle('dirty',dirty);
+  if(dirty) s.textContent='저장하지 않은 변경이 '+n+'건 있습니다. 저장하지 않고 페이지를 나가면 사라집니다.';
+  else if(savedAt){ var d=new Date(savedAt); s.textContent='모든 기록이 저장되어 있습니다 · 마지막 저장 '+(d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes()); }
+  else s.textContent='저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.';
+  var b=document.getElementById('c-savebtn');
+  b.disabled=!dirty; b.textContent=dirty?'저장 ('+n+')':'저장됨';
+  document.getElementById('c-float').hidden=!dirty;
+  document.getElementById('c-float-n').textContent=n;
+  document.body.classList.toggle('has-sfloat',dirty);
+}
 function colSave(){
-  if(colTimer)clearTimeout(colTimer);
   var el=document.getElementById('c-save');
-  colTimer=setTimeout(function(){
-    var payload={counts:COL.slice(),ledger:{buy:LG.buy,trade:LG.trade,used:LG.used,uprice:LG.uprice},log:LOG.slice(-200),ach:ACH,updated:new Date().toISOString()};
-    try{localStorage.setItem('bread27:collection',JSON.stringify(payload));}catch(e){}
-    if(colDoc){
-      colDoc.set(payload).then(function(){el.textContent='계정에 저장됨 · 다른 기기에서도 이어집니다.';})
-        .catch(function(){el.textContent='이 브라우저에만 저장됨(계정 저장 실패).';});
-    }else{
-      el.textContent='이 브라우저에 저장됨.';
-    }
-  },400);
+  LOG=LOG.concat(netPend()); if(LOG.length>200)LOG.splice(0,LOG.length-200);
+  PEND=[];
+  var payload=colSnap();
+  SAVED=JSON.stringify(payload); savedAt=Date.now();
+  try{localStorage.setItem('bread27:collection',SAVED);}catch(e){}
+  if(colDoc){
+    colDoc.set(payload).then(function(){el.textContent='계정에 저장됨 · 다른 기기에서도 이어집니다.';})
+      .catch(function(){el.textContent='이 브라우저에만 저장됨(계정 저장 실패).';});
+  }
+  logRender(); colStatus();
+  toast('저장했습니다','기록이 이 브라우저에 저장되었습니다');
+}
+function colRevert(){
+  colLoad(SAVED?JSON.parse(SAVED):null);
+  PEND=[];
+  colRender(); logRender(); achRender(); checkCelebrate(true); colStatus();
 }
 var colSum=[];
 function colBuildSum(){
@@ -1709,14 +1862,17 @@ function colBuildGrid(){
 colBuildSum();
 colBuildGrid();
 try{var raw=localStorage.getItem('bread27:collection');
-  if(raw){var d0=JSON.parse(raw);
-    if(d0&&d0.counts)for(var ci=0;ci<N;ci++)COL[ci]=d0.counts[ci]||0;
-    if(d0&&d0.ledger){LG.buy=d0.ledger.buy||0;LG.trade=d0.ledger.trade||0;LG.used=d0.ledger.used||0;LG.uprice=d0.ledger.uprice==null?15000:d0.ledger.uprice;}
-    else {LG.buy=colTotals().cnt;}
-    if(d0&&d0.log&&d0.log.length)LOG=d0.log.slice(-200);
-    if(d0&&d0.ach)ACH=d0.ach;
-  }}catch(e){}
-  document.getElementById('c-uprice').value=LG.uprice;
+  if(raw){var d0=JSON.parse(raw); colLoad(d0); SAVED=JSON.stringify(colSnap()); savedAt=d0.updated?Date.parse(d0.updated):null;
+    if(d0.ledger&&d0.ledger.uprice!=null)LG.uprice=d0.ledger.uprice;}
+}catch(e){}
+try{var up0=localStorage.getItem('bread27:uprice'); if(up0!=null&&!isNaN(+up0))LG.uprice=+up0;}catch(e){}
+function setUprice(v){
+  LG.uprice=Math.max(0,v||0);
+  var inp=document.getElementById('c-uprice'); if(document.activeElement!==inp) inp.value=won(LG.uprice);
+  try{localStorage.setItem('bread27:uprice',String(LG.uprice));}catch(e){}
+}
+document.getElementById('c-uprice').value=won(LG.uprice);
+colStatus();
 colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
 (function(){
   if(typeof claude==='undefined'||!claude||!claude.use)return;
@@ -1728,17 +1884,12 @@ colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
       return colDoc.get().then(function(doc){
         var data=(doc&&doc.exists&&typeof doc.data==='function')?doc.data():null;
         if(data&&data.counts){
-          for(var i=0;i<N;i++)COL[i]=data.counts[i]||0;
-          if(data.ledger){LG.buy=data.ledger.buy||0;LG.trade=data.ledger.trade||0;LG.used=data.ledger.used||0;LG.uprice=data.ledger.uprice==null?15000:data.ledger.uprice;}
-          else {LG.buy=colTotals().cnt;}
-          if(data.log&&data.log.length){LOG=data.log.slice(-200);logRender();}
-          if(data.ach)ACH=data.ach;
-          document.getElementById('c-uprice').value=LG.uprice;
-          colRender(); checkCelebrate(true); achCheck(true); achRender();
-          document.getElementById('c-save').textContent='계정 기록을 불러왔습니다 · 자동 저장됩니다.';
+          colLoad(data); PEND=[]; SAVED=JSON.stringify(colSnap()); savedAt=data.updated?Date.parse(data.updated):null;
+          logRender(); colRender(); checkCelebrate(true); achCheck(true); achRender(); colStatus();
+          document.getElementById('c-save').textContent='계정 기록을 불러왔습니다 · 저장 버튼을 눌러야 저장됩니다.';
         }else{
           document.getElementById('c-save').textContent='계정에 저장됩니다 · 다른 기기에서도 이어집니다.';
-          if(colTotals().cnt>0)colSave();
+          if(colTotals().cnt>0&&PEND.length)colSave();
         }
       });
     });
@@ -1747,20 +1898,25 @@ colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
 Array.prototype.forEach.call(document.querySelectorAll('.cledger .ctr button'),function(b){
   b.onclick=function(){
     var k=b.getAttribute('data-k'), d=+b.getAttribute('data-d');
-    if(d>0){ pickCard(k,function(i){applyGain(k,i,1);}); return; }
+    if(d>0){ pickCard(k,function(i){applyGain(k,i,1,k==='used'?numVal(document.getElementById('c-uprice')):null);}); return; }
     if(LG[k]<=0) return;
-    LG[k]-=1; addLog(k,null,-1); colRender(); colSave(); achCheck(true);
+    var w=0;
+    if(k==='used') w=-usedTake(null,1);
+    else { LG[k]-=1; if(k==='buy') w=-PRICE; }
+    addLog(k,null,-1,w); colRender(); colDirty(); achCheck(true);
   };
 });
-document.getElementById('c-uprice').onchange=function(){
-  var v=parseInt(this.value,10); LG.uprice=isNaN(v)?0:Math.max(0,v);
-  this.value=LG.uprice; colRender(); colSave();
-};
+numFmt(document.getElementById('c-uprice'),function(v){ setUprice(v); });
 document.getElementById('c-reset').onclick=function(){
   for(var i=0;i<N;i++)COL[i]=0;
-  LG.buy=0; LG.trade=0; LG.used=0; LOG=[]; ACH={}; allCelebrated=false;
-  logRender(); achRender(); colRender(); colSave();
+  LG.buy=0; LG.trade=0; LG.used=0; LG.usedList=[]; LOG=[]; ACH={}; allCelebrated=false;
+  PEND.push({t:Date.now(),k:'reset',i:null,d:0,w:0});
+  logRender(); achRender(); colRender(); colDirty();
 };
+document.getElementById('c-savebtn').onclick=colSave;
+document.getElementById('c-savebtn2').onclick=colSave;
+document.getElementById('c-revert').onclick=colRevert;
+window.addEventListener('beforeunload',function(e){ if(PEND.length){ e.preventDefault(); e.returnValue=''; } });
 // 탭 전환
 var tabS=document.getElementById('tab-sim'), tabC=document.getElementById('tab-col');
 function goTab(col,quiet){
