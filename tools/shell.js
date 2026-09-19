@@ -57,8 +57,10 @@
       return;
     }
     if (!sheet.hidden && !e.target.closest('.bsheet')) closeSheet();
+    var dg = document.querySelector('.dguide[open]');
+    if (dg && !e.target.closest('.dguide')) dg.open = false;
   });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeSheet(); var dg = document.querySelector('.dguide[open]'); if (dg) dg.open = false; } });
   window.addEventListener('popstate', function(){ show(cur()); });
   show(cur());
 
@@ -116,8 +118,9 @@
     html += '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
       + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>';
     box.innerHTML = html;
-    box.insertAdjacentHTML('afterend', guide());
   });
+  var slot = document.getElementById('dguide-slot');
+  if (slot) slot.outerHTML = guide();
 
   // 홈 컬렉션 정렬: 최신순 / 난이도순 (준비 중 항목은 항상 뒤로)
   var grid = document.getElementById('col-grid');

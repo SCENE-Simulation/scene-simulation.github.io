@@ -576,7 +576,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
     animation:shUp .18s ease-out}
   .bsheet .grp{margin:0;padding-top:10px;border:0}
   .bsheet .nv.sub,.bsheet .yr summary{padding-top:10px;padding-bottom:10px}
-  @keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
   #totop{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 }
 @media (max-width:360px){.bb a,.bb button{min-width:54px}}
@@ -601,7 +601,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .seg button.on{background:rgba(255,255,255,.12);color:var(--ink)}
 
 /* 컬렉션 페이지 상단 정보 타일 */
-.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 10px}
+.cmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 18px}
 @media (max-width:560px){.cmeta{grid-template-columns:1fr 1fr}.cmeta .mt > b{font-size:17px}.cmeta .dlv b{font-size:14px}}
 .cmeta .mt{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .cmeta .mk{font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--ink2)}
@@ -613,19 +613,24 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .cmeta .dlv .db i:nth-child(4){height:15px}.cmeta .dlv .db i:nth-child(5){height:17px}
 .cmeta .dlv b{font-size:16px}
 .cmeta small{font-size:12px;color:var(--ink2)}
-.dguide{margin:0 0 18px;font-size:12.5px;color:var(--ink2)}
+.sec{position:relative}
+.sec-l{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px}
+.dguide{font-size:12.5px;color:var(--ink2)}
 .dguide summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:4px 0;color:var(--ink2)}
 .dguide summary::-webkit-details-marker{display:none}
 .dguide summary::before{content:"?";display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;
   border:1px solid var(--line2);font-size:10px;font-weight:700}
 .dguide summary:hover{color:var(--ink)}
-.dguide .dg{margin-top:8px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.dguide[open] summary{color:var(--ink)}
+.dguide .dg{position:absolute;left:0;top:calc(100% + 8px);z-index:30;width:min(460px,100%);padding:14px 16px;border-radius:14px;
+  background:var(--board);border:1px solid var(--line2);box-shadow:0 14px 36px rgba(0,0,0,.5);animation:shUp .15s ease-out}
 .dguide p{margin:0 0 10px;line-height:1.6}
 .dguide p b{color:var(--ink)}
 .dguide ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
 .dguide li{display:flex;align-items:center;gap:12px}
 .dguide li .dlv{min-width:118px}
 .dguide li > span:last-child{font-family:"JetBrains Mono",monospace;font-size:12px}
+@keyframes shUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 </style>
 </head>
@@ -678,7 +683,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
   <p class="intro">이 사이트는 아이돌 그룹 리센느와 관련된 시뮬레이션 및 계산기 등 다양한 도구들을 활용할 수 있는 사이트입니다.</p>
 
-  <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div>
+  <div class="sec">
+    <div class="sec-l"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div><span id="dguide-slot"></span></div>
     <div class="seg" role="group" aria-label="정렬"><button type="button" data-sort="new" class="on">최신순</button><button type="button" data-sort="diff">난이도순</button></div>
   </div>
   <div class="hgrid" id="col-grid">
@@ -787,7 +793,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 </div>
 <div id="page-col">
 <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
-<p class="sec-d">실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 기록은 지금 쓰는 브라우저에 자동 저장됩니다.</p>
+<p class="sec-d">CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.</p>
 <div class="cmeta" data-col="cu405"></div>
   <div class="chead2">
     <div class="m"><b id="c-cnt">0회</b><span>구매 횟수(빵)</span></div>
@@ -1834,8 +1840,10 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
       return;
     }
     if (!sheet.hidden && !e.target.closest('.bsheet')) closeSheet();
+    var dg = document.querySelector('.dguide[open]');
+    if (dg && !e.target.closest('.dguide')) dg.open = false;
   });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeSheet(); var dg = document.querySelector('.dguide[open]'); if (dg) dg.open = false; } });
   window.addEventListener('popstate', function(){ show(cur()); });
   show(cur());
 
@@ -1893,8 +1901,9 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
     html += '<div class="mt"><span class="mk">구성</span><b>' + x.d.types + '종</b><small>' + x.d.comp + '</small></div>'
       + '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + x.packs + '개</b><small>약 ' + won(x.cost) + ' · 1개 ' + won(x.d.price) + '</small></div>';
     box.innerHTML = html;
-    box.insertAdjacentHTML('afterend', guide());
   });
+  var slot = document.getElementById('dguide-slot');
+  if (slot) slot.outerHTML = guide();
 
   // 홈 컬렉션 정렬: 최신순 / 난이도순 (준비 중 항목은 항상 뒤로)
   var grid = document.getElementById('col-grid');

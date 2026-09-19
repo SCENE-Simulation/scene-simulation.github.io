@@ -30,7 +30,7 @@ rep('<div id="page-sim" hidden>',
   '<p class="sec-d">빵 1개에 카드 1장, 카드는 27종입니다. 멤버 5명 × 4종 = 20종에 스페셜 7종을 더한 구성이며, 한 장이 나올 확률은 모두 1/27입니다.</p>');
 rep('<div id="page-col">',
   '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
-  '<p class="sec-d">실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 기록은 지금 쓰는 브라우저에 자동 저장됩니다.</p>\n' +
+  '<p class="sec-d">CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.</p>\n' +
   '<div class="cmeta" data-col="cu405"></div>');
 
 // 본문 닫기 + 모바일 하단 탭 바
