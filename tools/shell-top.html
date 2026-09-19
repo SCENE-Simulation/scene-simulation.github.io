@@ -5,6 +5,7 @@
     <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></symbol>
     <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
     <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
@@ -46,11 +47,14 @@
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
   <p class="intro">이 사이트는 아이돌 그룹 리센느와 관련된 시뮬레이션 및 계산기 등 다양한 도구들을 활용할 수 있는 사이트입니다.</p>
 
-  <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div></div>
-  <div class="hgrid">
-    <a class="hc" href="?tab=cu405" data-tab="cu405" style="--c:#47d19a">
-      <div class="k">2026 · COLLECTION BOOK</div>
+  <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div>
+    <div class="seg" role="group" aria-label="정렬"><button type="button" data-sort="new" class="on">최신순</button><button type="button" data-sort="diff">난이도순</button></div>
+  </div>
+  <div class="hgrid" id="col-grid">
+    <a class="hc" href="?tab=cu405" data-tab="cu405" data-col="cu405" style="--c:#47d19a">
+      <div class="k">COLLECTION BOOK</div>
       <h2>CU 리센느 405빵 콜라보</h2>
+      <div class="meta"></div>
       <p>실제로 산 빵과 뽑은 카드를 기록하는 도감입니다. 모은 만큼 카드가 빛나고, 칭호도 얻을 수 있습니다.</p>
       <div class="st2"><span><b data-mirror="c-own">0/27</b>보유</span><span><b data-mirror="c-cnt">0회</b>구매</span></div>
       <span class="go">도감 열기 →</span>
