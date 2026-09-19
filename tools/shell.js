@@ -152,6 +152,22 @@
           + '<svg class="xv"><use href="#i-chev"/></svg></button>';
       }).join('') + '</div>'
       + tabs.map(function(t){ return '<div class="xt-p" data-x="' + t.k + '" hidden>' + t.body + '</div>'; }).join('');
+    // 도감의 "기록 로그" 토글도 같은 줄로 옮겨서 하나만 열리게 함
+    var lb = document.getElementById('c-logbtn'), lp = document.getElementById('c-logp');
+    if (lb && lp && x.closest('#page-col')) {
+      lb.onclick = null;
+      lb.setAttribute('data-x', 'log');
+      x.querySelector('.xt-bar').appendChild(lb);
+      lp.classList.add('xt-p');
+      lp.setAttribute('data-x', 'log');
+      x.appendChild(lp);
+      var old = document.querySelector('.lgx'); if (old && !old.children.length) old.parentNode.removeChild(old);
+      // 중고 구매 칸의 안내를 눌러 로그를 열 때도 다른 패널은 닫음
+      document.getElementById('c-usedhint').addEventListener('click', function(){
+        x.querySelectorAll('.xt-b').forEach(function(o){ o.setAttribute('aria-expanded', String(o === lb)); });
+        x.querySelectorAll('.xt-p').forEach(function(p){ p.hidden = p !== lp; });
+      });
+    }
     x.addEventListener('click', function(e){
       var b = e.target.closest('.xt-b'); if (!b) return;
       var k = b.getAttribute('data-x'), open = b.getAttribute('aria-expanded') !== 'true';
