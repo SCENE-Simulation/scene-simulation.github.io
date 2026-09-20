@@ -539,3 +539,43 @@ body.has-sfloat #totop{bottom:84px}
 .bdg.lock .em{background:linear-gradient(160deg,#6e6e73,#3a3a3c)}
 .bdg.lock .em i{color:rgba(255,255,255,.75)}
 .bdg.lock .bt b{color:var(--ink2)}
+
+/* 카드 크기 조절 */
+.colbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.colbar .cb-k{font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.colbar .cb-s{font-size:11.5px;color:var(--dim);white-space:nowrap}
+.colbar b{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.colbar input[type=range]{flex:1;min-width:90px;height:26px;margin:0;padding:0;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:ew-resize}
+.colbar input[type=range]:focus-visible{outline:2px solid var(--lav-t);outline-offset:3px}
+.colbar input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:4px;background:linear-gradient(90deg,var(--pink),var(--gold))}
+.colbar input[type=range]::-moz-range-track{height:6px;border-radius:4px;background:linear-gradient(90deg,var(--pink),var(--gold))}
+.colbar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-8px;border-radius:50%;
+  background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.colbar input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
+#page-col .cgrid{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
+#page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+@media (max-width:640px){
+  #page-col .cgrid{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
+  #page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+  .colbar{gap:9px;padding:9px 12px}
+  .colbar .cb-k{font-size:12px}
+}
+
+/* 카드가 작아지면 조작부도 작게 */
+#page-col[data-cols="5"] .ctile,#page-col[data-cols="6"] .ctile,#page-col[data-cols="7"] .ctile,#page-col[data-cols="8"] .ctile{padding:5px}
+#page-col[data-cols="5"] .ctile .ctr button,#page-col[data-cols="6"] .ctile .ctr button,
+#page-col[data-cols="7"] .ctile .ctr button,#page-col[data-cols="8"] .ctile .ctr button{width:26px;font-size:14px;padding:4px 0}
+#page-col[data-cols="5"] .ctile .nm,#page-col[data-cols="6"] .ctile .nm,
+#page-col[data-cols="7"] .ctile .nm,#page-col[data-cols="8"] .ctile .nm{font-size:10.5px;padding:2px 4px}
+#page-col[data-cols="5"] .ctile .wish,#page-col[data-cols="6"] .ctile .wish,
+#page-col[data-cols="7"] .ctile .wish,#page-col[data-cols="8"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+#page-col[data-cols="5"] .ctile .wish svg,#page-col[data-cols="6"] .ctile .wish svg,
+#page-col[data-cols="7"] .ctile .wish svg,#page-col[data-cols="8"] .ctile .wish svg{width:15px;height:15px}
+@media (max-width:640px){
+  #page-col[data-cols="4"] .ctile{padding:5px}
+  #page-col[data-cols="4"] .ctile .ctr button{width:24px;font-size:14px;padding:4px 0}
+  #page-col[data-cols="4"] .ctile .ctr .n{font-size:12px}
+  #page-col[data-cols="4"] .ctile .nm{font-size:10px;padding:2px 3px}
+  #page-col[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+  #page-col[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
+}

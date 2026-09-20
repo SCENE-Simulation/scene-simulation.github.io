@@ -497,6 +497,13 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
     <div class="clog" id="c-logp" hidden><div class="list" id="c-log"><div class="em">기록이 없습니다.</div></div></div>
   </div>
   <div class="csum" id="c-sum"><span class="stars" id="sum-stars"></span></div>
+  <div class="colbar">
+    <span class="cb-k">카드 크기</span>
+    <span class="cb-s">크게</span>
+    <input id="c-cols" type="range" min="2" max="8" step="1" value="4" aria-label="한 줄에 보여 줄 카드 수">
+    <span class="cb-s">작게</span>
+    <b id="c-cols-n">4열</b>
+  </div>
   <div id="c-body"></div>
   <p class="csave" id="c-save">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>
   <div class="sfloat" id="c-float" hidden><span class="sf-t">저장하지 않은 변경 <b id="c-float-n">0</b>건</span><button id="c-revert">되돌리기</button><button class="p" id="c-savebtn2">저장</button></div>
@@ -1792,6 +1799,26 @@ document.getElementById('c-reset').onclick=function(){
   PEND.push({t:Date.now(),k:'reset',i:null,d:0,w:0});
   logRender(); achRender(); colRender(); colDirty();
 };
+(function(){
+  var sl=document.getElementById('c-cols'), lb=document.getElementById('c-cols-n'), page=document.getElementById('page-col');
+  var def=(window.innerWidth<=640)?3:4, v=def;
+  try{ var s=localStorage.getItem('bread27:cols'); if(s&&+s>=2&&+s<=8) v=+s; }catch(e){}
+  function apply(n,save){
+    v=Math.max(2,Math.min(8,n));
+    page.style.setProperty('--cols',v);
+    page.style.setProperty('--colsw',Math.max(1,Math.round(v/2)));
+    // 카드 수보다 많은 열은 쓰지 않음(오른쪽 빈칸 방지)
+    Array.prototype.forEach.call(document.querySelectorAll('#c-body .cgrid'),function(g){
+      var wide=g.classList.contains('wide'), want=wide?Math.max(1,Math.round(v/2)):v;
+      g.style.setProperty(wide?'--colsw':'--cols',Math.min(want,g.children.length));
+    });
+    page.setAttribute('data-cols',v);
+    sl.value=v; lb.textContent=v+'열';
+    if(save){ try{ localStorage.setItem('bread27:cols',String(v)); }catch(e){} }
+  }
+  sl.addEventListener('input',function(){ apply(+sl.value,true); });
+  apply(v,false);
+})();
 document.getElementById('c-ach-all').onclick=function(){
   var box=document.getElementById('c-badges-all'), open=box.hidden;
   box.hidden=!open; this.setAttribute('aria-expanded',String(open)); this.textContent=open?'접기':'전체 보기';
