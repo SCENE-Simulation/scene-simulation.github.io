@@ -1870,44 +1870,55 @@ function cardRain(idx,n){
 }
 
 // ---------------- 업적
+// 이 컬렉션(CU 405빵 27종)에서만 얻는 칭호. c: 색, r: 단계(높을수록 화려함)
 var ACHDEF=[
-  {id:'buy10', n:'빵 좀 먹을 줄 아는 사람', d:'빵 10개 구매', t:function(c){return c.buy>=10;}},
-  {id:'buy50', n:'빵집 단골',              d:'빵 50개 구매', t:function(c){return c.buy>=50;}},
-  {id:'buy105',n:'기댓값의 사도',          d:'빵 105개 구매 · 이론 평균 도달', t:function(c){return c.buy>=105;}},
-  {id:'buy200',n:'확률의 순교자',          d:'빵 200개 구매', t:function(c){return c.buy>=200;}},
-  {id:'tr3',   n:'손 큰 트레이더',         d:'교환 3회', t:function(c){return c.trade>=3;}},
-  {id:'tr10',  n:'당근의 신',              d:'교환 10회', t:function(c){return c.trade>=10;}},
-  {id:'tr25',  n:'교환소장',               d:'교환 25회', t:function(c){return c.trade>=25;}},
-  {id:'us1',   n:'호구 왔는가',            d:'중고 구매 첫 거래', t:function(c){return c.used>=1;}},
-  {id:'us5',   n:'지갑이 열린 자',         d:'중고 구매 5회', t:function(c){return c.used>=5;}},
-  {id:'us15',  n:'시세 파괴자',            d:'중고 구매 15회', t:function(c){return c.used>=15;}},
-  {id:'dup6',  n:'중복 지옥',              d:'같은 카드 6장 보유', t:function(c){return c.maxDup>=6;}},
-  {id:'dup10', n:'중복의 군주',            d:'같은 카드 10장 보유', t:function(c){return c.maxDup>=10;}},
-  {id:'own14', n:'절반의 수집가',          d:'14종 보유', t:function(c){return c.own>=14;}},
-  {id:'own27', n:'컴플리터',               d:'27종 전부 수집', t:function(c){return c.own>=27;}},
-  {id:'money', n:'십만원의 벽',            d:'누적 지출 10만원 돌파', t:function(c){return c.money>=100000;}},
-  {id:'preview',n:'홀로그램 관람객',       d:'숨겨진 미리보기를 발견', t:function(){return false;}},
-  {id:'credit',n:'서명을 찾은 사람',       d:'제작자 서명을 발견', t:function(){return false;}}
+  // 수집
+  {id:'first',   n:'첫 장의 설렘',      d:'카드 1종 보유',                 c:'#55a1e7', r:1, t:function(c){return c.own>=1;}},
+  {id:'mem1',    n:'최애 한 세트',      d:'한 멤버의 4종 모두 수집',        c:'#55a1e7', r:2, t:function(c){return c.memberDone>=1;}},
+  {id:'own14',   n:'절반의 수집가',      d:'14종 보유',                    c:'#55a1e7', r:2, t:function(c){return c.own>=14;}},
+  {id:'spAll',   n:'스페셜 컴플리트',    d:'스페셜 7종 모두 수집',           c:'#55a1e7', r:3, t:function(c){return c.spOwn>=c.spTotal;}},
+  {id:'own27',   n:'컴플리터',          d:'27종 전부 수집',                c:'#55a1e7', r:4, t:function(c){return c.own>=27;}},
+  // 빵 구매
+  {id:'buy10',   n:'빵 좀 먹을 줄 아는 사람', d:'빵 10개 구매',             c:'#ecd25b', r:1, t:function(c){return c.buy>=10;}},
+  {id:'buy50',   n:'빵집 단골',          d:'빵 50개 구매',                 c:'#ecd25b', r:2, t:function(c){return c.buy>=50;}},
+  {id:'buy105',  n:'기댓값의 사도',      d:'빵 105개 구매 · 이론 평균 도달',  c:'#ecd25b', r:3, t:function(c){return c.buy>=105;}},
+  {id:'buy200',  n:'확률의 순교자',      d:'빵 200개 구매',                c:'#ecd25b', r:4, t:function(c){return c.buy>=200;}},
+  // 지출
+  {id:'money10', n:'십만원의 벽',        d:'누적 지출 10만 원 돌파',         c:'#e09050', r:2, t:function(c){return c.money>=100000;}},
+  {id:'moneyAvg',n:'평균을 넘어선 자',   d:'누적 지출 262,500원 돌파 · 평균 컴플리트 비용', c:'#e09050', r:3, t:function(c){return c.money>=262500;}},
+  // 교환
+  {id:'tr1',     n:'첫 교환',            d:'교환 1회',                     c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
+  {id:'tr10',    n:'교환의 달인',        d:'교환 10회',                    c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
+  // 중고 구매
+  {id:'us1',     n:'호구 왔는가',        d:'중고 구매 첫 거래',              c:'#e96387', r:1, t:function(c){return c.used>=1;}},
+  {id:'us10',    n:'시세 파괴자',        d:'중고 구매 10회',                c:'#e96387', r:3, t:function(c){return c.used>=10;}},
+  // 중복
+  {id:'dup6',    n:'중복 지옥',          d:'같은 카드 6장 보유',             c:'#a080d0', r:2, t:function(c){return c.maxDup>=6;}},
+  {id:'dup10',   n:'중복의 군주',        d:'같은 카드 10장 보유',            c:'#a080d0', r:3, t:function(c){return c.maxDup>=10;}},
+  // 효율
+  {id:'thrifty', n:'알뜰 컴플리터',      d:'20만 원 이하로 27종 완성',       c:'#f6b93c', r:4, t:function(c){return c.own>=27&&c.money<=200000;}}
 ];
+
 function achCtx(){
-  var own=0,maxDup=0;
+  var own=0,maxDup=0,spOwn=0,memberDone=0;
   for(var i=0;i<N;i++){ if(COL[i]>0)own++; if(COL[i]>maxDup)maxDup=COL[i]; }
+  for(var s2=MTOTAL;s2<N;s2++) if(COL[s2]>0) spOwn++;
+  for(var m=0;m<MCOUNT;m++){
+    var full=true;
+    for(var v=0;v<VPER;v++) if(!COL[m*VPER+v]) full=false;
+    if(full) memberDone++;
+  }
   return {buy:LG.buy,trade:LG.trade,used:LG.used,own:own,maxDup:maxDup,
-          money:totalWon()};
+          money:totalWon(),spOwn:spOwn,spTotal:N-MTOTAL,memberDone:memberDone};
 }
-// 칭호 뱃지: 종류별 색, 단계가 높을수록 화려하게 (숨은 칭호는 홀로그램)
-var ACHCAT=[['buy','#ecd25b'],['tr','#47d19a'],['us','#e96387'],['dup','#a080d0'],['own','#55a1e7'],['money','#e09050']];
-var ACHRANK={buy10:1,buy50:2,buy105:3,buy200:4,tr3:1,tr10:2,tr25:3,us1:1,us5:2,us15:3,dup6:2,dup10:3,own14:2,own27:4,money:2};
-function achColor(id){for(var k=0;k<ACHCAT.length;k++)if(id.indexOf(ACHCAT[k][0])===0)return ACHCAT[k][1];return null;}
 function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
   var got=ACHDEF.filter(function(a){return ACH[a.id];});
   var cnt=document.getElementById('c-ach-n'); if(cnt)cnt.textContent=got.length+' / '+ACHDEF.length;
   box.innerHTML = got.length
     ? got.map(function(a){
-        var c=achColor(a.id), r=ACHRANK[a.id]||4;
-        return '<span class="bdg'+(c?'':' holo')+'" data-r="'+r+'"'+(c?' style="--bc:'+c+'"':'')+' title="'+a.n+' · '+a.d+'">'
-          +'<span class="em"><i>'+(c?'✦':'✧')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
+        return '<span class="bdg" data-r="'+(a.r||1)+'" style="--bc:'+a.c+'" title="'+a.n+' · '+a.d+'">'
+          +'<span class="em"><i>✦</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
       }).join('')
     : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 기록을 쌓으면 칭호가 생깁니다</span>';
 }
@@ -1937,7 +1948,6 @@ function holoPreview(){
   if(previewOn)return;
   previewOn=true;
   for(var i=0;i<N;i++) if(colTiles[i]) colTiles[i].el.classList.add('pv');
-  achAward('preview');
   toast('홀로그램 미리보기', '10초 동안 전 카드가 5성으로 보입니다 · 기록은 변하지 않습니다');
   setTimeout(function(){
     for(var i=0;i<N;i++) if(colTiles[i]) colTiles[i].el.classList.remove('pv');
@@ -2299,6 +2309,10 @@ function colLoad(d){
   LOG=(d&&d.log)?d.log.slice(-200):[];
   LOG.forEach(function(e,n){ if(!e.id) e.id='L'+n+'_'+e.t; });
   ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
+  // 예전 칭호 → 새 칭호
+  if(ACH.money&&!ACH.money10) ACH.money10=ACH.money;
+  if(ACH.tr3&&!ACH.tr1) ACH.tr1=ACH.tr3;
+  if(ACH.us5&&!ACH.us1) ACH.us1=ACH.us5;
 }
 function colDirty(){ colStatus(); }
 function colStatus(){
@@ -2499,18 +2513,6 @@ goTab(true,true);
   upd();
 })();
 
-(function(){
-  var el=document.querySelector('.credit'); if(!el)return;
-  var n=0,tt=0;
-  el.style.cursor='pointer';
-  el.onclick=function(){
-    var now=Date.now(); n=(now-tt<1200)?n+1:1; tt=now;
-    if(n>=7){ n=0; achAward('credit');
-      toast('비효율주의자', '효율은 포기했지만 컬렉션은 포기 못 합니다');
-      confettiRain(50);
-    }
-  };
-})();
 render(); showRec();
 say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니다. 카드 1종당 확률은 1/27입니다.');
 })();
