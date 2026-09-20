@@ -161,24 +161,25 @@
   }
   function renderWish(){
     var items = wishItems();
+    var pc = items.filter(function(x){ return x.type === 'pc'; });
+    var gd = items.filter(function(x){ return x.type === 'gd'; });
     var h = sec('i-heart', ['위시리스트'], '하트를 누른 포토카드와 굿즈가 여기에 모입니다. 기록은 이 브라우저에 저장됩니다.');
-    if (!items.length) {
-      h += '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span>담아 둔 항목이 없습니다</span>'
-        + '<small>포토카드나 굿즈 위의 하트를 누르면 여기에 담깁니다</small></div>';
-    } else {
-      var pc = items.filter(function(x){ return x.type === 'pc'; }), gd = items.filter(function(x){ return x.type === 'gd'; });
-      [['포토카드', pc], ['굿즈', gd]].forEach(function(grp){
-        if (!grp[1].length) return;
-        h += '<div class="sec sec2"><div class="sec-t">' + grp[0] + '<span class="cnt">' + grp[1].length + '</span></div></div><div class="wgrid">'
-          + grp[1].map(function(x){
-              return '<article class="witem' + (x.own ? ' have' : '') + '">'
-                + '<div class="w-img">' + (x.img ? '<img src="' + esc(x.img) + '" alt=""' + (x.pix ? ' class="pix"' : '') + ' loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>') + '</div>'
-                + '<div class="w-b"><b>' + esc(x.name) + '</b><span>' + esc(x.from) + (x.own ? ' · 보유 중' : '') + '</span>'
-                + '<a class="w-go" href="?tab=' + x.tab + '" data-tab="' + x.tab + '">페이지 열기 →</a></div>'
-                + heart(x.key) + '</article>';
-            }).join('') + '</div>';
-      });
-    }
+    [['포토카드', pc, '포토카드 도감이나 전체보기에서 하트를 누르면 여기에 담깁니다'],
+     ['굿즈', gd, '굿즈 페이지에서 하트를 누르면 여기에 담깁니다']].forEach(function(g){
+      h += '<div class="sec sec2"><div class="sec-t">' + g[0] + '<span class="cnt">' + g[1].length + '</span></div></div>';
+      if (!g[1].length) {
+        h += '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span>담아 둔 ' + g[0] + '가 없습니다</span><small>' + g[2] + '</small></div>';
+        return;
+      }
+      h += '<div class="wgrid">' + g[1].map(function(x){
+        return '<article class="witem' + (x.own ? ' have' : '') + '">'
+          + '<div class="w-img">' + (x.img ? '<img src="' + esc(x.img) + '" alt=""' + (x.pix ? ' class="pix"' : '') + ' loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>') + '</div>'
+          + '<div class="w-b"><span class="w-from">' + esc(x.from) + (x.own ? ' · 보유 중' : '') + '</span>'
+          + '<b>' + esc(x.name) + '</b>'
+          + '<a class="w-go" href="?tab=' + x.tab + '" data-tab="' + x.tab + '">페이지 열기 →</a></div>'
+          + heart(x.key) + '</article>';
+      }).join('') + '</div>';
+    });
     elWish.innerHTML = h;
   }
   function renderSum(){
