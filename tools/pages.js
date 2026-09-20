@@ -178,8 +178,8 @@
       });
       order.forEach(function(tab){
         var g = by[tab];
-        h += '<div class="wgrp"><div class="wgrp-h"><b>' + esc(g.from) + '</b><span class="cnt">' + g.items.length + '</span>'
-          + '<a class="w-go" href="?tab=' + g.tab + '" data-tab="' + g.tab + '">페이지 열기 →</a></div>'
+        h += '<details class="wgrp" open><summary class="wgrp-h"><b>' + esc(g.from) + '</b><span class="cnt">' + g.items.length + '</span>'
+          + '<a class="w-go" href="?tab=' + g.tab + '" data-tab="' + g.tab + '">페이지 열기 →</a></summary>'
           + '<div class="pcgrid">' + g.items.map(function(x){
               return '<div class="pcard' + (x.own ? ' have' : '') + (x.land ? ' land' : '') + '">'
                 + '<div class="pc-img">' + heart(x.key)
@@ -187,7 +187,7 @@
                          : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
                 + (x.own > 1 ? '<span class="pc-n">×' + x.own + '</span>' : '') + '</div>'
                 + '<div class="pc-t">' + esc(x.name) + '</div></div>';
-            }).join('') + '</div></div>';
+            }).join('') + '</div></details>';
       });
     });
     elWish.innerHTML = h;
