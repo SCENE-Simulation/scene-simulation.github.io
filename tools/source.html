@@ -1083,6 +1083,7 @@ function colRender(){
     colTiles[i].lvb.innerHTML='<em>COUNT</em><i>'+lv+'</i>';
     for(var L=1;L<=5;L++) colTiles[i].el.classList.toggle('lv'+L,lv===L);
   }
+  document.dispatchEvent(new CustomEvent("cu405change"));
   colProgs.forEach(function(p){
     var c=0; p.ids.forEach(function(i){if(COL[i]>0)c++;});
     p.el.textContent=c+'/'+p.ids.length;
@@ -1722,7 +1723,15 @@ function setUprice(v){
 }
 document.getElementById('c-uprice').value=won(LG.uprice);
 colStatus();
+window.CU405={
+  id:"cu405", year:"2026", title:"CU 리센느 405빵 콜라보",
+  N:N, names:CNAME, src:SRC, isLand:isLand, isPix:isPix,
+  members:MEM.map(function(m){return {n:m.n,c:m.c};}), vper:VPER, mcount:MCOUNT, mtotal:MTOTAL,
+  counts:function(){return COL.slice();},
+  tileEl:function(i){return colTiles[i]&&colTiles[i].el;}
+};
 colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
+document.dispatchEvent(new CustomEvent("cu405ready"));
 (function(){
   if(typeof claude==='undefined'||!claude||!claude.use)return;
   Promise.all([claude.use('db'),claude.use('user')]).then(function(r){

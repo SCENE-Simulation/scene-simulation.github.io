@@ -855,6 +855,90 @@ body.has-sfloat #totop{bottom:84px}
 #c-usedwon{font-family:"Pretendard Variable",sans-serif}
 #c-usedwon em{font-style:normal;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--gold-t);margin:0 1px}
 
+/* ===== 위시리스트 하트 ===== */
+.wish{position:absolute;left:6px;top:6px;z-index:3;width:30px;height:30px;padding:0!important;display:grid;place-items:center;
+  border-radius:50%!important;border:1px solid rgba(255,255,255,.2)!important;background:rgba(20,20,22,.6)!important;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;cursor:pointer}
+.wish svg{width:17px;height:17px;fill:none;stroke:currentColor}
+.wish:hover{background:rgba(20,20,22,.8)!important;transform:scale(1.06)}
+.wish.on{color:#ff4d6d;border-color:rgba(255,77,109,.6)!important;background:rgba(255,77,109,.16)!important}
+.wish.on svg{fill:#ff4d6d;stroke:#ff4d6d;animation:wishPop .3s ease-out}
+@keyframes wishPop{0%{transform:scale(.6)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+.ctile .wish{left:8px;top:8px}
+.wishbtn{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top,0px));display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--line2);color:var(--ink);text-decoration:none}
+.wishbtn svg{width:18px;height:18px;fill:none;stroke:currentColor}
+.wishbtn:hover{background:var(--glass-h);border-color:rgba(255,77,109,.5);color:#ff8095}
+.wishbtn .wn{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:#ff8095}
+.hd{position:relative}
+@media (max-width:640px){.wishbtn{right:12px;padding:7px 10px}}
+
+/* ===== 홈: 컬렉션 통합 현황 ===== */
+.sumrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.sumrow{grid-template-columns:1fr}}
+.sumc{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid rgba(255,255,255,.12)}
+.sumc .k{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+.sumc .k svg{width:16px;height:16px}
+.sumc .v{display:flex;align-items:baseline;gap:6px;font-family:"JetBrains Mono",monospace}
+.sumc .v b{font-size:30px;font-weight:700;color:var(--ink)}
+.sumc .v span{font-size:14px;color:var(--ink2)}
+.sumc .pbar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.sumc .pbar i{display:block;height:100%;border-radius:4px;transition:width .4s ease}
+.sumc .s{font-size:12.5px;color:var(--ink2)}
+.sumc .go{align-self:flex-start;margin-top:4px;padding:7px 13px;border-radius:9px;font-size:13px;font-weight:600;
+  background:var(--glass-h);border:1px solid var(--line2);color:var(--ink);text-decoration:none}
+.sumc .go:hover{background:rgba(255,255,255,.14)}
+
+/* ===== 굿즈 카드 ===== */
+.gnote2{margin:0 0 14px;font-size:12px;color:var(--ink2)}
+.gdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.gd{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--glass);border:1px solid var(--line)}
+.gd.have{border-color:rgba(71,209,154,.5)}
+.gd-img{position:relative;aspect-ratio:4/3;background:var(--cell)}
+.gd-img img{width:100%;height:100%;object-fit:cover;display:block}
+.gd-ph{width:100%;height:100%;display:grid;place-items:center;color:var(--dim)}
+.gd-ph svg{width:32px;height:32px}
+.gd-b{display:flex;flex-direction:column;gap:7px;padding:13px 14px 14px}
+.gd-b h4{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
+.gd-m{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;color:var(--ink2)}
+.gd-m .pr{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--gold-t)}
+.gd-b p{margin:0;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.gd-c{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px}
+.gd-c .gk{font-size:12px;color:var(--ink2);margin-right:auto}
+.gd-c button{width:34px;padding:6px 0;font-size:16px;line-height:1;text-align:center}
+.gd-c b{min-width:26px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink)}
+.pk-ph.tall{aspect-ratio:auto;padding:40px 20px;gap:6px}
+.pk-ph small{font-size:12px;color:var(--dim)}
+
+/* ===== 통합 포토카드 ===== */
+.pcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+@media (max-width:640px){.pcgrid{grid-template-columns:repeat(3,1fr);gap:9px}}
+.pcard{display:flex;flex-direction:column;gap:6px}
+.pc-img{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:2px solid var(--line2);background:var(--cell)}
+.pcard.land .pc-img{aspect-ratio:4/3}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.5)}
+.pcard.have .pc-img{border-color:var(--pink)}
+.pcard.have .pc-img img{filter:none}
+.pc-n{position:absolute;right:6px;bottom:6px;padding:2px 7px;border-radius:7px;background:rgba(20,20,22,.78);
+  font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:#fff}
+.pc-t{font-size:11.5px;line-height:1.35;color:var(--ink2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard.have .pc-t{color:var(--ink)}
+.sec-t .cnt{margin-left:8px;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink2)}
+.sec-t .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.page .sec.sec2{margin:26px 0 12px}
+
+/* ===== 위시리스트 페이지 ===== */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.witem{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.witem.have{border-color:rgba(71,209,154,.45)}
+.witem .w-img{flex:0 0 54px;width:54px;height:70px;border-radius:9px;overflow:hidden;background:var(--cell);border:1px solid var(--line2)}
+.witem .w-img img{width:100%;height:100%;object-fit:cover;display:block}
+.witem .w-b{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.witem .w-b b{font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.witem .w-b span{font-size:11.5px;color:var(--ink2)}
+.witem .w-go{font-size:12px;color:var(--mint-t);text-decoration:none;margin-top:2px}
+.witem .wish{position:static;flex:0 0 30px}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -862,6 +946,9 @@ body.has-sfloat #totop{bottom:84px}
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
     <symbol id="i-gacha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="11" height="15" rx="2"/><path d="M8 21h10a2 2 0 0 0 2-2V7"/><path d="M10.5 8.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L7.6 10.3l2-.3z"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1.5"/><path d="M5 13v7.5h14V13"/><path d="M12 8v12.5"/><path d="M12 8S10.5 3.5 8 4.2 8.5 8 12 8zM12 8s1.5-4.5 4-3.8S15.5 8 12 8z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3s-7.5-4.6-7.5-9.7A4.1 4.1 0 0 1 12 8.2a4.1 4.1 0 0 1 7.5 2.4c0 5.1-7.5 9.7-7.5 9.7z"/></symbol>
     <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
     <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
@@ -876,21 +963,38 @@ body.has-sfloat #totop{bottom:84px}
 
 <aside class="sb" aria-label="메뉴">
   <a class="nv" href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
+  <a class="nv" href="?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시리스트</a>
 
-  <div class="grp" id="grp-col" data-grp="col">
-    <div class="gl"><svg><use href="#i-book"/></svg>컬렉션 북</div>
+  <div class="grp" id="grp-pc" data-grp="pc">
+    <div class="gl"><svg><use href="#i-book"/></svg>포카 컬렉션 북</div>
     <details class="yr" open>
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2026</summary>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2026 포카</summary>
       <a class="nv sub" href="?tab=cu405" data-tab="cu405">CU 리센느 405빵 콜라보</a>
       <span class="nv sub off" aria-disabled="true">나랑드 콜라보<span class="bd">SOON</span></span>
       <span class="nv sub off" aria-disabled="true">도미노 콜라보<span class="bd">SOON</span></span>
     </details>
     <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2025<span class="bd">SOON</span></summary>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2025 포카<span class="bd">SOON</span></summary>
     </details>
     <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2024<span class="bd">SOON</span></summary>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2024 포카<span class="bd">SOON</span></summary>
     </details>
+    <a class="nv sub all" href="?tab=allcards" data-tab="allcards"><svg><use href="#i-grid"/></svg>포토카드 통합 보기</a>
+  </div>
+
+  <div class="grp" id="grp-gd" data-grp="gd">
+    <div class="gl"><svg><use href="#i-gift"/></svg>굿즈 컬렉션 북</div>
+    <details class="yr" open>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2026 굿즈</summary>
+      <a class="nv sub" href="?tab=goods2026" data-tab="goods2026">2026년 굿즈</a>
+    </details>
+    <details class="yr">
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈<span class="bd">SOON</span></summary>
+    </details>
+    <details class="yr">
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈<span class="bd">SOON</span></summary>
+    </details>
+    <a class="nv sub all" href="?tab=allgoods" data-tab="allgoods"><svg><use href="#i-grid"/></svg>굿즈 통합 보기</a>
   </div>
 
   <div class="grp" id="grp-toy" data-grp="toy">
@@ -904,6 +1008,7 @@ body.has-sfloat #totop{bottom:84px}
 
 <main class="mn">
 <header class="hd">
+  <a class="wishbtn" href="?tab=wish" data-tab="wish" aria-label="위시리스트"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span class="wn" id="wish-n" hidden>0</span></a>
   <a href="?tab=home" data-tab="home"><p class="lg">센둥이 <em>시뮬레이터</em></p></a>
 </header>
 
@@ -911,13 +1016,19 @@ body.has-sfloat #totop{bottom:84px}
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
   <p class="intro">이 사이트는 아이돌 그룹 리센느와 관련된 시뮬레이션 및 계산기 등 다양한 도구들을 활용할 수 있는 사이트입니다.<br>대표적인 기능으로는 포토카드 컬렉션 북, 조회수 예측기가 있습니다.</p>
 
-  <div class="sec">
-    <div class="sec-l"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북</div><span id="dguide-slot"></span></div>
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg>컬렉션 통합 현황</div></div>
+  <div class="sumrow">
+    <div class="sumc" id="sum-pc"></div>
+    <div class="sumc" id="sum-gd"></div>
+  </div>
+
+  <div class="sec sec2">
+    <div class="sec-l"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북</div><span id="dguide-slot"></span></div>
     <div class="seg" role="group" aria-label="정렬"><button type="button" data-sort="new" class="on">최신순</button><button type="button" data-sort="diff">난이도순</button></div>
   </div>
   <div class="hgrid" id="col-grid">
     <a class="hc" href="?tab=cu405" data-tab="cu405" data-col="cu405" style="--c:#47d19a">
-      <div class="k">COLLECTION BOOK</div>
+      <div class="k">2026 포카</div>
       <h2>CU 리센느 405빵 콜라보</h2>
       <div class="meta"></div>
       <p class="cdesc" data-desc="cu405"></p>
@@ -925,13 +1036,33 @@ body.has-sfloat #totop{bottom:84px}
       <span class="go">도감 열기 →</span>
     </a>
     <div class="hc soon" style="--c:#6e6e73">
-      <div class="k">COLLECTION BOOK</div>
+      <div class="k">2026 포카</div>
       <h2>나랑드 콜라보</h2>
       <span class="chip">SOON</span>
     </div>
     <div class="hc soon" style="--c:#6e6e73">
-      <div class="k">COLLECTION BOOK</div>
+      <div class="k">2026 포카</div>
       <h2>도미노 콜라보</h2>
+      <span class="chip">SOON</span>
+    </div>
+  </div>
+
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg>굿즈 컬렉션 북</div></div>
+  <div class="hgrid">
+    <a class="hc" href="?tab=goods2026" data-tab="goods2026" style="--c:#ecd25b">
+      <div class="k">2026 굿즈</div>
+      <h2>2026년 굿즈</h2>
+      <p>2026년에 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈를 기록해 보세요.</p>
+      <span class="go">굿즈 보기 →</span>
+    </a>
+    <div class="hc soon" style="--c:#6e6e73">
+      <div class="k">2025 굿즈</div>
+      <h2>2025년 굿즈</h2>
+      <span class="chip">SOON</span>
+    </div>
+    <div class="hc soon" style="--c:#6e6e73">
+      <div class="k">2024 굿즈</div>
+      <h2>2024년 굿즈</h2>
       <span class="chip">SOON</span>
     </div>
   </div>
@@ -1020,7 +1151,7 @@ body.has-sfloat #totop{bottom:84px}
 <p class="rec" id="rec">완성 기록 없음</p>
 </div>
 <div id="page-col">
-<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
+<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북<span class="cr">›</span>2026 포카<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>
 <p class="sec-d" data-desc="cu405"></p>
 <div class="cmeta" data-col="cu405"></div>
 <div class="xt" data-col="cu405"></div>
@@ -1057,8 +1188,10 @@ body.has-sfloat #totop{bottom:84px}
 <div class="bsheet" id="bsheet" hidden></div>
 <nav class="bb" aria-label="하단 메뉴">
   <a href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
-  <button type="button" data-open="grp-col"><svg><use href="#i-book"/></svg>컬렉션 북</button>
+  <button type="button" data-open="grp-pc"><svg><use href="#i-book"/></svg>포카</button>
+  <button type="button" data-open="grp-gd"><svg><use href="#i-gift"/></svg>굿즈</button>
   <button type="button" data-open="grp-toy"><svg><use href="#i-toy"/></svg>장난감</button>
+  <a href="?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시</a>
 </nav>
 <div class="mask" id="mask" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
@@ -1640,6 +1773,7 @@ function colRender(){
     colTiles[i].lvb.innerHTML='<em>COUNT</em><i>'+lv+'</i>';
     for(var L=1;L<=5;L++) colTiles[i].el.classList.toggle('lv'+L,lv===L);
   }
+  document.dispatchEvent(new CustomEvent("cu405change"));
   colProgs.forEach(function(p){
     var c=0; p.ids.forEach(function(i){if(COL[i]>0)c++;});
     p.el.textContent=c+'/'+p.ids.length;
@@ -2279,7 +2413,15 @@ function setUprice(v){
 }
 document.getElementById('c-uprice').value=won(LG.uprice);
 colStatus();
+window.CU405={
+  id:"cu405", year:"2026", title:"CU 리센느 405빵 콜라보",
+  N:N, names:CNAME, src:SRC, isLand:isLand, isPix:isPix,
+  members:MEM.map(function(m){return {n:m.n,c:m.c};}), vper:VPER, mcount:MCOUNT, mtotal:MTOTAL,
+  counts:function(){return COL.slice();},
+  tileEl:function(i){return colTiles[i]&&colTiles[i].el;}
+};
 colRender(); logRender(); checkCelebrate(true); achCheck(true); achRender();
+document.dispatchEvent(new CustomEvent("cu405ready"));
 (function(){
   if(typeof claude==='undefined'||!claude||!claude.use)return;
   Promise.all([claude.use('db'),claude.use('user')]).then(function(r){
@@ -2370,11 +2512,256 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
 })();
 </script>
 <script>
+// 굿즈 컬렉션 · 통합 보기 · 위시리스트
 (function(){
-  // 탭 → 원본 페이지 버튼. collection은 예전 주소 호환용
-  var TABS = { home: null, cu405: 'tab-col', gacha: 'tab-sim' };
-  var ALIAS = { collection: 'cu405' };
+  var LS = { wish: 'sendungi:wish', goods: 'sendungi:goods' };
+  function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
+  function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function won(n){ return (n || 0).toLocaleString('ko-KR'); }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+
+  // ===== 굿즈 자료 =====
+  // 연도별 상품 목록. 자료를 받으면 여기에 넣으면 페이지·통합 보기·위시리스트에 모두 반영됨
+  // { id, name, price, parts(구성), date(출시), img(이미지 주소) }
+  var GOODS = { '2026': [], '2025': [], '2024': [] };
+  var YEARS = ['2026', '2025', '2024'];
+
+  // ===== 포토카드 컬렉션 =====
+  function cu(){ return window.CU405; }
+  function pcCols(){ return cu() ? [cu()] : []; }
+  function pcTotal(){ return pcCols().reduce(function(s, c){ return s + c.N; }, 0); }
+  function pcOwned(){
+    return pcCols().reduce(function(s, c){
+      return s + c.counts().filter(function(v){ return v > 0; }).length;
+    }, 0);
+  }
+  function goodsAll(){
+    return YEARS.reduce(function(a, y){ return a.concat(GOODS[y].map(function(g){ return { y: y, g: g }; })); }, []);
+  }
+  function gdOwned(){ return goodsAll().filter(function(x){ return GOWN[x.g.id] > 0; }).length; }
+
+  var WISH = load(LS.wish, {}), GOWN = load(LS.goods, {});
+
+  // ===== 위시리스트 하트 =====
+  function heart(key, big){
+    var on = !!WISH[key];
+    return '<button type="button" class="wish' + (on ? ' on' : '') + (big ? ' big' : '') + '" data-wish="' + esc(key) + '"'
+      + ' aria-pressed="' + on + '" aria-label="위시리스트에 담기" title="위시리스트"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>';
+  }
+  function wishCount(){ return Object.keys(WISH).length; }
+  function syncHearts(){
+    document.querySelectorAll('[data-wish]').forEach(function(b){
+      var on = !!WISH[b.getAttribute('data-wish')];
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    var n = document.getElementById('wish-n');
+    if (n) { n.textContent = wishCount(); n.hidden = !wishCount(); }
+  }
+  function toggleWish(key){
+    if (WISH[key]) delete WISH[key]; else WISH[key] = Date.now();
+    save(LS.wish, WISH);
+    syncHearts(); renderWish(); renderSum();
+  }
+
+  // ===== 페이지 틀 =====
+  var main = document.querySelector('main.mn');
+  function page(id){
+    var s = document.createElement('section');
+    s.id = id; s.className = 'wrap page'; s.hidden = true;
+    main.appendChild(s);
+    return s;
+  }
+  var elGoods = page('v-goods2026'), elAllCards = page('v-allcards'), elAllGoods = page('v-allgoods'), elWish = page('v-wish');
+
+  function sec(icon, crumbs, desc){
+    var t = crumbs.map(function(c, i){
+      return (i ? '<span class="cr">›</span>' : '') + (i === crumbs.length - 1 ? '<span class="lt">' + esc(c) + '</span>' : esc(c));
+    }).join('');
+    return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>' + t + '</div></div>'
+      + (desc ? '<p class="sec-d">' + desc + '</p>' : '');
+  }
+  function empty(icon, text, sub){
+    return '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg><span>' + text + '</span>'
+      + (sub ? '<small>' + sub + '</small>' : '') + '<span class="chip">SOON</span></div>';
+  }
+
+  // ===== 굿즈 카드 =====
+  function goodsCard(g){
+    var n = GOWN[g.id] || 0;
+    return '<article class="gd' + (n ? ' have' : '') + '" data-g="' + esc(g.id) + '">'
+      + '<div class="gd-img">' + heart('gd:' + g.id)
+      + (g.img ? '<img src="' + esc(g.img) + '" alt="' + esc(g.name) + '" loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
+      + '</div>'
+      + '<div class="gd-b"><h4>' + esc(g.name) + '</h4>'
+      + '<div class="gd-m">' + (g.price != null ? '<span class="pr">' + won(g.price) + '원</span>' : '') + (g.date ? '<span>' + esc(g.date) + ' 출시</span>' : '') + '</div>'
+      + (g.parts ? '<p>' + esc(g.parts) + '</p>' : '')
+      + '<div class="gd-c"><span class="gk">보유</span><button type="button" data-gd="-1"' + (n ? '' : ' disabled') + '>−</button>'
+      + '<b>' + n + '</b><button type="button" class="p" data-gd="1">+</button></div>'
+      + '</div></article>';
+  }
+  function goodsGrid(list){
+    return list.length ? '<div class="gdgrid">' + list.map(goodsCard).join('') + '</div>'
+      : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 알려주시면 이 자리에 채워집니다');
+  }
+  function goodsStats(list){
+    var own = list.filter(function(g){ return GOWN[g.id] > 0; }).length;
+    var spent = list.reduce(function(s, g){ return s + (GOWN[g.id] || 0) * (g.price || 0); }, 0);
+    return '<div class="cmeta"><div class="mt"><span class="mk">등록 상품</span><b>' + list.length + '종</b><small>이 연도에 나온 굿즈</small></div>'
+      + '<div class="mt"><span class="mk">보유</span><b>' + own + '/' + list.length + '</b><small>가지고 있는 종류</small></div>'
+      + '<div class="mt"><span class="mk">쓴 금액</span><b>' + won(spent) + '원</b><small>보유 수량 × 가격</small></div></div>';
+  }
+
+  // ===== 각 페이지 =====
+  function renderGoods(){
+    var list = GOODS['2026'];
+    elGoods.innerHTML = sec('i-gift', ['굿즈 컬렉션 북', '2026 굿즈', '2026년 굿즈'],
+      '2026년에 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈는 보유 수량을 올려 두면 통합 현황에 반영됩니다.')
+      + goodsStats(list) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(list);
+  }
+  function renderAllGoods(){
+    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '2024년부터 2026년까지 나온 굿즈를 연도별로 모아서 봅니다.');
+    YEARS.forEach(function(y){
+      h += '<div class="sec sec2"><div class="sec-t">' + y + '년<span class="cnt">' + GOODS[y].length + '종</span></div></div>' + goodsGrid(GOODS[y]);
+    });
+    elAllGoods.innerHTML = h;
+  }
+  function cardTile(c, i, count, key){
+    return '<div class="pcard' + (count ? ' have' : '') + (c.isLand(i) ? ' land' : '') + '">'
+      + '<div class="pc-img">' + heart(key)
+      + '<img src="' + c.src[i] + '" alt="' + esc(c.names[i]) + '"' + (c.isPix(i) ? ' class="pix"' : '') + ' loading="lazy">'
+      + (count > 1 ? '<span class="pc-n">×' + count + '</span>' : '') + '</div>'
+      + '<div class="pc-t">' + (i + 1) + '. ' + esc(c.names[i]) + '</div></div>';
+  }
+  function renderAllCards(){
+    var c = cu();
+    if (!c) { elAllCards.innerHTML = sec('i-grid', ['포카 컬렉션 북', '포토카드 통합 보기'], '') + empty('i-book', '포토카드 자료를 불러오는 중입니다'); return; }
+    var counts = c.counts();
+    var h = sec('i-grid', ['포카 컬렉션 북', '포토카드 통합 보기'],
+      '지금까지 나온 포토카드를 멤버별로 모아서 봅니다. 가지고 있는 카드는 색이 살아나고, 하트를 누르면 위시리스트에 담깁니다.');
+    h += '<div class="cmeta"><div class="mt"><span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + pcCols().length + '개</small></div>'
+      + '<div class="mt"><span class="mk">보유</span><b>' + pcOwned() + '/' + pcTotal() + '</b><small>모은 종류</small></div>'
+      + '<div class="mt"><span class="mk">위시리스트</span><b>' + Object.keys(WISH).filter(function(k){ return k.indexOf('pc:') === 0; }).length + '장</b><small>담아 둔 카드</small></div></div>';
+    c.members.forEach(function(m, mi){
+      var ids = [], v;
+      for (v = 0; v < c.vper; v++) ids.push(mi * c.vper + v);
+      var own = ids.filter(function(i){ return counts[i] > 0; }).length;
+      h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:' + m.c + '"></span>' + esc(m.n)
+        + '<span class="cnt">' + own + '/' + ids.length + '</span></div></div>'
+        + '<div class="pcgrid">' + ids.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+    });
+    var sp = [], k;
+    for (k = c.mtotal; k < c.N; k++) sp.push(k);
+    var spOwn = sp.filter(function(i){ return counts[i] > 0; }).length;
+    h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:#f6b93c"></span>스페셜<span class="cnt">' + spOwn + '/' + sp.length + '</span></div></div>'
+      + '<div class="pcgrid">' + sp.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+    elAllCards.innerHTML = h;
+  }
+  function wishItems(){
+    var c = cu(), out = [];
+    Object.keys(WISH).sort(function(a, b){ return WISH[a] - WISH[b]; }).forEach(function(key){
+      if (key.indexOf('pc:') === 0 && c) {
+        var i = +key.split(':')[2];
+        out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + c.names[i], from: c.title, img: c.src[i], pix: c.isPix(i), land: c.isLand(i), own: c.counts()[i] || 0, tab: c.id });
+      } else if (key.indexOf('gd:') === 0) {
+        var id = key.slice(3), f = null, fy = null;
+        goodsAll().forEach(function(x){ if (x.g.id === id) { f = x.g; fy = x.y; } });
+        if (f) out.push({ key: key, type: 'gd', name: f.name, from: fy + '년 굿즈', img: f.img, price: f.price, own: GOWN[id] || 0, tab: 'goods' + fy });
+      }
+    });
+    return out;
+  }
+  function renderWish(){
+    var items = wishItems();
+    var h = sec('i-heart', ['위시리스트'], '하트를 누른 포토카드와 굿즈가 여기에 모입니다. 기록은 이 브라우저에 저장됩니다.');
+    if (!items.length) {
+      h += '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span>담아 둔 항목이 없습니다</span>'
+        + '<small>포토카드나 굿즈 위의 하트를 누르면 여기에 담깁니다</small></div>';
+    } else {
+      var pc = items.filter(function(x){ return x.type === 'pc'; }), gd = items.filter(function(x){ return x.type === 'gd'; });
+      [['포토카드', pc], ['굿즈', gd]].forEach(function(grp){
+        if (!grp[1].length) return;
+        h += '<div class="sec sec2"><div class="sec-t">' + grp[0] + '<span class="cnt">' + grp[1].length + '</span></div></div><div class="wgrid">'
+          + grp[1].map(function(x){
+              return '<article class="witem' + (x.own ? ' have' : '') + '">'
+                + '<div class="w-img">' + (x.img ? '<img src="' + esc(x.img) + '" alt=""' + (x.pix ? ' class="pix"' : '') + ' loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>') + '</div>'
+                + '<div class="w-b"><b>' + esc(x.name) + '</b><span>' + esc(x.from) + (x.own ? ' · 보유 중' : '') + '</span>'
+                + '<a class="w-go" href="?tab=' + x.tab + '" data-tab="' + x.tab + '">페이지 열기 →</a></div>'
+                + heart(x.key) + '</article>';
+            }).join('') + '</div>';
+      });
+    }
+    elWish.innerHTML = h;
+  }
+  function renderSum(){
+    var pc = document.getElementById('sum-pc'), gd = document.getElementById('sum-gd');
+    if (!pc || !gd) return;
+    var pt = pcTotal(), po = pcOwned(), gl = goodsAll().length, go = gdOwned();
+    function box(icon, title, own, total, sub, tab, c){
+      var pct = total ? Math.round(own / total * 100) : 0;
+      return '<div class="k"><svg><use href="#' + icon + '"/></svg>' + title + '</div>'
+        + '<div class="v"><b>' + own + '</b><span>/ ' + total + '종</span></div>'
+        + '<div class="pbar"><i style="width:' + pct + '%;background:' + c + '"></i></div>'
+        + '<div class="s">' + sub + '</div>'
+        + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">통합 보기 →</a>';
+    }
+    pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개 · 2024~2026년', 'allcards', '#e96387');
+    gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 2024~2026년') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
+    syncHearts();
+  }
+
+  // ===== 이벤트 =====
+  document.addEventListener('click', function(e){
+    var w = e.target.closest('[data-wish]');
+    if (w) { e.preventDefault(); toggleWish(w.getAttribute('data-wish')); return; }
+    var g = e.target.closest('[data-gd]');
+    if (g) {
+      var card = g.closest('[data-g]'), id = card.getAttribute('data-g'), d = +g.getAttribute('data-gd');
+      GOWN[id] = Math.max(0, Math.min(99, (GOWN[id] || 0) + d));
+      save(LS.goods, GOWN);
+      renderGoods(); renderAllGoods(); renderWish(); renderSum();
+    }
+  });
+  // 도감 수량이 바뀌면 통합 현황도 갱신
+  document.addEventListener('cu405change', function(){ renderSum(); if (!elAllCards.hidden) renderAllCards(); });
+  document.addEventListener('cu405ready', function(){ injectCardHearts(); renderSum(); syncHearts(); });
+
+  // 도감 카드 타일 위에 하트 달기
+  function injectCardHearts(){
+    var c = cu(); if (!c || !c.tileEl) return;
+    for (var i = 0; i < c.N; i++) {
+      var el = c.tileEl(i); if (!el || el.querySelector('.wish')) continue;
+      (el.querySelector('.frame') || el).insertAdjacentHTML('beforeend', heart('pc:' + c.id + ':' + i));
+    }
+    syncHearts();
+  }
+
+  renderGoods(); renderAllGoods(); renderAllCards(); renderWish();
+  injectCardHearts(); syncHearts();
+
+  window.SG = {
+    pages: { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish },
+    onShow: function(tab){
+      if (tab === 'allcards') renderAllCards();
+      else if (tab === 'wish') renderWish();
+      else if (tab === 'allgoods') renderAllGoods();
+      else if (tab === 'goods2026') renderGoods();
+      else if (tab === 'home') renderSum();
+      syncHearts();
+    }
+  };
+})();
+
+</script>
+<script>
+(function(){
+  // 탭 → 보여 줄 화면. btn은 기존 도감 페이지의 내부 탭 버튼
   var home = document.getElementById('v-home'), app = document.getElementById('v-app');
+  var TABS = { home: { el: home }, cu405: { el: app, btn: 'tab-col' }, gacha: { el: app, btn: 'tab-sim' } };
+  if (window.SG) Object.keys(window.SG.pages).forEach(function(k){ TABS[k] = { el: window.SG.pages[k] }; });
+  var VIEWS = [];
+  Object.keys(TABS).forEach(function(k){ if (VIEWS.indexOf(TABS[k].el) < 0) VIEWS.push(TABS[k].el); });
+  var ALIAS = { collection: 'cu405', goods: 'goods2026' };   // 예전 주소 호환용
   var sheet = document.getElementById('bsheet');
 
   function cur(){
@@ -2383,9 +2770,10 @@ say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니�
     return t in TABS ? t : 'home';
   }
   function show(t){
-    home.hidden = t !== 'home';
-    app.hidden = t === 'home';
-    if (TABS[t]) document.getElementById(TABS[t]).click();
+    var p = TABS[t];
+    VIEWS.forEach(function(v){ v.hidden = v !== p.el; });
+    if (p.btn) document.getElementById(p.btn).click();
+    if (window.SG) window.SG.onShow(t);
     document.querySelectorAll('.sb [data-tab], .bsheet [data-tab], .bb [data-tab]').forEach(function(a){
       a.classList.toggle('on', a.getAttribute('data-tab') === t);
     });

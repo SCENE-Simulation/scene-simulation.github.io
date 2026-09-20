@@ -29,7 +29,7 @@ rep('<div id="page-sim" hidden>',
   '<div id="page-sim" hidden>\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">빵뽑기 시뮬레이션</span></div></div>\n' +
   '<p class="sec-d">빵 1개에 카드 1장, 카드는 27종입니다. 멤버 5명 × 4종 = 20종에 스페셜 7종을 더한 구성이며, 한 장이 나올 확률은 모두 1/27입니다.</p>');
 rep('<div id="page-col">',
-  '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>컬렉션 북<span class="cr">›</span>2026<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
+  '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북<span class="cr">›</span>2026 포카<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
   '<p class="sec-d" data-desc="cu405"></p>\n' +
   '<div class="cmeta" data-col="cu405"></div>\n' +
   '<div class="xt" data-col="cu405"></div>');
@@ -38,8 +38,10 @@ rep('<div id="page-col">',
 rep('</div>\n<div class="mask" id="mask" hidden>',
   '</div>\n' + fs.readFileSync(__dirname + '/shell-bottom.html', 'utf8') + '\n<div class="mask" id="mask" hidden>');
 
-// 라우팅 스크립트
-rep('</body>', '<script>\n' + fs.readFileSync(__dirname + '/shell.js', 'utf8') + '\n</script>\n</body>');
+// 새 페이지(굿즈 · 통합 보기 · 위시리스트) + 라우팅 스크립트
+rep('</body>',
+  '<script>\n' + fs.readFileSync(__dirname + '/pages.js', 'utf8') + '\n</script>\n' +
+  '<script>\n' + fs.readFileSync(__dirname + '/shell.js', 'utf8') + '\n</script>\n</body>');
 
 fs.writeFileSync(out, h);
 console.log('wrote', out, h.length);

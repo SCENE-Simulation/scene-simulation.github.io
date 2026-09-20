@@ -440,3 +440,87 @@ body.has-sfloat #totop{bottom:84px}
 .cledger .tw span em{color:var(--mint-t)}
 #c-usedwon{font-family:"Pretendard Variable",sans-serif}
 #c-usedwon em{font-style:normal;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--gold-t);margin:0 1px}
+
+/* ===== 위시리스트 하트 ===== */
+.wish{position:absolute;left:6px;top:6px;z-index:3;width:30px;height:30px;padding:0!important;display:grid;place-items:center;
+  border-radius:50%!important;border:1px solid rgba(255,255,255,.2)!important;background:rgba(20,20,22,.6)!important;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;cursor:pointer}
+.wish svg{width:17px;height:17px;fill:none;stroke:currentColor}
+.wish:hover{background:rgba(20,20,22,.8)!important;transform:scale(1.06)}
+.wish.on{color:#ff4d6d;border-color:rgba(255,77,109,.6)!important;background:rgba(255,77,109,.16)!important}
+.wish.on svg{fill:#ff4d6d;stroke:#ff4d6d;animation:wishPop .3s ease-out}
+@keyframes wishPop{0%{transform:scale(.6)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+.ctile .wish{left:8px;top:8px}
+.wishbtn{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top,0px));display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--line2);color:var(--ink);text-decoration:none}
+.wishbtn svg{width:18px;height:18px;fill:none;stroke:currentColor}
+.wishbtn:hover{background:var(--glass-h);border-color:rgba(255,77,109,.5);color:#ff8095}
+.wishbtn .wn{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:#ff8095}
+.hd{position:relative}
+@media (max-width:640px){.wishbtn{right:12px;padding:7px 10px}}
+
+/* ===== 홈: 컬렉션 통합 현황 ===== */
+.sumrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.sumrow{grid-template-columns:1fr}}
+.sumc{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:16px;background:var(--glass);border:1px solid rgba(255,255,255,.12)}
+.sumc .k{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+.sumc .k svg{width:16px;height:16px}
+.sumc .v{display:flex;align-items:baseline;gap:6px;font-family:"JetBrains Mono",monospace}
+.sumc .v b{font-size:30px;font-weight:700;color:var(--ink)}
+.sumc .v span{font-size:14px;color:var(--ink2)}
+.sumc .pbar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.sumc .pbar i{display:block;height:100%;border-radius:4px;transition:width .4s ease}
+.sumc .s{font-size:12.5px;color:var(--ink2)}
+.sumc .go{align-self:flex-start;margin-top:4px;padding:7px 13px;border-radius:9px;font-size:13px;font-weight:600;
+  background:var(--glass-h);border:1px solid var(--line2);color:var(--ink);text-decoration:none}
+.sumc .go:hover{background:rgba(255,255,255,.14)}
+
+/* ===== 굿즈 카드 ===== */
+.gnote2{margin:0 0 14px;font-size:12px;color:var(--ink2)}
+.gdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.gd{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--glass);border:1px solid var(--line)}
+.gd.have{border-color:rgba(71,209,154,.5)}
+.gd-img{position:relative;aspect-ratio:4/3;background:var(--cell)}
+.gd-img img{width:100%;height:100%;object-fit:cover;display:block}
+.gd-ph{width:100%;height:100%;display:grid;place-items:center;color:var(--dim)}
+.gd-ph svg{width:32px;height:32px}
+.gd-b{display:flex;flex-direction:column;gap:7px;padding:13px 14px 14px}
+.gd-b h4{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
+.gd-m{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;color:var(--ink2)}
+.gd-m .pr{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--gold-t)}
+.gd-b p{margin:0;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.gd-c{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px}
+.gd-c .gk{font-size:12px;color:var(--ink2);margin-right:auto}
+.gd-c button{width:34px;padding:6px 0;font-size:16px;line-height:1;text-align:center}
+.gd-c b{min-width:26px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink)}
+.pk-ph.tall{aspect-ratio:auto;padding:40px 20px;gap:6px}
+.pk-ph small{font-size:12px;color:var(--dim)}
+
+/* ===== 통합 포토카드 ===== */
+.pcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+@media (max-width:640px){.pcgrid{grid-template-columns:repeat(3,1fr);gap:9px}}
+.pcard{display:flex;flex-direction:column;gap:6px}
+.pc-img{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:2px solid var(--line2);background:var(--cell)}
+.pcard.land .pc-img{aspect-ratio:4/3}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) brightness(.5)}
+.pcard.have .pc-img{border-color:var(--pink)}
+.pcard.have .pc-img img{filter:none}
+.pc-n{position:absolute;right:6px;bottom:6px;padding:2px 7px;border-radius:7px;background:rgba(20,20,22,.78);
+  font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:#fff}
+.pc-t{font-size:11.5px;line-height:1.35;color:var(--ink2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard.have .pc-t{color:var(--ink)}
+.sec-t .cnt{margin-left:8px;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink2)}
+.sec-t .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.page .sec.sec2{margin:26px 0 12px}
+
+/* ===== 위시리스트 페이지 ===== */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.witem{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.witem.have{border-color:rgba(71,209,154,.45)}
+.witem .w-img{flex:0 0 54px;width:54px;height:70px;border-radius:9px;overflow:hidden;background:var(--cell);border:1px solid var(--line2)}
+.witem .w-img img{width:100%;height:100%;object-fit:cover;display:block}
+.witem .w-b{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.witem .w-b b{font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.witem .w-b span{font-size:11.5px;color:var(--ink2)}
+.witem .w-go{font-size:12px;color:var(--mint-t);text-decoration:none;margin-top:2px}
+.witem .wish{position:static;flex:0 0 30px}

@@ -1,8 +1,11 @@
 (function(){
-  // 탭 → 원본 페이지 버튼. collection은 예전 주소 호환용
-  var TABS = { home: null, cu405: 'tab-col', gacha: 'tab-sim' };
-  var ALIAS = { collection: 'cu405' };
+  // 탭 → 보여 줄 화면. btn은 기존 도감 페이지의 내부 탭 버튼
   var home = document.getElementById('v-home'), app = document.getElementById('v-app');
+  var TABS = { home: { el: home }, cu405: { el: app, btn: 'tab-col' }, gacha: { el: app, btn: 'tab-sim' } };
+  if (window.SG) Object.keys(window.SG.pages).forEach(function(k){ TABS[k] = { el: window.SG.pages[k] }; });
+  var VIEWS = [];
+  Object.keys(TABS).forEach(function(k){ if (VIEWS.indexOf(TABS[k].el) < 0) VIEWS.push(TABS[k].el); });
+  var ALIAS = { collection: 'cu405', goods: 'goods2026' };   // 예전 주소 호환용
   var sheet = document.getElementById('bsheet');
 
   function cur(){
@@ -11,9 +14,10 @@
     return t in TABS ? t : 'home';
   }
   function show(t){
-    home.hidden = t !== 'home';
-    app.hidden = t === 'home';
-    if (TABS[t]) document.getElementById(TABS[t]).click();
+    var p = TABS[t];
+    VIEWS.forEach(function(v){ v.hidden = v !== p.el; });
+    if (p.btn) document.getElementById(p.btn).click();
+    if (window.SG) window.SG.onShow(t);
     document.querySelectorAll('.sb [data-tab], .bsheet [data-tab], .bb [data-tab]').forEach(function(a){
       a.classList.toggle('on', a.getAttribute('data-tab') === t);
     });
