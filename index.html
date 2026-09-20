@@ -946,6 +946,14 @@ body.has-sfloat #totop{bottom:84px}
 .wgrp .pcard.have .pc-img{border-color:var(--pink)}
 .wgrp .gd-ph{aspect-ratio:3/4}
 
+/* 칭호 전체 목록 */
+.cach-btn{margin-left:10px;padding:4px 10px!important;font-size:11.5px;border-radius:8px!important}
+.badges.all{margin-top:10px;padding-top:12px;border-top:1px dashed var(--line2)}
+.bdg.lock{background:rgba(255,255,255,.04);border-color:var(--line)!important;box-shadow:none;animation:none;filter:grayscale(.65);opacity:.75}
+.bdg.lock .em{background:linear-gradient(160deg,#6e6e73,#3a3a3c)}
+.bdg.lock .em i{color:rgba(255,255,255,.75)}
+.bdg.lock .bt b{color:var(--ink2)}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1165,7 +1173,7 @@ body.has-sfloat #totop{bottom:84px}
     <div class="m" id="m-won"><span class="mk">누적 금액</span><b id="c-won">0원</b><small>빵 구매 + 중고 구매</small></div>
     <div class="m" id="m-own"><span class="mk">보유 종수</span><b id="c-own">0/27</b><small>중복 <span id="c-dup">0</span>장</small><span class="mbar"><i id="c-ownbar"></i></span></div>
     <div class="sp"><button class="p" id="c-savebtn">저장</button><button id="c-reset">전체 초기화</button></div>
-    <div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n" id="c-ach-n">0 / 0</span></div><div class="badges" id="c-badges"></div></div>
+    <div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n" id="c-ach-n">0 / 0</span><button type="button" class="cach-btn" id="c-ach-all" aria-expanded="false">전체 보기</button></div><div class="badges" id="c-badges"></div><div class="badges all" id="c-badges-all" hidden></div></div>
   </div>
   <div class="cledger">
     <div class="lg" id="lg-buy"><div class="t">빵 구매 · 2,500원</div>
@@ -1890,8 +1898,9 @@ var ACHDEF=[
   {id:'tr1',     n:'첫 교환',            d:'교환 1회',                     c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
   {id:'tr10',    n:'교환의 달인',        d:'교환 10회',                    c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
   // 중고 구매
-  {id:'us1',     n:'호구 왔는가',        d:'중고 구매 첫 거래',              c:'#e96387', r:1, t:function(c){return c.used>=1;}},
-  {id:'us10',    n:'시세 파괴자',        d:'중고 구매 10회',                c:'#e96387', r:3, t:function(c){return c.used>=10;}},
+  {id:'us1',     n:'당근 하세요?',       d:'중고 구매 첫 거래',              c:'#e96387', r:1, t:function(c){return c.used>=1;}},
+  {id:'us5',     n:'마음이 따듯하다는 증거', d:'중고 구매 5회',              c:'#e96387', r:2, t:function(c){return c.used>=5;}},
+  {id:'us10',    n:'마음이 너무 따듯하다는 증거', d:'중고 구매 10회',        c:'#e96387', r:3, t:function(c){return c.used>=10;}},
   // 중복
   {id:'dup6',    n:'중복 지옥',          d:'같은 카드 6장 보유',             c:'#a080d0', r:2, t:function(c){return c.maxDup>=6;}},
   {id:'dup10',   n:'중복의 군주',        d:'같은 카드 10장 보유',            c:'#a080d0', r:3, t:function(c){return c.maxDup>=10;}},
@@ -1915,12 +1924,15 @@ function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
   var got=ACHDEF.filter(function(a){return ACH[a.id];});
   var cnt=document.getElementById('c-ach-n'); if(cnt)cnt.textContent=got.length+' / '+ACHDEF.length;
+  function badge(a,lock){
+    return '<span class="bdg'+(lock?' lock':'')+'" data-r="'+(a.r||1)+'" style="--bc:'+a.c+'" title="'+a.n+' · '+a.d+'">'
+      +'<span class="em"><i>'+(lock?'✧':'✦')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
+  }
   box.innerHTML = got.length
-    ? got.map(function(a){
-        return '<span class="bdg" data-r="'+(a.r||1)+'" style="--bc:'+a.c+'" title="'+a.n+' · '+a.d+'">'
-          +'<span class="em"><i>✦</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
-      }).join('')
-    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 기록을 쌓으면 칭호가 생깁니다</span>';
+    ? got.map(function(a){ return badge(a,false); }).join('')
+    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 아래 “전체 보기”에서 조건을 확인해 보십시오</span>';
+  var all=document.getElementById('c-badges-all');
+  if(all) all.innerHTML=ACHDEF.map(function(a){ return badge(a,!ACH[a.id]); }).join('');
 }
 function achAward(id,silent){
   if(ACH[id])return;
@@ -2312,7 +2324,7 @@ function colLoad(d){
   // 예전 칭호 → 새 칭호
   if(ACH.money&&!ACH.money10) ACH.money10=ACH.money;
   if(ACH.tr3&&!ACH.tr1) ACH.tr1=ACH.tr3;
-  if(ACH.us5&&!ACH.us1) ACH.us1=ACH.us5;
+  if(ACH.us15&&!ACH.us10) ACH.us10=ACH.us15;
 }
 function colDirty(){ colStatus(); }
 function colStatus(){
@@ -2481,6 +2493,10 @@ document.getElementById('c-reset').onclick=function(){
   LG.buy=0; LG.trade=0; LG.used=0; LG.usedList=[]; LOG=[]; ACH={}; allCelebrated=false;
   PEND.push({t:Date.now(),k:'reset',i:null,d:0,w:0});
   logRender(); achRender(); colRender(); colDirty();
+};
+document.getElementById('c-ach-all').onclick=function(){
+  var box=document.getElementById('c-badges-all'), open=box.hidden;
+  box.hidden=!open; this.setAttribute('aria-expanded',String(open)); this.textContent=open?'접기':'전체 보기';
 };
 document.getElementById('c-savebtn').onclick=colSave;
 document.getElementById('c-savebtn2').onclick=colSave;
