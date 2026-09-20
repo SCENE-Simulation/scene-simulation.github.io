@@ -11,6 +11,8 @@
   // { id, name, price, parts(구성), date(출시), img(이미지 주소) }
   var GOODS = { '2026': [], '2025': [], '2024': [] };
   var YEARS = ['2026', '2025', '2024'];
+  // 연도별 굿즈 컬렉션 이름
+  var GCOLL = { '2026': '더현대 팝업 스토어', '2025': '2025년 굿즈', '2024': '2024년 굿즈' };
 
   // ===== 포토카드 컬렉션 =====
   function cu(){ return window.CU405; }
@@ -101,14 +103,14 @@
   // ===== 각 페이지 =====
   function renderGoods(){
     var list = GOODS['2026'];
-    elGoods.innerHTML = sec('i-gift', ['굿즈 컬렉션 북', '2026 굿즈', '2026년 굿즈'],
-      '2026년에 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈는 보유 수량을 올려 두면 통합 현황에 반영됩니다.')
+    elGoods.innerHTML = sec('i-gift', ['굿즈 컬렉션 북', '2026 굿즈', GCOLL['2026']],
+      GCOLL['2026'] + '에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈는 보유 수량을 올려 두면 통합 현황에 반영됩니다.')
       + goodsStats(list) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(list);
   }
   function renderAllGoods(){
     var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '2024년부터 2026년까지 나온 굿즈를 연도별로 모아서 봅니다.');
     YEARS.forEach(function(y){
-      h += '<div class="sec sec2"><div class="sec-t">' + y + '년<span class="cnt">' + GOODS[y].length + '종</span></div></div>' + goodsGrid(GOODS[y]);
+      h += '<div class="sec sec2"><div class="sec-t">' + y + '년 · ' + esc(GCOLL[y]) + '<span class="cnt">' + GOODS[y].length + '종</span></div></div>' + goodsGrid(GOODS[y]);
     });
     elAllGoods.innerHTML = h;
   }
@@ -152,7 +154,7 @@
       } else if (key.indexOf('gd:') === 0) {
         var id = key.slice(3), f = null, fy = null;
         goodsAll().forEach(function(x){ if (x.g.id === id) { f = x.g; fy = x.y; } });
-        if (f) out.push({ key: key, type: 'gd', name: f.name, from: fy + '년 굿즈', img: f.img, price: f.price, own: GOWN[id] || 0, tab: 'goods' + fy });
+        if (f) out.push({ key: key, type: 'gd', name: f.name, from: fy + ' · ' + GCOLL[fy], img: f.img, price: f.price, own: GOWN[id] || 0, tab: 'goods' + fy });
       }
     });
     return out;

@@ -31,14 +31,21 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .nv.off{color:var(--dim);cursor:default}
 .nv.off:hover{background:none}
 .nv.off svg{color:var(--dim)}
+.nv .wn{margin-left:auto;min-width:20px;padding:1px 7px;border-radius:999px;text-align:center;
+  font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:#ff8095;background:rgba(255,77,109,.16);border:1px solid rgba(255,77,109,.35)}
 .nv .bd,.yr summary .bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
 /* 메뉴 그룹: 컬렉션 북 / 장난감 */
 .grp{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.gl{display:flex;align-items:center;gap:10px;padding:0 12px 8px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
+.gl{display:flex;align-items:center;gap:9px;padding:0 10px 8px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
+.glbtn{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600;
+  color:var(--ink2);text-decoration:none;background:var(--glass);border:1px solid var(--line)}
+.glbtn svg{width:12px;height:12px}
+.glbtn:hover{background:var(--glass-h);color:var(--ink);border-color:var(--line2)}
+.glbtn.on{background:rgba(255,255,255,.14);color:var(--ink);border-color:rgba(255,255,255,.22)}
 .gl svg{width:16px;height:16px}
 .nv.sub{padding:7px 12px 7px 38px;font-size:13.5px}
-.yr summary{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 14px;border-radius:10px;cursor:pointer;list-style:none;
-  font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--ink)}
+.yr summary{display:flex;align-items:center;gap:9px;padding:8px 12px 8px 13px;border-radius:10px;cursor:pointer;list-style:none;
+  font-family:"Pretendard Variable","Noto Sans KR",sans-serif;font-size:13.5px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
 .yr summary::-webkit-details-marker{display:none}
 .yr summary:hover{background:var(--glass)}
 .yr summary .cv{width:14px;height:14px;color:var(--ink2);transition:transform .15s ease}
@@ -442,22 +449,19 @@ body.has-sfloat #totop{bottom:84px}
 #c-usedwon em{font-style:normal;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--gold-t);margin:0 1px}
 
 /* ===== 위시리스트 하트 ===== */
-.wish{position:absolute;left:6px;top:6px;z-index:3;width:30px;height:30px;padding:0!important;display:grid;place-items:center;
-  border-radius:50%!important;border:1px solid rgba(255,255,255,.2)!important;background:rgba(20,20,22,.6)!important;
+.wish{position:absolute;right:7px;bottom:7px;z-index:3;width:32px;height:32px;padding:0!important;
+  display:inline-flex;align-items:center;justify-content:center;line-height:0;
+  border-radius:50%!important;border:1px solid rgba(255,255,255,.22)!important;background:rgba(20,20,22,.62)!important;
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;cursor:pointer}
-.wish svg{width:17px;height:17px;fill:none;stroke:currentColor}
+.wish svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor}
 .wish:hover{background:rgba(20,20,22,.8)!important;transform:scale(1.06)}
-.wish.on{color:#ff4d6d;border-color:rgba(255,77,109,.6)!important;background:rgba(255,77,109,.16)!important}
+.wish.on{color:#ff4d6d;border-color:rgba(255,77,109,.75)!important;background:rgba(255,77,109,.22)!important;
+  box-shadow:0 0 12px rgba(255,77,109,.35)}
 .wish.on svg{fill:#ff4d6d;stroke:#ff4d6d;animation:wishPop .3s ease-out}
 @keyframes wishPop{0%{transform:scale(.6)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
-.ctile .wish{left:8px;top:8px}
-.wishbtn{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top,0px));display:inline-flex;align-items:center;gap:6px;
-  padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--line2);color:var(--ink);text-decoration:none}
-.wishbtn svg{width:18px;height:18px;fill:none;stroke:currentColor}
-.wishbtn:hover{background:var(--glass-h);border-color:rgba(255,77,109,.5);color:#ff8095}
-.wishbtn .wn{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:#ff8095}
+.ctile .wish{right:8px;bottom:8px}
+.pcard .pc-n{right:auto;left:6px}
 .hd{position:relative}
-@media (max-width:640px){.wishbtn{right:12px;padding:7px 10px}}
 
 /* ===== 홈: 컬렉션 통합 현황 ===== */
 .sumrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -523,4 +527,4 @@ body.has-sfloat #totop{bottom:84px}
 .witem .w-b b{font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .witem .w-b span{font-size:11.5px;color:var(--ink2)}
 .witem .w-go{font-size:12px;color:var(--mint-t);text-decoration:none;margin-top:2px}
-.witem .wish{position:static;flex:0 0 30px}
+.witem .wish{position:static;flex:0 0 32px}

@@ -5,7 +5,7 @@
     <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></symbol>
     <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1.5"/><path d="M5 13v7.5h14V13"/><path d="M12 8v12.5"/><path d="M12 8S10.5 3.5 8 4.2 8.5 8 12 8zM12 8s1.5-4.5 4-3.8S15.5 8 12 8z"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3s-7.5-4.6-7.5-9.7A4.1 4.1 0 0 1 12 8.2a4.1 4.1 0 0 1 7.5 2.4c0 5.1-7.5 9.7-7.5 9.7z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21.1l-1.35-1.23C5.5 15.2 2.2 12.2 2.2 8.6 2.2 5.7 4.5 3.4 7.4 3.4c1.63 0 3.2.76 4.22 1.96A5.55 5.55 0 0 1 15.84 3.4c2.9 0 5.2 2.3 5.2 5.2 0 3.6-3.3 6.6-8.45 11.27L12 21.1z"/></symbol>
     <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
     <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
@@ -20,10 +20,10 @@
 
 <aside class="sb" aria-label="메뉴">
   <a class="nv" href="?tab=home" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
-  <a class="nv" href="?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시리스트</a>
+  <a class="nv" href="?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시리스트<span class="wn" id="wish-n" hidden>0</span></a>
 
   <div class="grp" id="grp-pc" data-grp="pc">
-    <div class="gl"><svg><use href="#i-book"/></svg>포카 컬렉션 북</div>
+    <div class="gl"><svg><use href="#i-book"/></svg>포카 컬렉션 북<a class="glbtn" href="?tab=allcards" data-tab="allcards" title="포토카드 통합 보기"><svg><use href="#i-grid"/></svg>통합</a></div>
     <details class="yr" open>
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 포카</summary>
       <a class="nv sub" href="?tab=cu405" data-tab="cu405">CU 리센느 405빵 콜라보</a>
@@ -36,14 +36,13 @@
     <details class="yr">
       <summary><svg class="cv"><use href="#i-chev"/></svg>2024 포카<span class="bd">SOON</span></summary>
     </details>
-    <a class="nv sub all" href="?tab=allcards" data-tab="allcards"><svg><use href="#i-grid"/></svg>포토카드 통합 보기</a>
   </div>
 
   <div class="grp" id="grp-gd" data-grp="gd">
-    <div class="gl"><svg><use href="#i-gift"/></svg>굿즈 컬렉션 북</div>
+    <div class="gl"><svg><use href="#i-gift"/></svg>굿즈 컬렉션 북<a class="glbtn" href="?tab=allgoods" data-tab="allgoods" title="굿즈 통합 보기"><svg><use href="#i-grid"/></svg>통합</a></div>
     <details class="yr" open>
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 굿즈</summary>
-      <a class="nv sub" href="?tab=goods2026" data-tab="goods2026">2026년 굿즈</a>
+      <a class="nv sub" href="?tab=goods2026" data-tab="goods2026">더현대 팝업 스토어</a>
     </details>
     <details class="yr">
       <summary><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈<span class="bd">SOON</span></summary>
@@ -51,7 +50,6 @@
     <details class="yr">
       <summary><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈<span class="bd">SOON</span></summary>
     </details>
-    <a class="nv sub all" href="?tab=allgoods" data-tab="allgoods"><svg><use href="#i-grid"/></svg>굿즈 통합 보기</a>
   </div>
 
   <div class="grp" id="grp-toy" data-grp="toy">
@@ -65,7 +63,6 @@
 
 <main class="mn">
 <header class="hd">
-  <a class="wishbtn" href="?tab=wish" data-tab="wish" aria-label="위시리스트"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span class="wn" id="wish-n" hidden>0</span></a>
   <a href="?tab=home" data-tab="home"><p class="lg">센둥이 <em>시뮬레이터</em></p></a>
 </header>
 
@@ -108,8 +105,8 @@
   <div class="hgrid">
     <a class="hc" href="?tab=goods2026" data-tab="goods2026" style="--c:#ecd25b">
       <div class="k">2026 굿즈</div>
-      <h2>2026년 굿즈</h2>
-      <p>2026년에 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈를 기록해 보세요.</p>
+      <h2>더현대 팝업 스토어</h2>
+      <p>더현대 팝업 스토어에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈를 기록해 보세요.</p>
       <span class="go">굿즈 보기 →</span>
     </a>
     <div class="hc soon" style="--c:#6e6e73">
