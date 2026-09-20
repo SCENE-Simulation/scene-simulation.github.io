@@ -161,24 +161,34 @@
   }
   function renderWish(){
     var items = wishItems();
-    var pc = items.filter(function(x){ return x.type === 'pc'; });
-    var gd = items.filter(function(x){ return x.type === 'gd'; });
     var h = sec('i-heart', ['위시리스트'], '하트를 누른 포토카드와 굿즈가 여기에 모입니다. 기록은 이 브라우저에 저장됩니다.');
-    [['포토카드', pc, '포토카드 도감이나 전체보기에서 하트를 누르면 여기에 담깁니다'],
-     ['굿즈', gd, '굿즈 페이지에서 하트를 누르면 여기에 담깁니다']].forEach(function(g){
-      h += '<div class="sec sec2"><div class="sec-t">' + g[0] + '<span class="cnt">' + g[1].length + '</span></div></div>';
-      if (!g[1].length) {
-        h += '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span>담아 둔 ' + g[0] + '가 없습니다</span><small>' + g[2] + '</small></div>';
+    [['포토카드', 'pc', '포토카드 도감이나 전체보기에서 하트를 누르면 여기에 담깁니다'],
+     ['굿즈', 'gd', '굿즈 페이지에서 하트를 누르면 여기에 담깁니다']].forEach(function(t){
+      var list = items.filter(function(x){ return x.type === t[1]; });
+      h += '<div class="sec sec2"><div class="sec-t">' + t[0] + '<span class="cnt">' + list.length + '</span></div></div>';
+      if (!list.length) {
+        h += '<div class="pk-ph tall"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span>담아 둔 ' + t[0] + '가 없습니다</span><small>' + t[2] + '</small></div>';
         return;
       }
-      h += '<div class="wgrid">' + g[1].map(function(x){
-        return '<article class="witem' + (x.own ? ' have' : '') + '">'
-          + '<div class="w-img">' + (x.img ? '<img src="' + esc(x.img) + '" alt=""' + (x.pix ? ' class="pix"' : '') + ' loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>') + '</div>'
-          + '<div class="w-b"><span class="w-from">' + esc(x.from) + (x.own ? ' · 보유 중' : '') + '</span>'
-          + '<b>' + esc(x.name) + '</b>'
-          + '<a class="w-go" href="?tab=' + x.tab + '" data-tab="' + x.tab + '">페이지 열기 →</a></div>'
-          + heart(x.key) + '</article>';
-      }).join('') + '</div>';
+      // 같은 컬렉션끼리 묶고, 제목과 "페이지 열기"는 묶음마다 한 번만
+      var order = [], by = {};
+      list.forEach(function(x){
+        if (!by[x.tab]) { by[x.tab] = { from: x.from, tab: x.tab, items: [] }; order.push(x.tab); }
+        by[x.tab].items.push(x);
+      });
+      order.forEach(function(tab){
+        var g = by[tab];
+        h += '<div class="wgrp"><div class="wgrp-h"><b>' + esc(g.from) + '</b><span class="cnt">' + g.items.length + '</span>'
+          + '<a class="w-go" href="?tab=' + g.tab + '" data-tab="' + g.tab + '">페이지 열기 →</a></div>'
+          + '<div class="pcgrid">' + g.items.map(function(x){
+              return '<div class="pcard' + (x.own ? ' have' : '') + (x.land ? ' land' : '') + '">'
+                + '<div class="pc-img">' + heart(x.key)
+                + (x.img ? '<img src="' + esc(x.img) + '" alt=""' + (x.pix ? ' class="pix"' : '') + ' loading="lazy">'
+                         : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
+                + (x.own > 1 ? '<span class="pc-n">×' + x.own + '</span>' : '') + '</div>'
+                + '<div class="pc-t">' + esc(x.name) + '</div></div>';
+            }).join('') + '</div></div>';
+      });
     });
     elWish.innerHTML = h;
   }
