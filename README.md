@@ -20,4 +20,11 @@
 node tools/build.js tools/source.html index.html
 ```
 
+
+## 포토카드 컬렉션 추가하기
+
+`tools/collections.js` 에 설정을 하나 넣으면 도감 페이지가 만들어지고 사이드바·홈·전체보기·위시리스트에 자동으로 붙습니다.
+설정 형식은 `tools/collection.js` 맨 위 주석에 있습니다. Claude에게는 **"포카 페이지 만들어줘"** 라고 하면
+`.claude/skills/photocard-collection` 스킬이 절차대로 진행합니다.
+
 MADE BY 비효율주의자 OF 여자 아이돌 컨텐츠 마이너갤러리

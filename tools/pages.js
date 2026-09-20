@@ -16,7 +16,8 @@
 
   // ===== 포토카드 컬렉션 =====
   function cu(){ return window.CU405; }
-  function pcCols(){ return cu() ? [cu()] : []; }
+  function pcCols(){ return (cu() ? [cu()] : []).concat(window.SGCOLS || []); }
+  function pcCol(id){ return pcCols().filter(function(c){ return c.id === id; })[0]; }
   function pcTotal(){ return pcCols().reduce(function(s, c){ return s + c.N; }, 0); }
   function pcOwned(){
     return pcCols().reduce(function(s, c){
@@ -117,40 +118,48 @@
   function cardTile(c, i, count, key){
     return '<div class="pcard' + (count ? ' have' : '') + (c.isLand(i) ? ' land' : '') + '">'
       + '<div class="pc-img">' + heart(key)
-      + '<img src="' + c.src[i] + '" alt="' + esc(c.names[i]) + '"' + (c.isPix(i) ? ' class="pix"' : '') + ' loading="lazy">'
+      + (c.src[i] ? '<img src="' + esc(c.src[i]) + '" alt="' + esc(c.names[i]) + '"' + (c.isPix(i) ? ' class="pix"' : '') + ' loading="lazy">'
+                  : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
       + (count > 1 ? '<span class="pc-n">×' + count + '</span>' : '') + '</div>'
       + '<div class="pc-t">' + (i + 1) + '. ' + esc(c.names[i]) + '</div></div>';
   }
   function renderAllCards(){
-    var c = cu();
-    if (!c) { elAllCards.innerHTML = sec('i-grid', ['포카 컬렉션 북', '포토카드 통합 보기'], '') + empty('i-book', '포토카드 자료를 불러오는 중입니다'); return; }
-    var counts = c.counts();
-    var h = sec('i-grid', ['포카 컬렉션 북', '포토카드 통합 보기'],
+    var cols = pcCols();
+    if (!cols.length) { elAllCards.innerHTML = sec('i-grid', ['포카 컬렉션 북', '포토카드 전체보기'], '') + empty('i-book', '포토카드 자료를 불러오는 중입니다'); return; }
+    var h = sec('i-grid', ['포카 컬렉션 북', '포토카드 전체보기'],
       '지금까지 나온 포토카드를 멤버별로 모아서 봅니다. 가지고 있는 카드는 색이 살아나고, 하트를 누르면 위시리스트에 담깁니다.');
-    h += '<div class="cmeta"><div class="mt"><span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + pcCols().length + '개</small></div>'
+    h += '<div class="cmeta"><div class="mt"><span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + cols.length + '개</small></div>'
       + '<div class="mt"><span class="mk">보유</span><b>' + pcOwned() + '/' + pcTotal() + '</b><small>모은 종류</small></div>'
       + '<div class="mt"><span class="mk">위시리스트</span><b>' + Object.keys(WISH).filter(function(k){ return k.indexOf('pc:') === 0; }).length + '장</b><small>담아 둔 카드</small></div></div>';
-    c.members.forEach(function(m, mi){
-      var ids = [], v;
-      for (v = 0; v < c.vper; v++) ids.push(mi * c.vper + v);
-      var own = ids.filter(function(i){ return counts[i] > 0; }).length;
-      h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:' + m.c + '"></span>' + esc(m.n)
-        + '<span class="cnt">' + own + '/' + ids.length + '</span></div></div>'
-        + '<div class="pcgrid">' + ids.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+    cols.forEach(function(c){
+      var counts = c.counts();
+      if (cols.length > 1) h += '<div class="wgrp-h" style="margin-top:22px"><b>' + esc(c.title) + '</b><span class="cnt">'
+        + counts.filter(function(v){ return v > 0; }).length + '/' + c.N + '</span>'
+        + '<a class="w-go" href="?tab=' + c.id + '" data-tab="' + c.id + '">페이지 열기 →</a></div>';
+      (c.members || []).forEach(function(m, mi){
+        var ids = [], v;
+        for (v = 0; v < c.vper; v++) ids.push(mi * c.vper + v);
+        var own = ids.filter(function(i){ return counts[i] > 0; }).length;
+        h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:' + m.c + '"></span>' + esc(m.n)
+          + '<span class="cnt">' + own + '/' + ids.length + '</span></div></div>'
+          + '<div class="pcgrid">' + ids.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+      });
+      var sp = [], k;
+      for (k = c.mtotal; k < c.N; k++) sp.push(k);
+      if (!sp.length) return;
+      var spOwn = sp.filter(function(i){ return counts[i] > 0; }).length;
+      h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:#f6b93c"></span>스페셜<span class="cnt">' + spOwn + '/' + sp.length + '</span></div></div>'
+        + '<div class="pcgrid">' + sp.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
     });
-    var sp = [], k;
-    for (k = c.mtotal; k < c.N; k++) sp.push(k);
-    var spOwn = sp.filter(function(i){ return counts[i] > 0; }).length;
-    h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:#f6b93c"></span>스페셜<span class="cnt">' + spOwn + '/' + sp.length + '</span></div></div>'
-      + '<div class="pcgrid">' + sp.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
     elAllCards.innerHTML = h;
   }
   function wishItems(){
     var c = cu(), out = [];
     Object.keys(WISH).sort(function(a, b){ return WISH[a] - WISH[b]; }).forEach(function(key){
-      if (key.indexOf('pc:') === 0 && c) {
-        var i = +key.split(':')[2];
-        out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + c.names[i], from: c.title, img: c.src[i], pix: c.isPix(i), land: c.isLand(i), own: c.counts()[i] || 0, tab: c.id });
+      if (key.indexOf('pc:') === 0) {
+        var pp = key.split(':'), col = pcCol(pp[1]), i = +pp[2];
+        if (col) out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + col.names[i], from: col.title, img: col.src[i],
+          pix: col.isPix(i), land: col.isLand(i), own: col.counts()[i] || 0, tab: col.id });
       } else if (key.indexOf('gd:') === 0) {
         var id = key.slice(3), f = null, fy = null;
         goodsAll().forEach(function(x){ if (x.g.id === id) { f = x.g; fy = x.y; } });
@@ -202,7 +211,7 @@
         + '<div class="v"><b>' + own + '</b><span>/ ' + total + '종</span></div>'
         + '<div class="pbar"><i style="width:' + pct + '%;background:' + c + '"></i></div>'
         + '<div class="s">' + sub + '</div>'
-        + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">통합 보기 →</a>';
+        + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">전체보기 →</a>';
     }
     pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개 · 2024~2026년', 'allcards', '#e96387');
     gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 2024~2026년') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
@@ -223,6 +232,7 @@
   });
   // 도감 수량이 바뀌면 통합 현황도 갱신
   document.addEventListener('cu405change', function(){ renderSum(); if (!elAllCards.hidden) renderAllCards(); });
+  document.addEventListener('sgcolchange', function(){ renderSum(); syncHearts(); });
   document.addEventListener('cu405ready', function(){ injectCardHearts(); renderSum(); syncHearts(); });
 
   // 도감 카드 타일 위에 하트 달기
@@ -235,17 +245,52 @@
     syncHearts();
   }
 
+  // 엔진으로 만든 컬렉션을 사이드바와 홈에 붙임
+  function mountCollections(){
+    (window.SGCOLS || []).forEach(function(c){
+      if (document.querySelector('.sb [data-tab="' + c.id + '"]')) return;
+      var yr = null;
+      document.querySelectorAll('#grp-pc details.yr').forEach(function(d){
+        if (d.querySelector('summary').textContent.indexOf(c.year) === 0) yr = d;
+      });
+      if (yr) {
+        var soon = yr.querySelector('summary .bd');
+        if (soon) soon.parentNode.removeChild(soon);
+        var a = document.createElement('a');
+        a.className = 'nv sub'; a.href = '?tab=' + c.id; a.setAttribute('data-tab', c.id); a.textContent = c.title;
+        yr.appendChild(a);
+        if (!yr.open) yr.open = true;
+      }
+      var grid = document.getElementById('col-grid');
+      if (grid) {
+        var card = document.createElement('a');
+        card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', '#55a1e7');
+        var counts = c.counts(), own = counts.filter(function(v){ return v > 0; }).length;
+        card.innerHTML = '<div class="k">' + esc(c.year) + ' 포카</div><h2>' + esc(c.title) + '</h2>'
+          + '<p class="cdesc">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
+          + '<div class="st2"><span><b>' + own + '/' + c.N + '</b>보유</span></div>'
+          + '<span class="go">도감 열기 →</span>';
+        grid.appendChild(card);
+      }
+    });
+  }
+  mountCollections();
   renderGoods(); renderAllGoods(); renderAllCards(); renderWish();
   injectCardHearts(); syncHearts();
 
   window.SG = {
-    pages: { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish },
+    pages: (function(){
+      var m = { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
+      (window.SGCOLS || []).forEach(function(c){ m[c.id] = c.el; });
+      return m;
+    })(),
     onShow: function(tab){
       if (tab === 'allcards') renderAllCards();
       else if (tab === 'wish') renderWish();
       else if (tab === 'allgoods') renderAllGoods();
       else if (tab === 'goods2026') renderGoods();
       else if (tab === 'home') renderSum();
+      else (window.SGCOLS || []).forEach(function(c){ if (c.id === tab) c.onShow(); });
       syncHearts();
     }
   };

@@ -40,6 +40,8 @@ rep('</div>\n<div class="mask" id="mask" hidden>',
 
 // 새 페이지(굿즈 · 통합 보기 · 위시리스트) + 라우팅 스크립트
 rep('</body>',
+  '<script>\n' + fs.readFileSync(__dirname + '/collection.js', 'utf8') + '\n</script>\n' +
+  '<script>\n' + fs.readFileSync(__dirname + '/collections.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/pages.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/shell.js', 'utf8') + '\n</script>\n</body>');
 
