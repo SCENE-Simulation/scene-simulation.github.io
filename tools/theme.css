@@ -608,3 +608,70 @@ body.has-sfloat #totop{bottom:84px}
 .atab td:nth-child(4){font-family:inherit}
 /* 표지나 카드 이미지가 없을 때: 카드 뒷면 무늬 */
 #hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}
+
+/* 뽑기 버튼: 1장·10장은 눌리는 맛이 있는 주 버튼, 나머지는 작은 보조 버튼 */
+.gpull{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gp{--g1:#f784a6;--g2:#df4f7d;--gd:#a8345a;--gs:rgba(233,99,135,.32);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:66px;padding:10px 12px 12px;border:0!important;border-radius:16px!important;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,var(--g1),var(--g2));
+  box-shadow:0 4px 0 var(--gd),0 10px 22px var(--gs),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 0 rgba(0,0,0,.08);
+  transition:transform .08s ease,box-shadow .08s ease,filter .15s ease}
+.gp:hover:not(:disabled){background:linear-gradient(180deg,var(--g1),var(--g2));filter:brightness(1.07) saturate(1.05)}
+.gp:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--gd),0 4px 10px var(--gs),inset 0 1px 0 rgba(255,255,255,.4)}
+.gp10{--g1:#ffe08a;--g2:#f3a93b;--gd:#b56f16;--gs:rgba(243,169,59,.3);color:#3d2500}
+.gp-l{display:flex;align-items:center;gap:7px;font-size:16.5px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.gp-l svg{width:19px;height:19px;flex:0 0 auto}
+.gp-s{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;opacity:.82}
+.gp-x{position:absolute;top:7px;right:8px;padding:2px 7px;border-radius:999px;background:rgba(61,37,0,.16);font:800 10.5px "JetBrains Mono",monospace}
+/* 올려 두면 광택이 한 번 훑고 지나간다 */
+.gp::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-130%)}
+.gp:hover:not(:disabled)::after{animation:gpShine .75s ease-out}
+@keyframes gpShine{to{transform:translateX(130%)}}
+/* 컴플리트 뒤 비활성: 흐린 분홍 대신 중립 회색 */
+.gp:disabled{opacity:1;background:rgba(255,255,255,.05);color:var(--dim);box-shadow:inset 0 0 0 1px var(--line)}
+.gp:disabled .gp-x{background:rgba(255,255,255,.06)}
+.gsub{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.gs{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px!important;font-size:12.5px;font-weight:600;
+  background:rgba(255,255,255,.05);border-color:var(--line)!important;color:var(--ink2)}
+.gs svg{width:14px;height:14px;flex:0 0 auto}
+.gs small{font:700 11px "JetBrains Mono",monospace;opacity:.75}
+.gs:hover:not(:disabled){background:rgba(255,255,255,.11);color:var(--ink)}
+.gs-m{background:rgba(71,209,154,.08);border-color:rgba(71,209,154,.3)!important;color:var(--mint-t)}
+.gs-m:hover:not(:disabled){background:rgba(71,209,154,.18);color:var(--mint-t)}
+.gs-r{margin-left:auto}
+.gs.on{background:var(--pink-soft);border-color:var(--pink)!important;color:var(--pink-t)}   /* 자동 완성 진행 중 */
+.gs.on svg{animation:gsPulse 1s ease-in-out infinite}
+@keyframes gsPulse{50%{opacity:.35}}
+@media (max-width:640px){.gp{min-height:60px}.gp-l{font-size:15.5px}
+  .gsub{display:grid;grid-template-columns:1fr 1fr}.gs{justify-content:center}.gs-r{margin-left:0}
+  .gp-x{display:none}}   /* 좁은 버튼에서는 글자와 겹치므로 숨긴다 (글자에 이미 10장이 있음) */
+
+/* 수집 진행률: 카드 한 장당 한 칸, 멤버 그룹별로 묶어 그룹 색으로 채운다 */
+.gprog{margin-top:12px;padding:12px 14px 10px;border-radius:12px;background:var(--glass);border:1px solid var(--line);transition:border-color .3s,box-shadow .3s}
+.gprog-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:10px}
+.gprog-t{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--ink2)}
+.gprog-h b{font:700 15px "JetBrains Mono",monospace;color:var(--ink)}
+.gprog-pc{padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.08);font:700 11.5px "JetBrains Mono",monospace;color:var(--ink)}
+.gprog-r{margin-left:auto;font-size:12px;color:var(--ink2)}
+.gprog-slots{display:flex;gap:8px}
+.gps{display:flex;flex-direction:column;gap:5px;min-width:0}
+.gps-s{display:flex;gap:3px}
+.gps-s i{flex:1 1 0;min-width:3px;height:16px;border-radius:4px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+  transition:background .25s ease,box-shadow .25s ease}
+.gps-s i.on{background:var(--c);box-shadow:0 0 10px color-mix(in srgb,var(--c) 45%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.gps-s i.pop{animation:gpsPop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes gpsPop{0%{transform:scale(1)}40%{transform:scale(1.35,1.6)}100%{transform:scale(1)}}
+.gps-n{font-size:10.5px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gps.full .gps-n{color:var(--c)}
+.gps.full .gps-n::after{content:" ✓"}
+.gprog.dense .gps-s{gap:1px}
+.gprog.dense .gps-s i{border-radius:2px}
+/* 컴플리트: 칸마다 차례로 빛이 지나간다 */
+.gprog.done{border-color:color-mix(in srgb,var(--gold) 45%,transparent);box-shadow:0 0 18px rgba(236,210,91,.12)}
+.gprog.done .gprog-pc{background:var(--gold);color:#3d2500}
+.gprog.done .gprog-r{color:var(--gold-t);font-weight:700}
+.gprog.done .gps-s i{animation:gpsWave 2.8s ease-in-out infinite;animation-delay:calc(var(--k) * 40ms)}
+@keyframes gpsWave{0%,60%,100%{filter:none}30%{filter:brightness(1.55) saturate(1.2)}}
+@media (prefers-reduced-motion:reduce){.gp::after,.gps-s i.pop,.gprog.done .gps-s i,.gs.on svg{animation:none}}

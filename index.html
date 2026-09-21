@@ -1023,6 +1023,73 @@ body.has-sfloat #totop{bottom:84px}
 /* 표지나 카드 이미지가 없을 때: 카드 뒷면 무늬 */
 #hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}
 
+/* 뽑기 버튼: 1장·10장은 눌리는 맛이 있는 주 버튼, 나머지는 작은 보조 버튼 */
+.gpull{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gp{--g1:#f784a6;--g2:#df4f7d;--gd:#a8345a;--gs:rgba(233,99,135,.32);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:66px;padding:10px 12px 12px;border:0!important;border-radius:16px!important;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,var(--g1),var(--g2));
+  box-shadow:0 4px 0 var(--gd),0 10px 22px var(--gs),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 0 rgba(0,0,0,.08);
+  transition:transform .08s ease,box-shadow .08s ease,filter .15s ease}
+.gp:hover:not(:disabled){background:linear-gradient(180deg,var(--g1),var(--g2));filter:brightness(1.07) saturate(1.05)}
+.gp:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--gd),0 4px 10px var(--gs),inset 0 1px 0 rgba(255,255,255,.4)}
+.gp10{--g1:#ffe08a;--g2:#f3a93b;--gd:#b56f16;--gs:rgba(243,169,59,.3);color:#3d2500}
+.gp-l{display:flex;align-items:center;gap:7px;font-size:16.5px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.gp-l svg{width:19px;height:19px;flex:0 0 auto}
+.gp-s{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;opacity:.82}
+.gp-x{position:absolute;top:7px;right:8px;padding:2px 7px;border-radius:999px;background:rgba(61,37,0,.16);font:800 10.5px "JetBrains Mono",monospace}
+/* 올려 두면 광택이 한 번 훑고 지나간다 */
+.gp::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-130%)}
+.gp:hover:not(:disabled)::after{animation:gpShine .75s ease-out}
+@keyframes gpShine{to{transform:translateX(130%)}}
+/* 컴플리트 뒤 비활성: 흐린 분홍 대신 중립 회색 */
+.gp:disabled{opacity:1;background:rgba(255,255,255,.05);color:var(--dim);box-shadow:inset 0 0 0 1px var(--line)}
+.gp:disabled .gp-x{background:rgba(255,255,255,.06)}
+.gsub{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.gs{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px!important;font-size:12.5px;font-weight:600;
+  background:rgba(255,255,255,.05);border-color:var(--line)!important;color:var(--ink2)}
+.gs svg{width:14px;height:14px;flex:0 0 auto}
+.gs small{font:700 11px "JetBrains Mono",monospace;opacity:.75}
+.gs:hover:not(:disabled){background:rgba(255,255,255,.11);color:var(--ink)}
+.gs-m{background:rgba(71,209,154,.08);border-color:rgba(71,209,154,.3)!important;color:var(--mint-t)}
+.gs-m:hover:not(:disabled){background:rgba(71,209,154,.18);color:var(--mint-t)}
+.gs-r{margin-left:auto}
+.gs.on{background:var(--pink-soft);border-color:var(--pink)!important;color:var(--pink-t)}   /* 자동 완성 진행 중 */
+.gs.on svg{animation:gsPulse 1s ease-in-out infinite}
+@keyframes gsPulse{50%{opacity:.35}}
+@media (max-width:640px){.gp{min-height:60px}.gp-l{font-size:15.5px}
+  .gsub{display:grid;grid-template-columns:1fr 1fr}.gs{justify-content:center}.gs-r{margin-left:0}
+  .gp-x{display:none}}   /* 좁은 버튼에서는 글자와 겹치므로 숨긴다 (글자에 이미 10장이 있음) */
+
+/* 수집 진행률: 카드 한 장당 한 칸, 멤버 그룹별로 묶어 그룹 색으로 채운다 */
+.gprog{margin-top:12px;padding:12px 14px 10px;border-radius:12px;background:var(--glass);border:1px solid var(--line);transition:border-color .3s,box-shadow .3s}
+.gprog-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:10px}
+.gprog-t{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--ink2)}
+.gprog-h b{font:700 15px "JetBrains Mono",monospace;color:var(--ink)}
+.gprog-pc{padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.08);font:700 11.5px "JetBrains Mono",monospace;color:var(--ink)}
+.gprog-r{margin-left:auto;font-size:12px;color:var(--ink2)}
+.gprog-slots{display:flex;gap:8px}
+.gps{display:flex;flex-direction:column;gap:5px;min-width:0}
+.gps-s{display:flex;gap:3px}
+.gps-s i{flex:1 1 0;min-width:3px;height:16px;border-radius:4px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+  transition:background .25s ease,box-shadow .25s ease}
+.gps-s i.on{background:var(--c);box-shadow:0 0 10px color-mix(in srgb,var(--c) 45%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.gps-s i.pop{animation:gpsPop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes gpsPop{0%{transform:scale(1)}40%{transform:scale(1.35,1.6)}100%{transform:scale(1)}}
+.gps-n{font-size:10.5px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gps.full .gps-n{color:var(--c)}
+.gps.full .gps-n::after{content:" ✓"}
+.gprog.dense .gps-s{gap:1px}
+.gprog.dense .gps-s i{border-radius:2px}
+/* 컴플리트: 칸마다 차례로 빛이 지나간다 */
+.gprog.done{border-color:color-mix(in srgb,var(--gold) 45%,transparent);box-shadow:0 0 18px rgba(236,210,91,.12)}
+.gprog.done .gprog-pc{background:var(--gold);color:#3d2500}
+.gprog.done .gprog-r{color:var(--gold-t);font-weight:700}
+.gprog.done .gps-s i{animation:gpsWave 2.8s ease-in-out infinite;animation-delay:calc(var(--k) * 40ms)}
+@keyframes gpsWave{0%,60%,100%{filter:none}30%{filter:brightness(1.55) saturate(1.2)}}
+@media (prefers-reduced-motion:reduce){.gp::after,.gps-s i.pop,.gprog.done .gps-s i,.gs.on svg{animation:none}}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -2815,6 +2882,14 @@ goTab(true,true);
 
   var PENALTY = 5000;                 // 교환 가위바위보에서 지면 잃는 돈
   var HAND = ['가위', '바위', '보'];
+  function svg(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
+  var ICON = {
+    one: svg('<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 8.3l1 2 2.2.3-1.6 1.5.4 2.2-2-1.05-2 1.05.4-2.2-1.6-1.5 2.2-.3z"/>'),
+    ff: svg('<path d="M4 6l7 6-7 6zM13 6l7 6-7 6z"/>'),
+    swap: svg('<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>'),
+    tag: svg('<path d="M3.5 12.5l8.8-8.8H20v7.7l-8.8 8.8z"/><circle cx="15.6" cy="8.4" r="1.3"/>'),
+    reset: svg('<path d="M4 4v5h5"/><path d="M5.1 15a7.5 7.5 0 1 0 1.3-7.6L4 9"/>')
+  };
 
   function $(id){ return document.getElementById(id); }
   function won(v){ return Math.round(v).toLocaleString('ko-KR'); }
@@ -2969,13 +3044,15 @@ goTab(true,true);
     +     '<div class="top">'
     +       '<div class="stage" id="stage"><img id="hero" alt=""><div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div>'
     +       '<div>'
-    +         '<div class="btns">'
-    +           '<button class="p" id="b1">1장 뽑기</button>'
-    +           '<button class="p" id="b10">10장 뽑기</button>'
-    +           '<button id="bauto">자동 완성</button>'
-    +           '<button class="m" id="btrade">중복 2장 → 교환(가위바위보)</button>'
-    +           '<button class="m" id="bused">중고 구매</button>'
-    +           '<button id="breset">처음부터</button>'
+    +         '<div class="gpull">'
+    +           '<button type="button" class="gp gp1" id="b1"><span class="gp-l">' + ICON.one + '1장 뽑기</span><span class="gp-s" id="b1s"></span></button>'
+    +           '<button type="button" class="gp gp10" id="b10"><span class="gp-x">×10</span><span class="gp-l"><svg aria-hidden="true"><use href="#i-gacha"/></svg>10장 뽑기</span><span class="gp-s" id="b10s"></span></button>'
+    +         '</div>'
+    +         '<div class="gsub">'
+    +           '<button type="button" class="gs" id="bauto">' + ICON.ff + '<span id="bauto-l">자동 완성</span></button>'
+    +           '<button type="button" class="gs gs-m" id="btrade" title="중복 2장을 걸고 가위바위보로 없는 카드와 교환">' + ICON.swap + '교환<small>중복 2장</small></button>'
+    +           '<button type="button" class="gs gs-m" id="bused" title="없는 카드 한 장을 중고로 구매">' + ICON.tag + '중고<small id="bused-p"></small></button>'
+    +           '<button type="button" class="gs gs-r" id="breset">' + ICON.reset + '처음부터</button>'
     +         '</div>'
     +         '<div class="rps" id="rps" hidden>'
     +           '<div class="q">중복 2장을 넘기려면 가위바위보에서 이겨야 합니다. 지면 ' + won(PENALTY) + '원을 잃습니다.</div>'
@@ -2989,7 +3066,10 @@ goTab(true,true);
     +           '<div class="st"><b id="s-o">0</b><span>모은 종</span></div>'
     +           '<div class="st"><b id="s-d">0</b><span>중복 장수</span></div>'
     +         '</div>'
-    +         '<div class="bar"><i id="bar"></i></div>'
+    +         '<div class="gprog" id="gprog">'
+    +           '<div class="gprog-h"><span class="gprog-t">수집 진행률</span><b id="gp-n"></b><span class="gprog-pc" id="gp-pc"></span><span class="gprog-r" id="gp-r"></span></div>'
+    +           '<div class="gprog-slots" id="gp-slots"></div>'
+    +         '</div>'
     +         '<div class="stats" style="grid-template-columns:1fr 1fr">'
     +           '<div class="st"><b id="s-e">0</b><span>예상 총비용(원) = 지금까지 + 남은 기대</span></div>'
     +           '<div class="st"><b id="s-c">0</b><span id="s-cl">평균 대비(원)</span></div>'
@@ -3054,8 +3134,17 @@ goTab(true,true);
   }
 
   function buildSets(){
-    setsEl.innerHTML = ''; cells = []; progs = [];
+    var slots = $('gp-slots');
+    setsEl.innerHTML = ''; slots.innerHTML = ''; cells = []; progs = [];
+    $('gprog').classList.toggle('dense', G.N > 40);             // 카드가 많으면 슬롯 간격을 좁힌다
     G.groups.forEach(function(gr){
+      // 진행률 슬롯: 카드 한 장당 한 칸, 멤버 그룹끼리 묶고 그룹 색으로 채운다
+      var sg = document.createElement('div'); sg.className = 'gps';
+      sg.style.flex = gr.ids.length + ' 1 0'; sg.style.setProperty('--c', gr.color);
+      var sr = document.createElement('div'); sr.className = 'gps-s';
+      var sn = document.createElement('span'); sn.className = 'gps-n'; sn.textContent = gr.name;
+      sg.appendChild(sr); sg.appendChild(sn); slots.appendChild(sg);
+
       var box = document.createElement('div'); box.className = 'set' + (gr.sp ? ' sp' : '');
       var hd = document.createElement('div'); hd.className = 'shead';
       hd.innerHTML = '<span class="chip" style="background:' + gr.color + '"></span><b>' + esc(gr.name) + '</b>'
@@ -3071,15 +3160,18 @@ goTab(true,true);
         var v = document.createElement('div'); v.className = 'v'; v.textContent = v.title = (i + 1) + '. ' + G.names[i];
         d.appendChild(c); d.appendChild(b); d.title = G.names[i] + ' (No.' + (i + 1) + ')';
         wrap.appendChild(d); wrap.appendChild(v);
-        (land ? rowW : row).appendChild(wrap); cells[i] = { el: d, dup: b, wrap: wrap };
+        var sl = document.createElement('i'); sl.title = (i + 1) + '. ' + G.names[i]; sl.style.setProperty('--k', i); sr.appendChild(sl);
+        (land ? rowW : row).appendChild(wrap); cells[i] = { el: d, dup: b, wrap: wrap, slot: sl };
       });
       box.appendChild(hd);
       if (row.children.length) box.appendChild(row);
       if (rowW.children.length) box.appendChild(rowW);
       setsEl.appendChild(box);
-      progs.push({ el: hd.querySelector('.pr'), ids: gr.ids });
+      progs.push({ el: hd.querySelector('.pr'), ids: gr.ids, slot: sg });
     });
   }
+  // 새 카드를 얻은 칸을 한 번 튀어 오르게 한다
+  function pop(i){ var s = cells[i].slot; s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); }
 
   function render(){
     var N = G.N, o = owned(), rem = N - o, dup = dupCount();
@@ -3093,17 +3185,25 @@ goTab(true,true);
     dEl.textContent = (diff > 0 ? '+' : '') + won(diff);
     dEl.style.color = diff > 0 ? 'var(--pink)' : 'var(--mint)';
     $('s-cl').textContent = '평균 ' + won(meanCost()) + '원 대비(원)';
-    $('bar').style.width = (o / N * 100) + '%';
+    $('gp-n').textContent = o + ' / ' + N + '종';
+    $('gp-pc').textContent = Math.floor(o / N * 100) + '%';      // 26/27 이 100% 로 보이지 않게 내림
+    $('gp-r').textContent = rem ? '남은 ' + rem + '종 · 다음 1장이 새 카드일 확률 ' + Math.round(rem / N * 100) + '%' : '컴플리트!';
+    $('gprog').classList.toggle('done', !rem);
     for (var i = 0; i < N; i++){
       cells[i].el.classList.toggle('own', S.counts[i] > 0);
       cells[i].wrap.classList.toggle('own', S.counts[i] > 0);
+      cells[i].slot.classList.toggle('on', S.counts[i] > 0);
       if (S.counts[i] > 1){ cells[i].dup.style.display = ''; cells[i].dup.textContent = 'x' + S.counts[i]; }
       else cells[i].dup.style.display = 'none';
     }
-    progs.forEach(function(p){ var c = 0; p.ids.forEach(function(i){ if (S.counts[i]) c++; }); p.el.textContent = c + '/' + p.ids.length; });
+    progs.forEach(function(p){
+      var c = 0; p.ids.forEach(function(i){ if (S.counts[i]) c++; });
+      p.el.textContent = c + '/' + p.ids.length;
+      p.slot.classList.toggle('full', c === p.ids.length);
+    });
     $('btrade').disabled = dup < 2 || rem === 0;
     $('bused').disabled = rem === 0;
-    $('b1').disabled = $('b10').disabled = rem === 0;
+    $('b1').disabled = $('b10').disabled = $('bauto').disabled = rem === 0;
     if (view === 'ana') anaSoon();
   }
 
@@ -3153,13 +3253,13 @@ goTab(true,true);
     S.counts[i]++; S.pulls++; S.spent += G.price; note();
     show(i, isNew ? 'NEW No.' + (i + 1) : 'DUP No.' + (i + 1));
     if (!quiet){ stage.classList.remove('pop'); void stage.offsetWidth; stage.classList.add('pop'); }
-    flash(i);
+    flash(i); if (isNew && !auto) pop(i);
     if (isNew) say(S.pulls + '장째 — <b>' + name(i) + '</b> 획득 (' + owned() + '/' + G.N + ')', 'new');
     else if (!quiet) say(S.pulls + '장째 — ' + name(i) + ' 중복');
     render();
     if (owned() === G.N) complete();
   }
-  function stopAuto(){ if (auto){ clearInterval(auto); auto = null; } $('bauto').textContent = '자동 완성'; }
+  function stopAuto(){ if (auto){ clearInterval(auto); auto = null; } $('bauto-l').textContent = '자동 완성'; $('bauto').classList.remove('on'); }
   function rpsScore(){
     $('rpssc').textContent = '교환 승부 ' + (S.rpsW + S.rpsL + S.rpsD) + '회 — ' + S.rpsW + '승 ' + S.rpsL + '패 ' + S.rpsD + '무 · 벌금 누적 ' + won(S.penalty) + '원';
   }
@@ -3180,7 +3280,7 @@ goTab(true,true);
         S.counts[src]--; gave.push(name(src));
       }
       var tt = m[(Math.random() * m.length) | 0]; S.counts[tt] = 1; S.trades++; note();
-      show(tt, 'TRADE No.' + (tt + 1)); flash(tt);
+      show(tt, 'TRADE No.' + (tt + 1)); flash(tt); pop(tt);
       out.innerHTML = head + '<span class="w"><b>승리.</b></span> ' + name(tt) + ' 획득';
       say('교환 성공 — 중복 2장(' + gave.join(', ') + ')을 내주고 <b>' + name(tt) + '</b> 획득', 'new');
       render();
@@ -3202,7 +3302,7 @@ goTab(true,true);
   };
   $('bauto').onclick = function(){
     if (auto){ stopAuto(); return; }
-    this.textContent = '멈추기';
+    $('bauto-l').textContent = '멈추기'; this.classList.add('on');
     auto = setInterval(function(){ for (var k = 0; k < 3; k++) pull(true); }, 40);
   };
   $('btrade').onclick = function(){
@@ -3218,7 +3318,7 @@ goTab(true,true);
   $('bused').onclick = function(){
     var m = missing(); if (!m.length) return;
     var t = m[(Math.random() * m.length) | 0]; S.counts[t] = 1; S.spent += G.used; S.buys++; note();
-    show(t, 'BUY No.' + (t + 1)); flash(t);
+    show(t, 'BUY No.' + (t + 1)); flash(t); pop(t);
     say('중고 구매 — <b>' + name(t) + '</b> ' + won(G.used) + '원에 확보');
     render();
     if (owned() === G.N) complete();
@@ -3257,7 +3357,9 @@ goTab(true,true);
     buildSets();
     $('btrade').hidden = !G.trade;
     $('bused').hidden = !G.used;
-    $('bused').textContent = '중고 구매 ' + won(G.used) + '원';
+    $('b1s').textContent = won(G.price) + '원';
+    $('b10s').textContent = won(G.price * 10) + '원';
+    $('bused-p').textContent = won(G.used) + '원';
     $('rps').hidden = true;
     if (isNew) intro();
     else logEl.innerHTML = S.log.map(function(e){ return '<div' + (e[1] ? ' class="' + e[1] + '"' : '') + '>' + e[0] + '</div>'; }).join('');
