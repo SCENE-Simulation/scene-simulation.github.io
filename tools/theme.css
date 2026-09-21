@@ -1334,3 +1334,5 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-tr.hi rect.on{fill:#ff5a5f}
 .mb-tr.mid rect.on{fill:#ffb547}
 .mb-tr.lo rect.on{fill:var(--ink2)}
+/* 선 그래프: 모바일에서 누르고 있어도 글자 선택·메뉴가 뜨지 않게 (누르는 동안 수치 말풍선) */
+.vd-chart svg{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}

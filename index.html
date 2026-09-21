@@ -1748,6 +1748,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-tr.hi rect.on{fill:#ff5a5f}
 .mb-tr.mid rect.on{fill:#ffb547}
 .mb-tr.lo rect.on{fill:var(--ink2)}
+/* 선 그래프: 모바일에서 누르고 있어도 글자 선택·메뉴가 뜨지 않게 (누르는 동안 수치 말풍선) */
+.vd-chart svg{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 
 </style>
 </head>
@@ -5561,49 +5563,105 @@ goTab(true,true);
   }
 
   // 그래프(15일 뒤): 가로축 주 단위 (최근 최대 2주 기록 · 지금 · 1주 ~ 8주 뒤). 1일 추세로 이은 예상 + 100만 단위 가로선
+  // 그래프(15일 뒤): 지금 구간의 100만 단위를 넘은 때부터 → 지금 → 앞으로 (④ 1일 추세). 가로 눈금은 [1일 | 1주]
+  //   1일: 14일 뒤까지 · 1주: 8주 뒤까지. 넘은 때가 기록 전이면(수집 전에 넘은 영상) 첫 기록부터
+  var mu = 'w', MU = { d: { tab: '1일', n: 14, step: 24, u: '일' }, w: { tab: '1주', n: VE.WEEKS, step: 168, u: '주' } };
+  function msStart(v, a){
+    var V = av(v, a), M0 = Math.floor(V / VE.MSTEP) * VE.MSTEP, s0 = VE.since(v.vs), sn = v.vs.snaps;
+    if (!(M0 > 0)) return { h: s0, M: null };                                         // 아직 100만 전
+    for (var i = 0; i < sn.length; i++) if (sn[i][1] >= M0){
+      if (!i || sn[i - 1][0] < s0) return { h: s0, M: M0, before: true };
+      var p0 = sn[i - 1], p1 = sn[i], f = (M0 - p0[1]) / (p1[1] - p0[1] || 1);
+      return { h: p0[0] + (p1[0] - p0[0]) * f, M: M0 };
+    }
+    return { h: s0, M: M0, before: true };
+  }
   function msChart(){
-    var v = sel, a = age(v), p = plan(v), box = $('vd-chart');
+    var v = sel, a = age(v), p = plan(v), box = $('vd-chart'), U = MU[mu];
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 24, B = 30;
-    var s = Math.max(VE.since(v.vs), a - 336), end = a + VE.WEEKS * 168, fut = [];
-    var pts = v.vs.snaps.filter(function(q){ return q[0] >= s - 1e-6 && q[0] <= a + 1e-6; });
-    if (p) for (var dd = 0; dd <= VE.WEEKS * 7; dd++) fut.push([a + dd * 24, VE.dayProject(p.V, p.g, p.r, dd)]);
-    var ys = pts.map(function(q){ return q[1]; }).concat(fut.map(function(f){ return f[1]; }));
+    var st = msStart(v, a), s = Math.min(st.h, a - 1), end = a + U.n * U.step, fut = [];
+    var pts = v.vs.snaps.filter(function(q){ return q[0] > s + 1e-6 && q[0] <= a + 1e-6; }), sv = av(v, s);
+    if (sv != null) pts.unshift([s, sv]);
+    if (p) for (var dd = 0; dd <= U.n * U.step / 24 + 1e-9; dd += mu === 'd' ? 0.25 : 1) fut.push([a + dd * 24, VE.dayProject(p.V, p.g, p.r, dd)]);
+    var ys = pts.map(function(q){ return q[1]; }).concat(fut.map(function(q){ return q[1]; }));
     var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), M1 = p && p.ms[0].M, showM1 = M1 && M1 <= y1 + (y1 - y0) * 0.35;
     if (showM1) y1 = Math.max(y1, M1);
     var pad = (y1 - y0) * 0.08 || y1 * 0.02; y0 = Math.max(0, y0 - pad); y1 += pad;
     function X(h){ return L + (h - s) / (end - s) * (W - L - R); }
+    function Hx(x){ return s + Math.max(0, Math.min(1, (x - L) / (W - L - R))) * (end - s); }
     function Y(y){ return Tp + (1 - (y - y0) / (y1 - y0)) * (H - Tp - B); }
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="주 단위 100만 돌파 예상">';
-    var st = niceStep((y1 - y0) / 4);
-    for (var y = Math.ceil(y0 / st) * st; y <= y1; y += st)
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + U.tab + ' 단위 100만 돌파 예상">';
+    var gs = niceStep((y1 - y0) / 4);
+    for (var y = Math.ceil(y0 / gs) * gs; y <= y1; y += gs)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,.06)"/>'
         + '<text x="' + (L - 7) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#8e8e93">' + fmt(y) + '</text>';
-    for (var w = -2; w <= VE.WEEKS; w++){
-      var hx = a + w * 168; if (hx < s - 1e-6) continue;
-      var x = X(hx);
-      svg += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,' + (w ? .06 : 0) + ')"/>'
-        + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (w > 0 ? 700 : 500) + '" fill="' + (w > 0 ? '#aeaeb2' : '#8e8e93') + '">' + (w === 0 ? '' : (w > 0 ? w : '−' + (-w)) + '주') + '</text>';
+    // 가로 눈금: 지금을 0 으로 1일(또는 1주)마다. 글자가 겹치지 않게 m 칸마다 적는다
+    var px1 = U.step / (end - s) * (W - L - R), m = Math.max(1, Math.ceil(34 / px1)), t0 = v.pub + s * 3600e3;
+    for (var k = -Math.floor((a - s) / U.step); k <= U.n; k++){
+      if (!k || k % m) continue;
+      var x = X(a + k * U.step);
+      if (x < X(s) + 44) continue;
+      svg += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.06)"/>'
+        + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (k > 0 ? 700 : 500) + '" fill="' + (k > 0 ? '#aeaeb2' : '#8e8e93') + '">' + (k > 0 ? k : '−' + (-k)) + U.u + '</text>';
     }
     for (var M = Math.ceil(y0 / VE.MSTEP) * VE.MSTEP; M <= y1; M += VE.MSTEP)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(M).toFixed(1) + '" y2="' + Y(M).toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity=".55" stroke-dasharray="6 5"/>'
         + '<text x="' + (L + 6) + '" y="' + (Y(M) - 6).toFixed(1) + '" font-size="11" font-weight="800" fill="' + LT.color + '">' + fmtM(M) + ' 돌파선</text>';
     if (p){
-      svg += '<path d="' + fut.map(function(f, i){ return (i ? 'L' : 'M') + X(f[0]).toFixed(1) + ' ' + Y(f[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="' + LT.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
-      p.ms.forEach(function(m){
-        if (m.days == null || m.days * 24 > end - a || m.M > y1) return;
-        var cx = X(a + m.days * 24), cy = Y(m.M);
+      svg += '<path d="' + fut.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="' + LT.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
+      p.ms.forEach(function(o){
+        if (o.days == null || o.days * 24 > end - a || o.M > y1) return;
+        var cx = X(a + o.days * 24), cy = Y(o.M);
         svg += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5.5" fill="' + LT.color + '" stroke="#1c1c1e" stroke-width="2"/>'
-          + '<text x="' + cx.toFixed(1) + '" y="' + (cy + 18).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#cfe9fb">' + m.week + '주 차</text>';
+          + '<text x="' + cx.toFixed(1) + '" y="' + (cy + 18).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#cfe9fb">' + (mu === 'w' ? o.week + '주 차' : daysTxt(o.days) + ' 안') + '</text>';
       });
-      if (M1 && !showM1) svg += '<text x="' + (W - R - 4) + '" y="' + (Tp - 8) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">다음 ' + fmtM(M1) + '까지 ' + fmt(M1 - p.V) + ' — 8주 안에는 어려움</text>';
+      if (M1 && !showM1) svg += '<text x="' + (W - R - 4) + '" y="' + (Tp - 8) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">다음 ' + fmtM(M1) + '까지 ' + fmt(M1 - p.V) + ' — ' + U.n + U.u + ' 안에는 어려움</text>';
     }
     if (pts.length > 1) svg += '<path d="' + pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="#ff4d4f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
+    // 시작점: 지금 구간의 100만 단위를 넘은 때 (기록 전에 넘었으면 첫 기록). 날짜는 가로축 맨 왼쪽에
+    if (sv != null) svg += '<circle cx="' + X(s).toFixed(1) + '" cy="' + Y(sv).toFixed(1) + '" r="4" fill="#1c1c1e" stroke="#ff9e9a" stroke-width="2"/>';
+    svg += '<text x="' + X(s).toFixed(1) + '" y="' + (H - 9) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">' + md(t0) + '</text>';
     var V = av(v, a);
     svg += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
-      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · 가로축은 주 (최근 기록 → 지금 → 8주 뒤)') + svg
+      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
+      + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
+      + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
+    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · ' + (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ')부터 → 지금 → ' + U.n + U.u + ' 뒤 · 마우스를 올리거나 누르면 수치',
+        ['d', 'w'].map(function(k){ return '<button type="button" data-mu="' + k + '" class="' + (mu === k ? 'on' : '') + '" aria-selected="' + (mu === k) + '">' + MU[k].tab + '</button>'; }).join(''))
+      + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상 (1일 추세)</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
+    // 말풍선: 지금까지는 실제, 그 뒤는 ④ 1일 추세 예상
+    lineTip(box, W, H, L, R, function(x){
+      var h = Hx(x), act = h <= a + 1e-6, y = act ? av(v, h) : p ? VE.dayProject(p.V, p.g, p.r, (h - a) / 24) : null;
+      if (y == null) return null;
+      var t = v.pub + h * 3600e3, nx = (Math.floor(y / VE.MSTEP) + 1) * VE.MSTEP;
+      return { x: X(h), y: Y(y), color: act ? '#ff4d4f' : LT.color,
+        html: '<b>' + md(t) + ' ' + hm(t) + ' · ' + (Math.abs(h - a) < 0.5 ? '지금' : act ? ageTxt(a - h) + ' 전' : ageTxt(h - a) + ' 뒤') + '</b>'
+          + '<span>' + (act ? '실제 조회수 <em>' + full(y) + '</em>' : '예상 조회수 <em style="color:' + LT.color + '">' + full(Math.round(y)) + '</em>') + '</span>'
+          + '<small>' + fmtM(nx) + '까지 ' + fmt(nx - y) + ' 남음</small>' };
+    });
+  }
+  // 선 그래프 말풍선: PC는 마우스를 올리면, 모바일은 누르고 있는 동안(옆으로 밀면 따라감) 세로선 · 점 · 값
+  //   at(x: SVG 가로 좌표) → { x, y, color, html } | null
+  function lineTip(box, W, H, L, R, at){
+    var svg = box.querySelector('svg'), tip = $('vd-tip'), cx = svg.querySelector('#vd-cx'), cd = svg.querySelector('#vd-cd');
+    function hide(){ tip.hidden = true; cx.style.display = cd.style.display = 'none'; }
+    function move(e){
+      var rc = svg.getBoundingClientRect(), bx = box.getBoundingClientRect(), x = (e.clientX - rc.left) * W / rc.width;
+      var o = x < L - 4 || x > W - R + 4 ? null : at(x);
+      if (!o){ hide(); return; }
+      cx.setAttribute('x1', o.x); cx.setAttribute('x2', o.x); cx.style.display = '';
+      cd.setAttribute('cx', o.x); cd.setAttribute('cy', o.y); cd.setAttribute('fill', o.color); cd.style.display = '';
+      tip.innerHTML = o.html; tip.hidden = false;
+      var px = rc.left - bx.left + o.x * rc.width / W, py = rc.top - bx.top + o.y * rc.height / H;
+      var tw = tip.offsetWidth, left = px + 14 + tw > bx.width ? px - 14 - tw : px + 14;
+      tip.style.left = Math.max(4, left) + 'px'; tip.style.top = Math.max(4, py - tip.offsetHeight - 10) + 'px';
+    }
+    svg.addEventListener('pointermove', move);
+    svg.addEventListener('pointerdown', move);
+    svg.addEventListener('pointerleave', hide);
+    svg.addEventListener('pointercancel', hide);
   }
 
   // 성적표(15일 뒤): 주차 적중(±1주) + 8주 안/넘게로 본 예측이 실제로 어땠는지
@@ -6079,16 +6137,17 @@ goTab(true,true);
   function niceStep(x){ var p = Math.pow(10, Math.floor(Math.log(x) / Math.LN10)), f = x / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
   function chart(){
     var box = $('vd-chart');
-    if (!UNITS[cm]){ if (late(sel)) msChart(); else cumChart(); return; }
+    if (late(sel)){ msChart(); return; }
+    if (!UNITS[cm]){ cumChart(); return; }
     var U = UNITS[cm];
     box.innerHTML = chHead('조회수 증가', U.range + ' · 막대 하나가 ' + U.per + ' 는 조회수 · 막대에 마우스를 올리거나 꾹 누르면 수치')
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
       + '<p class="gnote">기록 간격이 긴 구간은 그 사이를 고르게 나눠 그립니다. 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
-  function chHead(t, sub){
-    return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="그래프 종류">'
-      + '<button type="button" data-cm="cum" class="' + (!UNITS[cm] ? 'on' : '') + '">누적·예측</button>'
-      + UORDER.map(function(k){ return '<button type="button" data-cm="' + k + '" class="' + (cm === k ? 'on' : '') + '">' + UNITS[k].tab + '</button>'; }).join('') + '</div></div>';
+  function chHead(t, sub, tabs){
+    return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="' + (tabs ? '가로축 단위' : '그래프 종류') + '">'
+      + (tabs || '<button type="button" data-cm="cum" class="' + (!UNITS[cm] ? 'on' : '') + '">누적·예측</button>'
+      + UORDER.map(function(k){ return '<button type="button" data-cm="' + k + '" class="' + (cm === k ? 'on' : '') + '">' + UNITS[k].tab + '</button>'; }).join('')) + '</div></div>';
   }
   // 방법 k(0~2 방법, 3 종합)의 예측이 아직 없으면 그 이유(언제 나오는지), 있으면 null
   function mStatus(v, k){
@@ -6202,27 +6261,15 @@ goTab(true,true);
       }
       return null;
     }
-    var svg = box.querySelector('svg'), tip = $('vd-tip'), cx = svg.querySelector('#vd-cx'), cd = svg.querySelector('#vd-cd');
-    function hide(){ tip.hidden = true; cx.style.display = cd.style.display = 'none'; }
-    function move(e){
-      var rc = svg.getBoundingClientRect(), bx = box.getBoundingClientRect(), x = (e.clientX - rc.left) * W / rc.width;
-      if (x < L - 4 || x > W - R + 4){ hide(); return; }
+    lineTip(box, W, H, L, R, function(x){
       var h = Hx(x), val = valAt(h);
-      if (!val){ hide(); return; }
-      var yv = val.act != null ? val.act : val.p, sx = X(h), sy = Y(yv);
-      cx.setAttribute('x1', sx); cx.setAttribute('x2', sx); cx.style.display = '';
-      cd.setAttribute('cx', sx); cd.setAttribute('cy', sy); cd.setAttribute('fill', val.act != null ? '#ff4d4f' : m.color); cd.style.display = '';
-      tip.innerHTML = '<b>게시 후 ' + ageTxt(h) + '</b>' + (val.act != null
-        ? '<span>실제 조회수 <em>' + full(val.act) + '</em></span>'
-        : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span><small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>');
-      tip.hidden = false;
-      var px = rc.left - bx.left + sx * rc.width / W, py = rc.top - bx.top + sy * rc.height / H;
-      var tw = tip.offsetWidth, left = px + 14 + tw > bx.width ? px - 14 - tw : px + 14;
-      tip.style.left = Math.max(4, left) + 'px'; tip.style.top = Math.max(4, py - tip.offsetHeight - 10) + 'px';
-    }
-    svg.addEventListener('pointermove', move);
-    svg.addEventListener('pointerdown', move);
-    svg.addEventListener('pointerleave', hide);
+      if (!val) return null;
+      var yv = val.act != null ? val.act : val.p;
+      return { x: X(h), y: Y(yv), color: val.act != null ? '#ff4d4f' : m.color,
+        html: '<b>게시 후 ' + ageTxt(h) + '</b>' + (val.act != null
+          ? '<span>실제 조회수 <em>' + full(val.act) + '</em></span>'
+          : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span><small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>') };
+    });
   }
 
   // ----- 예측 방법: 공식 없이 쉬운 설명 -----
@@ -6366,6 +6413,8 @@ goTab(true,true);
       return;
     }
     if (e.target.closest('[data-more]')){ tn += 20; renderTable(); return; }
+    var mub = e.target.closest('[data-mu]');
+    if (mub){ mu = mub.getAttribute('data-mu'); msChart(); return; }
     var c = e.target.closest('[data-cm]');
     if (c){ cm = c.getAttribute('data-cm'); chart(); return; }
     if (e.target.closest('#vx-chk')){ recheck(true); return; }
@@ -6421,7 +6470,7 @@ goTab(true,true);
   document.addEventListener('pointercancel', pressEnd);
   document.addEventListener('scroll', function(){ if (!pressing) tipHide(); }, true);
   // 꾹 누르는 동안 브라우저 메뉴(이미지 저장 등)가 뜨지 않게
-  document.addEventListener('contextmenu', function(e){ if (e.target.closest && e.target.closest('.vh-svg')) e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e){ if (e.target.closest && e.target.closest('.vh-svg, .vd-chart svg')) e.preventDefault(); });
 })();
 
 </script>
