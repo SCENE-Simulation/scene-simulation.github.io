@@ -223,6 +223,8 @@
     + '</div>'
     + '<div id="g-mini" hidden>'
     +   '<p class="mg-lead">원하는 카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요.</p>'
+    // 순서: 카드 고르기(고르면 접힘) → 뽑기 무대 → 결과 → 기록. 결과는 늘 뽑기 버튼 바로 아래에 온다
+    +   '<div class="mg-pick" id="mg-pick"></div>'
     +   '<div class="mg-stage" id="mg-stage">'
     +     '<div class="mg-slots">'
     +       '<div class="mg-slot mg-target"><span class="mg-k">목표 카드</span><div class="mg-card" id="mg-tcard"><img alt=""></div>'
@@ -233,8 +235,7 @@
     +     '</div>'
     +     '<button type="button" class="gp gp1 mg-go" id="mg-go"><span class="gp-l">' + ICON.one + '<span id="mg-gol">뽑기 시작</span></span><span class="gp-s" id="mg-gos"></span></button>'
     +   '</div>'
-    +   '<div class="mg-pick" id="mg-pick"></div>'
-    +   '<div class="mg-res" id="mg-res" hidden></div>'
+    +   '<div class="mg-res" id="mg-res"></div>'
     +   '<div class="mg-hist" id="mg-hist"></div>'
     + '</div>');
 
@@ -848,17 +849,18 @@
     $('mg-gol').textContent = run ? '건너뛰기' : (m.res ? '한 번 더' : '뽑기 시작');
     $('mg-gos').textContent = run ? '결과 바로 보기'
       : has ? '나올 때까지 뽑기 · 평균 ' + G.N + '번'
-      : '아래에서 뽑고 싶은 카드를 먼저 고르세요';
+      : '위에서 뽑고 싶은 카드를 먼저 고르세요';
     var pick = $('mg-pick');
     pick.hidden = has && !m.picking;
     if (!pick.hidden) mgPicker();
-    if (m.res && !run) mgResult(); else $('mg-res').hidden = true;
+    mgResult();
     mgHist();
   }
 
   function mgPicker(){
     var m = mini(), box = $('mg-pick');
-    box.innerHTML = '<h3 class="ahead">어떤 카드를 뽑고 싶으세요?</h3>';
+    box.innerHTML = '<div class="mg-ph"><h3 class="ahead">어떤 카드를 뽑고 싶으세요?</h3>'
+      + (m.target != null ? '<button type="button" class="gs" id="mg-fold">접기</button>' : '') + '</div>';
     G.groups.forEach(function(gr){
       var g = document.createElement('div'); g.className = 'mg-grp';
       g.innerHTML = '<div class="mg-gh"><i style="background:' + gr.color + '"></i>' + esc(gr.name) + '</div>';
@@ -904,27 +906,89 @@
     mgT.push(setTimeout(function(){ if (mgEnd) mgEnd(); }, D + HOLD));
   }
 
+  // 등급별 구간: [{ g, a, b }] — a번부터 b번까지 (마지막 등급은 b 가 없다)
+  function mgRanges(){
+    var out = [], cur = null, lastG = GRADES[GRADES.length - 1];
+    for (var k = 1; k < 1e5; k++){
+      var g = gradeOf(k);
+      if (!cur || cur.g !== g){ if (cur) out.push(cur); cur = { g: g, a: k, b: k }; } else cur.b = k;
+      if (g === lastG){ cur.b = null; break; }
+    }
+    out.push(cur);
+    return out;
+  }
+  // 몇 번째에 처음 나오는지의 분포. 막대 하나 = 정확히 그 번째에 처음 나올 확률 p(1-p)^(k-1).
+  // 막대 색은 등급 구간, 결과(n)가 있으면 n번째까지를 진하게 칠한다
+  function mgChart(n){
+    // 그리는 폭을 실제 화면 폭에 맞춘다. 640 으로 그려 모바일에서 줄이면 글자가 5px 로 작아진다
+    var box = $('mg-res'), w = Math.max(320, Math.min(640, (box.clientWidth || 672) - 32));
+    var C = palette(), p = 1 / G.N, h = 200, L = 44, R = 12, T = 30, B = 26;
+    var xmax = Math.max(Math.ceil(Math.log(0.015) / Math.log(1 - p)), n ? n + 3 : 0), st = niceStep(xmax, w < 480 ? 5 : 8);
+    xmax = Math.ceil(xmax / st) * st;
+    var bw = (w - L - R) / xmax, ymax = p * 1.08;
+    function X(k){ return L + (k - 1) * bw; }                // k번째 막대의 왼쪽
+    function Y(v){ return T + (1 - v / ymax) * (h - T - B); }
+    var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="몇 번째에 처음 나오는지의 확률 분포">';
+    [0, p / 2, p].forEach(function(v){
+      s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="' + C.line + '"/>'
+        + t(L - 6, Y(v) + 4, (v * 100).toFixed(1) + '%', C.ink2, { a: 'end', fs: 10.5 });
+    });
+    var bar = bw >= 4 ? bw * 0.78 : bw;
+    for (var k = 1; k <= xmax; k++){
+      var v = p * Math.pow(1 - p, k - 1);
+      s += '<rect x="' + X(k).toFixed(1) + '" y="' + Y(v).toFixed(1) + '" width="' + Math.max(1, bar).toFixed(1) + '" height="' + (h - B - Y(v)).toFixed(1)
+        + '" fill="' + gradeOf(k).c + '" opacity="' + (n ? (k <= n ? 0.95 : 0.22) : 0.6) + '"/>';
+    }
+    for (var x = st; x <= xmax; x += st) s += t(X(x) + bw / 2, h - B + 16, x + '번', C.ink2);
+    s += t(X(1) + bw / 2, h - B + 16, '1', C.ink2);
+    // 평균은 N번. 라벨은 내 결과 선과 겹치지 않게 결과의 반대쪽에 둔다
+    var mx = X(G.N) + bw / 2, ml = n > G.N;
+    s += '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + T + '" y2="' + (h - B) + '" stroke="' + C.ink2 + '" stroke-dasharray="4 4"/>'
+      + t(mx + (ml ? -5 : 5), T + 12, '평균 ' + G.N + '번', C.ink2, { a: ml ? 'end' : 'start', fs: 11 });
+    if (n){
+      var cx = X(n) + bw / 2, right = cx > w * 0.62;
+      s += '<line x1="' + cx.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y1="' + (T - 8) + '" y2="' + (h - B) + '" stroke="' + C.ink + '" stroke-width="2"/>'
+        + t(cx + (right ? -7 : 7), T - 12, '내 결과 ' + won(n) + '번', C.ink, { a: right ? 'end' : 'start', fs: 12.5 });
+    }
+    return s + '</svg>';
+  }
+
+  // 결과 영역은 늘 보인다. 도전 전·뽑는 중에는 같은 자리에 빈 값을 채워 화면이 들썩이지 않게 한다
   function mgResult(){
-    var r = mini().res, n = r.n, gr = gradeOf(n), q = within(n), diff = G.N - n;
+    var m = mini(), run = !!mgEnd, r = run ? null : m.res, box = $('mg-res');
+    var n = r ? r.n : 0, gr = r ? gradeOf(n) : null, q = r ? within(n) : 0, diff = G.N - n;
     var cnt = {}, top = -1, topN = 0;
-    r.seq.slice(0, -1).forEach(function(i){ cnt[i] = (cnt[i] || 0) + 1; if (cnt[i] > topN){ topN = cnt[i]; top = i; } });
-    var box = $('mg-res');
-    box.hidden = false;
+    if (r) r.seq.slice(0, -1).forEach(function(i){ cnt[i] = (cnt[i] || 0) + 1; if (cnt[i] > topN){ topN = cnt[i]; top = i; } });
+    var head = r
+      ? '<span class="mg-grade" style="--gc:' + gr.c + '">' + gr.t + '</span><b>' + won(n) + '번 만에 나왔다!</b>'
+      : '<span class="mg-grade mg-g0">' + (run ? '뽑는 중' : '도전 전') + '</span><b>' + (run ? '뽑는 중…' : '몇 번 만에 나올까요?') + '</b>';
+    var text = r
+      ? (n === 1 ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / G.N) + '의 행운입니다.'
+        : won(n) + '번 안에 나올 확률은 ' + pctTxt(q) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.')
+      : run ? '목표 카드가 나오면 결과가 여기에 표시됩니다.'
+      : '목표 카드를 고르고 뽑기 시작을 누르면 결과가 여기에 표시됩니다. 한 번에 나올 확률은 1/' + G.N
+        + '이고, 평균 ' + G.N + '번 · 절반은 ' + mgMedian() + '번 안에 나옵니다.';
+    var legend = mgRanges().map(function(x){
+      var rg = x.b == null ? x.a + '번~' : x.a === x.b ? x.a + '번' : x.a + '~' + x.b + '번';
+      return '<span class="' + (gr === x.g ? 'on' : '') + '" style="--gc:' + x.g.c + '"><i></i>' + x.g.t + ' ' + rg + '</span>';
+    }).join('');
+    box.classList.toggle('empty', !r);
     box.innerHTML =
-      '<div class="mg-rh"><span class="mg-grade" style="--gc:' + gr.c + '">' + gr.t + '</span><b>' + won(n) + '번 만에 나왔다!</b></div>'
-      + '<p class="mg-rs">' + (n === 1
-        ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / G.N) + '의 행운입니다.'
-        : won(n) + '번 안에 나올 확률은 ' + pctTxt(q) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.') + '</p>'
-      + '<div class="mg-gauge" aria-hidden="true"><div class="mg-gbar"></div><i style="left:' + (Math.min(q, 1) * 100).toFixed(1) + '%"></i><span>운 좋음</span><span>운 나쁨</span></div>'
+      '<div class="mg-rh">' + head + '</div><p class="mg-rs">' + text + '</p>'
+      + '<div class="mg-chart">' + mgChart(n) + '</div>'
+      + '<div class="mg-legend">' + legend + '</div>'
+      + '<p class="gnote mg-cap">막대 하나는 정확히 그 번째에 처음 나올 확률입니다. 색은 등급 구간'
+      + (r ? '이고, 진하게 칠한 막대가 이번 결과보다 빨리 나온 경우입니다.' : '입니다.') + '</p>'
       + '<div class="cmeta">'
-      +   tile('쓴 돈', won(n * G.price) + '원', '1장 ' + won(G.price) + '원 × ' + won(n) + '장')
-      +   tile('평균과 비교', diff > 0 ? diff + '번 빨리' : diff < 0 ? -diff + '번 늦게' : '딱 평균', '평균 ' + G.N + '번 · 절반은 ' + mgMedian() + '번 안에')
-      +   tile('그 사이 나온 카드', n > 1 ? won(n - 1) + '장' : '없음', n > 1 ? Object.keys(cnt).length + '종' : '바로 나옴')
-      +   tile('제일 많이 나온 카드', topN >= 2 ? esc(G.names[top]) : '—', topN >= 2 ? topN + '번이나 나왔습니다' : '겹친 카드 없음')
+      +   tile('쓴 돈', r ? won(n * G.price) + '원' : '—', r ? '1장 ' + won(G.price) + '원 × ' + won(n) + '장' : '1장 ' + won(G.price) + '원')
+      +   tile('평균과 비교', r ? (diff > 0 ? diff + '번 빨리' : diff < 0 ? -diff + '번 늦게' : '딱 평균') : '—', '평균 ' + G.N + '번 · 절반은 ' + mgMedian() + '번 안에')
+      +   tile('그 사이 나온 카드', r ? (n > 1 ? won(n - 1) + '장' : '없음') : '—', r ? (n > 1 ? Object.keys(cnt).length + '종' : '바로 나옴') : '목표가 나오기 전까지 뽑힌 카드')
+      +   tile('제일 많이 나온 카드', r && topN >= 2 ? esc(G.names[top]) : '—', r ? (topN >= 2 ? topN + '번이나 나왔습니다' : '겹친 카드 없음') : '그 사이 가장 자주 겹친 카드')
       + '</div>'
-      + '<div class="mg-strip" id="mg-strip"></div>'
-      + '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'
-      + '<button type="button" class="gs" id="mg-repick">다른 카드 고르기</button></div>';
+      + '<div class="mg-strip" id="mg-strip">' + (r ? '' : '<em>목표 카드가 나오기까지 뽑힌 카드가 여기에 순서대로 나옵니다</em>') + '</div>'
+      + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'
+        + '<button type="button" class="gs" id="mg-repick">다른 카드 고르기</button></div>' : '');
+    if (!r) return;
     // 목표가 나오기까지 뽑힌 카드들 (최근 40장, 마지막이 목표 카드)
     var strip = $('mg-strip'), last = r.seq.slice(-40);
     if (r.seq.length > 40){ var em = document.createElement('em'); em.textContent = '앞의 ' + won(r.seq.length - 40) + '장 생략 ·'; strip.appendChild(em); }
@@ -962,7 +1026,12 @@
       if (mgEnd) return;
       m.target = +b.getAttribute('data-mg'); m.picking = false; m.res = null;
       renderMini();
-      $('mg-stage').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $('mg-stage').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      return;
+    }
+    if (e.target.closest('#mg-fold')){
+      m.picking = false; renderMini();
+      $('mg-stage').scrollIntoView({ block: 'start', behavior: 'smooth' });
       return;
     }
     if (e.target.closest('#mg-go')){ mgRun(); return; }
