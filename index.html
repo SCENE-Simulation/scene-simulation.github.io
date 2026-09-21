@@ -1670,6 +1670,55 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vt-c.ms b{font-family:"Pretendard Variable",sans-serif;font-size:17px;font-weight:800;line-height:1.3;color:#ff8a8a;white-space:normal}
 @media (prefers-reduced-motion:reduce){.vt-c.ms.soon > span::before{animation:none}}
 
+/* ===== 조회수 예측기: 성적표 표 (기준 시점 · 실제 · 예측 · 오차) ===== */
+.vs-tab th small{display:block;font-size:10.5px;font-weight:500;color:var(--dim);margin-top:1px}
+.vs-tab td.num{font-family:"JetBrains Mono",monospace;font-size:13px}
+.vs-tab td.num b{color:var(--ink)}
+.vs-px{display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 5px!important;border-radius:8px!important;
+  background:rgba(255,181,71,.1)!important;border:1px solid rgba(255,181,71,.35)!important;color:var(--ink);font:700 13px "JetBrains Mono",monospace!important}
+.vs-px .vp-no{width:18px;height:18px;font-size:10px}
+.vs-px svg{width:14px;height:14px;color:#ffb547;transition:transform .15s ease}
+.vs-px[aria-expanded="true"]{background:rgba(255,181,71,.2)!important;border-color:#ffb547!important}
+.vs-px[aria-expanded="true"] svg{transform:rotate(180deg)}
+.vs-err{display:inline-flex;flex-direction:column;align-items:flex-end;gap:0;line-height:1.2}
+.vs-err b{font:800 14px "JetBrains Mono",monospace;color:var(--ink)}
+.vs-err small{font-family:"Pretendard Variable",sans-serif;font-size:10.5px;font-weight:700}
+.vs-err.hit b,.vs-err.hit small{color:var(--mint-t)}
+.vs-err.miss b,.vs-err.miss small{color:#ff8a8a}
+.vs-tab tr.open td{border-bottom-color:transparent}
+.vs-tab tr.vs-sub td{padding-top:0;background:rgba(255,181,71,.04)}
+.vs-ms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:4px 0 8px}
+.vs-m{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid color-mix(in srgb,var(--mc) 40%,transparent)}
+.vs-m b{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap}
+.vs-m em{margin-left:auto;font:700 13px "JetBrains Mono",monospace;font-style:normal;color:var(--ink)}
+.vs-m .vs-err{flex-direction:row;font:700 12px "JetBrains Mono",monospace}
+.vs-m.off{opacity:.5}
+.vs-m.off em{font-family:"Pretendard Variable",sans-serif;font-size:11.5px;color:var(--ink2)}
+@media (max-width:640px){.vs-ms{grid-template-columns:1fr}}
+.vs-tab th{font-family:"Pretendard Variable","Noto Sans KR",sans-serif;letter-spacing:0}
+.vs-tab th.num,.vs-tab td.num{text-align:right}
+.vs-tab tr.vs-sub td,.vs-m b,.vs-wait{font-family:"Pretendard Variable","Noto Sans KR",sans-serif;letter-spacing:0}
+/* 휴대폰: 영상 제목을 윗줄에 두고, 네 칸(기준·실제·예측·오차)을 아랫줄 한 화면에 */
+@media (max-width:640px){
+  .vs-tab,.vs-tab thead,.vs-tab tbody{display:block}
+  .vs-tab tr{display:grid;grid-template-columns:1fr 1fr 1.3fr .95fr;align-items:center;border-bottom:1px solid var(--line)}
+  .vs-tab th,.vs-tab td{border-bottom:0;padding:6px 4px}
+  .vs-tab th:first-child{display:none}
+  .vs-tab tr.vs-r td:first-child{grid-column:1/-1;padding:10px 4px 0}
+  .vs-tab tr.vs-r.open{border-bottom-color:transparent}
+  .vs-tab tr.vs-sub{display:block}
+  .vs-tab tr.vs-sub td{display:block;padding:0 0 4px}
+  .vs-tab td.num{font-size:12.5px}
+  .vs-px{gap:4px;padding:3px 6px 3px 4px!important;font-size:12.5px!important}
+  .vs-px .vp-no{width:16px;height:16px}
+  .vs-err b{font-size:13px}
+  .vs-tab .vs-th{width:44px}
+  .vs-tab tr.on{background:rgba(255,77,79,.08)}
+  .vs-tab tr.on td{background:none}
+}
+.vs-err.vs-wait b{font:700 12px "Pretendard Variable","Noto Sans KR",sans-serif;color:var(--ink2)}
+.vs-err.vs-wait small{color:var(--dim);font-weight:500}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -5175,6 +5224,7 @@ goTab(true,true);
   var PRED = {};                                       // 영상·목표별 예측 (한 번 계산하면 재사용)
 
   // 화면 상태: 순위 기준 창(24시간/7일), 종류 거르기, 표 정렬·검색·보이는 줄 수, 그래프 모드, 펼친 줄
+  var SOPEN = {};                                        // 성적표: 방법별 예측을 펼친 줄
   var rv = 'rank', rk = 24, ft = 'all', ts = 'gain', tq = '', tn = 20, cm = 'cum', OPEN = {}, VC = {}, lastCheck = 0, timer = null;
 
   function show(){
@@ -6156,20 +6206,36 @@ goTab(true,true);
             + '<small>' + (s.n ? s.n + '개 영상에서 확인' : '아직 결과가 없습니다') + '</small></div>';
         }).join('') + '</div>';
     if (!tr.rows.length){ $('vs').innerHTML = h + '<p class="anote">아직 비교할 예측이 없습니다.</p>'; return; }
-    h += '<div class="atab-w"><table class="atab vs-tab"><thead><tr><th>영상</th><th>실제 ' + tg.name + '</th>'
-      + ORDER.map(function(k){ return '<th><span class="vp-no" style="--mc:' + ALLM[k].color + '">' + ALLM[k].b + '</span> ' + ALLM[k].tab + '</th>'; }).join('')
-      + '</tr></thead><tbody>'
-      + tr.rows.slice(0, 15).map(function(r){
-          return '<tr' + (r.v === sel ? ' class="on"' : '') + '><td><button type="button" class="vs-v" data-vid="' + esc(r.v.id) + '"><span class="vs-th">' + thumb(r.v) + '</span>' + esc(r.v.title) + '</button></td>'
-            + '<td>' + (r.done ? '<b>' + fmt(r.act) + '</b>' : '<span class="vs-wait">' + ageTxt(tg.T - age(r.v)) + ' 뒤</span>') + '</td>'
-            + ORDER.map(function(k){
-                var p = r.pr[k], x = r.res[k];
-                if (!p) return '<td>—</td>';
-                return '<td>' + fmt(p.p) + (x ? '<span class="vp-e' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '">' + signPct(x.err) + (x.hit == null ? '' : x.hit ? ' ✓' : ' ✗') + '</span>' : '') + '</td>';
-              }).join('') + '</tr>';
-        }).join('') + '</tbody></table></div>'
-      + '<p class="gnote">✓ 는 실제 조회수가 80% 범위 안에 들어온 경우입니다. 예측은 그 시점까지 있던 기록만으로 계산했습니다. '
-      + '범위는 과거 영상에 같은 방법을 적용해 본 결과로, 10번 중 8번은 실제가 들어오도록 잡은 폭입니다.</p>';
+    // 열: 영상 · ① 기준 시점(예측을 만든 때) 조회수 · ② 목표 시점 실제 조회수 · ③ 예측(종합, 누르면 방법별 3개) · ④ 오차
+    var row = function(r){
+      var p = r.pr[3], x = r.res[3], base = at(r.v, tg.c, 1), open = !!SOPEN[r.v.id + '|' + si];
+      var errCell = !r.done ? '<span class="vs-err vs-wait"><b>' + ageTxt(tg.T - age(r.v)) + '</b><small>뒤 채점</small></span>'
+        : !x ? '—' : '<span class="vs-err' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '"><b>' + signPct(x.err) + '</b>'
+          + (x.hit == null ? '' : '<small>' + (x.hit ? '✓ 범위 안' : '✗ 범위 밖') + '</small>') + '</span>';
+      var h1 = '<tr class="vs-r' + (r.v === sel ? ' on' : '') + (open ? ' open' : '') + '">'
+        + '<td><button type="button" class="vs-v" data-vid="' + esc(r.v.id) + '"><span class="vs-th">' + thumb(r.v) + '</span>' + esc(r.v.title) + '</button></td>'
+        + '<td class="num">' + (base == null ? '—' : fmt(base)) + '</td>'
+        + '<td class="num">' + (r.done ? '<b>' + fmt(r.act) + '</b>' : '<span class="vs-wait">아직</span>') + '</td>'
+        + '<td class="num"><button type="button" class="vs-px" data-sx="' + esc(r.v.id) + '" aria-expanded="' + open + '" title="방법별 예측 보기">'
+        + '<span class="vp-no" style="--mc:' + ALL.color + '">' + ALL.b + '</span>' + (p ? fmt(p.p) : '—')
+        + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>'
+        + '<td class="num">' + errCell + '</td></tr>';
+      var h2 = '<tr class="vs-sub"' + (open ? '' : ' hidden') + '><td colspan="5"><div class="vs-ms">' + [0, 1, 2].map(function(k){
+          var q2 = r.pr[k], y = r.res[k], m = METHODS[k];
+          return '<div class="vs-m' + (q2 ? '' : ' off') + '" style="--mc:' + m.color + '"><span class="vp-no">' + m.b + '</span><b>' + m.tab + '</b>'
+            + '<em>' + (q2 ? fmt(q2.p) : '예측 없음') + '</em>'
+            + (y ? '<span class="vs-err' + (y.hit == null ? '' : y.hit ? ' hit' : ' miss') + '">' + signPct(y.err) + (y.hit == null ? '' : y.hit ? ' ✓' : ' ✗') + '</span>' : '') + '</div>';
+        }).join('') + '</div></td></tr>';
+      return h1 + h2;
+    };
+    h += '<div class="atab-w"><table class="atab vs-tab"><thead><tr><th>영상</th>'
+      + '<th class="num">기준 시점<small>게시 ' + tg.from + ' 뒤</small></th>'
+      + '<th class="num">실제 조회수<small>게시 ' + tg.name + ' 뒤</small></th>'
+      + '<th class="num">예측<small>종합 · 눌러서 방법별</small></th>'
+      + '<th class="num">오차<small>예측 − 실제</small></th>'
+      + '</tr></thead><tbody>' + tr.rows.slice(0, 15).map(row).join('') + '</tbody></table></div>'
+      + '<p class="gnote">기준 시점은 예측을 만든 때(게시 ' + tg.from + ' 뒤)의 조회수이고, 예측은 그때까지 있던 기록만으로 계산했습니다. '
+      + '오차가 + 이면 실제보다 높게, − 이면 낮게 예측한 것입니다. ✓ 는 실제 조회수가 80% 범위 안에 들어온 경우입니다.</p>';
     $('vs').innerHTML = h;
   }
 
@@ -6233,6 +6299,8 @@ goTab(true,true);
       if (mt.closest('.vm-list')) $('vd-pred').scrollIntoView({ block: 'start', behavior: 'smooth' });
       return;
     }
+    var sx = e.target.closest('[data-sx]');
+    if (sx){ var sk = sx.getAttribute('data-sx') + '|' + si; SOPEN[sk] = !SOPEN[sk]; renderScore(); return; }
     var sc = e.target.closest('[data-si]');
     if (sc){ si = +sc.getAttribute('data-si'); renderScore(); }
   });
