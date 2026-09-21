@@ -1046,7 +1046,7 @@
       + s + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
-      + (past.length ? '<span><i class="k-d"></i>지난 목표의 실제</span>' : '')
+      + (past.length ? '<span><i class="k-d"></i>예측 포인트</span>' : '')
       + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
     function valAt(h){
