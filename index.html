@@ -5547,7 +5547,7 @@ goTab(true,true);
     }
     if (pw != null && el > pw + 1) return { cls: 'miss', done: true, pw: pw, aw: null, txt: '✗ 예측한 ' + pw + '주 차가 지났지만 아직 못 넘음' };
     if (pw == null && el > VE.WEEKS) return { cls: 'hit', done: true, pw: pw, aw: null, txt: '✓ 8주 안에 못 넘음 (예측대로)' };
-    return { cls: '', done: false, pw: pw, aw: null, txt: '진행 중 · ' + Math.floor(el + 1) + '주 차' };
+    return { cls: '', done: false, pw: pw, aw: null, txt: '진행 중' };
   }
   function history(v){
     if (!v.ms || !v.ms.length) return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span><small class="vh-n">게시 15일 뒤 기록이 2일 쌓이면 다음 100만 단위를 몇 주 차에 넘을지 예측을 고정해 두고, 실제로 넘은 주와 비교해 채점합니다.</small></div>';
