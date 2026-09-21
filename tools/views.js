@@ -425,7 +425,8 @@
     function Y(y){ return Tp + (1 - y / top) * (H - Tp - B); }
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="조회수 추이와 예측">'
       + '<defs><linearGradient id="vg-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e96387" stop-opacity=".38"/><stop offset="1" stop-color="#e96387" stop-opacity="0"/></linearGradient>'
-      + '<linearGradient id="vg-f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + m.color + '" stop-opacity=".08"/><stop offset="1" stop-color="' + m.color + '" stop-opacity=".3"/></linearGradient></defs>';
+      + '<linearGradient id="vg-f" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="' + m.color + '" stop-opacity=".08"/><stop offset="1" stop-color="' + m.color + '" stop-opacity=".3"/></linearGradient>'
+      + '<pattern id="vg-h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(255,255,255,.015)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,.07)" stroke-width="2"/></pattern></defs>';
     for (var y = 0; y <= top + 1e-9; y += st)
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,' + (y ? .07 : .18) + ')"/>'
         + '<text x="' + (L - 8) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#8e8e93">' + fmt(y) + '</text>';
@@ -439,6 +440,15 @@
       s += '<line x1="' + X(tg.T).toFixed(1) + '" x2="' + X(tg.T).toFixed(1) + '" y1="' + (Tp - 6) + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.14)" stroke-dasharray="3 5"/>'
         + '<text x="' + X(tg.T).toFixed(1) + '" y="' + (Tp - 12) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#aeaeb2">' + tg.name + '</text>';
     });
+    // 수집을 시작하기 전 구간 (기록 없음) — 빗금으로 표시
+    var sb = Math.min(VE.since(v), xmax);
+    if (sb > 0){
+      var bw = X(sb) - L;
+      s += '<rect x="' + L + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="url(#vg-h)"/>'
+        + (bw > 150 ? '<text x="' + (L + bw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 - 4).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#8e8e93">수집 시작 전 · 기록 없음</text>'
+          + '<text x="' + (L + bw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 + 14).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6e6e73">'
+          + (DATA.since ? when(Date.parse(DATA.since)) + '부터 기록 · ' : '') + '유튜브는 지난 기록을 주지 않습니다</text>' : '');
+    }
     // 실제 추이 (면 + 선)
     var pts = v.snaps.filter(function(p){ return p[0] <= xmax; }), s0 = VE.since(v);          // 게시 직후 기록이 없으면 기록 시작점부터 그린다
     var line = s0 ? '' : 'M' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1);
