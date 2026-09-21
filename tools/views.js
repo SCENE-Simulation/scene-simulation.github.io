@@ -22,6 +22,12 @@
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
   function full(n){ return Math.round(n).toLocaleString('ko-KR'); }
+  // 범위 양 끝이 같은 글자로 반올림되면 자릿수를 늘린다 (6.1만~6.1만 → 6.08만~6.14만)
+  function fmtR(lo, hi){
+    var a = fmt(lo), b = fmt(hi);
+    if (a === b && lo >= 1e4 && hi < 1e6) return (lo / 1e4).toFixed(2) + '만~' + (hi / 1e4).toFixed(2) + '만';
+    return a + '~' + b;
+  }
   // 12,345 → 1.2만, 1,234,567 → 123만
   function fmt(n){
     n = Math.round(n);
@@ -183,12 +189,12 @@
       for (h = 192; h <= 720; h += 24) hrs.push(h);
       for (h = 888; h <= a; h += 168) hrs.push(h);
       hrs = hrs.filter(function(x){ return x <= a; });
-      var last = [0, 0, 0];
+      var last = [0, 0, 0], pt = 0;
       var snaps = hrs.map(function(t){
-        var vv = Math.max(last[0], V(t) * (1 + gauss() * 0.01)),
-            ll = Math.max(last[1], vv * rl * (1 + 0.4 * Math.exp(-t / 12)) * (1 + gauss() * 0.02)),
+        var vv = last[0] + Math.max(0, (V(t) - V(pt)) * (1 + gauss() * 0.12)),   // 흔들림은 증가분에 준다(오래된 영상도 조금씩 는다)
+            ll =Math.max(last[1], vv * rl * (1 + 0.4 * Math.exp(-t / 12)) * (1 + gauss() * 0.02)),
             cc = Math.max(last[2], vv * rc * (1 + Math.exp(-t / 8)) * (1 + gauss() * 0.03));
-        last = [vv, ll, cc];
+        last = [vv, ll, cc]; pt = t;
         return [t, Math.round(vv), Math.round(ll), Math.round(cc)];
       });
       vids.push({ id: 'demo' + two(n + 1), title: '예시 영상 ' + two(n + 1), published: new Date(now - a * 3600e3).toISOString(), snaps: snaps });
@@ -295,21 +301,71 @@
     w.classList.toggle('at-end', row.scrollLeft + row.clientWidth > row.scrollWidth - 4);
   }
 
-  // ----- 고른 영상: 썸네일 · 지금 현황 · 예측 현황 · 그래프 -----
+  // ----- 고른 영상: 제목 · 썸네일과 지금 현황(같은 높이) · 예측 현황 · 그래프 -----
+  // 같은 게시 후 시간에서 다른 영상들의 값. k 1: 조회수(그 시간까지 기록이 있는 영상만), 2·3: 조회수 대비 좋아요·댓글 비율
+  function peers(v, a, k){
+    var out = [];
+    VIDEOS.forEach(function(i){
+      if (i === v) return;
+      if (k === 1){ if (age(i) >= a) out.push(at(i, a, 1)); return; }
+      var t = Math.min(a, age(i)), V = at(i, t, 1);
+      if (V > 0) out.push(at(i, t, k) / V);
+    });
+    return out;
+  }
+  // 채널 안에서의 위치: 위쪽 절반이면 "상위 N%", 아니면 "하위 N%"
+  function rank(x, arr){
+    if (arr.length < 3) return '';
+    var n = arr.length + 1, up = arr.filter(function(y){ return y > x; }).length + 1, dn = arr.filter(function(y){ return y < x; }).length + 1;
+    return up / n <= 0.5 ? '<em class="up">상위 ' + Math.max(1, Math.round(up / n * 100)) + '%</em>'
+      : '<em>하위 ' + Math.max(1, Math.round(dn / n * 100)) + '%</em>';
+  }
+  // 다른 영상들의 비율을 점으로 늘어놓고(세로선은 보통값) 이 영상을 분홍 점으로
+  function strip(x, arr){
+    if (arr.length < 3) return '';
+    var all = arr.concat([x]), mn = Math.min.apply(null, all), w = Math.max.apply(null, all) - mn || 1;
+    function P(y){ return ((y - mn) / w * 100).toFixed(1) + '%'; }
+    return '<span class="vd-strip" title="점: 채널의 다른 영상 · 세로선: 보통 · 분홍: 이 영상">'
+      + arr.map(function(y){ return '<i style="left:' + P(y) + '"></i>'; }).join('')
+      + '<i class="md" style="left:' + P(q(arr, 0.5)) + '"></i><b style="left:' + P(x) + '"></b></span>';
+  }
+  // 게시부터 지금까지 누적 조회수 곡선
+  function spark(v, a){
+    var W = 120, H = 30, n = 40, V = at(v, a, 1) || 1, d = '';
+    for (var i = 0; i <= n; i++) d += (i ? ' L' : 'M') + (W * i / n).toFixed(1) + ' ' + (H - 2 - at(v, a * i / n, 1) / V * (H - 5)).toFixed(1);
+    return '<svg class="vd-spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">'
+      + '<path class="a" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/><path class="l" d="' + d + '" vector-effect="non-scaling-stroke"/></svg>';
+  }
+  // 최근 n칸의 증가 (step 시간 단위, 마지막 막대가 가장 최근)
+  function bars(v, a, step, n){
+    var inc = [];
+    for (var j = n - 1; j >= 0; j--){ var t1 = a - j * step; if (t1 > 0) inc.push(at(v, t1, 1) - at(v, Math.max(0, t1 - step), 1)); }
+    var mx = Math.max.apply(null, inc.concat([1]));
+    return '<span class="vd-bars" aria-hidden="true">' + inc.map(function(x){ return '<i style="height:' + Math.max(6, x / mx * 100).toFixed(0) + '%"></i>'; }).join('') + '</span>';
+  }
+  function tile(k, chip, val, sub, viz){
+    return '<div class="vd-s"><div class="vd-sh"><span>' + k + '</span>' + chip + '</div><b>' + val + '</b><small>' + sub + '</small>'
+      + (viz ? '<div class="vd-sv">' + viz + '</div>' : '') + '</div>';
+  }
+
   function renderVideo(){
-    var v = sel, a = age(v), V = at(v, a, 1), L = at(v, a, 2), C = at(v, a, 3), dh = a >= 2 ? V - at(v, a - 1, 1) : V, s = status(v);
+    var v = sel, a = age(v), V = at(v, a, 1), L = at(v, a, 2), C = at(v, a, 3), s = status(v);
+    var daily = a > 48, step = daily ? 24 : 1, dh = V - at(v, Math.max(0, a - step), 1);   // 이틀이 지나면 시간 단위 대신 하루 단위
+    var pv = peers(v, a, 1), pl = peers(v, a, 2), pc = peers(v, a, 3);
     var link = DATA.demo ? '' : 'https://www.youtube.com/watch?v=' + encodeURIComponent(v.id);
-    $('vd').innerHTML = '<div class="vd-top">'
+    $('vd').innerHTML = '<div class="vd-hd"><div class="vd-ht"><div class="vd-hm"><span class="vp-st' + (s.live ? ' live' : '') + '">' + s.t + '</span>'
+      + '<small class="vd-when">게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전</small></div><h3>' + esc(v.title) + '</h3></div>'
+      + (link ? '<a class="gs vd-yt" href="' + link + '" target="_blank" rel="noopener">YouTube에서 보기 ↗</a>' : '') + '</div>'
+      + '<div class="vd-top">'
       + (link ? '<a class="vd-th" href="' + link + '" target="_blank" rel="noopener" aria-label="YouTube에서 보기">' : '<div class="vd-th">')
       + thumb(v) + '<span class="vd-play">' + PLAY + '</span>' + (link ? '</a>' : '</div>')
-      + '<div class="vd-info"><span class="vp-st' + (s.live ? ' live' : '') + '">' + s.t + '</span>'
-      + '<h3>' + esc(v.title) + '</h3><small class="vd-when">게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전</small>'
       + '<div class="vd-stats">'
-      + stat('조회수', fmt(V), full(V) + '회')
-      + stat('좋아요', fmt(L), '조회수의 ' + pct(L / V, 1))
-      + stat('댓글', fmt(C), '조회수의 ' + pct(C / V, 2))
-      + stat('최근 1시간', '+' + fmt(dh), a >= 2 ? '시간당 증가' : '게시 직후')
-      + '</div></div></div>'
+      + tile('조회수', rank(V, pv), fmt(V), full(V) + '회' + (pv.length >= 3 ? ' · 같은 시점 보통 ' + fmt(q(pv, 0.5)) : ''), spark(v, a))
+      + tile('좋아요', rank(L / V, pl), full(L), '조회수의 ' + pct(L / V, 1) + (pl.length >= 3 ? ' · 보통 ' + pct(q(pl, 0.5), 1) : ''), strip(L / V, pl))
+      + tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' · 보통 ' + pct(q(pc, 0.5), 2) : ''), strip(C / V, pc))
+      + tile(daily ? '최근 하루' : '최근 1시간', '', '+' + full(dh), daily ? '지난 7일 +' + fmt(V - at(v, Math.max(0, a - 168), 1)) : a >= 2 ? '지난 24시간 +' + fmt(V - at(v, Math.max(0, a - 24), 1)) : '게시 직후',
+          bars(v, a, step, daily ? 14 : 24))
+      + '</div></div>'
       + '<div class="vd-pred" id="vd-pred"><div class="vd-ph"><h4>예측 현황</h4><div class="vd-mt" role="tablist" aria-label="예측 방법">'
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
@@ -318,7 +374,6 @@
       + '<div class="vd-chart" id="vd-chart"></div>';
     renderPred();
   }
-  function stat(k, v, s){ return '<div class="vd-s"><span>' + k + '</span><b>' + v + '</b><small>' + s + '</small></div>'; }
 
   function renderPred(){
     var v = sel, m = ALLM[mi];
@@ -331,25 +386,52 @@
     $('vd-hs').innerHTML = TARGETS.map(function(tg, k){ return hzCard(v, k); }).join('');
     chart();
   }
+
+  // 목표 카드: 큰 숫자(예상 또는 실제) · 게이지(채운 막대 = 지금/실제, 칸 = 예상 범위, 세로 막대 = 예측) · 방법별 예측
+  function gauge(fill, r, act){
+    var top = Math.max(fill, r ? (r.hi != null ? r.hi : r.p) : 0) * 1.1 || 1;
+    function P(x){ return Math.min(100, x / top * 100).toFixed(1) + '%'; }
+    return '<div class="vh-g" aria-hidden="true"><i class="now" style="width:' + P(fill) + '"></i>'
+      + (r && r.lo != null ? '<i class="band" style="left:' + P(r.lo) + ';width:' + ((r.hi - r.lo) / top * 100).toFixed(1) + '%"></i>' : '')
+      + (r ? '<i class="pm" style="left:' + P(r.p) + '"></i>' : '')
+      + (act ? '<i class="act" style="left:' + P(fill) + '"></i>' : '') + '</div>';
+  }
+  function mchips(o){
+    if (!o.pr) return '';
+    return '<div class="vh-ms">' + [0, 1, 2].map(function(k){
+      var r = o.pr[k], m = METHODS[k];
+      if (!r) return '<span class="vh-mc off" style="--mc:' + m.color + '"><i>' + m.b + '</i>—</span>';
+      var res = o.done && r.lo != null ? (o.act >= r.lo && o.act <= r.hi ? ' hit' : ' miss') : '';
+      return '<button type="button" class="vh-mc' + (k === mi ? ' on' : '') + res + '" data-mi="' + k + '" style="--mc:' + m.color + '" title="' + m.name
+        + (res ? (res === ' hit' ? ' · 범위 안' : ' · 범위 밖') : '') + '"><i>' + m.b + '</i>' + fmt(r.p) + '</button>';
+    }).join('') + '</div>';
+  }
   function hzCard(v, k){
     var o = hz(v, k), m = ALLM[mi], tg = o.tg, r = o.pr ? o.pr[mi] : null, a = age(v), V = at(v, a, 1);
-    var top = function(tag, cls){ return '<div class="vh-h"><b>' + tg.name + (o.done ? '' : ' 뒤') + '</b><span class="vh-tag ' + (cls || '') + '">' + tag + '</span></div>'; };
+    var head = function(tag, cls){
+      return '<div class="vh-h"><div><b>게시 후 ' + tg.name + '</b><small>' + when(v.pub + tg.T * 3600e3) + '</small></div>'
+        + '<span class="vh-tag ' + (cls || '') + '">' + tag + '</span></div>';
+    };
+    var range = function(lab){ return r && r.lo != null ? '<span class="r">' + lab + ' <b>' + fmtR(r.lo, r.hi) + '</b></span>' : '<span>범위는 과거 영상이 더 모이면</span>'; };
     if (o.done){
       var res = r ? { err: (r.p - o.act) / o.act, hit: r.lo != null && o.act >= r.lo && o.act <= r.hi } : null;
-      return '<div class="vh done' + (res ? (res.hit ? ' hit' : ' miss') : '') + '" style="--mc:' + m.color + '">'
-        + top(res ? (res.hit ? '예측 적중' : '범위 밖') : '지남', res ? (res.hit ? 'hit' : 'miss') : '')
+      var cls = res ? (res.hit ? 'hit' : r.lo != null ? 'miss' : '') : '';
+      return '<div class="vh done ' + cls + '" style="--mc:' + m.color + '">'
+        + head(res ? (res.hit ? '✓ 예측 적중' : r.lo != null ? '범위 밖' : '지남') : '지남', cls)
         + '<div class="vh-v">' + fmt(o.act) + '<small>실제</small></div>'
-        + (r ? '<div class="vh-r">게시 ' + tg.from + ' 뒤 예측 <b>' + fmt(r.p) + '</b>' + (r.lo != null ? ' <small>(' + fmt(r.lo) + '~' + fmt(r.hi) + ')</small>' : '') + '</div>'
-             + '<small class="vh-n">' + (Math.abs(res.err) < 0.005 ? '실제와 거의 같게 예측했습니다' : '예측이 실제보다 ' + Math.round(Math.abs(res.err) * 100) + '% ' + (res.err > 0 ? '높았습니다' : '낮았습니다')) + '</small>'
+        + (r ? '<div class="vh-up" title="' + (Math.abs(res.err) < 0.005 ? '실제와 거의 같게 예측했습니다'
+               : '예측이 실제보다 ' + Math.round(Math.abs(res.err) * 100) + '% ' + (res.err > 0 ? '높았습니다' : '낮았습니다')) + '">'
+             + tg.from + ' 때 예측 <b>' + fmt(r.p) + '</b> · 오차 <b>' + signPct(res.err) + '</b></div>'
+             + gauge(o.act, r, true) + '<div class="vh-gl"><span>실제 <b>' + fmt(o.act) + '</b></span>' + range('예측 범위') + '</div>'
            : '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>')
-        + '</div>';
+        + mchips(o) + '</div>';
     }
-    if (!r) return '<div class="vh na">' + top('예측 불가') + '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small></div>';
-    return '<div class="vh" style="--mc:' + m.color + '">' + top(ageTxt(tg.T - a) + ' 남음', 'live')
-      + '<div class="vh-v">' + fmt(r.p) + '<small>예측</small></div>'
-      + '<div class="vh-r">' + (r.lo != null ? fmt(r.lo) + ' ~ ' + fmt(r.hi) + ' <small>80% 범위</small>' : '<small>범위를 낼 과거 영상이 부족합니다</small>') + '</div>'
-      + '<div class="vh-bar" title="지금 조회수 ÷ 예측"><i style="width:' + Math.min(100, V / r.p * 100).toFixed(1) + '%"></i></div>'
-      + '<small class="vh-n">지금 ' + fmt(V) + ' → 약 ' + (r.p / V).toFixed(1) + '배</small></div>';
+    if (!r) return '<div class="vh na">' + head('예측 불가') + '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>' + mchips(o) + '</div>';
+    return '<div class="vh" style="--mc:' + m.color + '">' + head(ageTxt(tg.T - a) + ' 남음', 'live')
+      + '<div class="vh-v">' + fmt(r.p) + '<small>예상</small></div>'
+      + '<div class="vh-up">지금보다 <b>+' + fmt(Math.max(0, r.p - V)) + '</b> · ' + (r.p / V >= 2 ? '약 ' + (r.p / V).toFixed(1) + '배' : '+' + Math.round((r.p / V - 1) * 100) + '%') + '</div>'
+      + gauge(V, r, false) + '<div class="vh-gl"><span class="n">지금 <b>' + fmt(V) + '</b></span>' + range('범위') + '</div>'
+      + mchips(o) + '</div>';
   }
 
   // ----- 그래프: 실제 추이 + 예측 부채꼴(80% 범위) + 지난 목표의 실제와 그때 한 예측. 마우스를 올리면 값 -----
