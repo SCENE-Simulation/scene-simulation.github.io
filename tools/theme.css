@@ -1318,3 +1318,19 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   .vr-jump{width:100%}
   .vr-jump button{flex:1 1 0;min-width:0;padding:7px 4px;font-size:12px}
 }
+/* 성적표 예측 버튼: 숫자 길이와 상관없이 같은 크기 (숫자는 오른쪽 맞춤) */
+.vs-px{width:112px;justify-content:space-between}
+.vs-px .vs-pv{flex:1;min-width:0;text-align:right;font:inherit;color:inherit}
+@media (max-width:640px){.vs-px{width:100%;max-width:112px}}
+/* 100만 단위 목록: 아래 줄 오른쪽 추이 (강함 · 중간 · 약함, 현황 칸과 같은 색) */
+.mb-f .mb-ft{min-width:0}
+.mb-tr{margin-left:auto;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;color:var(--ink2);font-weight:600}
+.mb-tr svg{width:13px;height:10px;flex:0 0 auto}
+.mb-tr rect{fill:rgba(255,255,255,.16)}
+#v-views .mb-r .mb-f .mb-tr b{font-weight:800}
+#v-views .mb-r .mb-f .mb-tr.hi b{color:#ff5a5f}
+#v-views .mb-r .mb-f .mb-tr.mid b{color:#ffb547}
+#v-views .mb-r .mb-f .mb-tr.lo b{color:var(--ink2)}
+.mb-tr.hi rect.on{fill:#ff5a5f}
+.mb-tr.mid rect.on{fill:#ffb547}
+.mb-tr.lo rect.on{fill:var(--ink2)}

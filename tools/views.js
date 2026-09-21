@@ -609,12 +609,17 @@
     if (x.eta == null) foot = x.why === 'far' ? '지금 추세로는 ' + fmtM(x.M) + ' 달성이 어렵습니다' : '기록이 조금 더 쌓이면 달성 예상일이 나옵니다';
     else foot = '<b>' + (x.eta < 1 ? '하루 안' : '약 ' + Math.ceil(x.eta) + '일 뒤') + '</b> ' + fmtM(x.M) + ' 달성 예상 · ' + dday(v, x.eta * 24) + ' 무렵'
       + (ok ? '' : ' <span class="mb-far">8주 넘게</span>');
+    // 아래 줄 오른쪽: 추이 (현황 칸의 추이와 같은 기준 — 최근 24시간 증가가 채널 영상 중 몇 번째인지)
+    var tr = trend(v), trTxt = !tr ? '' : '<span class="mb-tr ' + tr.lv.c + '" title="최근 24시간 증가 채널 ' + tr.rank + '위 / ' + tr.n + '편">추이'
+      + '<svg viewBox="0 0 13 10" aria-hidden="true">' + [0, 1, 2].map(function(k){
+          return '<rect x="' + k * 4.5 + '" y="' + (6 - k * 3) + '" width="3.5" height="' + (4 + k * 3) + '" rx="1"' + (k < 3 - TREND.indexOf(tr.lv) ? ' class="on"' : '') + '/>';
+        }).join('') + '</svg><b>' + tr.lv.t + '</b></span>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
       + '<span class="mb-now">구간 <b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span></span>'
       + '<span class="mb-e"><small>' + fmtM(x.M) + '까지</small><span class="mb-left"><b>' + leftTxt + '</b><em>남음</em></span></span>'
-      + '<span class="mb-f">' + foot + '</span></button>';
+      + '<span class="mb-f"><span class="mb-ft">' + foot + '</span>' + trTxt + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
@@ -702,14 +707,16 @@
   function md(ms){ var d = new Date(ms); return (d.getMonth() + 1) + '/' + d.getDate(); }
   function barChart(v, u, span, W, H){
     var U = UNITS[u], a = age(v), nowMs = v.pub + a * 3600e3, L = 46, R = 10, Tp = 24, B = 22, slots = [];
-    var st0 = Math.max(floorSlot(nowMs - (span || U.span) * 3600e3, u), floorSlot(v.pub, u));
+    // 칸 수는 고른 기간 그대로 (15분 24시간 96칸 · 1시간 168칸 · 1일 30칸 · 1주일 12칸). 새 영상도 막대가 뚱뚱해지지 않게 게시 전 칸은 비워 둔다
+    var N = Math.round((span || U.span) / U.step), st0 = floorSlot(nowMs - (N - 1) * U.step * 3600e3, u);
     var s0 = v.vs.snaps[0][0];                                                       // 기록이 시작된 때(게시 후 시간)
     for (var t = st0; t < nowMs; t = nextSlot(t, u)){
-      var e = nextSlot(t, u), ta = Math.max(0, (t - v.pub) / 3600e3), tb = (Math.min(e, nowMs) - v.pub) / 3600e3, cut = false;
-      var x0 = av(v, ta), x1 = av(v, tb);
+      var e = nextSlot(t, u), pre = e <= v.pub, ta = Math.max(0, (t - v.pub) / 3600e3), tb = (Math.min(e, nowMs) - v.pub) / 3600e3, cut = false;
+      var x0 = pre ? null : av(v, ta), x1 = pre ? null : av(v, tb);
       // 칸 중간에 기록이 시작됐으면 기록이 있는 부분만 센다 (1일·1주일 칸이 수집 시작 날에 통째로 비지 않게)
       if (x0 == null && x1 != null && s0 > ta && s0 < tb){ x0 = av(v, s0); cut = true; }
-      slots.push({ t: t, e: e, x: x0 != null && x1 != null && tb > ta ? Math.max(0, x1 - x0) : null, open: e > nowMs, cut: cut ? v.pub + s0 * 3600e3 : 0 });
+      slots.push({ t: t, e: e, pre: pre, x: x0 != null && x1 != null && tb > ta ? Math.max(0, x1 - x0) : null, open: e > nowMs,
+        cut: cut ? v.pub + s0 * 3600e3 : 0, pub: t < v.pub && v.pub < e });
     }
     var n = Math.max(1, slots.length), inc = slots.map(function(o){ return o.x; });
     var mx = Math.max.apply(null, inc.filter(function(x){ return x != null; }).concat([1])), stp = niceStep(mx * 1.1 / 3), top = Math.ceil(mx * 1.1 / stp) * stp, bw = (W - L - R) / n;
@@ -721,10 +728,13 @@
     for (var y = 0; y <= top + 1e-9; y += stp)
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,' + (y ? .06 : .16) + ')"/>'
         + '<text x="' + (L - 7) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#8e8e93">' + fmt(y) + '</text>';
+    // 게시 전 구간: 빗금 없이 비워 두고 이름만
+    var np = 0; while (np < n && slots[np].pre) np++;
+    if (np && X(np) - L > 70) s += '<text x="' + ((L + X(np)) / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6e6e73">게시 전</text>';
     // 기록이 없는 구간(수집 전)
     var gs = -1, i;
     for (i = 0; i <= n; i++){
-      var none = i < n && inc[i] == null;
+      var none = i < n && inc[i] == null && !slots[i].pre;
       if (none && gs < 0) gs = i;
       if (!none && gs >= 0){
         s += '<rect x="' + X(gs).toFixed(1) + '" y="' + Tp + '" width="' + (X(i) - X(gs)).toFixed(1) + '" height="' + (H - Tp - B) + '" fill="url(#vg-h2)"/>'
@@ -732,20 +742,27 @@
         gs = -1;
       }
     }
-    // 날짜 눈금: 자정마다, 글자가 겹치지 않을 만큼만
-    var d = new Date(slots[0].t), lastX = -99;
-    d.setHours(24, 0, 0, 0);
-    for (; d.getTime() < nowMs; d.setDate(d.getDate() + 1)){
-      var x = XT(d.getTime());
-      if (x - lastX < 44 || x < L + 10) continue;
-      lastX = x;
-      s += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.07)"/>'
-        + '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10.5" fill="#8e8e93">' + md(d.getTime()) + '</text>';
+    // 날짜 눈금. 15분·1시간: 자정마다 경계에 / 1일·1주일: 막대 가운데에, 맨 오른쪽(지금) 칸부터 글자가 겹치지 않게 건너뛰며
+    var coarse = u === 'd' || u === 'w';
+    if (coarse){
+      for (var k = Math.max(1, Math.ceil(46 / bw)), j = n - 1; j >= 0; j -= k)
+        s += '<text x="' + (X(j) + bw / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10.5" fill="#8e8e93">' + md(slots[j].t) + (u === 'w' ? '~' : '') + '</text>';
+    } else {
+      var d = new Date(slots[0].t), lastX = -99;
+      d.setHours(24, 0, 0, 0);
+      for (; d.getTime() < nowMs; d.setDate(d.getDate() + 1)){
+        var x = XT(d.getTime());
+        if (x - lastX < 44 || x < L + 10) continue;
+        lastX = x;
+        s += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.07)"/>'
+          + '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10.5" fill="#8e8e93">' + md(d.getTime()) + '</text>';
+      }
     }
+    // 게시 표시. 1일·1주일은 막대를 가로지르지 않게 게시한 칸의 왼쪽 경계에 긋고 날짜·시각을 적는다
     if (slots[0].t <= v.pub){
-      var px = XT(v.pub);
+      var px = coarse ? X(np) : XT(v.pub), pl = '게시 ' + (coarse ? md(v.pub) + ' ' : '') + hm(v.pub), pr = px + 100 > W - R;
       s += '<line x1="' + px.toFixed(1) + '" x2="' + px.toFixed(1) + '" y1="' + (Tp - 8) + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-dasharray="3 3"/>'
-        + '<text x="' + (px + 4).toFixed(1) + '" y="' + (Tp - 10) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">게시 ' + hm(v.pub) + '</text>';
+        + '<text x="' + (pr ? px - 4 : px + 4).toFixed(1) + '" y="' + (Tp - 10) + '"' + (pr ? ' text-anchor="end"' : '') + ' font-size="10.5" font-weight="700" fill="#ff9e9a">' + pl + '</text>';
     }
     inc.forEach(function(x, i){
       if (x == null) return;
@@ -757,7 +774,7 @@
       if (x == null) return;
       var o = slots[i], lab = u === 'q' || u === 'h' ? md(o.t) + ' ' + hm(o.t) + ' ~ ' + hm(o.e) : u === 'd' ? md(o.t) : md(o.t) + ' ~ ' + md(o.e - 1);
       s += '<rect class="hit" data-bi="' + i + '" x="' + X(i).toFixed(1) + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="transparent"'
-        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 는 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
+        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 는 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : o.pub ? ' · 게시 ' + hm(v.pub) + ' 뒤' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
     });
     return s + '</svg>';
   }
@@ -1142,7 +1159,7 @@
         + '<td class="num">' + (base == null ? '—' : fmt(base)) + '</td>'
         + '<td class="num">' + (r.done ? '<b>' + fmt(r.act) + '</b>' : '<span class="vs-wait">아직</span>') + '</td>'
         + '<td class="num"><button type="button" class="vs-px" data-sx="' + esc(r.v.id) + '" aria-expanded="' + open + '" title="방법별 예측 보기">'
-        + '<span class="vp-no" style="--mc:' + ALL.color + '">' + ALL.b + '</span>' + (p ? fmt(p.p) : '—')
+        + '<span class="vp-no" style="--mc:' + ALL.color + '">' + ALL.b + '</span><b class="vs-pv">' + (p ? fmt(p.p) : '—') + '</b>'
         + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>'
         + '<td class="num">' + errCell + '</td></tr>';
       var h2 = '<tr class="vs-sub"' + (open ? '' : ' hidden') + '><td colspan="5"><div class="vs-ms">' + [0, 1, 2].map(function(k){
