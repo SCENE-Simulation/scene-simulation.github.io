@@ -144,7 +144,7 @@
   var PRED = {};                                       // 영상·목표별 예측 (한 번 계산하면 재사용)
 
   // 화면 상태: 순위 기준 창(24시간/7일), 종류 거르기, 표 정렬·검색·보이는 줄 수, 그래프 모드, 펼친 줄
-  var rk = 24, ft = 'all', ts = 'gain', tq = '', tn = 20, cm = 'cum', OPEN = {}, VC = {}, lastCheck = 0, timer = null;
+  var rv = 'rank', rk = 24, ft = 'all', ts = 'gain', tq = '', tn = 20, cm = 'cum', OPEN = {}, VC = {}, lastCheck = 0, timer = null;
 
   function show(){
     if (DATA){ render(); return; }
@@ -314,10 +314,10 @@
     return (y == null ? -1 : y) - (x == null ? -1 : x);
   }
 
-  // ---------- 게시 3주 뒤: 100만 단위 돌파 (④ 장기 추세, 계산은 views-engine.js) ----------
+  // ---------- 게시 3주 뒤: 100만 단위 돌파 (④ 장기 추세, 1주 ~ 8주 주 단위, 계산은 views-engine.js) ----------
   var LT = { no: '④', b: '4', name: '장기 추세법', color: '#5bb4ec',
-    short: '게시 3주가 지나면 하루 증가량이 나이에 따라 점점 줄어드는 흐름으로 보고, 다음 100만 단위에 언제 닿을지 계산합니다.',
-    desc: '최근 24시간 증가량과 그 앞 2주의 증가량을 비교해 얼마나 빨리 줄어드는지 재고, 그 속도로 줄어든다고 보고 100만 단위에 닿는 날을 계산합니다.',
+    short: '게시 3주가 지나면 하루 증가량이 나이에 따라 점점 줄어드는 흐름으로 보고, 다음 100만 단위를 1주~8주 중 언제 넘을지 주 단위로 계산합니다.',
+    desc: '최근 24시간 증가량과 그 앞 2주의 증가량을 비교해 얼마나 빨리 줄어드는지 재고, 그 흐름이 조금씩 흔들릴 수 있다고 보고 1주~8주 안에 다음 100만을 넘을 확률을 주마다 계산합니다.',
     uses: ['최근 24시간 증가', '2주 추이'],
     pro: '오래된 영상의 느린 증가에 맞음', con: '갑자기 다시 뜨는 영상(역주행)은 늦게 따라감' };
   var CH = { high: '높음', mid: '보통', low: '낮음' };
@@ -328,64 +328,60 @@
     return VC[key];
   }
   function nowMs(v){ return v.pub + age(v) * 3600e3; }
-  function etaTxt(h){ return h == null ? '닿기 어려움' : h < 1 ? '1시간 안' : h < 1440 ? '약 ' + ageTxt(h) + ' 뒤' : '약 ' + far(h).join(' ') + (h < 8760 ? ' 뒤' : ''); }
   // 날짜: 올해가 아니면 연도를 붙인다 (27.3/5)
-  function dday(v, h){ var n = new Date(nowMs(v)), d = new Date(nowMs(v) + h * 3600e3); return (d.getFullYear() !== n.getFullYear() ? String(d.getFullYear()).slice(2) + '.' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
   function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '.' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
-  // 남은 기간 크게: 시간 → 일 → 개월 → 1년 넘게
-  function far(h){ return h < 24 ? [Math.max(1, Math.round(h)), '시간'] : h < 1440 ? [Math.round(h / 24), '일'] : h < 8760 ? [Math.round(h / 720), '개월'] : ['1년', '넘게']; }
-
-  // 맨 위: 2주 안에 다음 100만 단위를 넘길 가능성이 높은 영상
-  function renderSoon(){
-    var L = VIDEOS.filter(late).map(function(v){
+  function dday(v, h){ return dY(nowMs(v) + h * 3600e3, nowMs(v)); }
+  // w주 차의 날짜 구간 (지금부터 (w−1)주 ~ w주)
+  function weekSpan(v, w){ return dday(v, (w - 1) * 168) + '~' + dday(v, w * 168); }
+  function p8(m){ return m.p[VE.WEEKS - 1]; }
+  // 주별로 넘을 확률 막대 (1주 ~ 8주). 처음 50% 를 넘는 주(유력 주차)를 강조
+  function wkBars(p, big){
+    var lw = VE.likelyWeek(p);
+    return '<span class="wk' + (big ? ' big' : '') + '" role="img" aria-label="주별로 넘을 확률 ' + p.map(function(x, i){ return (i + 1) + '주 ' + Math.round(x * 100) + '%'; }).join(', ') + '">'
+      + p.map(function(x, i){
+          return '<i class="' + (i + 1 === lw ? 'lw' : x >= 0.5 ? 'on' : '') + '" style="--h:' + Math.max(4, x * 100).toFixed(0) + '%" title="' + (i + 1) + '주 안에 넘을 확률 ' + Math.round(x * 100) + '%">'
+            + (big ? '<em>' + Math.round(x * 100) + '</em>' : '') + '</i>';
+        }).join('') + '</span>'
+      + (big ? '<span class="wk-x">' + p.map(function(x, i){ return '<span>' + (i + 1) + '주</span>'; }).join('') + '</span>' : '');
+  }
+  // 8주 안에 넘을 확률 50% 이상 = 유력. 유력 주차가 빠른 순
+  function candidates(){
+    return VIDEOS.filter(late).map(function(v){
       var p = plan(v), m = p && p.ms[0];
-      return m && VE.chance(m.e) === 'high' ? { v: v, p: p, m: m } : null;
-    }).filter(Boolean).sort(function(a, b){ return a.m.e[1] - b.m.e[1]; });
-    $('vx-soon').innerHTML = '<div class="v2-h"><b>100만 단위 돌파 유력</b><small>게시 3주가 지난 영상 중 2주 안에 다음 100만을 넘길 가능성이 높은 영상</small></div>'
-      + (L.length ? '<div class="v2-row">' + L.map(soonCard).join('') + '</div>'
-        : '<p class="v2-none">지금은 2주 안에 100만 단위를 넘길 것으로 보이는 영상이 없습니다.</p>');
+      return m && p8(m) >= 0.5 ? { v: v, p: p, m: m } : null;
+    }).filter(Boolean).sort(function(a, b){ return (VE.likelyWeek(a.m.p) || 9) - (VE.likelyWeek(b.m.p) || 9) || p8(b.m) - p8(a.m); });
   }
-  function soonCard(x){
-    var v = x.v, m = x.m, V = x.p.V, f = Math.max(0, Math.min(1, (V - (m.M - VE.MSTEP)) / VE.MSTEP));
-    return '<button type="button" class="v2' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
-      + '<span class="v2-th">' + thumb(v) + '</span>'
-      + '<span class="v2-b"><span class="v2-t">' + esc(v.title) + '</span>'
-      + '<span class="v2-m"><b>' + fmtM(m.M) + '</b><small>까지 ' + fmt(m.M - V) + ' 남음</small></span>'
-      + '<span class="v2-bar"><i style="width:' + (f * 100).toFixed(1) + '%"></i></span>'
-      + '<span class="v2-e"><strong>' + etaTxt(m.e[1]) + '</strong><small>' + dday(v, m.e[1]) + ' 무렵</small><i class="vk vk-high">가능성 높음</i></span></span></button>';
+  // 상승 순위 줄의 "100만 단위 돌파 유력" 카드
+  function msRowCard(x){
+    var v = x.v, m = x.m, c = VE.chance(m), lw = VE.likelyWeek(m.p);
+    return '<button type="button" class="vc ms' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" aria-pressed="' + (v === sel) + '">'
+      + '<span class="vc-th">' + thumb(v) + '<span class="vc-rk">' + (lw ? lw + '주 차' : '8주 안') + '</span><span class="vc-ms">' + fmtM(m.M) + '</span></span>'
+      + '<span class="vc-g"><b>' + Math.round(p8(m) * 100) + '%</b><small>8주 안 ' + fmtM(m.M) + ' 돌파</small><i class="vk vk-' + c + '">' + CH[c] + '</i></span>'
+      + '<span class="vc-wk">' + wkBars(m.p) + '</span>'
+      + '<span class="vc-t">' + esc(v.title) + '</span>'
+      + '<span class="vc-m">' + fmt(m.M - x.p.V) + ' 남음 · 하루 +' + fmt(x.p.d) + '</span></button>';
   }
 
-  // 상세(3주 뒤): 다음 100만 단위 세 개 · 초기 예측 결과 · 이 영상의 100만 돌파 예측 기록
+  // 상세(3주 뒤): 다음 100만 단위 세 개(주별 확률) · 초기 예측 결과 · 이 영상의 100만 돌파 예측 기록
   function renderLate(){
     var v = sel, p = plan(v);
     $('vd-md').innerHTML = '<i style="background:' + LT.color + '"></i><span>' + LT.short + '</span>'
       + (p ? '<em>지금 하루 약 +' + fmt(p.d) + '회 · 줄어드는 정도 ' + p.k.toFixed(2)
-        + (p.src === 'data' ? ' (기록 ' + Math.max(1, Math.floor(p.days)) + '일로 계산)' : ' (기록 2일이 쌓이기 전이라 기본값)') + '</em>' : '');
-    $('vd-hs').innerHTML = p ? p.ms.map(function(m, i){ return msCard(v, p, m, i); }).join('')
+        + (p.src === 'data' ? ' (기록 ' + Math.max(1, Math.floor(p.days)) + '일로 계산)' : ' (기록 2일이 쌓이기 전이라 기본값, 확률 폭을 넓게)') + '</em>' : '');
+    $('vd-hs').innerHTML = p ? p.ms.map(function(m){ return msCard(v, p, m); }).join('')
       : '<div class="vh na" style="grid-column:1/-1"><div class="vh-h"><div><b>100만 단위 돌파</b></div><span class="vh-tag">예측 준비 중</span></div>'
         + '<small class="vh-n">최근 기록이 3시간 이상 쌓이면 예측합니다.</small></div>';
     $('vd-ex').innerHTML = early(v) + history(v);
     chart();
   }
-  function msCard(v, p, m, i){
-    var c = VE.chance(m.e), e = m.e;
+  function msCard(v, p, m){
+    var c = VE.chance(m), lw = VE.likelyWeek(m.p);
     return '<div class="vh ms" style="--mc:' + LT.color + '">'
       + '<div class="vh-h"><div><b>' + fmtM(m.M) + ' 돌파</b><small>' + fmt(m.M - p.V) + ' 남음</small></div>'
       + '<span class="vh-tag ' + (c === 'high' ? 'hit' : c === 'mid' ? 'live' : '') + '">가능성 ' + CH[c] + '</span></div>'
-      + '<div class="vh-v">' + (e[1] == null ? '어려움' : far(e[1])[0] + '<small>' + far(e[1])[1] + (e[1] < 8760 ? ' 뒤' : '') + ' · ' + dday(v, e[1]) + ' 무렵</small>') + '</div>'
-      + '<div class="vh-up">' + (e[1] == null ? '지금 흐름대로 줄어들면 닿지 못합니다' : i === 0 ? '지금 하루 +' + fmt(p.d) + '회 기준' : '앞 목표를 넘은 뒤 ' + fmt(VE.MSTEP) + ' 더') + '</div>'
-      + tl(e) + '<div class="vh-gl"><span>빠르면 <b>' + (e[0] == null ? '—' : dday(v, e[0])) + '</b></span><span class="r">늦으면 <b>' + (e[2] == null ? '못 닿음' : dday(v, e[2])) + '</b></span></div></div>';
-  }
-  // 시간 막대: 오늘 → 2주 / 30일 / 90일. 칸 = 빠르면~늦으면, 세로 막대 = 가운데
-  function tl(e){
-    var far = e[2] != null ? e[2] : e[1] != null ? e[1] * 1.6 : null, span = far == null || far > 720 ? 2160 : far > 336 ? 720 : 336;
-    function P(h){ return Math.min(100, h / span * 100).toFixed(1) + '%'; }
-    var lo = e[0] == null ? span : e[0], hi = e[2] == null ? span : e[2];
-    return '<div class="vh-g tl" aria-hidden="true">'
-      + (span > 336 ? '<i class="soon" style="left:' + P(336) + '"></i>' : '')
-      + (e[0] != null ? '<i class="band' + (e[2] == null ? ' open' : '') + '" style="left:' + P(lo) + ';width:' + Math.max(1.5, Math.min(hi, span) / span * 100 - lo / span * 100).toFixed(1) + '%"></i>' : '')
-      + (e[1] != null ? '<i class="pm" style="left:' + P(e[1]) + '"></i>' : '') + '</div>'
-      + '<div class="vh-tlx"><span>오늘</span>' + (span > 336 ? '<span style="left:' + P(336) + '">2주</span>' : '') + '<span>' + (span / 24) + '일</span></div>';
+      + '<div class="vh-v">' + (lw ? lw + '<small>주 차 유력 · ' + weekSpan(v, lw) + '</small>' : '8주+<small>8주 안에는 어려움</small>') + '</div>'
+      + '<div class="vh-up">8주 안에 넘을 확률 <b>' + Math.round(p8(m) * 100) + '%</b></div>'
+      + wkBars(m.p, true) + '</div>';
   }
   // 초기(24시간·7일·30일) 예측 결과 한 줄 요약
   function early(v){
@@ -397,60 +393,64 @@
       return '<span class="vd-e1"><em>' + tg.name + '</em>' + body + '</span>';
     }).join('') + '</div>';
   }
-  // 100만 돌파 예측 하나의 결과. 늦게·빨리 잡은 날 ±12시간 안에 닿으면 적중
+  // 100만 돌파 예측 하나를 주 단위로 채점: 예측한 유력 주차(없으면 "8주 넘게")와 실제로 넘은 주차가 ±1주 안이면 적중
   function msResult(v, m){
-    var a = age(v);
+    var a = age(v), pw = m.p ? VE.likelyWeek(m.p) : m.e[1] == null ? null : Math.max(1, Math.ceil((m.e[1] - m.t) / 168)),
+      el = (a - m.t) / 168, P8 = m.p ? m.p[VE.WEEKS - 1] : null;
+    if (pw != null && pw > VE.WEEKS) pw = null;
     if (m.hit != null){
-      var inR = (m.e[0] == null || m.hit >= m.e[0] - 12) && (m.e[2] == null || m.hit <= m.e[2] + 12), d = m.e[1] == null ? null : (m.hit - m.e[1]) / 24;
-      return { cls: inR ? 'hit' : 'miss', done: true, d: d,
-        txt: (inR ? '✓ 범위 안 달성' : d != null && d < 0 ? '예상보다 빨리 달성' : '예상보다 늦게 달성') + (d == null ? '' : ' · ' + (Math.abs(d) < 0.5 ? '거의 정확' : Math.abs(d).toFixed(1) + '일 ' + (d < 0 ? '빠름' : '늦음'))) };
+      var aw = Math.max(1, Math.ceil((m.hit - m.t) / 168));
+      if (pw == null) return { cls: aw > VE.WEEKS ? 'hit' : 'miss', done: true, pw: pw, aw: aw, P8: P8, in8: aw <= VE.WEEKS,
+        txt: aw > VE.WEEKS ? '✓ 8주 넘어 달성 (예측대로)' : '예상(8주 넘게)보다 빨리 ' + aw + '주 차 달성' };
+      var ok = Math.abs(aw - pw) <= 1;
+      return { cls: ok ? 'hit' : 'miss', done: true, pw: pw, aw: aw, P8: P8, in8: aw <= VE.WEEKS,
+        txt: (ok ? '✓ ' : '') + '예측 ' + pw + '주 차 → 실제 ' + aw + '주 차' };
     }
-    if (m.e[2] != null && a > m.e[2] + 12) return { cls: 'miss', done: true, d: null, txt: '✗ 늦게 잡은 날도 지났지만 아직 못 닿음' };
-    return { cls: '', done: false, d: null, txt: '진행 중' };
+    if (pw != null && el > pw + 1) return { cls: 'miss', done: true, pw: pw, aw: null, P8: P8, in8: el > VE.WEEKS ? false : null, txt: '✗ 예측한 ' + pw + '주 차가 지났지만 아직 못 넘음' };
+    if (el > VE.WEEKS) return { cls: pw == null ? 'hit' : 'miss', done: true, pw: pw, aw: null, P8: P8, in8: false, txt: pw == null ? '✓ 8주 안에 못 넘음 (예측대로)' : '✗ 8주 안에 못 넘음' };
+    return { cls: '', done: false, pw: pw, aw: null, P8: P8, in8: null, txt: '진행 중 · ' + Math.floor(el + 1) + '주 차' };
   }
   function history(v){
-    if (!v.ms || !v.ms.length) return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span><small class="vh-n">게시 3주 뒤 기록이 2일 쌓이면 다음 100만 단위 예측을 고정해 두고, 닿았는지 채점합니다.</small></div>';
+    if (!v.ms || !v.ms.length) return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span><small class="vh-n">게시 3주 뒤 기록이 2일 쌓이면 다음 100만 단위 예측(1주~8주 확률)을 고정해 두고, 몇 주 차에 넘었는지 채점합니다.</small></div>';
     return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span>' + v.ms.slice().reverse().map(function(m){
       var r = msResult(v, m);
-      return '<div class="vd-mr ' + r.cls + '"><b>' + fmtM(m.M) + '</b><span>' + when(v.pub + m.t * 3600e3) + ' 예측 → '
-        + (m.e[1] == null ? '닿기 어려움' : dY(v.pub + m.e[1] * 3600e3, v.pub + m.t * 3600e3) + ' 무렵') + '</span>'
-        + '<span>' + (m.hit != null ? '실제 ' + when(v.pub + m.hit * 3600e3) : '') + '</span><em>' + r.txt + '</em></div>';
+      return '<div class="vd-mr ' + r.cls + '"><b>' + fmtM(m.M) + '</b><span>' + dY(v.pub + m.t * 3600e3, nowMs(v)) + ' 예측 · '
+        + (r.pw ? r.pw + '주 차 유력' : '8주 넘게') + (r.P8 != null ? ' (8주 안 ' + Math.round(r.P8 * 100) + '%)' : '') + '</span>'
+        + '<span>' + (m.hit != null ? '실제 ' + dY(v.pub + m.hit * 3600e3, nowMs(v)) : '') + '</span><em>' + r.txt + '</em></div>';
     }).join('') + '</div>';
   }
 
-  // 그래프(3주 뒤): 가로축 날짜. 최근 2주 실제 + 앞으로의 예상(가운데 선 + 빠르면~늦으면 칸) + 100만 단위 가로선
+  // 그래프(3주 뒤): 가로축 주 단위 (최근 최대 2주 기록 · 지금 · 1주 ~ 8주 뒤). 예상 가운데 선 + 빠르면~늦으면 칸 + 100만 단위 가로선
   function msChart(){
     var v = sel, a = age(v), p = plan(v), box = $('vd-chart');
-    var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 22, B = 30;
-    var s = Math.max(VE.since(v.vs), a - 336), m0 = p && p.ms[0], far = m0 && m0.e[2] != null ? m0.e[2] : m0 && m0.e[1] != null ? m0.e[1] * 1.5 : 336;
-    var end = a + Math.max(168, Math.min(1440, far * 1.15)), pts = v.vs.snaps.filter(function(q){ return q[0] >= s - 1e-6 && q[0] <= a + 1e-6; });
-    var n = 48, fut = [];
+    var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 24, B = 30;
+    var s = Math.max(VE.since(v.vs), a - 336), end = a + VE.WEEKS * 168;
+    var pts = v.vs.snaps.filter(function(q){ return q[0] >= s - 1e-6 && q[0] <= a + 1e-6; }), fut = [], n = 56;
     for (var i = 0; i <= n; i++){
       var h = (end - a) * i / n;
-      fut.push(p ? [a + h, VE.project(p.V, a, p.d, p.k - VE.KSPAN, h), VE.project(p.V, a, p.d, p.k, h), VE.project(p.V, a, p.d, p.k + VE.KSPAN, h)] : null);
+      if (p) fut.push([a + h, VE.project(p.V, a, p.d, p.k - VE.KSPAN, h), VE.project(p.V, a, p.d, p.k, h), VE.project(p.V, a, p.d, p.k + VE.KSPAN, h)]);
     }
-    var ys = pts.map(function(q){ return q[1]; }); if (p) fut.forEach(function(f){ ys.push(f[1], f[3]); });
-    var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys.concat(p ? [p.ms[0].M] : []));
+    var ys = pts.map(function(q){ return q[1]; }); fut.forEach(function(f){ ys.push(f[1], f[3]); });
+    var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), M1 = p && p.ms[0].M, showM1 = M1 && M1 <= y1 + (y1 - y0) * 0.35;
+    if (showM1) y1 = Math.max(y1, M1);
     var pad = (y1 - y0) * 0.08 || y1 * 0.02; y0 = Math.max(0, y0 - pad); y1 += pad;
     function X(h){ return L + (h - s) / (end - s) * (W - L - R); }
     function Y(y){ return Tp + (1 - (y - y0) / (y1 - y0)) * (H - Tp - B); }
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="100만 단위 돌파 예상">';
-    // 눈금: 가로 = 보기 좋은 간격, 100만 단위는 진하게 이름 붙여서
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="주 단위 100만 돌파 예상">';
     var st = niceStep((y1 - y0) / 4);
     for (var y = Math.ceil(y0 / st) * st; y <= y1; y += st)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,.06)"/>'
         + '<text x="' + (L - 7) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#8e8e93">' + fmt(y) + '</text>';
+    // 주 눈금: −2주 ~ 8주
+    for (var w = -2; w <= VE.WEEKS; w++){
+      var hx = a + w * 168; if (hx < s - 1e-6) continue;
+      var x = X(hx);
+      svg += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,' + (w ? .06 : 0) + ')"/>'
+        + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (w > 0 ? 700 : 500) + '" fill="' + (w > 0 ? '#aeaeb2' : '#8e8e93') + '">' + (w === 0 ? '' : (w > 0 ? w : '−' + (-w)) + '주') + '</text>';
+    }
     for (var M = Math.ceil(y0 / VE.MSTEP) * VE.MSTEP; M <= y1; M += VE.MSTEP)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(M).toFixed(1) + '" y2="' + Y(M).toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity=".55" stroke-dasharray="6 5"/>'
         + '<text x="' + (L + 6) + '" y="' + (Y(M) - 6).toFixed(1) + '" font-size="11" font-weight="800" fill="' + LT.color + '">' + fmtM(M) + ' 돌파선</text>';
-    // 날짜 눈금
-    var day = 86400e3, step = (end - s) / 24 > 40 ? 7 : (end - s) / 24 > 20 ? 3 : 1, d = new Date(v.pub + s * 3600e3); d.setHours(24, 0, 0, 0);
-    for (var k = 0; d.getTime() < v.pub + end * 3600e3; d = new Date(d.getTime() + day), k++){
-      if (k % step) continue;
-      var x = X((d.getTime() - v.pub) / 3600e3);
-      svg += '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" fill="#8e8e93">' + (d.getMonth() + 1) + '/' + d.getDate() + '</text>';
-    }
-    // 예상 (빠르면~늦으면 칸 + 가운데 점선)
     if (p){
       var up = '', dn = '', md = '';
       fut.forEach(function(f, i){ up += (i ? ' L' : 'M') + X(f[0]).toFixed(1) + ' ' + Y(f[1]).toFixed(1); md += (i ? ' L' : 'M') + X(f[0]).toFixed(1) + ' ' + Y(f[2]).toFixed(1); });
@@ -458,48 +458,52 @@
       svg += '<path d="' + up + dn + ' Z" fill="' + LT.color + '" fill-opacity=".16" stroke="' + LT.color + '" stroke-opacity=".3"/>'
         + '<path d="' + md + '" fill="none" stroke="' + LT.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
       p.ms.forEach(function(m){
-        if (m.e[1] == null || a + m.e[1] > end) return;
+        var lw = VE.likelyWeek(m.p);
+        if (m.e[1] == null || m.e[1] > end - a || m.M > y1) return;
         var cx = X(a + m.e[1]), cy = Y(m.M);
         svg += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5.5" fill="' + LT.color + '" stroke="#1c1c1e" stroke-width="2"/>'
-          + '<text x="' + cx.toFixed(1) + '" y="' + (cy + 18).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#cfe9fb">' + dday(v, m.e[1]) + '</text>';
+          + '<text x="' + cx.toFixed(1) + '" y="' + (cy + 18).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#cfe9fb">' + (lw ? lw + '주 차' : '') + '</text>';
       });
+      if (M1 && !showM1) svg += '<text x="' + (W - R - 4) + '" y="' + (Tp - 8) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">다음 ' + fmtM(M1) + '까지 ' + fmt(M1 - p.V) + ' — 8주 안에는 어려움</text>';
     }
-    // 실제
-    if (pts.length){
-      var line = pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ');
-      svg += '<path d="' + line + '" fill="none" stroke="#3ddc97" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
-    }
+    if (pts.length > 1) svg += '<path d="' + pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="#3ddc97" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
     var V = av(v, a);
     svg += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#3ddc97" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#3ddc97" stroke="#1c1c1e" stroke-width="2"/>'
-      + '<rect x="' + (X(a) - 20).toFixed(1) + '" y="' + (H - B - 22) + '" width="40" height="17" rx="8.5" fill="#3ddc97"/>'
-      + '<text x="' + X(a).toFixed(1) + '" y="' + (H - B - 9.5) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#05291b">지금</text></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 장기 추세 · 가로축은 날짜 (최근 2주 기록 + 앞으로)') + svg
+      + '<rect x="' + (X(a) - 20).toFixed(1) + '" y="' + (H - B + 6) + '" width="40" height="17" rx="8.5" fill="#3ddc97"/>'
+      + '<text x="' + X(a).toFixed(1) + '" y="' + (H - B + 18.5) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#05291b">지금</text></svg>';
+    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 장기 추세 · 가로축은 주 (최근 기록 → 지금 → 8주 뒤)') + svg
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span><span><i class="k-r"></i>빠르면~늦으면</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
   }
 
-  // 성적표(3주 뒤): 100만 단위 돌파 예측이 맞았는지
+  // 성적표(3주 뒤): 주 단위 적중(±1주) + 가능성별로 8주 안에 실제로 넘었는지
   function renderMsScore(h){
     var rows = [];
     VIDEOS.forEach(function(v){ (v.ms || []).forEach(function(m){ rows.push({ v: v, m: m, r: msResult(v, m) }); }); });
     rows.sort(function(x, y){ return (y.v.pub + y.m.t * 3600e3) - (x.v.pub + x.m.t * 3600e3); });
-    var done = rows.filter(function(x){ return x.r.done; }), hit = done.filter(function(x){ return x.r.cls === 'hit'; }),
-      ds = done.filter(function(x){ return x.r.d != null; }).map(function(x){ return Math.abs(x.r.d); });
+    var done = rows.filter(function(x){ return x.r.done; }), hit = done.filter(function(x){ return x.r.cls === 'hit'; });
+    var bucket = function(lo, hi){
+      var b = rows.filter(function(x){ return x.r.P8 != null && x.r.P8 >= lo && x.r.P8 < hi && x.r.in8 != null; });
+      return { n: b.length, y: b.filter(function(x){ return x.r.in8; }).length };
+    };
+    var B = [['높음', 0.7, 2], ['보통', 0.4, 0.7], ['낮음', 0, 0.4]].map(function(x){ var b = bucket(x[1], x[2]); return '<div class="vs-row"><span>가능성 ' + x[0] + '</span><b>' + (b.n ? b.y + '/' + b.n : '—') + '</b></div>'; }).join('');
     h += '<div class="vs-cards ms"><div class="vs-c" style="--mc:' + LT.color + '"><div class="vs-ch"><span class="vp-no">' + LT.b + '</span>' + LT.name + '</div>'
-      + '<div class="vs-row"><span>범위 안 달성</span><b>' + (done.length ? pct(hit.length / done.length) : '—') + '</b></div>'
+      + '<div class="vs-row"><span>유력 주차 적중 (±1주)</span><b>' + (done.length ? pct(hit.length / done.length) : '—') + '</b></div>'
       + '<div class="vs-bar"><i style="width:' + (done.length ? hit.length / done.length * 100 : 0).toFixed(0) + '%"></i></div>'
-      + '<div class="vs-row"><span>날짜 오차</span><b>' + (ds.length ? mean(ds).toFixed(1) + '일' : '—') + '</b></div>'
-      + '<small>' + (done.length ? done.length + '개 결과 · 진행 중 ' + (rows.length - done.length) + '개' : rows.length ? '진행 중 ' + rows.length + '개 · 아직 결과 없음' : '아직 예측이 없습니다') + '</small></div></div>';
+      + '<small>' + (done.length ? done.length + '개 결과 · 진행 중 ' + (rows.length - done.length) + '개' : rows.length ? '진행 중 ' + rows.length + '개 · 아직 결과 없음' : '아직 예측이 없습니다') + '</small></div>'
+      + '<div class="vs-c" style="--mc:' + LT.color + '"><div class="vs-ch">가능성별 8주 안 실제 돌파</div>' + B
+      + '<small>높음 = 8주 안 확률 70% 이상, 보통 = 40~70%</small></div></div>';
     if (!rows.length){ $('vs').innerHTML = h + '<p class="anote">게시 3주가 지나고 기록이 2일 쌓인 영상부터 100만 단위 돌파 예측을 고정해 채점합니다.</p>'; return; }
-    h += '<div class="atab-w"><table class="atab vs-tab vs-ms"><thead><tr><th>영상</th><th>목표</th><th>예측한 날</th><th>예상 (빠르면~늦으면)</th><th>실제</th><th>결과</th></tr></thead><tbody>'
+    h += '<div class="atab-w"><table class="atab vs-tab vs-ms"><thead><tr><th>영상</th><th>목표</th><th>예측한 날</th><th>주별 확률 (1~8주)</th><th>유력 주차</th><th>실제</th><th>결과</th></tr></thead><tbody>'
       + rows.slice(0, 20).map(function(x){
           var v = x.v, m = x.m, D = function(t){ return t == null ? '—' : dY(v.pub + t * 3600e3, v.pub + m.t * 3600e3); };
           return '<tr' + (v === sel ? ' class="on"' : '') + '><td><button type="button" class="vs-v" data-vid="' + esc(v.id) + '"><span class="vs-th">' + thumb(v) + '</span>' + esc(v.title) + '</button></td>'
-            + '<td><b>' + fmtM(m.M) + '</b></td><td>' + D(m.t) + '</td><td>' + D(m.e[1]) + ' <small>(' + D(m.e[0]) + '~' + (m.e[2] == null ? '못 닿음' : D(m.e[2])) + ')</small></td>'
-            + '<td>' + (m.hit != null ? D(m.hit) : '—') + '</td><td><span class="vp-e ' + x.r.cls + '">' + x.r.txt + '</span></td></tr>';
+            + '<td><b>' + fmtM(m.M) + '</b></td><td>' + D(m.t) + '</td><td>' + (m.p ? wkBars(m.p) + ' <small>' + Math.round(m.p[VE.WEEKS - 1] * 100) + '%</small>' : '—') + '</td>'
+            + '<td>' + (x.r.pw ? x.r.pw + '주 차' : '8주 넘게') + '</td>'
+            + '<td>' + (m.hit != null ? D(m.hit) + ' <small>(' + x.r.aw + '주 차)</small>' : '—') + '</td><td><span class="vp-e ' + x.r.cls + '">' + x.r.txt + '</span></td></tr>';
         }).join('') + '</tbody></table></div>'
-      + '<p class="gnote">예측은 게시 3주가 지나고 기록이 2일 쌓였을 때(또는 앞 목표를 넘은 직후) 한 번 고정해 둔 값입니다. 늦게·빨리 잡은 날 ±12시간 안에 닿으면 범위 안으로 봅니다.</p>';
+      + '<p class="gnote">예측은 게시 3주가 지나고 기록이 2일 쌓였을 때(또는 앞 목표를 넘은 직후) 한 번 고정해 둔 값입니다. 유력 주차(넘을 확률이 처음 50%를 넘는 주)와 실제로 넘은 주가 ±1주 안이면 적중으로 봅니다.</p>';
     $('vs').innerHTML = h;
   }
 
@@ -519,11 +523,12 @@
         : fresh < MINPOOL ? '<p class="vp-note">' + (DATA.since ? when(Date.parse(DATA.since)) + '부터 ' : '') + '1시간마다 기록하고 있습니다. 유튜브는 지난 기록을 주지 않아 그 전에 올라온 영상은 초반 흐름을 알 수 없습니다. '
           + '그래서 과거 영상과 비교하는 ①·② 예측과 예상 범위는 수집을 시작한 뒤 올라온 영상이 ' + MINPOOL + '개 이상 쌓이면 채워집니다 (지금 ' + fresh + '개). '
           + '③ 추세 곡선은 기록이 조금만 쌓여도 나옵니다.</p>' : '')
-      + '<section class="vx-soon" id="vx-soon"></section>'
       // 상승 순위 (가로로 넘기는 카드)
       + '<div class="vr-head"><div class="vr-t"><div class="vr-dd"><button type="button" class="vr-db" id="vr-db" aria-haspopup="true" aria-expanded="false"></button>'
       + '<div class="vr-menu" id="vr-menu" hidden><button type="button" data-rk="24">최근 24시간</button><button type="button" data-rk="168">최근 7일</button></div></div>'
-      + '<b>상승 순위</b></div><div class="seg vr-ft" id="vr-ft"></div></div>'
+      + '<button type="button" class="vr-tb" id="vr-tb" data-rv="rank">상승 순위</button>'
+      + '<button type="button" class="vr-msb" id="vr-msb" data-rv="ms"></button></div><div class="seg vr-ft" id="vr-ft"></div></div>'
+      + '<p class="vr-cap" id="vr-cap" hidden></p>'
       + '<div class="vc-wrap at-start"><button type="button" class="vc-nav prev" data-nav="-1" aria-label="이전 영상들">‹</button>'
       + '<div class="vc-row" id="vc-row"></div>'
       + '<button type="button" class="vc-nav next" data-nav="1" aria-label="다음 영상들">›</button></div>'
@@ -539,15 +544,16 @@
     var row = $('vc-row');
     row.addEventListener('scroll', navState, { passive: true });
     $('vt-q').addEventListener('input', function(){ tq = this.value.trim(); tn = 20; renderTable(); });
-    renderSoon(); renderRank(); renderVideo(); renderTable(); renderScore(); renderMethods(); tick();
+    renderRank(); renderVideo(); renderTable(); renderScore(); renderMethods(); tick();
   }
   function about(){
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
       + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>예측</b> 게시한 지 24시간(7일)이 안 된 영상은 24시간째(7일째) 조회수 예측값으로 순위를 매기고 <i class="vk vk-pred">예측</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>게시 3주 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)에 언제 닿을지 ④ 장기 추세로 예측합니다. 하루 증가량이 나이에 따라 얼마나 빨리 줄어드는지를 그 영상의 기록으로 재서 씁니다.</li>'
-      + '<li><b>가능성</b> 늦게 잡아도 2주 안에 닿으면 <i class="vk vk-high">높음</i>, 가운데 값이 2주 안이면 보통, 그 밖은 낮음입니다. 높음인 영상은 맨 위 "100만 단위 돌파 유력"에 모입니다.</li>'
+      + '<li><b>게시 3주 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 장기 추세로 봅니다. 오래 보는 예측이라 <b>주 단위</b>(1주 ~ 8주)로, 주마다 그때까지 넘을 확률을 냅니다.</li>'
+      + '<li><b>유력 주차</b> 넘을 확률이 처음 50%를 넘는 주입니다. 8주 안 확률이 50% 이상인 영상은 상승 순위 옆 <b>100만 단위 돌파 유력</b> 버튼에 모입니다. 가능성은 8주 안 확률 70% 이상 <i class="vk vk-high">높음</i>, 40~70% 보통, 그 밖 낮음입니다.</li>'
+      + '<li><b>확률 계산</b> 하루 증가량과 줄어드는 정도가 조금씩 흔들릴 수 있다고 보고 여러 경우를 계산해, 그 주까지 넘는 경우의 비율을 셉니다. 기록이 2일이 안 된 영상은 흔들림을 더 크게 잡습니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 시간별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -562,6 +568,16 @@
     $('vr-ft').innerHTML = [['all', '전체'], ['long', '일반'], ['short', '쇼츠'], ['live', '라이브']].filter(function(x){ return cnt[x[0]]; }).map(function(x){
       return '<button type="button" data-ft="' + x[0] + '" class="' + (ft === x[0] ? 'on' : '') + '">' + x[1] + '<small>' + cnt[x[0]] + '</small></button>';
     }).join('');
+    var C = candidates(), ms = rv === 'ms';
+    $('vr-msb').innerHTML = '<i></i>100만 단위 돌파 유력<b>' + C.length + '</b>';
+    $('vr-msb').classList.toggle('on', ms); $('vr-tb').classList.toggle('on', !ms);
+    el.querySelector('.vr-dd').classList.toggle('off', ms);
+    $('vr-cap').hidden = !ms;
+    $('vr-cap').innerHTML = '게시 3주가 지난 영상 중 <b>8주 안에 다음 100만 단위를 넘을 확률이 50% 이상</b>인 영상입니다. 막대는 1주 ~ 8주 안에 넘을 확률, 진한 막대가 유력 주차입니다.';
+    if (ms){
+      $('vc-row').innerHTML = C.map(msRowCard).join('') || '<p class="anote vr-none">지금은 8주 안에 다음 100만 단위를 넘을 확률이 50% 이상인 영상이 없습니다.</p>';
+      $('vc-row').scrollLeft = 0; navState(); return;
+    }
     var L = list().sort(byGain).slice(0, 12);
     $('vc-row').innerHTML = L.map(function(v, i){ return card(v, i + 1); }).join('') || '<p class="anote">해당하는 영상이 없습니다.</p>';
     $('vc-row').scrollLeft = 0; navState();
@@ -759,6 +775,10 @@
   }
 
   function msPill(v){
+    if (late(v)){
+      var P = plan(v), M0 = P && P.ms[0], w = M0 && VE.likelyWeek(M0.p);
+      return w ? '<span class="vp-ms" title="④ 장기 추세 · 8주 안에 넘을 확률 ' + Math.round(p8(M0) * 100) + '%">' + fmtM(M0.M) + ' 돌파 유력 · ' + w + '주 차</span>' : '';
+    }
     var m = milestone(v); if (m.h == null) return '';
     return '<span class="vp-ms" title="' + (m.how === 'rate' ? '최근 24시간 속도가 이어진다면' : m.how === 'lt' ? '④ 장기 추세 기준' : '종합 예측 곡선 기준') + '">' + fmtM(m.M) + ' 돌파 예상 · '
       + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</span>';
@@ -1046,9 +1066,11 @@
       }
       return;
     }
-    if (e.target.closest('#vr-db')){ menu($('vr-menu').hidden); return; }
+    if (e.target.closest('#vr-db')){ if (rv === 'ms'){ rv = 'rank'; renderRank(); } menu($('vr-menu').hidden); return; }
+    var rvb = e.target.closest('[data-rv]');
+    if (rvb){ rv = rvb.getAttribute('data-rv'); menu(false); renderRank(); return; }
     var r = e.target.closest('[data-rk]');
-    if (r){ rk = +r.getAttribute('data-rk'); menu(false); renderRank(); renderTable(); return; }
+    if (r){ rk = +r.getAttribute('data-rk'); rv = 'rank'; menu(false); renderRank(); renderTable(); return; }
     var f = e.target.closest('[data-ft]');
     if (f){ ft = f.getAttribute('data-ft'); tn = 20; renderRank(); renderTable(); return; }
     var t = e.target.closest('[data-ts]');
