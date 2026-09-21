@@ -117,7 +117,7 @@
   //   t일째 누적 = V + d·A^k·(t^(1−k) − A^(1−k)) ÷ (1−k)      (k = 1 이면 V + d·A·ln(t/A))
   //   d: 최근 24시간 증가, k: 앞 구간(최대 2주)과 최근 24시간의 하루 증가를 비교해 구한다. 기록이 모자라면 KDEF
   //   범위: k 를 ±KSPAN 바꿔 본 값 (k 가 작을수록 덜 줄어듦 = 빨리 닿음)
-  var LATE = 504, MSTEP = 1e6, SOON = 336, KDEF = 1, KSPAN = 0.4;
+  var LATE = 504, MSTEP = 1e6, KDEF = 1, KSPAN = 0.4;
   // vs: 조회수만 담은 기록 { snaps: [[h, 조회수], ...] }. h0~h1 사이 하루 평균 증가
   function perDay(vs, h0, h1){ var x0 = at(vs, h0, 1), x1 = at(vs, h1, 1); return x0 == null || x1 == null || h1 - h0 < 1 ? null : (x1 - x0) / (h1 - h0) * 24; }
   function longTerm(vs, a){
@@ -149,19 +149,42 @@
     var A = a / 24, T = (a + h) / 24; k = Math.max(0, k);
     return V + (Math.abs(k - 1) < 1e-6 ? d * A * Math.log(T / A) : d * Math.pow(A, k) * (Math.pow(T, 1 - k) - Math.pow(A, 1 - k)) / (1 - k));
   }
-  // 다음 n개 100만 단위와 도달 예상. e: 지금부터 [빠르면, 가운데, 늦으면] 몇 시간 뒤 (null = 못 닿음)
+  // 주 단위(1주 ~ 8주)로 본다. 주별로 "그 주까지 M 을 넘을 확률":
+  //   k(줄어드는 정도)와 d(하루 증가)가 흔들린다고 보고 — k ~ 정규(k̂, KSD), d ~ 로그정규(DSD) —
+  //   격자(−2.5σ ~ +2.5σ, 0.5σ 간격)로 무게를 매겨 넘는 쪽의 비율을 센다. k 를 기본값으로 쓴 경우 흔들림을 더 크게
+  var WEEKS = 8, KSD = 0.35, DSD = 0.2, ZS = [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5];
+  function probs(V, a, d, k, M, src){
+    var ksd = src === 'data' ? KSD : KSD * 1.6, out = [];
+    for (var w = 1; w <= WEEKS; w++){
+      var h = w * 168, p = 0, t = 0;
+      for (var i = 0; i < ZS.length; i++) for (var j = 0; j < ZS.length; j++){
+        var wt = Math.exp(-(ZS[i] * ZS[i] + ZS[j] * ZS[j]) / 2);
+        if (project(V, a, d * Math.exp(ZS[j] * DSD), Math.max(0, k + ZS[i] * ksd), h) >= M) p += wt;
+        t += wt;
+      }
+      out.push(p / t);
+    }
+    return out;                                                // [1주까지, 2주까지, …, 8주까지]
+  }
+  // 다음 n개 100만 단위와 도달 예상
+  //   e: 지금부터 [빠르면, 가운데, 늦으면] 몇 시간 뒤 (null = 못 닿음), p: 1~8주까지 넘을 확률
+  //   wk: 1~8주 뒤 예상 누적 [빠르면, 가운데, 늦으면]
   function msPlan(vs, a, n){
     var V = at(vs, a, 1), L = longTerm(vs, a); if (V == null || !L) return null;
-    var out = [], M = (Math.floor(V / MSTEP) + 1) * MSTEP;
+    var out = [], M = (Math.floor(V / MSTEP) + 1) * MSTEP, wk = [];
     for (var i = 0; i < (n || 3); i++, M += MSTEP)
-      out.push({ M: M, e: [etaH(V, M, a, L.d, L.k - KSPAN), etaH(V, M, a, L.d, L.k), etaH(V, M, a, L.d, L.k + KSPAN)] });
-    return { V: V, d: L.d, k: L.k, src: L.src, days: L.days, ms: out };
+      out.push({ M: M, e: [etaH(V, M, a, L.d, L.k - KSPAN), etaH(V, M, a, L.d, L.k), etaH(V, M, a, L.d, L.k + KSPAN)], p: probs(V, a, L.d, L.k, M, L.src) });
+    for (var w = 1; w <= WEEKS; w++) wk.push([project(V, a, L.d, L.k - KSPAN, w * 168), project(V, a, L.d, L.k, w * 168), project(V, a, L.d, L.k + KSPAN, w * 168)]);
+    return { V: V, d: L.d, k: L.k, src: L.src, days: L.days, ms: out, wk: wk };
   }
-  // 가능성: 늦게 잡아도 2주 안이면 high, 가운데 값이 2주 안이면 mid, 아니면 low
-  function chance(e){ return e[2] != null && e[2] <= SOON ? 'high' : e[1] != null && e[1] <= SOON ? 'mid' : 'low'; }
+  // 가능성(8주 안에 넘을 확률): 70% 이상 high, 40% 이상 mid, 그 밖 low
+  function chance(m){ var p = m.p[WEEKS - 1]; return p >= 0.7 ? 'high' : p >= 0.4 ? 'mid' : 'low'; }
+  // 넘을 확률이 처음 50% 를 넘는 주 (1~8, 8주 안에 없으면 null) — "유력 주차"
+  function likelyWeek(p){ for (var i = 0; i < p.length; i++) if (p[i] >= 0.5) return i + 1; return null; }
 
   var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
     poolFor: poolFor, METHODS: METHODS, predictAll: predictAll,
-    LATE: LATE, MSTEP: MSTEP, SOON: SOON, KSPAN: KSPAN, longTerm: longTerm, etaH: etaH, project: project, msPlan: msPlan, chance: chance };
+    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, KSPAN: KSPAN, longTerm: longTerm, etaH: etaH, project: project, probs: probs, msPlan: msPlan,
+    chance: chance, likelyWeek: likelyWeek };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);
