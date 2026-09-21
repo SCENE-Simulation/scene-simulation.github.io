@@ -472,9 +472,7 @@
     if (pts.length > 1) svg += '<path d="' + pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="#ff4d4f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
     var V = av(v, a);
     svg += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
-      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
-      + '<rect x="' + (X(a) - 20).toFixed(1) + '" y="' + (H - B + 6) + '" width="40" height="17" rx="8.5" fill="#ff4d4f"/>'
-      + '<text x="' + X(a).toFixed(1) + '" y="' + (H - B + 18.5) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2b0608">지금</text></svg>';
+      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/></svg>';
     box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · 가로축은 주 (최근 기록 → 지금 → 8주 뒤)') + svg
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상 (1일 추세)</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
@@ -513,7 +511,6 @@
     if (!sel){ el.innerHTML = head() + '<p class="anote">기록된 영상이 없습니다.</p>'; return; }
     var nSnap = VIDEOS.reduce(function(s, v){ return s + v.snaps.length; }, 0), ch = DATA.channel || {}, title = ch.title;
     // 게시 직후부터 기록한 영상이 적으면(수집 초기) 왜 예측이 비어 있는지 알려 준다
-    var fresh = VIDEOS.filter(function(v){ return VE.since(v) === 0 && age(v) >= TARGETS[0].T; }).length;
     el.innerHTML = head()
       + '<div class="vp-ch"><div class="vp-ava" aria-hidden="true">' + (ch.thumb ? '<img src="' + esc(ch.thumb) + '" alt="">' : PLAY) + '</div>'
       + '<div class="vp-cht"><b>' + esc(title || CHANNEL.handle) + '</b>'
@@ -522,9 +519,7 @@
       + (DATA.demo ? '<span class="vp-dpill">예시 데이터</span>' : '')
       + '<a class="gs vp-yt" href="' + CHANNEL.url + '" target="_blank" rel="noopener">채널 ↗</a></div>'
       + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 1시간마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
-        : fresh < MINPOOL ? '<p class="vp-note">' + (DATA.since ? when(Date.parse(DATA.since)) + '부터 ' : '') + '1시간마다 기록하고 있습니다. 유튜브는 지난 기록을 주지 않아 그 전에 올라온 영상은 초반 흐름을 알 수 없습니다. '
-          + '그래서 과거 영상과 비교하는 ①·② 예측과 예상 범위는 수집을 시작한 뒤 올라온 영상이 ' + MINPOOL + '개 이상 쌓이면 채워집니다 (지금 ' + fresh + '개). '
-          + '③ 추세 곡선은 기록이 조금만 쌓여도 나옵니다.</p>' : '')
+        : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
       + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button></div>'
@@ -576,19 +571,18 @@
     $('vc-wrap').hidden = ms; $('mb').hidden = !ms;
     if (ms){ renderBoard(B); return; }
     var L = list().sort(function(a, b){ var x = week1(a).gain, y = week1(b).gain; return (y == null ? -1 : y) - (x == null ? -1 : x); }).slice(0, 12);
-    $('vc-row').innerHTML = L.map(function(v, i){ return card(v, i + 1); }).join('') || '<p class="anote">해당하는 영상이 없습니다.</p>';
+    $('vc-row').innerHTML = L.map(function(v){ return card(v); }).join('') || '<p class="anote">해당하는 영상이 없습니다.</p>';
     $('vc-row').scrollLeft = 0; navState();
   }
   function wTag(o){ return o.kind === 'est' ? '<i class="vk vk-est">추정</i>' : o.kind === 'wait' ? '<i class="vk vk-wait">수집 중</i>' : ''; }
-  function card(v, n){
-    var a = age(v), w = week1(v), s = soon(v), V = av(v, a);
+  // 상단 영상 카드: 썸네일(+ 곧 N00만) · 1주 뒤 예상 · 제목 · 게시 후 지난 시간만
+  function card(v){
+    var w = week1(v), s = soon(v);
     return '<button type="button" class="vc' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" aria-pressed="' + (v === sel) + '">'
-      + '<span class="vc-th">' + thumb(v) + '<span class="vc-rk">' + n + '위</span>'
-      + (TYPE[v.type] ? '<span class="vc-type">' + TYPE[v.type] + '</span>' : '')
-      + (s ? '<span class="vc-ms">곧 ' + fmtM(s.M) + '</span>' : '') + '</span>'
-      + '<span class="vc-g"><b>' + (w.gain == null ? '—' : '+' + fmt(w.gain)) + '</b><small>1주 뒤 예상</small>' + wTag(w) + '</span>'
+      + '<span class="vc-th">' + thumb(v) + (s ? '<span class="vc-ms">곧 ' + fmtM(s.M) + '</span>' : '') + '</span>'
+      + '<span class="vc-g"><b>' + (w.gain == null ? '—' : '+' + fmt(w.gain)) + '</b><small>1주 뒤 예상</small></span>'
       + '<span class="vc-t">' + esc(v.title) + '</span>'
-      + '<span class="vc-m">지금 ' + fmt(V) + (w.x == null ? '' : ' → 약 ' + fmt(w.x)) + ' · ' + ageTxt(a) + ' 전</span></button>';
+      + '<span class="vc-m">' + ageTxt(age(v)) + ' 전</span></button>';
   }
   // 100만 단위 돌파 목록: 지난 100만 → 다음 100만 진행 막대, 넘는 때. 8주 안에 넘는 영상은 강조
   function renderBoard(B){
@@ -985,9 +979,7 @@
     });
     // 지금
     s += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
-      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V0).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
-      + '<rect x="' + (X(a) - 20).toFixed(1) + '" y="' + (H - B - 22) + '" width="40" height="17" rx="8.5" fill="#ff4d4f"/>'
-      + '<text x="' + X(a).toFixed(1) + '" y="' + (H - B - 9.5) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#2b0608">지금</text>';
+      + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V0).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>';
     // 마우스 따라가는 선과 점
     s += '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
