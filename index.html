@@ -4915,13 +4915,13 @@ goTab(true,true);
     return out;                                                // [①, ②, ③, 종합]
   }
 
-  // ---------- ④ 1일 추세 (게시 3주 뒤부터): 다음 100만 단위까지 며칠 ----------
+  // ---------- ④ 1일 추세 (게시 15일 뒤부터): 다음 100만 단위까지 며칠 ----------
   // 간단하게 1일 단위로 본다:
   //   g: 최근 하루(24시간) 증가 (기록이 하루가 안 되면 있는 만큼으로 하루치 환산, 3시간 이상일 때)
   //   r: 하루 증가가 하루마다 몇 배가 되는지 — 최근 최대 7일을 앞·뒤 반으로 나눠 하루 증가를 비교 (기록 2일 이상일 때, 0.85 ~ 1)
   //      기록이 모자라면 r = 1 (지금 속도 그대로)
   //   n일 뒤 누적 = V + g·(r + r² + … + rⁿ)      (r = 1 이면 V + g·n)
-  var LATE = 504, MSTEP = 1e6, WEEKS = 8;
+  var LATE = 360, MSTEP = 1e6, WEEKS = 8;          // LATE: 게시 15일(360시간) 뒤부터 100만 단위로 본다
   // vs: 조회수만 담은 기록 { snaps: [[h, 조회수], ...] }. h0~h1 사이 하루 평균 증가
   function perDay(vs, h0, h1){ var x0 = at(vs, h0, 1), x1 = at(vs, h1, 1); return x0 == null || x1 == null || h1 - h0 < 1 ? null : (x1 - x0) / (h1 - h0) * 24; }
   function daily(vs, a){
@@ -5282,9 +5282,9 @@ goTab(true,true);
     return (y == null ? -1 : y) - (x == null ? -1 : x);
   }
 
-  // ---------- 게시 3주 뒤: 100만 단위 돌파 (④ 1일 추세, 1주 ~ 8주로 보여 줌, 계산은 views-engine.js) ----------
+  // ---------- 게시 15일 뒤: 100만 단위 돌파 (④ 1일 추세, 1주 ~ 8주로 보여 줌, 계산은 views-engine.js) ----------
   var LT = { no: '④', b: '4', name: '1일 추세법', color: '#5bb4ec',
-    short: '게시 3주가 지나면 최근 하루 증가량과, 그 증가량이 하루마다 얼마나 줄어드는지로 다음 100만 단위까지 며칠 걸릴지 계산합니다.',
+    short: '게시 15일이 지나면 최근 하루 증가량과, 그 증가량이 하루마다 얼마나 줄어드는지로 다음 100만 단위까지 며칠 걸릴지 계산합니다.',
     desc: '최근 하루 동안 는 조회수를 기준으로, 최근 일주일 동안 하루 증가량이 하루에 몇 %씩 줄었는지를 이어 붙여 다음 100만 단위에 닿는 날을 셉니다.',
     uses: ['최근 하루 증가', '1일 단위 추이'],
     pro: '단순하고 오래된 영상의 느린 증가에 맞음', con: '갑자기 다시 뜨는 영상(역주행)은 늦게 따라감' };
@@ -5329,7 +5329,7 @@ goTab(true,true);
       + '<span class="vc-m">' + fmt(m.M - x.p.V) + ' 남음 · 하루 +' + fmt(x.p.g) + '</span></button>';
   }
 
-  // 상세(3주 뒤): 다음 100만 단위 세 개 · 초기 예측 결과 · 이 영상의 100만 돌파 예측 기록
+  // 상세(15일 뒤): 다음 100만 단위 세 개 · 초기 예측 결과 · 이 영상의 100만 돌파 예측 기록
   function renderLate(){
     var v = sel, p = plan(v);
     $('vd-md').innerHTML = '<i style="background:' + LT.color + '"></i><span>' + LT.short + '</span>'
@@ -5376,7 +5376,7 @@ goTab(true,true);
     return { cls: '', done: false, pw: pw, aw: null, txt: '진행 중 · ' + Math.floor(el + 1) + '주 차' };
   }
   function history(v){
-    if (!v.ms || !v.ms.length) return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span><small class="vh-n">게시 3주 뒤 기록이 2일 쌓이면 다음 100만 단위를 몇 주 차에 넘을지 예측을 고정해 두고, 실제로 넘은 주와 비교해 채점합니다.</small></div>';
+    if (!v.ms || !v.ms.length) return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span><small class="vh-n">게시 15일 뒤 기록이 2일 쌓이면 다음 100만 단위를 몇 주 차에 넘을지 예측을 고정해 두고, 실제로 넘은 주와 비교해 채점합니다.</small></div>';
     return '<div class="vd-mh"><span class="vd-el">100만 돌파 예측 기록</span>' + v.ms.slice().reverse().map(function(m){
       var r = msResult(v, m);
       return '<div class="vd-mr ' + r.cls + '"><b>' + fmtM(m.M) + '</b><span>' + dY(v.pub + m.t * 3600e3, nowMs(v)) + ' 예측 · '
@@ -5385,7 +5385,7 @@ goTab(true,true);
     }).join('') + '</div>';
   }
 
-  // 그래프(3주 뒤): 가로축 주 단위 (최근 최대 2주 기록 · 지금 · 1주 ~ 8주 뒤). 1일 추세로 이은 예상 + 100만 단위 가로선
+  // 그래프(15일 뒤): 가로축 주 단위 (최근 최대 2주 기록 · 지금 · 1주 ~ 8주 뒤). 1일 추세로 이은 예상 + 100만 단위 가로선
   function msChart(){
     var v = sel, a = age(v), p = plan(v), box = $('vd-chart');
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 24, B = 30;
@@ -5433,7 +5433,7 @@ goTab(true,true);
       + '<span><i class="k-m"></i>100만 단위</span></div>';
   }
 
-  // 성적표(3주 뒤): 주차 적중(±1주) + 8주 안/넘게로 본 예측이 실제로 어땠는지
+  // 성적표(15일 뒤): 주차 적중(±1주) + 8주 안/넘게로 본 예측이 실제로 어땠는지
   function renderMsScore(h){
     var rows = [];
     VIDEOS.forEach(function(v){ (v.ms || []).forEach(function(m){ rows.push({ v: v, m: m, r: msResult(v, m) }); }); });
@@ -5449,7 +5449,7 @@ goTab(true,true);
       + '<div class="vs-row"><span>8주 안으로 본 예측</span><b>' + (inW.length ? got(inW) + '/' + inW.length : '—') + '</b></div>'
       + '<div class="vs-row"><span>8주 넘게로 본 예측</span><b>' + (outW.length ? got(outW) + '/' + outW.length : '—') + '</b></div>'
       + '<small>앞은 클수록, 뒤는 작을수록 잘 맞은 것</small></div></div>';
-    if (!rows.length){ $('vs').innerHTML = h + '<p class="anote">게시 3주가 지나고 기록이 2일 쌓인 영상부터 100만 단위 돌파 예측을 고정해 채점합니다.</p>'; return; }
+    if (!rows.length){ $('vs').innerHTML = h + '<p class="anote">게시 15일이 지나고 기록이 2일 쌓인 영상부터 100만 단위 돌파 예측을 고정해 채점합니다.</p>'; return; }
     h += '<div class="atab-w"><table class="atab vs-tab vs-ms"><thead><tr><th>영상</th><th>목표</th><th>예측한 날</th><th>예상</th><th>예측 주차</th><th>실제</th><th>결과</th></tr></thead><tbody>'
       + rows.slice(0, 20).map(function(x){
           var v = x.v, m = x.m, D = function(t){ return t == null ? '—' : dY(v.pub + t * 3600e3, v.pub + m.t * 3600e3); };
@@ -5458,7 +5458,7 @@ goTab(true,true);
             + '<td>' + (x.r.pw ? x.r.pw + '주 차' : '8주 넘게') + '</td>'
             + '<td>' + (m.hit != null ? D(m.hit) + ' <small>(' + x.r.aw + '주 차)</small>' : '—') + '</td><td><span class="vp-e ' + x.r.cls + '">' + x.r.txt + '</span></td></tr>';
         }).join('') + '</tbody></table></div>'
-      + '<p class="gnote">예측은 게시 3주가 지나고 기록이 2일 쌓였을 때(또는 앞 목표를 넘은 직후) 한 번 고정해 둔 값입니다. 예측한 주차와 실제로 넘은 주가 ±1주 안이면 적중으로 봅니다.</p>';
+      + '<p class="gnote">예측은 게시 15일이 지나고 기록이 2일 쌓였을 때(또는 앞 목표를 넘은 직후) 한 번 고정해 둔 값입니다. 예측한 주차와 실제로 넘은 주가 ±1주 안이면 적중으로 봅니다.</p>';
     $('vs').innerHTML = h;
   }
 
@@ -5506,7 +5506,7 @@ goTab(true,true);
       + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>예측</b> 게시한 지 24시간(7일)이 안 된 영상은 24시간째(7일째) 조회수 예측값으로 순위를 매기고 <i class="vk vk-pred">예측</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>게시 3주 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 1일 추세로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
+      + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 1일 추세로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
       + '<li><b>100만 단위 돌파 유력</b> 그렇게 계산해 8주 안에 다음 100만을 넘는 영상입니다. 상승 순위 옆 버튼에 모입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 시간별 증가가 가끔 튀어 보일 수 있습니다.</li>'
@@ -5527,7 +5527,7 @@ goTab(true,true);
     $('vr-msb').classList.toggle('on', ms); $('vr-tb').classList.toggle('on', !ms);
     el.querySelector('.vr-dd').classList.toggle('off', ms);
     $('vr-cap').hidden = !ms;
-    $('vr-cap').innerHTML = '게시 3주가 지난 영상 중 최근 1일 추세로 <b>8주 안에 다음 100만 단위를 넘는</b> 영상입니다. 막대는 1주 ~ 8주 뒤까지 남은 조회수를 얼마나 채우는지, 진한 막대가 넘는 주입니다.';
+    $('vr-cap').innerHTML = '게시 15일이 지난 영상 중 최근 1일 추세로 <b>8주 안에 다음 100만 단위를 넘는</b> 영상입니다. 막대는 1주 ~ 8주 뒤까지 남은 조회수를 얼마나 채우는지, 진한 막대가 넘는 주입니다.';
     if (ms){
       $('vc-row').innerHTML = C.map(msRowCard).join('') || '<p class="anote vr-none">지금 추세로는 8주 안에 다음 100만 단위를 넘을 영상이 없습니다.</p>';
       $('vc-row').scrollLeft = 0; navState(); return;
@@ -5718,7 +5718,7 @@ goTab(true,true);
           bars(v, a, step, daily ? 14 : 24))
       + '</div></div>'
       + '<div class="vd-pred' + (late(v) ? ' late' : '') + '" id="vd-pred"><div class="vd-ph">' + (late(v)
-        ? '<h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + LT.color + '"><i>' + LT.b + '</i>' + LT.name + ' · 게시 3주 뒤부터</span></div>'
+        ? '<h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + LT.color + '"><i>' + LT.b + '</i>' + LT.name + ' · 게시 15일 뒤부터</span></div>'
         : '<h4>예측 현황</h4><div class="vd-mt" role="tablist" aria-label="예측 방법">'
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
@@ -5946,7 +5946,7 @@ goTab(true,true);
     }).join('')
       + (function(){
         var rs = []; VIDEOS.forEach(function(v){ (v.ms || []).forEach(function(m){ var r = msResult(v, m); if (r.done) rs.push(r); }); });
-        return '<div class="vm lt" style="--mc:' + LT.color + '"><span class="vm-h"><span class="vp-no">' + LT.b + '</span><b>' + LT.name + '</b><small>게시 3주 뒤부터</small></span>'
+        return '<div class="vm lt" style="--mc:' + LT.color + '"><span class="vm-h"><span class="vp-no">' + LT.b + '</span><b>' + LT.name + '</b><small>게시 15일 뒤부터</small></span>'
           + '<span class="vm-d">' + LT.desc + '</span>'
           + '<span class="vp-tags">' + LT.uses.map(function(u){ return '<span>' + u + '</span>'; }).join('') + '</span>'
           + '<span class="vm-pc"><span class="p">' + LT.pro + '</span><span class="c">' + LT.con + '</span></span>'
@@ -5958,10 +5958,10 @@ goTab(true,true);
   function scoreSeg(){
     return '<div class="seg vs-seg" role="tablist" aria-label="성적표 목표">' + TARGETS.map(function(x, k){
         return '<button type="button" role="tab" data-si="' + k + '" class="' + (k === si ? 'on' : '') + '" aria-selected="' + (k === si) + '">' + x.from + ' → ' + x.name + '</button>';
-      }).join('') + '<button type="button" role="tab" data-si="3" class="' + (si === 3 ? 'on' : '') + '" aria-selected="' + (si === 3) + '">3주 뒤 → 100만 돌파</button></div>';
+      }).join('') + '<button type="button" role="tab" data-si="3" class="' + (si === 3 ? 'on' : '') + '" aria-selected="' + (si === 3) + '">15일 뒤 → 100만 돌파</button></div>';
   }
   function renderScore(){
-    if (si === 3){ renderMsScore('<div class="vs-top"><p>게시 3주가 지난 영상의 <b>다음 100만 단위 돌파</b> 예측이 맞았는지 봅니다.</p>' + scoreSeg() + '</div>'); return; }
+    if (si === 3){ renderMsScore('<div class="vs-top"><p>게시 15일이 지난 영상의 <b>다음 100만 단위 돌파</b> 예측이 맞았는지 봅니다.</p>' + scoreSeg() + '</div>'); return; }
     var tg = TARGETS[si], tr = track(si), best = -1, bm = Infinity;
     tr.sum.forEach(function(s, k){ if (k < 3 && s.n && s.mape < bm){ bm = s.mape; best = k; } });
     var h = '<div class="vs-top"><p>게시 <b>' + tg.from + '</b> 뒤에 한 <b>' + tg.name + '</b> 조회수 예측이 실제와 얼마나 맞았는지 봅니다.</p>'
