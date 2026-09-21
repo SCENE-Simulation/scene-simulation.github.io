@@ -168,7 +168,6 @@
     + '<div class="gview seg" id="g-view" role="tablist" aria-label="시뮬레이터 화면">'
     + '<button type="button" role="tab" data-v="draw">뽑기</button>'
     + '<button type="button" role="tab" data-v="ana">분석</button>'
-    + '<button type="button" role="tab" data-v="mini">뽑기 미니게임</button>'
     + '</div>'
     + '<div id="g-draw">'
     +   '<div class="board">'
@@ -221,9 +220,23 @@
     +   '<div class="graph" id="a-cost"></div>'
     +   '<div class="cmp" id="a-cmp"></div>'
     +   '<div class="graph" id="a-rec"></div>'
+    + '</div>');
+
+  // ---------- 뽑기 미니게임 페이지 (?tab=minigame) ----------
+  // 원래 시뮬레이터 안의 세 번째 화면이었는데, 사이드바의 별도 페이지로 올렸다(pages.js 가 window.SGMINI 를 페이지로 등록).
+  // 뽑기 종류(G)는 시뮬레이터와 같이 쓴다 — 어느 페이지에서 바꿔도 둘 다 바뀐다
+  var mgPage = document.createElement('section');
+  mgPage.id = 'v-minigame'; mgPage.className = 'wrap page'; mgPage.hidden = true;
+  (document.querySelector('main.mn') || document.body).appendChild(mgPage);
+  mgPage.insertAdjacentHTML('beforeend',
+    '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">뽑기 미니게임</span></div></div>'
+    + '<p class="sec-d">원하는 포토카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요. 결과는 등급과 확률 그래프로 보여 주고, 도전 기록은 이 브라우저에 남습니다.</p>'
+    + '<div class="gsel">'
+    +   '<div class="gsel-h">뽑기 종류<small>콜라보마다 포토카드 구성이 다릅니다</small></div>'
+    +   '<div class="gsel-list" id="mg-glist" role="radiogroup" aria-label="뽑기 종류"></div>'
+    +   '<p class="gsel-info" id="mg-ginfo"></p>'
     + '</div>'
-    + '<div id="g-mini" hidden>'
-    +   '<p class="mg-lead">원하는 카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요.</p>'
+    + '<div id="g-mini">'
     // 순서: 카드 고르기 토글(뽑기 상자 위, 눌러서 펼치고 접음) → 뽑기 상자 → 결과 → 기록.
     // 결과는 늘 뽑기 버튼 바로 아래에 온다
     +   '<div class="mg-acc" id="mg-acc">'
@@ -492,14 +505,17 @@
   }
 
   // ---------- 뽑기 종류 선택 · 화면 전환 ----------
+  // 뽑기 종류 목록은 시뮬레이터(g-list)와 미니게임 페이지(mg-glist) 두 곳에 같은 내용으로 그린다
   function renderList(){
-    $('g-list').innerHTML = LIST.map(function(g){
+    var html = LIST.map(function(g){
       var on = g === G;
       return '<button type="button" class="gopt' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-g="' + esc(g.id) + '">'
         + '<b>' + esc(g.title) + '</b><small>' + g.N + '종 · 1장 ' + won(g.price) + '원</small></button>';
     }).join('');
-    $('g-info').textContent = (G.comp ? G.comp + ' = ' : '') + G.N + '종 · 카드 한 장이 나올 확률은 모두 1/' + G.N
+    var info = (G.comp ? G.comp + ' = ' : '') + G.N + '종 · 카드 한 장이 나올 확률은 모두 1/' + G.N
       + ' · 1장 ' + won(G.price) + '원(' + G.buy + ')';
+    $('g-list').innerHTML = $('mg-glist').innerHTML = html;
+    $('g-info').textContent = $('mg-ginfo').textContent = info;
   }
   function select(id){
     var g = LIST.filter(function(x){ return x.id === id; })[0] || LIST[0];
@@ -523,7 +539,7 @@
     if (S.done) showResult(); else $('result').hidden = true;
     showRec();
     if (view === 'ana') renderAna();
-    if (view === 'mini') renderMini();
+    if (!mgPage.hidden) renderMini();
   }
   function setView(v){
     view = v;
@@ -533,9 +549,7 @@
     });
     $('g-draw').hidden = v !== 'draw';
     $('g-ana').hidden = v !== 'ana';
-    $('g-mini').hidden = v !== 'mini';
     if (v === 'ana') renderAna();
-    if (v === 'mini') renderMini();
   }
   root.addEventListener('click', function(e){
     var o = e.target.closest('.gopt'); if (o){ select(o.getAttribute('data-g')); return; }
@@ -1102,10 +1116,16 @@
     if (e.target.closest('#mg-again')){ $('mg-stage').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); mgRun(); return; }
     if (mgEnd && e.target.closest('#mg-draw')) mgEnd();       // 뽑기 창을 눌러도 건너뛴다
   });
+  // 미니게임 페이지의 뽑기 종류 목록 (시뮬레이터와 같은 select)
+  mgPage.addEventListener('click', function(e){
+    var o = e.target.closest('.gopt'); if (o) select(o.getAttribute('data-g'));
+  });
 
   // ---------- 시작 ----------
   var saved = null;
   try { saved = localStorage.getItem('gacha:sel'); } catch (e){}
   select(saved || LIST[0].id);
   setView('draw');
+  // 페이지 등록용 (pages.js). 숨어 있는 동안은 그래프 폭을 잴 수 없어서, 페이지를 열 때 새로 그린다
+  window.SGMINI = { el: mgPage, onShow: function(){ renderMini(); } };
 })();

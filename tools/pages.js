@@ -282,6 +282,7 @@
     pages: (function(){
       var m = { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
       (window.SGCOLS || []).forEach(function(c){ m[c.id] = c.el; });
+      if (window.SGMINI) m.minigame = window.SGMINI.el;        // 뽑기 미니게임 (gacha.js)
       return m;
     })(),
     onShow: function(tab){
@@ -290,6 +291,7 @@
       else if (tab === 'allgoods') renderAllGoods();
       else if (tab === 'goods2026') renderGoods();
       else if (tab === 'home') renderSum();
+      else if (tab === 'minigame') { if (window.SGMINI) window.SGMINI.onShow(); }
       else (window.SGCOLS || []).forEach(function(c){ if (c.id === tab) c.onShow(); });
       syncHearts();
     }

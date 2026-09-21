@@ -29,6 +29,7 @@
     return t in TABS ? t : 'home';
   }
   function show(t){
+    if (!TABS[t]) t = 'home';   // 페이지를 못 만든 경우(데이터를 못 읽음 등) 메뉴를 눌러도 멈추지 않게
     var p = TABS[t];
     VIEWS.forEach(function(v){ v.hidden = v !== p.el; });
     if (p.btn) document.getElementById(p.btn).click();

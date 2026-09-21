@@ -61,7 +61,8 @@ node tools/build.js tools/source.html index.html
     들여쓴 하위 메뉴 글자 왼쪽 빈자리에 떠서 글자 자리·크기는 그대로다. 사이드바와 모바일 하단 시트에 같이 나온다
 - `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
 - `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
-- `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석 · 뽑기 미니게임). 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
+- `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석) + **뽑기 미니게임** 별도 페이지(`?tab=minigame`, `window.SGMINI` 를 pages.js 가 등록).
+  뽑기 종류 선택은 두 페이지가 같이 쓴다. 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
 - `tools/views.js` — 조회수 예측기 화면. 기록이 비어 있으면 예시 데이터를 만들어 "예시"로 표시한다
 - `tools/views-engine.js` — 조회수 예측 계산식. 사이트와 수집기가 같이 쓴다 (브라우저 `window.VE`, Node `require`)
 
