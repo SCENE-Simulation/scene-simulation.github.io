@@ -70,6 +70,10 @@ node tools/build.js tools/source.html index.html
 - 기록은 **`data` 브랜치의 `views.json`** 에 쌓인다 (main 은 건드리지 않음 → 사이트가 매시간 다시 배포되지 않는다).
   사이트는 raw.githubusercontent.com 에서 읽고, 못 읽으면 main 의 `data/views.json`(빈 자리)을 읽는다
 - 기록 형식과 간격은 `collect-views.js` 맨 위 주석. 예측 시점(6시간·24시간·7일)에 예측을 계산해 `pred` 로 고정 저장한다
+- 채널 **동영상 탭(UULF… 재생목록)만** 모은다 (쇼츠·라이브 제외)
+- 게시 **3주 뒤**부터는 ④ 장기 추세로 다음 **100만 단위** 돌파를 예측하고 `ms` 로 고정 저장, 닿으면 `hit` 기록.
+  화면은 3주 지난 영상을 100만 단위 모드로 보여 주고, 2주 안 돌파 가능성이 높은 영상은 맨 위 "100만 단위 돌파 유력"에 모은다
+- 조회수 예측기 화면 색은 **초록 계열**(사이트 나머지의 분홍과 다름). 변수는 theme.css 의 `#v-views{--vg…}`
 - 손으로 돌리기: `gh workflow run collect-views.yml` (전체 목록 다시 읽기: `-f full=true`)
 
 ## 커밋 신원
