@@ -18,22 +18,30 @@
     VIEWS.forEach(function(v){ v.hidden = v !== p.el; });
     if (p.btn) document.getElementById(p.btn).click();
     if (window.SG) window.SG.onShow(t);
-    document.querySelectorAll('.sb [data-tab], .bsheet [data-tab], .bb [data-tab]').forEach(function(a){
+    document.querySelectorAll('.sb [data-tab], .bsheet [data-tab]').forEach(function(a){
       a.classList.toggle('on', a.getAttribute('data-tab') === t);
     });
-    // 하단 탭 바: 현재 페이지가 속한 그룹 버튼 강조
+    closeSheet();   // 하단 탭 바 강조는 closeSheet() → syncBB() 가 맡는다
+    window.scrollTo(0, 0);
+  }
+
+  // 하단 탭 바 강조를 현재 탭 기준으로 되돌린다. 켜지는 건 현재 페이지 하나뿐이다.
+  function syncBB(){
+    var t = cur();
+    document.querySelectorAll('.bb [data-tab]').forEach(function(a){
+      a.classList.toggle('on', a.getAttribute('data-tab') === t);
+    });
     document.querySelectorAll('.bb [data-open]').forEach(function(b){
       var g = document.getElementById(b.getAttribute('data-open'));
+      b.classList.remove('open');
       b.classList.toggle('on', !!g.querySelector('[data-tab="' + t + '"]'));
     });
-    closeSheet();
-    window.scrollTo(0, 0);
   }
 
   // 모바일 하단 시트: 사이드바 그룹을 그대로 복제해서 보여줌
   function closeSheet(){
     sheet.hidden = true;
-    document.querySelectorAll('.bb [data-open]').forEach(function(b){ b.classList.remove('open'); });
+    syncBB();
   }
   function openSheet(id, btn){
     if (!sheet.hidden && sheet.getAttribute('data-for') === id) { closeSheet(); return; }
@@ -46,6 +54,8 @@
       a.classList.toggle('on', a.getAttribute('data-tab') === cur());
     });
     sheet.hidden = false;
+    // 시트가 열려 있는 동안에는 방금 누른 버튼 하나만 켠다
+    document.querySelectorAll('.bb a, .bb button').forEach(function(b){ b.classList.remove('on', 'open'); });
     btn.classList.add('open');
   }
 

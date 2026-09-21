@@ -1,0 +1,4 @@
+# tools/build.js 가 '</style>\n</head>' 처럼 LF 기준으로 문자열을 찾는다.
+# Windows 의 core.autocrlf=true 가 체크아웃 때 CRLF 로 바꾸면 빌드가 깨지므로,
+# 어느 PC에서 clone 하든 작업트리를 LF 로 고정한다.
+* text=auto eol=lf
