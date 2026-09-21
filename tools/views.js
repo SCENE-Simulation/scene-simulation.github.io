@@ -996,13 +996,7 @@
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
       + (past.length ? '<span><i class="k-d"></i>지난 목표의 실제</span>' : '')
-      + (past.some(function(p){ return p.r; }) ? '<span style="--mc:' + m.color + '"><i class="k-o"></i>그때 한 예측</span>' : '') + '</div>'
-      // 네 가지 예측의 상태를 따로 보여 준다. 누르면 그 방법의 예측선으로 바뀐다
-      + '<div class="vd-mst" role="group" aria-label="방법별 예측 상태">' + ORDER.map(function(k){
-          var mm = ALLM[k], st = mStatus(v, k);
-          return '<button type="button" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + (st ? ' off' : '') + '" style="--mc:' + mm.color + '">'
-            + '<i>' + mm.b + '</i><b>' + mm.tab + '</b><small>' + (st ? esc(st) : '예측선 있음') + '</small></button>';
-        }).join('') + '</div>';
+      + (past.some(function(p){ return p.r; }) ? '<span style="--mc:' + m.color + '"><i class="k-o"></i>그때 한 예측</span>' : '') + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
     function valAt(h){
       if (h <= a){ var x = at(v, h, 1); return x == null ? null : { act: x }; }
