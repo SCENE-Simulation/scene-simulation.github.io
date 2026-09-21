@@ -529,16 +529,21 @@
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
       + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button></div>'
-      + '<div class="seg vr-ft" id="vr-ft"></div></div>'
+      + '<div class="vr-side"><div class="seg vr-ft" id="vr-ft"></div>'
+      // 바로 가기: 아래 칸으로 한 번에 내려간다
+      + '<nav class="vr-jump" aria-label="바로 가기">' + [['vd-pred', '예측 현황'], ['vt-h', '전체 영상'], ['vs-h', '예측 성적표']].map(function(x){
+          return '<button type="button" data-jump="' + x[0] + '">' + x[1]
+            + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+        }).join('') + '</nav></div></div>'
       + '<p class="vr-cap" id="vr-cap"></p>'
       + '<div class="vc-wrap at-start" id="vc-wrap"><button type="button" class="vc-nav prev" data-nav="-1" aria-label="이전 영상들">‹</button>'
       + '<div class="vc-row" id="vc-row"></div>'
       + '<button type="button" class="vc-nav next" data-nav="1" aria-label="다음 영상들">›</button></div>'
       + '<div class="mb" id="mb" hidden></div>'
       + '<div class="vd" id="vd"></div>'
-      + '<div class="vt-head"><h3 class="ahead">전체 영상</h3><input type="search" class="vt-q" id="vt-q" placeholder="제목 검색" value="' + esc(tq) + '" aria-label="제목 검색"></div>'
+      + '<div class="vt-head" id="vt-h"><h3 class="ahead">전체 영상</h3><input type="search" class="vt-q" id="vt-q" placeholder="제목 검색" value="' + esc(tq) + '" aria-label="제목 검색"></div>'
       + '<div class="vt" id="vt"></div>'
-      + '<h3 class="ahead">예측 성적표</h3><div class="vs" id="vs"></div>'
+      + '<h3 class="ahead" id="vs-h">예측 성적표</h3><div class="vs" id="vs"></div>'
       + '<h3 class="ahead">예측 방법</h3><div class="vm-list" id="vm-list"></div>'
       + about()
       + '<div class="vx-toast" id="vx-toast" role="status" hidden></div>';
@@ -1107,7 +1112,7 @@
   function scoreSeg(){
     return '<div class="seg vs-seg" role="tablist" aria-label="성적표 목표">' + TARGETS.map(function(x, k){
         return '<button type="button" role="tab" data-si="' + k + '" class="' + (k === si ? 'on' : '') + '" aria-selected="' + (k === si) + '">' + x.from + ' → ' + x.name + '</button>';
-      }).join('') + '<button type="button" role="tab" data-si="3" class="' + (si === 3 ? 'on' : '') + '" aria-selected="' + (si === 3) + '">15일 뒤 → 100만 돌파</button></div>';
+      }).join('') + '<button type="button" role="tab" data-si="3" class="' + (si === 3 ? 'on' : '') + '" aria-selected="' + (si === 3) + '">100만 단위 예측 확인</button></div>';
   }
   function renderScore(){
     if (si === 3){ renderMsScore('<div class="vs-top"><p>게시 15일이 지난 영상의 <b>다음 100만 단위 돌파</b> 예측이 맞았는지 봅니다.</p>' + scoreSeg() + '</div>'); return; }
@@ -1172,6 +1177,8 @@
     renderVideo(); renderScore();
   }
   el.addEventListener('click', function(e){
+    var jp = e.target.closest('[data-jump]');
+    if (jp){ ($(jp.getAttribute('data-jump')) || $('vd')).scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
     var b = e.target.closest('[data-vid]');
     if (b){
       var v = VIDEOS.filter(function(x){ return x.id === b.getAttribute('data-vid'); })[0];

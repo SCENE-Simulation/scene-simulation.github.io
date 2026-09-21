@@ -969,7 +969,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vs-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .vs-top p{margin:0;font-size:12.5px;color:var(--ink2)}
 .vs-top p b{color:var(--ink)}
-.vs-seg button{padding:6px 12px;font-size:12px}
+.vs-seg button{padding:6px 12px;font-size:12px;word-break:keep-all}
 .vs-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .vs-c{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .vs-c.best{border-color:color-mix(in srgb,var(--mc) 55%,transparent);background:color-mix(in srgb,var(--mc) 9%,transparent)}
@@ -1304,3 +1304,17 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 }
 .vs-err.vs-wait b{font:700 12px "Pretendard Variable","Noto Sans KR",sans-serif;color:var(--ink2)}
 .vs-err.vs-wait small{color:var(--dim);font-weight:500}
+
+/* ===== 조회수 예측기: 탭 줄 오른쪽 바로 가기 (예측 현황 · 전체 영상 · 예측 성적표) ===== */
+.vr-side{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-left:auto}
+.vr-jump{display:flex;gap:6px}
+.vr-jump button{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 11px 7px 12px;border-radius:9px!important;
+  background:rgba(255,255,255,.04);color:var(--ink2);font-size:12.5px;font-weight:700;white-space:nowrap}
+#v-views .vr-jump button:hover{background:var(--vg-soft);border-color:color-mix(in srgb,var(--vg) 55%,transparent)!important;color:var(--ink)}
+.vr-jump svg{width:13px;height:13px;flex:0 0 auto;color:var(--vg-t)}
+#vd-pred,#vt-h,#vs-h{scroll-margin-top:14px}
+@media (max-width:640px){
+  .vr-side{width:100%;margin-left:0}
+  .vr-jump{width:100%}
+  .vr-jump button{flex:1 1 0;min-width:0;padding:7px 4px;font-size:12px}
+}
