@@ -675,3 +675,62 @@ body.has-sfloat #totop{bottom:84px}
 .gprog.done .gps-s i{animation:gpsWave 2.8s ease-in-out infinite;animation-delay:calc(var(--k) * 40ms)}
 @keyframes gpsWave{0%,60%,100%{filter:none}30%{filter:brightness(1.55) saturate(1.2)}}
 @media (prefers-reduced-motion:reduce){.gp::after,.gps-s i.pop,.gprog.done .gps-s i,.gs.on svg{animation:none}}
+
+/* ===== 뽑기 미니게임: 고른 카드가 몇 번 만에 나오는지 (gacha.js) ===== */
+.mg-lead{margin:0 0 12px;font-size:13px;color:var(--ink2)}
+#g-mini .cmeta{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}   /* 타일 4개가 한 줄(모바일은 2×2)에 맞게 */
+.mg-stage{padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.mg-slots{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:16px}
+.mg-slot{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;text-align:center}
+.mg-k{font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+.mg-card{width:min(128px,100%);aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:var(--slot2);border:1px solid var(--line2);transition:border-color .2s,box-shadow .2s}
+.mg-card.land{width:min(160px,100%);aspect-ratio:4/3}
+.mg-card img{width:100%;height:100%;object-fit:cover;display:block}
+.mg-slot > b{max-width:100%;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mg-slot small{font-size:11.5px;color:var(--ink2)}
+.mg-arrow{font-size:20px;color:var(--dim)}
+.mg-target .mg-card{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink-soft)}
+.mg-change{padding:4px 10px;font-size:11.5px;border-radius:999px!important;background:transparent;color:var(--ink2);border-color:var(--line)!important}
+.mg-draw > b{font:700 18px "JetBrains Mono",monospace}
+.mg-draw.hit .mg-card{border-color:var(--gold);box-shadow:0 0 0 3px rgba(236,210,91,.35),0 0 26px rgba(236,210,91,.4);animation:mgHit .6s cubic-bezier(.3,1.6,.5,1)}
+.mg-draw.hit > b{color:var(--gold-t)}
+@keyframes mgHit{0%{transform:scale(.86)}60%{transform:scale(1.07)}100%{transform:scale(1)}}
+.mg-go{width:100%}
+.mg-go.skip{--g1:#55555a;--g2:#3e3e42;--gd:#242427;--gs:transparent;color:var(--ink)}
+#g-mini.busy .mg-draw{cursor:pointer}
+.mg-pick{margin-top:14px}
+.mg-grp{margin-bottom:12px}
+.mg-gh{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12.5px;font-weight:700;color:var(--ink)}
+.mg-gh i{width:10px;height:10px;border-radius:3px}
+.mg-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.mg-pc{display:flex;flex-direction:column;gap:5px;min-width:0;padding:5px;border-radius:10px!important;text-align:left;
+  background:rgba(255,255,255,.04);border-color:var(--line)!important}
+.mg-pc img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;display:block}
+.mg-pc.land{grid-column:span 2}
+.mg-pc.land img{aspect-ratio:4/3}
+.mg-pc span{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mg-pc:hover:not(:disabled){background:rgba(255,255,255,.1)}
+.mg-pc.on{background:var(--pink-soft);border-color:var(--pink)!important}
+.mg-pc.on span{color:var(--ink)}
+.mg-res{margin-top:14px;padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.mg-rh{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-bottom:6px}
+.mg-grade,.mg-gd{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:800;color:#1c1c1e;background:var(--gc);white-space:nowrap}
+.mg-gd{padding:2px 9px;font-size:11.5px;font-weight:700}
+.mg-rh b{font-size:clamp(18px,4.6vw,22px);color:var(--ink)}
+.mg-rs{margin:0 0 14px;font-size:13px;color:var(--ink2);line-height:1.6}
+.mg-gauge{position:relative;margin:0 0 30px}
+.mg-gbar{height:8px;border-radius:999px;background:linear-gradient(90deg,#ffe08a,#6fe0b3 40%,#c1a8ea 70%,#f28aa7)}
+.mg-gauge i{position:absolute;top:-5px;width:4px;height:18px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.45);transform:translateX(-50%)}
+.mg-gauge span{position:absolute;top:14px;left:0;font-size:10.5px;color:var(--ink2)}
+.mg-gauge span:last-child{left:auto;right:0}
+.mg-strip{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:14px 0 4px}
+.mg-strip img{width:28px;aspect-ratio:3/4;object-fit:cover;border-radius:4px;opacity:.6}
+.mg-strip img.land{width:37px;aspect-ratio:4/3}
+.mg-strip img.t{opacity:1;outline:2px solid var(--gold);outline-offset:1px}
+.mg-strip em{margin-right:4px;font-style:normal;font-size:11.5px;color:var(--ink2)}
+.mg-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.mg-tab th:nth-child(2),.mg-tab td:nth-child(2),.mg-tab th:nth-child(3),.mg-tab td:nth-child(3){text-align:left;font-family:inherit}
+.mg-tab th:nth-child(4),.mg-tab td:nth-child(4){text-align:right}
+.mg-tab td:nth-child(4){font-family:"JetBrains Mono",monospace}
+.mg-card img.gback,.mg-pc img.gback,.mg-strip img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px)}
+@media (prefers-reduced-motion:reduce){.mg-draw.hit .mg-card{animation:none}}

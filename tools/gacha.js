@@ -167,6 +167,7 @@
     + '<div class="gview seg" id="g-view" role="tablist" aria-label="시뮬레이터 화면">'
     + '<button type="button" role="tab" data-v="draw">뽑기</button>'
     + '<button type="button" role="tab" data-v="ana">분석</button>'
+    + '<button type="button" role="tab" data-v="mini">뽑기 미니게임</button>'
     + '</div>'
     + '<div id="g-draw">'
     +   '<div class="board">'
@@ -219,6 +220,22 @@
     +   '<div class="graph" id="a-cost"></div>'
     +   '<div class="cmp" id="a-cmp"></div>'
     +   '<div class="graph" id="a-rec"></div>'
+    + '</div>'
+    + '<div id="g-mini" hidden>'
+    +   '<p class="mg-lead">원하는 카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요.</p>'
+    +   '<div class="mg-stage" id="mg-stage">'
+    +     '<div class="mg-slots">'
+    +       '<div class="mg-slot mg-target"><span class="mg-k">목표 카드</span><div class="mg-card" id="mg-tcard"><img alt=""></div>'
+    +         '<b id="mg-tname"></b><button type="button" class="mg-change" id="mg-change">다른 카드 고르기</button></div>'
+    +       '<div class="mg-arrow" aria-hidden="true">→</div>'
+    +       '<div class="mg-slot mg-draw" id="mg-draw"><span class="mg-k">뽑기 창</span><div class="mg-card" id="mg-dcard"><img alt=""></div>'
+    +         '<b id="mg-count" aria-live="polite"></b><small id="mg-sub"></small></div>'
+    +     '</div>'
+    +     '<button type="button" class="gp gp1 mg-go" id="mg-go"><span class="gp-l">' + ICON.one + '<span id="mg-gol">뽑기 시작</span></span><span class="gp-s" id="mg-gos"></span></button>'
+    +   '</div>'
+    +   '<div class="mg-pick" id="mg-pick"></div>'
+    +   '<div class="mg-res" id="mg-res" hidden></div>'
+    +   '<div class="mg-hist" id="mg-hist"></div>'
     + '</div>');
 
   var hero = $('hero'), tag = $('tag'), tag2 = $('tag2'), stage = $('stage'), setsEl = $('sets'), logEl = $('log');
@@ -477,7 +494,7 @@
   }
   function select(id){
     var g = LIST.filter(function(x){ return x.id === id; })[0] || LIST[0];
-    stopAuto();
+    stopAuto(); mgStop();
     G = g;
     var isNew = !ST[G.id];
     S = ST[G.id] || (ST[G.id] = fresh());
@@ -497,6 +514,7 @@
     if (S.done) showResult(); else $('result').hidden = true;
     showRec();
     if (view === 'ana') renderAna();
+    if (view === 'mini') renderMini();
   }
   function setView(v){
     view = v;
@@ -506,7 +524,9 @@
     });
     $('g-draw').hidden = v !== 'draw';
     $('g-ana').hidden = v !== 'ana';
+    $('g-mini').hidden = v !== 'mini';
     if (v === 'ana') renderAna();
+    if (v === 'mini') renderMini();
   }
   root.addEventListener('click', function(e){
     var o = e.target.closest('.gopt'); if (o){ select(o.getAttribute('data-g')); return; }
@@ -777,6 +797,184 @@
       + '<p class="gnote">완성 ' + r.length + '회 · 평균 ' + Math.round(s / r.length) + '장 · 최소 ' + best + '장(상위 ' + pctTxt(at(G.curve, best)) + ')</p>'
       + '<div class="atab-w"><table class="atab"><thead><tr><th>회차</th><th>장수</th><th>총비용</th><th>방식</th><th>총비용 기준</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
+
+  // ---------- 뽑기 미니게임 ----------
+  // 카드 한 장을 골라 그 카드가 몇 번 만에 나오는지 본다.
+  // 한 번에 나올 확률이 1/N 이므로 n번 안에 나올 확률은 1 - (1 - 1/N)^n, 평균은 N번이다.
+  var MINI = {}, mgT = [], mgEnd = null;       // 뽑기 종류별 목표 카드 · 결과, 연출 타이머, 연출을 끝내는 함수(연출 중일 때만)
+  var GRADES = [                                // max: n번 안에 나올 확률이 이 값 이하이면 그 등급
+    { t: '원샷 원킬', c: '#ffe08a', max: 0 },    // 첫 번째에 바로
+    { t: '신의 손', c: '#ffe08a', max: 0.10 },
+    { t: '금손', c: '#f3a93b', max: 0.30 },
+    { t: '무난한 손', c: '#6fe0b3', max: 0.60 },
+    { t: '아쉬운 손', c: '#c1a8ea', max: 0.85 },
+    { t: '흙손', c: '#c9a27e', max: 0.97 },
+    { t: '저주받은 손', c: '#f28aa7', max: 2 }
+  ];
+  function mini(){ return MINI[G.id] || (MINI[G.id] = { target: null, res: null, picking: true }); }
+  function mgKey(){ return 'gacha:mini:' + G.id; }
+  function mgLoad(key){ try { return JSON.parse(localStorage.getItem(key || mgKey()) || '[]'); } catch (e){ return []; } }
+  function within(n){ return 1 - Math.pow(1 - 1 / G.N, n); }
+  function mgMedian(){ return Math.ceil(Math.log(0.5) / Math.log(1 - 1 / G.N)); }
+  function gradeOf(n){
+    if (n === 1) return GRADES[0];
+    var q = within(n);
+    for (var k = 1; k < GRADES.length; k++) if (q <= GRADES[k].max) return GRADES[k];
+    return GRADES[GRADES.length - 1];
+  }
+  function backImg(img){ img.removeAttribute('src'); img.className = 'gback'; img.parentNode.classList.remove('land'); }
+  function cardImg(img, i){ setImg(img, i); img.parentNode.classList.toggle('land', !!G.land(i)); }
+  function coverImg(img){
+    if (!G.cover){ backImg(img); return; }
+    img.src = G.cover; img.className = G.coverCls; img.parentNode.classList.remove('land');
+  }
+  function mgStop(){
+    mgT.forEach(clearTimeout); mgT = []; mgEnd = null;
+    $('g-mini').classList.remove('busy'); $('mg-go').classList.remove('skip');
+  }
+
+  function renderMini(){
+    var m = mini(), has = m.target != null, run = !!mgEnd;
+    var tImg = $('mg-tcard').firstChild, dImg = $('mg-dcard').firstChild;
+    if (has) cardImg(tImg, m.target); else backImg(tImg);
+    $('mg-tname').textContent = has ? G.names[m.target] : '카드를 골라 주세요';
+    $('mg-change').hidden = !has || m.picking;
+    if (!run){
+      if (m.res){ cardImg(dImg, m.res.i); $('mg-count').textContent = won(m.res.n) + '번째'; $('mg-draw').classList.add('hit'); }
+      else { coverImg(dImg); $('mg-count').textContent = '—'; $('mg-draw').classList.remove('hit'); }
+    }
+    $('mg-sub').textContent = '한 번에 나올 확률 1/' + G.N + ' (' + (100 / G.N).toFixed(2) + '%)';
+    $('mg-go').disabled = !has;
+    $('mg-gol').textContent = run ? '건너뛰기' : (m.res ? '한 번 더' : '뽑기 시작');
+    $('mg-gos').textContent = run ? '결과 바로 보기'
+      : has ? '나올 때까지 뽑기 · 평균 ' + G.N + '번'
+      : '아래에서 뽑고 싶은 카드를 먼저 고르세요';
+    var pick = $('mg-pick');
+    pick.hidden = has && !m.picking;
+    if (!pick.hidden) mgPicker();
+    if (m.res && !run) mgResult(); else $('mg-res').hidden = true;
+    mgHist();
+  }
+
+  function mgPicker(){
+    var m = mini(), box = $('mg-pick');
+    box.innerHTML = '<h3 class="ahead">어떤 카드를 뽑고 싶으세요?</h3>';
+    G.groups.forEach(function(gr){
+      var g = document.createElement('div'); g.className = 'mg-grp';
+      g.innerHTML = '<div class="mg-gh"><i style="background:' + gr.color + '"></i>' + esc(gr.name) + '</div>';
+      var row = document.createElement('div'); row.className = 'mg-row';
+      gr.ids.forEach(function(i){
+        var b = document.createElement('button'); b.type = 'button';
+        b.className = 'mg-pc' + (G.land(i) ? ' land' : '') + (m.target === i ? ' on' : '');
+        b.setAttribute('data-mg', i);
+        var im = document.createElement('img'); im.alt = ''; setImg(im, i);
+        var s = document.createElement('span'); s.textContent = G.names[i];
+        b.appendChild(im); b.appendChild(s); row.appendChild(b);
+      });
+      g.appendChild(row); box.appendChild(g);
+    });
+  }
+
+  function mgRun(){
+    if (mgEnd){ mgEnd(); return; }                            // 연출 중에 누르면 건너뛰기
+    var m = mini(); if (m.target == null) return;
+    var t = m.target, seq = [], k;
+    do { k = (Math.random() * G.N) | 0; seq.push(k); } while (k !== t && seq.length < 1e5);
+    var key = mgKey(), n = seq.length, draw = $('mg-draw'), dImg = $('mg-dcard').firstChild;
+    function frame(idx){ cardImg(dImg, seq[idx]); $('mg-count').textContent = won(idx + 1) + '번째'; }
+    m.res = null;
+    mgEnd = function(){
+      mgStop();
+      m.res = { i: t, n: n, seq: seq };
+      try { var r = mgLoad(key); r.push({ i: t, n: n, t: Date.now() }); if (r.length > 50) r.shift(); localStorage.setItem(key, JSON.stringify(r)); } catch (e){}
+      renderMini();
+      draw.classList.remove('hit'); void draw.offsetWidth; draw.classList.add('hit');
+    };
+    $('g-mini').classList.add('busy'); $('mg-go').classList.add('skip'); draw.classList.remove('hit');
+    renderMini();
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || n === 1){ mgEnd(); return; }
+    // 처음엔 빠르게 넘기다 끝으로 갈수록 느려지고, 목표 카드 직전에 잠깐 멈춘다.
+    // 오래 걸린 판도 3초 안에 끝나도록 보여 줄 장면 수를 줄인다
+    var D = Math.min(2600, 400 + n * 60), F = Math.min(n, 44), HOLD = 300;
+    for (var f = 0; f < F - 1; f++) (function(f){
+      var idx = Math.floor(f * (n - 1) / (F - 1));          // 마지막 장(목표 카드)은 mgEnd 에서 보여 준다
+      mgT.push(setTimeout(function(){ frame(idx); }, D * Math.pow(f / (F - 1), 2.2)));
+    })(f);
+    mgT.push(setTimeout(function(){ if (mgEnd) mgEnd(); }, D + HOLD));
+  }
+
+  function mgResult(){
+    var r = mini().res, n = r.n, gr = gradeOf(n), q = within(n), diff = G.N - n;
+    var cnt = {}, top = -1, topN = 0;
+    r.seq.slice(0, -1).forEach(function(i){ cnt[i] = (cnt[i] || 0) + 1; if (cnt[i] > topN){ topN = cnt[i]; top = i; } });
+    var box = $('mg-res');
+    box.hidden = false;
+    box.innerHTML =
+      '<div class="mg-rh"><span class="mg-grade" style="--gc:' + gr.c + '">' + gr.t + '</span><b>' + won(n) + '번 만에 나왔다!</b></div>'
+      + '<p class="mg-rs">' + (n === 1
+        ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / G.N) + '의 행운입니다.'
+        : won(n) + '번 안에 나올 확률은 ' + pctTxt(q) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.') + '</p>'
+      + '<div class="mg-gauge" aria-hidden="true"><div class="mg-gbar"></div><i style="left:' + (Math.min(q, 1) * 100).toFixed(1) + '%"></i><span>운 좋음</span><span>운 나쁨</span></div>'
+      + '<div class="cmeta">'
+      +   tile('쓴 돈', won(n * G.price) + '원', '1장 ' + won(G.price) + '원 × ' + won(n) + '장')
+      +   tile('평균과 비교', diff > 0 ? diff + '번 빨리' : diff < 0 ? -diff + '번 늦게' : '딱 평균', '평균 ' + G.N + '번 · 절반은 ' + mgMedian() + '번 안에')
+      +   tile('그 사이 나온 카드', n > 1 ? won(n - 1) + '장' : '없음', n > 1 ? Object.keys(cnt).length + '종' : '바로 나옴')
+      +   tile('제일 많이 나온 카드', topN >= 2 ? esc(G.names[top]) : '—', topN >= 2 ? topN + '번이나 나왔습니다' : '겹친 카드 없음')
+      + '</div>'
+      + '<div class="mg-strip" id="mg-strip"></div>'
+      + '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'
+      + '<button type="button" class="gs" id="mg-repick">다른 카드 고르기</button></div>';
+    // 목표가 나오기까지 뽑힌 카드들 (최근 40장, 마지막이 목표 카드)
+    var strip = $('mg-strip'), last = r.seq.slice(-40);
+    if (r.seq.length > 40){ var em = document.createElement('em'); em.textContent = '앞의 ' + won(r.seq.length - 40) + '장 생략 ·'; strip.appendChild(em); }
+    last.forEach(function(i, k){
+      var im = document.createElement('img'); im.alt = ''; setImg(im, i); im.title = G.names[i];
+      if (k === last.length - 1) im.classList.add('t');
+      strip.appendChild(im);
+    });
+  }
+
+  function mgHist(){
+    var r = mgLoad(), box = $('mg-hist'), m = mini();
+    if (!r.length){ box.innerHTML = ''; return; }
+    var sum = r.reduce(function(a, x){ return a + x.n; }, 0);
+    var best = r.reduce(function(a, x){ return x.n < a.n ? x : a; }, r[0]);
+    var mine = m.target != null ? r.filter(function(x){ return x.i === m.target; }) : [];
+    var rows = r.slice().reverse().slice(0, 10).map(function(x, k){
+      var g = gradeOf(x.n);
+      return '<tr><td>' + (r.length - k) + '</td><td>' + esc(G.names[x.i] || 'No.' + (x.i + 1)) + '</td>'
+        + '<td><span class="mg-gd" style="--gc:' + g.c + '">' + g.t + '</span></td><td>' + won(x.n) + '번</td><td>' + pctTxt(within(x.n)) + '</td></tr>';
+    }).join('');
+    box.innerHTML = '<h3 class="ahead">도전 기록</h3><div class="cmeta">'
+      + tile('도전 횟수', r.length + '회', '최근 50회까지 저장')
+      + tile('평균', (sum / r.length).toFixed(1) + '번', '이론 평균 ' + G.N + '번')
+      + tile('최고 기록', won(best.n) + '번', esc(G.names[best.i] || ''))
+      + (m.target != null ? tile('이 카드 최고', mine.length ? won(Math.min.apply(null, mine.map(function(x){ return x.n; }))) + '번' : '—',
+          mine.length ? '도전 ' + mine.length + '회' : '아직 도전 안 함') : '')
+      + '</div><div class="atab-w"><table class="atab mg-tab"><thead><tr><th>회차</th><th>카드</th><th>등급</th><th>횟수</th><th>그 안에 나올 확률</th></tr></thead>'
+      + '<tbody>' + rows + '</tbody></table></div>';
+  }
+
+  $('g-mini').addEventListener('click', function(e){
+    var m = mini(), b = e.target.closest('[data-mg]');
+    if (b){
+      if (mgEnd) return;
+      m.target = +b.getAttribute('data-mg'); m.picking = false; m.res = null;
+      renderMini();
+      $('mg-stage').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    if (e.target.closest('#mg-go')){ mgRun(); return; }
+    if (e.target.closest('#mg-again')){ $('mg-stage').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); mgRun(); return; }
+    if (e.target.closest('#mg-change, #mg-repick')){
+      if (mgEnd) return;
+      m.picking = true; renderMini();
+      $('mg-pick').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      return;
+    }
+    if (mgEnd && e.target.closest('#mg-draw')) mgEnd();       // 뽑기 창을 눌러도 건너뛴다
+  });
 
   // ---------- 시작 ----------
   var saved = null;
