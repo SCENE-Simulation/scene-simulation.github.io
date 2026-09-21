@@ -1188,21 +1188,25 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-now b.to{color:var(--ink2)}
 #v-views .mb-r.in .mb-now b.to{color:var(--vg-t)}
 .mb-now i{font-style:normal;color:var(--dim)}
-.mb-meta{display:flex;flex-wrap:wrap;gap:4px 6px}
-.mb-meta span{font-size:11px;font-weight:600;padding:1px 7px;border-radius:6px;background:rgba(255,255,255,.07);color:var(--ink2)}
-#v-views .mb-r.in .mb-meta .wk{background:rgba(255,77,79,.16);color:var(--vg-t)}
-.mb-e{display:flex;flex-direction:column;align-items:flex-end;gap:0;text-align:right;min-width:96px;padding-left:10px;border-left:1px solid var(--line)}
-.mb-e small{font-size:11px;color:var(--ink2)}
-.mb-e b{font:800 22px "JetBrains Mono",monospace;line-height:1.15;color:var(--ink);white-space:nowrap}
-#v-views .mb-r.in .mb-e b{color:var(--vg)}
-.mb-e em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink2);margin-top:-1px}
-.mb-eta{margin-top:4px;font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap}
-#v-views .mb-r.in .mb-eta{color:var(--vg-t)}
+.mb-r{grid-template-areas:"th b e" "th f f";row-gap:8px!important}
+.mb-th{grid-area:th;align-self:center}
+.mb-b{grid-area:b}
+.mb-e{grid-area:e;display:flex;flex-direction:column;align-items:flex-end;gap:1px;text-align:right;padding-left:12px;border-left:1px solid var(--line)}
+.mb-e small{font-size:11px;color:var(--ink2);white-space:nowrap}
+.mb-left{display:flex;align-items:baseline;gap:3px;white-space:nowrap}
+.mb-left b{font:800 22px "JetBrains Mono",monospace;line-height:1.15;color:var(--ink)}
+#v-views .mb-r.in .mb-left b{color:var(--vg)}
+.mb-left em{font-style:normal;font-size:12px;font-weight:700;color:var(--ink2)}
+.mb-f{grid-area:f;display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);font-size:11.5px;color:var(--ink2)}
+.mb-f b{font-weight:800;color:var(--ink)}
+#v-views .mb-r.in .mb-f{background:rgba(255,77,79,.1);color:var(--ink)}
+#v-views .mb-r.in .mb-f b{color:var(--vg-t)}
+.mb-far{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink2)}
 .vt-tab .w{text-align:right;white-space:nowrap}
 .vt-tab td.w b{font-weight:700}
 @media (max-width:980px){.mb-list{grid-template-columns:1fr}}
 @media (max-width:760px){.vt-tab .w{display:none}}
-@media (max-width:640px){.mb-r{grid-template-columns:64px minmax(0,1fr) auto;gap:9px;padding:9px 10px!important}.mb-e{min-width:0;padding-left:9px}.mb-e b{font-size:19px}.mb-eta{white-space:normal;max-width:96px}.mb-now b{font-size:13px}.vr-tabs button{padding:7px 12px!important;font-size:13px}}
+@media (max-width:640px){.mb-r{grid-template-columns:64px minmax(0,1fr) auto;gap:9px;padding:9px 10px!important}.mb-e{padding-left:9px}.mb-left b{font-size:19px}.mb-now b{font-size:13px}.vr-tabs button{padding:7px 12px!important;font-size:13px}}
 #v-views .vr-cap b{color:var(--vg-t)}
 
 /* 펼친 줄: 시간별 증가 머리 (24시간 | 72시간) */

@@ -589,20 +589,21 @@
     $('mb').innerHTML = '<div class="mb-sum"><span><b>' + B.length + '</b>편 · 조회수 100만 안팎 이상</span><span><b>' + B.filter(in8).length + '</b>편 · 8주 안에 다음 100만 돌파 예상</span></div>'
       + (B.length ? '<div class="mb-list">' + B.map(mbRow).join('') + '</div>' : '<p class="anote">조회수 100만 안팎 이상인 영상이 없습니다.</p>');
   }
-  // 100만 단위 목록 한 줄: 지금 → 다음 100만, 그리고 "남은 조회수"를 가장 크게
+  // 100만 단위 목록 한 줄
+  //   왼쪽: 제목 / 구간(지금 → 목표)   오른쪽: 목표까지 / N만 남음   아래(두 칸 걸침): 달성까지 며칠
   function mbRow(x){
-    var v = x.v, lo = x.M - VE.MSTEP, f = Math.max(0, Math.min(1, (x.V - lo) / VE.MSTEP)), ok = in8(x), wk = x.eta == null ? null : Math.max(1, Math.ceil(x.eta / 7));
+    var v = x.v, ok = in8(x);
     var left = Math.max(0, x.M - x.V), leftTxt = left < 1e4 ? full(left) + '회' : fmtM(left);
-    var eta = x.eta == null ? (x.why === 'far' ? '지금 추세로는 어려움' : '기록이 쌓이면 나옵니다')
-      : (x.eta < 1 ? '하루 안' : '약 ' + Math.ceil(x.eta) + '일') + ' · ' + dday(v, x.eta * 24) + ' 무렵';
+    var foot;
+    if (x.eta == null) foot = x.why === 'far' ? '지금 추세로는 ' + fmtM(x.M) + ' 달성이 어렵습니다' : '기록이 조금 더 쌓이면 달성 예상일이 나옵니다';
+    else foot = '<b>' + (x.eta < 1 ? '하루 안' : '약 ' + Math.ceil(x.eta) + '일 뒤') + '</b> ' + fmtM(x.M) + ' 달성 예상 · ' + dday(v, x.eta * 24) + ' 무렵'
+      + (ok ? '' : ' <span class="mb-far">8주 넘게</span>');
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
-      + '<span class="mb-now">지금 <b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span>'
-      + '<span class="mb-meta"><span>' + Math.round(f * 100) + '% 왔음</span>'
-      + (x.eta == null ? '' : '<span class="wk">' + (ok ? wk + '주 차' : '8주 넘게') + '</span>') + '</span></span>'
-      + '<span class="mb-e"><small>' + fmtM(x.M) + '까지</small><b>' + leftTxt + '</b><em>남음</em>'
-      + '<span class="mb-eta">' + eta + '</span></span></button>';
+      + '<span class="mb-now">구간 <b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span></span>'
+      + '<span class="mb-e"><small>' + fmtM(x.M) + '까지</small><span class="mb-left"><b>' + leftTxt + '</b><em>남음</em></span></span>'
+      + '<span class="mb-f">' + foot + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
