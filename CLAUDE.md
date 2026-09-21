@@ -65,7 +65,9 @@ node tools/build.js tools/source.html index.html
 
 ## 조회수 수집기 (GitHub Actions)
 
-- `.github/workflows/collect-views.yml` 이 매시 17분에 `tools/collect-views.js` 를 실행한다
+- `.github/workflows/collect-views.yml` 이 **15분마다(매시 2·17·32·47분)** `tools/collect-views.js` 를 실행한다
+  (API 사용량 한 번에 약 3 → 하루 약 290, 무료 한도 10,000. GitHub 예약 실행은 붐비면 몇 분~수십 분 늦을 수 있다)
+- `hr` 은 최근 74시간의 15분 간격 조회수. 화면의 15분별 증가 그래프(24시간·72시간)와 말풍선이 이걸 쓴다
 - YouTube Data API v3 키는 저장소 Secret `YT_API_KEY`. **키를 코드·로그·작업 로그 어디에도 적지 않는다**
 - 기록은 **`data` 브랜치의 `views.json`** 에 쌓인다 (main 은 건드리지 않음 → 사이트가 매시간 다시 배포되지 않는다).
   사이트는 raw.githubusercontent.com 에서 읽고, 못 읽으면 main 의 `data/views.json`(빈 자리)을 읽는다

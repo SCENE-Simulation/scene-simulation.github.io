@@ -1,4 +1,4 @@
-// 조회수 수집기 — GitHub Actions(.github/workflows/collect-views.yml)가 1시간마다 실행한다.
+// 조회수 수집기 — GitHub Actions(.github/workflows/collect-views.yml)가 15분마다 실행한다.
 // YouTube Data API v3 로 채널 "동영상" 탭의 영상(쇼츠·라이브 제외)의 조회수·좋아요·댓글을 읽어 기록 파일에 쌓고,
 //  - 예측 시점(게시 6시간·24시간·7일)을 지난 영상은 그 시점의 예측을 한 번 계산해 고정 저장한다 (pred)
 //  - 게시 15일이 지난 영상은 다음 100만 단위 돌파 예측을 고정 저장하고, 닿으면 닿은 시각을 적는다 (ms)
@@ -9,7 +9,7 @@
 //   { channel: { handle, id, title, url, thumb, subs }, since: 수집 시작 ISO, updated: 마지막 수집 ISO,
 //     videos: [ { id, published: ISO, title, thumb, type: 'long', gone?: true(삭제·비공개), dur: 길이(초),
 //                 now:   [게시 후 시간(h), 조회수, 좋아요, 댓글]      ← 매번 덮어쓰는 가장 최근 값
-//                 hr:    [[h, 조회수], ...]                         ← 최근 26시간의 매 수집 값 (시간별 증가용, 오래된 것은 버림)
+//                 hr:    [[h, 조회수], ...]                         ← 최근 74시간의 매 수집 값(15분 간격) — 15분별 증가 그래프용, 오래된 것은 버림
 //                 snaps: [[h, 조회수, 좋아요, 댓글], ...]             ← 영상 나이에 따라 간격을 벌려 쌓는 기록
 //                 pred:  { "24" | "168" | "720": { t: 예측 시점(h), n: 비교한 과거 영상 수, made: ISO,
 //                                                  p: [[예측, 범위 아래, 범위 위] | null × 4 (①②③종합)] }
@@ -19,7 +19,7 @@
 //                            hit?: 실제로 닿은 때(h) } ] } ] }
 //   과거 영상이 MINPOOL 개보다 적을 때는 ③ 만 범위 없이 저장된다 (①·②·범위는 null)
 //   좋아요·댓글이 숨겨져 있으면 null. 기록 간격: 게시 48시간까지 1시간, 7일까지 6시간, 그 뒤 1일.
-//   API 사용량: 한 번에 약 3 (영상 50개마다 +1). 무료 한도는 하루 10,000.
+//   API 사용량: 한 번에 약 3 (영상 50개마다 +1). 15분마다면 하루 96번 × 3 ≈ 290. 무료 한도는 하루 10,000.
 'use strict';
 const fs = require('fs');
 const VE = require('./views-engine.js');
@@ -31,6 +31,7 @@ const API = 'https://www.googleapis.com/youtube/v3/';
 const NOW = process.env.NOW ? Date.parse(process.env.NOW) : Date.now();     // NOW 는 시험용
 
 function gap(h){ return h <= 48 ? 1 : h <= 168 ? 6 : 24; }
+const HR_KEEP = 74, HR_MIN = 10 / 60;      // hr: 74시간 보관(72시간 그래프 + 여유), 10분 이상 벌어지면 쌓기
 const r2 = x => Math.round(x * 100) / 100;
 const num = x => x == null ? null : Number(x);
 // ISO 8601 길이 (PT1M30S) → 초
@@ -69,7 +70,7 @@ function series(v){
   if (v.now && (!s.length || v.now[0] > s[s.length - 1][0] + 1e-6)) s.push(v.now);
   return s;
 }
-// 조회수만: snaps + 최근 26시간 매시간 값 (사이트의 v.vs 와 같다)
+// 조회수만: snaps + 최근 74시간 15분 간격 값 (사이트의 v.vs 와 같다)
 function viewsOnly(v){
   return series(v).map(p => [p[0], p[1]]).concat((v.hr || []).map(p => [p[0], p[1]]))
     .sort((a, b) => a[0] - b[0]).filter((p, i, arr) => !i || p[0] - arr[i - 1][0] > 0.05);
@@ -136,9 +137,10 @@ async function main(){
       const row = [r2(h), num(st.viewCount) || 0, num(st.likeCount), num(st.commentCount)];
       v.now = row;
       v.dur = dur || v.dur || 0;
-      // 최근 26시간의 매 수집 조회수 [h, 조회수] — 영상 나이와 상관없이 시간별 증가·24시간 증가를 보기 위해
-      v.hr = (v.hr || []).filter(p => p[0] >= row[0] - 26);
-      if (!v.hr.length || row[0] - v.hr[v.hr.length - 1][0] >= 0.5) v.hr.push([row[0], row[1]]);
+      // 최근 74시간의 매 수집 조회수 [h, 조회수] — 영상 나이와 상관없이 15분별 증가(24·72시간)·24시간 증가를 보기 위해.
+      // 예약이 조금 늦게 돌아도 빠지지 않게 10분 이상 벌어졌으면 쌓는다
+      v.hr = (v.hr || []).filter(p => p[0] >= row[0] - HR_KEEP);
+      if (!v.hr.length || row[0] - v.hr[v.hr.length - 1][0] >= HR_MIN) v.hr.push([row[0], row[1]]);
       const last = v.snaps[v.snaps.length - 1];
       if (!last || h - last[0] >= gap(h) - 0.25){ v.snaps.push(row); log.snaps++; }
     }

@@ -2,7 +2,7 @@
 // 유튜브 채널 영상의 조회수·좋아요·댓글 기록(스냅샷)으로 앞으로의 조회수를 세 가지 간단한 공식으로 예측하고,
 // 과거 영상에 같은 공식을 적용해 본 결과로 오차 범위와 적중률을 보여 준다. 계산식은 views-engine.js.
 //
-// 데이터: data 브랜치의 views.json — tools/collect-views.js 가 GitHub Actions 에서 1시간마다 쌓는다 (형식은 그 파일 맨 위 주석)
+// 데이터: data 브랜치의 views.json — tools/collect-views.js 가 GitHub Actions 에서 15분마다 쌓는다 (형식은 그 파일 맨 위 주석)
 //   읽지 못하거나 영상이 없으면 화면 구성을 보여 주기 위한 예시 데이터를 만들어 쓰고, 예시라고 크게 표시한다.
 (function(){
   var main = document.querySelector('main.mn');
@@ -161,7 +161,7 @@
       var s = (v.snaps || []).slice().sort(function(a, b){ return a[0] - b[0]; });
       // 마지막 관측값(now)은 기록 간격 때문에 snaps 에 안 들어갔을 수 있다 → 끝에 붙인다
       if (v.now && (!s.length || v.now[0] > s[s.length - 1][0] + 1e-6)) s.push(v.now);
-      // 조회수만: snaps + 최근 26시간의 매시간 값(hr) → 시간별 증가를 촘촘하게
+      // 조회수만: snaps + 최근 74시간의 15분 간격 값(hr) → 15분별 증가를 촘촘하게
       var vs = s.map(function(p){ return [p[0], p[1]]; }).concat((v.hr || []).map(function(p){ return [p[0], p[1]]; }))
         .sort(function(a, b){ return a[0] - b[0]; }).filter(function(p, i, arr){ return !i || p[0] - arr[i - 1][0] > 0.05; });
       return { id: v.id, title: v.title, thumb: v.thumb || '', pub: Date.parse(v.published), hue: (n * 47) % 360,
@@ -169,7 +169,7 @@
     }).filter(function(v){ return v.snaps.length; }).sort(function(a, b){ return b.pub - a.pub; });
     sel = VIDEOS.filter(function(v){ return v.id === keep; })[0] || VIDEOS[0] || null;
   }
-  // 기록은 data 브랜치에 쌓인다(수집기가 1시간마다 올림). 못 읽으면 main 의 data/views.json, 둘 다 비었으면 예시 데이터
+  // 기록은 data 브랜치에 쌓인다(수집기가 15분마다 올림). 못 읽으면 main 의 data/views.json, 둘 다 비었으면 예시 데이터
   var SOURCES = ['https://raw.githubusercontent.com/SCENE-Simulation/scene-simulation.github.io/data/views.json', 'data/views.json'];
   function load(i){
     if (i >= SOURCES.length) return Promise.resolve(demo());
@@ -178,11 +178,16 @@
       .then(function(d){ if (!d || !d.videos || !d.videos.filter(function(v){ return !v.gone; }).length) throw 0; return d; })
       .catch(function(){ return load(i + 1); });
   }
-  // 다음 예약 수집(매시 17분, UTC 기준 cron)과 새 기록 확인. 수집 예정 시각이 3분 넘게 지나면 5분마다 다시 읽는다
+  // 다음 예약 수집(매시 2·17·32·47분, cron)과 새 기록 확인. 수집 예정 시각이 3분 넘게 지나면 5분마다 다시 읽는다
+  var RUNS = [2, 17, 32, 47];
   function nextRun(){
     var u = Date.parse(DATA.updated), d = new Date(u);
-    d.setUTCMinutes(17, 0, 0); if (d.getTime() <= u + 60e3) d.setUTCHours(d.getUTCHours() + 1);
-    return d.getTime();
+    for (var k = 0; k < 8; k++){
+      var hh = new Date(d); hh.setUTCMinutes(0, 0, 0); hh.setUTCHours(hh.getUTCHours() + Math.floor(k / 4));
+      var t = hh.getTime() + RUNS[k % 4] * 60e3;
+      if (t > u + 60e3) return t;
+    }
+    return u + 15 * 60e3;
   }
   function tick(){
     var m = $('vx-next'); if (!m || !DATA || DATA.demo || el.hidden) return;
@@ -208,7 +213,7 @@
     return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span></div></div>'
       + '<div class="vx-hero"><div class="vx-meta" id="vx-meta"></div>'
       + '<h2 class="vx-h">안원잘부 영상들,<br>조회수가 <em>어디까지 오를까?</em></h2>'
-      + '<p class="vx-d">1시간마다 조회수를 모아 지금 얼마나 빨리 오르는지 보고, 24시간·7일·30일 뒤 조회수를 예측합니다. 지난 예측이 맞았는지도 채점합니다.</p></div>';
+      + '<p class="vx-d">15분마다 조회수를 모아 지금 얼마나 빨리 오르는지 보고, 24시간·7일·30일 뒤 조회수를 예측합니다. 지난 예측이 맞았는지도 채점합니다.</p></div>';
   }
   function status(v){
     var a = age(v);
@@ -253,7 +258,7 @@
   }
 
   // ---------- 상승 속도 ----------
-  // 게시 후 t시간의 조회수 (최근 26시간은 매시간 값까지 써서 촘촘하게)
+  // 게시 후 t시간의 조회수 (최근 74시간은 15분 간격 값까지 써서 촘촘하게)
   function av(v, t){ return at(v.vs, t, 1); }
   // 최근 W시간 동안 는 조회수 { x, kind }
   //   real: 기록으로 잰 값 · est: 기록이 W시간보다 짧아 지금 속도로 늘려 잡은 값
@@ -518,7 +523,7 @@
       + '영상 ' + VIDEOS.length + '개 · 기록 ' + full(nSnap) + '개</small></div>'
       + (DATA.demo ? '<span class="vp-dpill">예시 데이터</span>' : '')
       + '<a class="gs vp-yt" href="' + CHANNEL.url + '" target="_blank" rel="noopener">채널 ↗</a></div>'
-      + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 1시간마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
+      + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 15분마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
@@ -551,7 +556,7 @@
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 1일 추세로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
       + '<li><b>100만 단위 돌파</b> 조회수 100만 안팎 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
-      + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 시간별 증가가 가끔 튀어 보일 수 있습니다.</li>'
+      + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
   }
 
@@ -612,7 +617,7 @@
     w.classList.toggle('at-end', row.scrollLeft + row.clientWidth > row.scrollWidth - 4);
   }
 
-  // ----- 전체 영상 표: 정렬(증가·누적·경과) · 검색 · 줄 펼치면 시간별 증가 -----
+  // ----- 전체 영상 표: 정렬(증가·누적·경과) · 검색 · 줄 펼치면 15분별 증가 -----
   function renderTable(){
     var W = 24, L = list().filter(function(v){ return !tq || v.title.toLowerCase().indexOf(tq.toLowerCase()) >= 0; });
     var sorters = { gain: byGain, pred: function(a, b){ var x = week1(a).gain, y = week1(b).gain; return (y == null ? -1 : y) - (x == null ? -1 : x); }, tot: function(a, b){ return av(b, age(b)) - av(a, age(a)); }, age: function(a, b){ return b.pub - a.pub; } };
@@ -641,7 +646,7 @@
       + (rest > 0 ? '<button type="button" class="gs" data-more="1">' + Math.min(rest, 20) + '편 더 보기</button>' : '') + '</div>';
     L.slice(0, tn).forEach(function(v){ if (OPEN[v.id]) rowDetail(v); });
   }
-  // 펼친 줄: 24시간·7일·하루 평균·기념 조회수 예상 + 시간별 증가(24시간, 누르면 72시간)
+  // 펼친 줄: 24시간·7일·하루 평균·기념 조회수 예상 + 15분별 증가(24시간, 누르면 72시간)
   var HSPAN = {};
   function rowDetail(v){
     var box = $('vt-d-' + v.id); if (!box) return;
@@ -651,25 +656,27 @@
     if (m.h != null) tiles.push('<div class="vt-c ms"><span>' + fmtM(m.M) + ' 돌파</span><b>' + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</b><small>' + (m.how === 'rate' ? '지금 속도라면' : '예측 곡선 기준') + '</small></div>');
     box.innerHTML = '<div class="vt-cs" style="--n:' + tiles.length + '">' + tiles.join('')
       + '<button type="button" class="gs vt-go" data-vid="' + esc(v.id) + '" data-go="1">예측 자세히 ↑</button></div>'
-      + '<div class="vt-hh"><b>시간별 증가</b><span>최근 ' + sp + '시간 · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span>'
+      + '<div class="vt-hh"><b>15분별 증가</b><span>최근 ' + sp + '시간 · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span>'
       + '<div class="seg" role="tablist" aria-label="기간">'
       + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
       + '</div></div>'
       + '<div class="vt-hc">' + hourChart(v, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
-      + '<p class="gnote">막대 하나가 1시간 동안 는 조회수입니다. 기록 간격이 긴 구간은 그 사이를 고르게 나눠 그리고, 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
+      + '<p class="gnote">막대 하나가 15분 동안 는 조회수입니다. 기록 간격이 긴 구간은 그 사이를 고르게 나눠 그리고, 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
 
-  // ----- 시간별 증가 막대 그래프 (최근 span 시간, 실제 날짜 눈금) -----
+  // ----- 15분별 증가 막대 그래프 (최근 span 시간, 실제 날짜 눈금) -----
+  // 막대 하나 = 15분(QSTEP 시간) 동안 는 조회수. 마지막 칸이 15분이 안 되면 15분 속도로 맞춰 그린다
+  var QSTEP = 0.25;
   function hourChart(v, span, W, H){
-    var a = age(v), t0 = Math.max(0, Math.floor(a - span)), n = Math.max(1, Math.ceil(a - t0)), L = 46, R = 10, Tp = 24, B = 22, inc = [];
+    var a = age(v), t0 = Math.max(0, Math.floor((a - span) / QSTEP) * QSTEP), n = Math.max(1, Math.ceil((a - t0) / QSTEP - 1e-9)), L = 46, R = 10, Tp = 24, B = 22, inc = [];
     for (var i = 0; i < n; i++){
-      var ta = t0 + i, tb = Math.min(a, ta + 1), x0 = av(v, ta), x1 = av(v, tb);
-      inc.push(x0 != null && x1 != null && tb > ta ? Math.max(0, (x1 - x0) / (tb - ta)) : null);
+      var ta = t0 + i * QSTEP, tb = Math.min(a, ta + QSTEP), x0 = av(v, ta), x1 = av(v, tb);
+      inc.push(x0 != null && x1 != null && tb > ta ? Math.max(0, (x1 - x0) / (tb - ta) * QSTEP) : null);
     }
     var mx = Math.max.apply(null, inc.filter(function(x){ return x != null; }).concat([1])), st = niceStep(mx * 1.1 / 3), top = Math.ceil(mx * 1.1 / st) * st, bw = (W - L - R) / n;
     function X(i){ return L + i * bw; }
     function Y(y){ return Tp + (1 - y / top) * (H - Tp - B); }
-    var s = '<svg class="vh-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="시간별 조회수 증가">'
+    var s = '<svg class="vh-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="15분별 조회수 증가">'
       + '<defs><pattern id="vg-h2" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,.07)" stroke-width="2"/></pattern></defs>';
     for (var y = 0; y <= top + 1e-9; y += st)
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,' + (y ? .06 : .16) + ')"/>'
@@ -688,7 +695,7 @@
     // 날짜 눈금 (자정마다)
     var d = new Date(v.pub + t0 * 3600e3); d.setHours(24, 0, 0, 0);
     for (; d.getTime() < v.pub + a * 3600e3; d.setDate(d.getDate() + 1)){
-      var x = L + ((d.getTime() - v.pub) / 3600e3 - t0) * bw;
+      var x = L + ((d.getTime() - v.pub) / 3600e3 - t0) / QSTEP * bw;
       s += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.07)"/>'
         + '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10.5" fill="#8e8e93">' + (d.getMonth() + 1) + '/' + d.getDate() + '</text>';
     }
@@ -702,7 +709,7 @@
     // 수치 말풍선용 감지 영역: 막대가 가늘어도 짚기 쉽게 칸 전체 높이로 (views.js 아래쪽 말풍선 처리)
     inc.forEach(function(x, i){
       if (x == null) return;
-      var t1 = v.pub + (t0 + i) * 3600e3, t2 = t1 + 3600e3;
+      var t1 = v.pub + (t0 + i * QSTEP) * 3600e3, t2 = t1 + QSTEP * 3600e3;
       s += '<rect class="hit" data-bi="' + i + '" x="' + X(i).toFixed(1) + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="transparent"'
         + ' data-tt="' + when(t1) + ' ~ ' + two(new Date(t2).getHours()) + ':' + two(new Date(t2).getMinutes()) + '" data-tv="+' + full(x) + '회"'
         + (i === n - 1 ? ' data-tn="1"' : '') + '/>';
@@ -786,7 +793,7 @@
          : tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' · 보통 ' + pct(q(pc, 0.5), 2) : ''), strip(C / V, pc)))
       + tile(daily ? '최근 하루' : '최근 1시간', '', dh == null ? '—' : '+' + full(dh),
           dh == null ? '기록을 쌓는 중' : wk == null ? '' : (daily ? '지난 7일 +' : '지난 24시간 +') + fmt(wk),
-          bars(v, a, step, daily ? 14 : 24))
+          bars(v, a, daily ? 24 : QSTEP, daily ? 14 : 24))       // 막대: 15분 × 24 = 최근 6시간 (하루 단위면 14일)
       + '</div></div>'
       + '<div class="vd-pred' + (late(v) ? ' late' : '') + '" id="vd-pred"><div class="vd-ph">' + (late(v)
         ? '<h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + LT.color + '"><i>' + LT.b + '</i>' + LT.name + ' · 게시 15일 뒤부터</span></div>'
@@ -875,14 +882,14 @@
   function chart(){
     var box = $('vd-chart');
     if (cm !== 'hour'){ if (late(sel)) msChart(); else cumChart(); return; }
-    box.innerHTML = chHead('시간별 증가', '최근 7일 · 막대 하나가 1시간 동안 는 조회수')
-      + '<div class="vt-hc">' + hourChart(sel, 168, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
+    box.innerHTML = chHead('15분별 증가', '최근 72시간 · 막대 하나가 15분 동안 는 조회수 · 막대에 마우스를 올리거나 꾹 누르면 수치')
+      + '<div class="vt-hc">' + hourChart(sel, 72, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
       + '<p class="gnote">기록 간격이 긴 구간은 그 사이를 고르게 나눠 그립니다. 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
   function chHead(t, sub){
     return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="그래프 종류">'
       + '<button type="button" data-cm="cum" class="' + (cm !== 'hour' ? 'on' : '') + '">누적·예측</button>'
-      + '<button type="button" data-cm="hour" class="' + (cm === 'hour' ? 'on' : '') + '">시간별 증가</button></div></div>';
+      + '<button type="button" data-cm="hour" class="' + (cm === 'hour' ? 'on' : '') + '">15분별 증가</button></div></div>';
   }
   // 방법 k(0~2 방법, 3 종합)의 예측이 아직 없으면 그 이유(언제 나오는지), 있으면 null
   function mStatus(v, k){
@@ -912,7 +919,7 @@
       else if (r) knots.push({ h: tg.T, p: r.p, lo: r.lo != null ? r.lo : r.p, hi: r.hi != null ? r.hi : r.p, tg: tg });
     });
     var ymax = 1;
-    v.snaps.forEach(function(s){ ymax = Math.max(ymax, s[1]); });
+    v.vs.snaps.forEach(function(s){ ymax = Math.max(ymax, s[1]); });
     knots.forEach(function(k){ ymax = Math.max(ymax, k.hi); });
     past.forEach(function(p){ ymax = Math.max(ymax, p.act, p.r ? (p.r.hi || p.r.p) : 0); });
     var st = niceStep(ymax * 1.08 / 4), top = Math.ceil(ymax * 1.08 / st) * st;
@@ -944,7 +951,7 @@
           + (DATA.since ? when(Date.parse(DATA.since)) + '부터 기록 · ' : '') + '유튜브는 지난 기록을 주지 않습니다</text>' : '');
     }
     // 실제 추이 (면 + 선)
-    var pts = v.snaps.filter(function(p){ return p[0] <= xmax; }), s0 = VE.since(v);          // 게시 직후 기록이 없으면 기록 시작점부터 그린다
+    var pts = v.vs.snaps.filter(function(p){ return p[0] <= xmax; }), s0 = VE.since(v);       // 15분 간격 값까지 써서 촘촘하게. 게시 직후 기록이 없으면 기록 시작점부터
     var line = s0 ? '' : 'M' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1);
     pts.forEach(function(p, i){ line += (line ? ' L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1); });
     s += '<path d="' + line + ' L' + X(pts[pts.length - 1][0]).toFixed(1) + ' ' + Y(0).toFixed(1) + ' L' + X(s0 ? pts[0][0] : 0).toFixed(1) + ' ' + Y(0).toFixed(1) + ' Z" fill="url(#vg-a)"/>'
@@ -1152,7 +1159,7 @@
     var svg = hit.ownerSVGElement, bar = svg && svg.querySelector('rect.hb[data-bi="' + hit.getAttribute('data-bi') + '"]');
     if (tipBar && tipBar !== bar) tipBar.classList.remove('act');
     tipBar = bar; if (bar) bar.classList.add('act');
-    tip.innerHTML = '<b>' + hit.getAttribute('data-tt') + (hit.getAttribute('data-tn') ? ' · 지금' : '') + '</b><em>' + hit.getAttribute('data-tv') + '</em><small>1시간 동안 는 조회수</small>';
+    tip.innerHTML = '<b>' + hit.getAttribute('data-tt') + (hit.getAttribute('data-tn') ? ' · 지금' : '') + '</b><em>' + hit.getAttribute('data-tv') + '</em><small>15분 동안 는 조회수</small>';
     tip.hidden = false;
     var w = tip.offsetWidth, h = tip.offsetHeight, x = cx - w / 2, y = cy - h - 18;
     x = Math.max(8, Math.min(window.innerWidth - w - 8, x));
