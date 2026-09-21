@@ -1347,3 +1347,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vc-tr.mid rect.on{fill:#ffb547}
 .vc-tr.lo rect.on{fill:var(--ink2)}
 .mb-when{white-space:nowrap}                          /* 100만 목록: "9/23 오전 무렵" 은 한 줄로 */
+/* 100만 카드 막대 범례: 숫자는 진행률(%), 밝은 막대는 돌파하는 주 */
+.wk-lg{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:10.5px;color:var(--ink2)}
+.wk-lg i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:#5bb4ec;box-shadow:0 0 6px rgba(91,180,236,.7);vertical-align:-1px}
