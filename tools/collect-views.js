@@ -14,9 +14,9 @@
 //                 pred:  { "24" | "168" | "720": { t: 예측 시점(h), n: 비교한 과거 영상 수, made: ISO,
 //                                                  p: [[예측, 범위 아래, 범위 위] | null × 4 (①②③종합)] }
 //                                               | { none: 'pool', n } (그때 어느 방법으로도 예측 못 함) },
-//                 ms:    [ { M: 100만 단위 목표, t: 예측한 때(h), v: 그때 조회수, d: 그때 하루 증가, k: 줄어드는 정도,
-//                            src: 'data' | 'default', e: [빠르면, 가운데, 늦으면] 닿을 것으로 본 때(h, null = 못 닿음),
-//                            p: [1주, 2주, …, 8주 안에 넘을 확률], hit?: 실제로 닿은 때(h) } ] } ] }
+//                 ms:    [ { M: 100만 단위 목표, t: 예측한 때(h), v: 그때 조회수, g: 그때 하루 증가, r: 하루 증가가 하루마다 몇 배,
+//                            src: 'data' | 'flat', e: 닿을 것으로 본 때(h, null = 못 닿음), w: 몇 주 차로 봤는지,
+//                            hit?: 실제로 닿은 때(h) } ] } ] }
 //   과거 영상이 MINPOOL 개보다 적을 때는 ③ 만 범위 없이 저장된다 (①·②·범위는 null)
 //   좋아요·댓글이 숨겨져 있으면 null. 기록 간격: 게시 48시간까지 1시간, 7일까지 6시간, 그 뒤 1일.
 //   API 사용량: 한 번에 약 3 (영상 50개마다 +1). 무료 한도는 하루 10,000.
@@ -170,11 +170,12 @@ async function main(){
     raw.ms = raw.ms || [];
     raw.ms.forEach(m => { if (m.hit == null && cur >= m.M){ m.hit = r2(crossAt(vs, m.M, m.t, a)); log.hit++; } });
     const M = (Math.floor(cur / VE.MSTEP) + 1) * VE.MSTEP;
-    if (raw.ms.some(m => m.M === M) || a - VE.since(vs) < 48) continue;          // 기록 2일(줄어드는 정도를 잴 수 있을 만큼)부터
+    if (raw.ms.some(m => m.M === M) || a - VE.since(vs) < 48) continue;          // 기록 2일(하루 증가가 줄어드는 비율을 잴 수 있을 만큼)부터
     const P = VE.msPlan(vs, a, 1);
     if (!P) continue;
-    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), d: Math.round(P.d), k: Math.round(P.k * 100) / 100, src: P.src,
-      e: P.ms[0].e.map(x => x == null ? null : r2(a + x)), p: P.ms[0].p.map(x => Math.round(x * 100) / 100) });
+    const m0 = P.ms[0];
+    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), g: Math.round(P.g), r: Math.round(P.r * 1000) / 1000, src: P.src,
+      e: m0.days == null ? null : r2(a + m0.days * 24), w: m0.week });
     log.ms++;
   }
 
