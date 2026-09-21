@@ -369,6 +369,14 @@
   // 날짜: 올해가 아니면 연도를 붙인다 (27.3/5)
   function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '.' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
   function dday(v, h){ return dY(nowMs(v) + h * 3600e3, nowMs(v)); }
+  // 100만 목록 달성까지 (숫자 먼저): 3일 안은 N시간 N분, 2주 안은 N일 N시간, 그 뒤는 N주 N일 / 그때 날짜 + 오전·오후
+  function etaHM(d){
+    var mn = Math.max(1, Math.round(d * 1440)), hh = Math.round(d * 24), dd = Math.round(d);
+    if (mn < 72 * 60) return (mn >= 60 ? Math.floor(mn / 60) + '시간' + (mn % 60 ? ' ' : '') : '') + (mn % 60 ? mn % 60 + '분' : '');
+    if (hh < 14 * 24) return Math.floor(hh / 24) + '일' + (hh % 24 ? ' ' + hh % 24 + '시간' : '');
+    return Math.floor(dd / 7) + '주' + (dd % 7 ? ' ' + dd % 7 + '일' : '');
+  }
+  function ddayAP(v, h){ var t = nowMs(v) + h * 3600e3; return dday(v, h) + ' ' + (new Date(t).getHours() < 12 ? '오전' : '오후'); }
   // 달성까지 남은 때: 하루 안은 N시간, 7일까지는 N일, 그 뒤는 N주 (올림)
   function daysTxt(d){ return d == null ? '못 닿음' : d < 1 ? Math.max(1, Math.ceil(d * 24)) + '시간' : d <= 7 ? Math.ceil(d) + '일' : Math.ceil(d / 7) + '주'; }
   // 100만 단위 추이: ④ 1일 추세로 본 앞으로 1주 동안 늘 조회수가 게시 15일 지난 영상 중 몇 번째인지 (상위 20% 강함 · 50% 중간 · 그 아래 약함)
@@ -625,7 +633,8 @@
   function about(){
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
       + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
-      + '<li><b>예측 조회수</b> 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 ④ 1일 추세로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
+      + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
+      + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 ④ 1일 추세로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 1일 추세로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
       + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 ④ 1일 추세로 모은 탭입니다. 오른쪽 아래 추이는 ④로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
@@ -646,20 +655,27 @@
     [['vr-tb', !ms], ['vr-msb', ms]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
     $('vr-cap').innerHTML = ms
       ? '게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 <b>다음 100만 단위를 언제 넘을지</b>입니다. 최근 하루 증가량과 그 증가량이 하루마다 줄어드는 비율(④ 1일 추세)로 계산하고, 빨리 넘는 순으로 보여 줍니다.'
-      : '영상마다 <b>1주 뒤 예상 조회수</b>입니다. 앞으로 1주 동안 가장 많이 늘 것으로 보이는 순서입니다.';
+      : '영상마다 <b>추이</b>입니다. 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함이고, 많이 는 순서로 보여 줍니다.';
     $('vc-wrap').hidden = ms; $('mb').hidden = !ms;
     if (ms){ renderBoard(B); return; }
-    var L = list().sort(function(a, b){ var x = week1(a).gain, y = week1(b).gain; return (y == null ? -1 : y) - (x == null ? -1 : x); }).slice(0, 12);
+    var L = list().sort(byGain).slice(0, 12);                                              // 최근 24시간 동안 많이 는 순 (추이와 같은 기준)
     $('vc-row').innerHTML = L.map(function(v){ return card(v); }).join('') || '<p class="anote">해당하는 영상이 없습니다.</p>';
     $('vc-row').scrollLeft = 0; navState();
   }
   function wTag(o){ return o.kind === 'est' ? '<i class="vk vk-est">추정</i>' : o.kind === 'wait' ? '<i class="vk vk-wait">수집 중</i>' : ''; }
-  // 상단 영상 카드: 썸네일(+ 곧 N00만) · 1주 뒤 예상 · 제목 · 게시 후 지난 시간만
+  // 추이 막대 아이콘: 강함 3칸 · 중간 2칸 · 약함 1칸
+  function sigBars(lv){
+    return '<svg viewBox="0 0 13 10" aria-hidden="true">' + [0, 1, 2].map(function(k){
+      return '<rect x="' + k * 4.5 + '" y="' + (6 - k * 3) + '" width="3.5" height="' + (4 + k * 3) + '" rx="1"' + (k < 3 - TREND.indexOf(lv) ? ' class="on"' : '') + '/>';
+    }).join('') + '</svg>';
+  }
+  // 상단 영상 카드: 썸네일(+ 곧 N00만) · 추이(현황 칸의 추이와 같은 기준) · 제목 · 게시 후 지난 시간만
   function card(v){
-    var w = week1(v), s = soon(v);
+    var tr = trend(v), s = soon(v);
     return '<button type="button" class="vc' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" aria-pressed="' + (v === sel) + '">'
       + '<span class="vc-th">' + thumb(v) + (s ? '<span class="vc-ms">곧 ' + fmtM(s.M) + '</span>' : '') + '</span>'
-      + '<span class="vc-g"><b>' + (w.gain == null ? '—' : '+' + fmt(w.gain)) + '</b><small>1주 뒤 예상</small></span>'
+      + (tr ? '<span class="vc-g vc-tr ' + tr.lv.c + '" title="최근 24시간 +' + fmt(tr.g.x) + ' · 채널 영상 ' + tr.n + '편 중 ' + tr.rank + '위"><small>추이</small>' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>'
+        : '<span class="vc-g vc-tr"><small>추이</small><b>—</b></span>')
       + '<span class="vc-t">' + esc(v.title) + '</span>'
       + '<span class="vc-m">' + ageTxt(age(v)) + ' 전</span></button>';
   }
@@ -675,13 +691,11 @@
     var left = Math.max(0, x.M - x.V), leftTxt = left < 1e4 ? full(left) + '회' : fmtM(left);
     var foot;
     if (x.eta == null) foot = x.why === 'far' ? '지금 추세로는 ' + fmtM(x.M) + ' 달성이 어렵습니다' : '기록이 조금 더 쌓이면 달성 예상일이 나옵니다';
-    else foot = '<b>' + daysTxt(x.eta) + ' 안</b> ' + fmtM(x.M) + ' 달성 예상 · ' + dday(v, x.eta * 24) + ' 무렵'
+    else foot = fmtM(x.M) + ' 달성 예상, <b>' + etaHM(x.eta) + ' 내</b>, <span class="mb-when">' + ddayAP(v, x.eta * 24) + ' 무렵</span>'
       + (ok ? '' : ' <span class="mb-far">8주 넘게</span>');
     // 아래 줄 오른쪽: 추이 (④ 1일 추세로 본 1주 증가가 게시 15일 지난 영상 중 몇 번째인지)
     var tr = ltTrend(v), trTxt = !tr ? '' : '<span class="mb-tr ' + tr.lv.c + '" title="④ 1일 추세로 1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이'
-      + '<svg viewBox="0 0 13 10" aria-hidden="true">' + [0, 1, 2].map(function(k){
-          return '<rect x="' + k * 4.5 + '" y="' + (6 - k * 3) + '" width="3.5" height="' + (4 + k * 3) + '" rx="1"' + (k < 3 - TREND.indexOf(tr.lv) ? ' class="on"' : '') + '/>';
-        }).join('') + '</svg><b>' + tr.lv.t + '</b></span>';
+      + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'

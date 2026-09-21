@@ -1336,3 +1336,14 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-tr.lo rect.on{fill:var(--ink2)}
 /* 선 그래프: 모바일에서 누르고 있어도 글자 선택·메뉴가 뜨지 않게 (누르는 동안 수치 말풍선) */
 .vd-chart svg{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+/* 상단 영상 카드: 1주 뒤 예상 대신 추이 (강함 · 중간 · 약함, 현황 칸과 같은 색) */
+.vc-g.vc-tr{align-items:center;gap:6px}
+.vc-tr svg{width:17px;height:13px;flex:0 0 auto}
+.vc-tr rect{fill:rgba(255,255,255,.16)}
+#v-views .vc-g.vc-tr b{font:800 19px "Pretendard Variable","Noto Sans KR",sans-serif;letter-spacing:-.01em;color:var(--ink2)}
+#v-views .vc-g.vc-tr.hi b{color:#ff5a5f}
+#v-views .vc-g.vc-tr.mid b{color:#ffb547}
+.vc-tr.hi rect.on{fill:#ff5a5f}
+.vc-tr.mid rect.on{fill:#ffb547}
+.vc-tr.lo rect.on{fill:var(--ink2)}
+.mb-when{white-space:nowrap}                          /* 100만 목록: "9/23 오전 무렵" 은 한 줄로 */
