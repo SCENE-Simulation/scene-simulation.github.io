@@ -7,7 +7,9 @@
 // 기록 파일 (data 브랜치의 views.json)
 //   { channel: { handle, id, title, url, thumb, subs }, since: 수집 시작 ISO, updated: 마지막 수집 ISO,
 //     videos: [ { id, published: ISO, title, thumb, type: 'long' | 'short' | 'live', gone?: true(삭제·비공개),
+//                 dur: 길이(초),
 //                 now:   [게시 후 시간(h), 조회수, 좋아요, 댓글]      ← 매번 덮어쓰는 가장 최근 값
+//                 hr:    [[h, 조회수], ...]                         ← 최근 26시간의 매 수집 값 (시간별 증가용, 오래된 것은 버림)
 //                 snaps: [[h, 조회수, 좋아요, 댓글], ...]             ← 영상 나이에 따라 간격을 벌려 쌓는 기록
 //                 pred:  { "24" | "168" | "720": { t: 예측 시점(h), n: 비교한 과거 영상 수, made: ISO,
 //                                                  p: [[예측, 범위 아래, 범위 위] | null × 4 (①②③종합)] }
@@ -119,6 +121,10 @@ async function main(){
       if (!(h >= 0)) continue;
       const row = [r2(h), num(st.viewCount) || 0, num(st.likeCount), num(st.commentCount)];
       v.now = row;
+      v.dur = secs(it.contentDetails && it.contentDetails.duration) || v.dur || 0;
+      // 최근 26시간의 매 수집 조회수 [h, 조회수] — 영상 나이와 상관없이 시간별 증가·24시간 증가를 보기 위해
+      v.hr = (v.hr || []).filter(p => p[0] >= row[0] - 26);
+      if (!v.hr.length || row[0] - v.hr[v.hr.length - 1][0] >= 0.5) v.hr.push([row[0], row[1]]);
       const last = v.snaps[v.snaps.length - 1];
       if (!last || h - last[0] >= gap(h) - 0.25){ v.snaps.push(row); log.snaps++; }
     }
