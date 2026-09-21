@@ -1025,16 +1025,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vk-sofar,.vk-wait{background:rgba(255,255,255,.07);color:var(--ink2)}
 /* 상승 순위 머리 */
 .vr-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:22px}
-.vr-t{display:flex;align-items:center;gap:8px;font-size:17px}
-.vr-t > b{font-weight:800;color:var(--ink)}
-.vr-dd{position:relative}
-.vr-db{display:inline-flex;align-items:center;gap:3px;padding:2px 2px 3px!important;border:0!important;border-bottom:2px dashed rgba(255,255,255,.3)!important;border-radius:0!important;
   background:none!important;font-size:17px;font-weight:800;color:var(--ink)}
-.vr-db svg{width:16px;height:16px;color:var(--ink2)}
-.vr-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:20;display:flex;flex-direction:column;min-width:150px;padding:5px;border-radius:12px;
   background:#202023;border:1px solid var(--line);box-shadow:0 14px 34px rgba(0,0,0,.5)}
-.vr-menu button{justify-content:flex-start;padding:8px 11px!important;border:0!important;border-radius:8px!important;background:none;font-size:13px;font-weight:600;color:var(--ink);text-align:left}
-.vr-menu button:hover{background:rgba(255,255,255,.07)}
 .vr-ft button small{margin-left:5px;font:600 10.5px "JetBrains Mono",monospace;opacity:.6}
 /* 상승 순위 카드 */
 .vc-rk{position:absolute;left:6px;top:6px;padding:2px 8px;border-radius:6px;background:var(--vg);color:#fff;font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.35)}
@@ -1114,7 +1106,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   .vt-go{margin-left:0}
 }
 @media (max-width:640px){
-  .vr-t,.vr-db{font-size:15.5px}
   .vc-g b{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){.vx-chk.ing i{animation:none}.vt-x svg{transition:none}}
@@ -1159,22 +1150,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .vh-svg rect.now{fill:#ffb36b}
 
 /* 상승 순위 옆 "100만 단위 돌파 유력" 버튼과 주별 확률 막대 (1주 ~ 8주) */
-.vr-tb{padding:2px 2px 3px!important;border:0!important;border-radius:0!important;background:none!important;font-size:17px;font-weight:800;color:var(--ink2)}
-.vr-tb.on{color:var(--ink)}
-.vr-dd.off .vr-db{opacity:.45}
-.vr-msb{display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:6px 7px 6px 12px!important;border-radius:999px!important;font-size:12.5px;font-weight:700;
   background:rgba(91,180,236,.1);border:1px solid rgba(91,180,236,.45)!important;color:#8fd0f7}
-.vr-msb i{width:7px;height:7px;border-radius:50%;background:#5bb4ec;box-shadow:0 0 8px #5bb4ec}
-.vr-msb b{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(91,180,236,.25);font:800 11px "JetBrains Mono",monospace;color:#cfe9fb;text-align:center}
-.vr-msb:hover:not(:disabled){background:rgba(91,180,236,.18)}
-.vr-msb.on{background:linear-gradient(90deg,rgba(91,180,236,.35),rgba(255,77,79,.22));border-color:#5bb4ec!important;color:#fff;box-shadow:0 0 0 1px rgba(91,180,236,.4),0 6px 18px rgba(91,180,236,.2)}
-.vr-msb.on b{background:#5bb4ec;color:#062033}
 .vr-cap{margin:8px 2px 0;font-size:12px;line-height:1.6;color:var(--ink2)}
 .vr-cap b{color:#8fd0f7}
-.vc.ms .vc-rk{background:linear-gradient(90deg,#5bb4ec,#ff4d4f);color:#05291b}
-.vc.ms .vc-ms{border-color:#5bb4ec;color:#8fd0f7}
-#v-views .vc.ms .vc-g b{color:#8fd0f7}
-.vc.ms.on{border-color:#5bb4ec!important;background:rgba(91,180,236,.1);box-shadow:0 0 0 1px #5bb4ec,0 8px 22px rgba(91,180,236,.2)}
 .vc-wk{display:block;padding:0 11px}
 .vk-mid{background:rgba(236,210,91,.14);color:var(--gold-t)}
 .vk-low{background:rgba(255,255,255,.07);color:var(--ink2)}
@@ -1189,6 +1167,43 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .wk-x span{flex:1;text-align:center;font-size:9.5px;color:var(--ink2)}
 .vs-ms .wk{display:inline-flex;width:84px;height:18px;vertical-align:middle}
 .vs-ms small{color:var(--ink2)}
-@media (max-width:640px){.vr-msb{margin-left:0}.vr-t{flex-wrap:wrap}}
 .vs-ms td:nth-child(5),.vs-ms td:nth-child(7),.vs-ms .vp-e{font-family:"Pretendard Variable",sans-serif}
 @media (max-width:640px){.vs-cards.ms{grid-template-columns:1fr}}
+
+/* 한 줄 탭: [예측 조회수 | 100만 단위 돌파 N] */
+.vr-tabs{padding:4px;border-radius:12px}
+.vr-tabs button{display:inline-flex;align-items:center;gap:7px;padding:8px 16px!important;border-radius:9px!important;font-size:14px;font-weight:800}
+.vr-tabs button b{min-width:22px;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.1);font:800 11px "JetBrains Mono",monospace;text-align:center}
+#v-views .vr-tabs button.on{background:var(--vgrad);color:var(--vg-ink);box-shadow:0 4px 14px rgba(255,77,79,.3)}
+#v-views .vr-tabs button.on b{background:rgba(0,0,0,.22);color:#fff}
+/* 100만 단위 돌파 목록 */
+.mb{margin-top:12px}
+.mb-sum{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 2px 10px;font-size:12.5px;color:var(--ink2)}
+.mb-sum b{font:800 15px "JetBrains Mono",monospace;color:var(--ink)}
+#v-views .mb-sum span:last-child b{color:var(--vg)}
+.mb-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mb-r{display:grid;grid-template-columns:92px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px!important;border-radius:12px!important;text-align:left;
+  background:rgba(255,255,255,.03);border:1px solid var(--line)!important;color:inherit;opacity:.72}
+.mb-r.in{opacity:1;background:rgba(255,77,79,.06);border-color:rgba(255,77,79,.35)!important}
+.mb-r:hover{opacity:1}
+#v-views .mb-r.on{border-color:var(--vg)!important;box-shadow:0 0 0 1px var(--vg)}
+.mb-th{position:relative;aspect-ratio:16/9;border-radius:7px;overflow:hidden;background:#111}
+.mb-th img{width:100%;height:100%;object-fit:cover;display:block}
+.mb-b{display:flex;flex-direction:column;gap:5px;min-width:0}
+.mb-t{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-bar{display:block;height:9px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+#v-views .mb-bar i{display:block;height:100%;border-radius:999px;background:var(--vgrad)}
+.mb-r:not(.in) .mb-bar i{filter:saturate(.35)}
+.mb-lab{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font:500 10.5px "JetBrains Mono",monospace;color:var(--ink2)}
+.mb-lab b{font-size:11.5px;color:var(--ink)}
+.mb-e{display:flex;flex-direction:column;align-items:flex-end;gap:1px;text-align:right;min-width:92px}
+.mb-e em{font:800 16px "JetBrains Mono",monospace;font-style:normal;color:var(--ink)}
+#v-views .mb-r.in .mb-e em{color:var(--vg)}
+.mb-e b{font-size:12.5px;color:var(--ink)}
+.mb-e small{font-size:10.5px;color:var(--ink2)}
+.vt-tab .w{text-align:right;white-space:nowrap}
+.vt-tab td.w b{font-weight:700}
+@media (max-width:980px){.mb-list{grid-template-columns:1fr}}
+@media (max-width:760px){.vt-tab .w{display:none}}
+@media (max-width:640px){.mb-r{grid-template-columns:72px minmax(0,1fr) auto;gap:9px}.mb-e{min-width:78px}.vr-tabs button{padding:7px 12px!important;font-size:13px}}
+#v-views .vr-cap b{color:var(--vg-t)}
