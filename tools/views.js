@@ -141,6 +141,7 @@
   var ALLM = METHODS.concat([ALL]);                    // 0~2 방법, 3 종합
   var ORDER = [3, 0, 1, 2];                            // 화면에 보이는 순서: 종합 먼저
   var sel = null, mi = 3, si = 1, loading = false;     // 고른 영상, 고른 방법(기본 종합), 성적표 목표(기본 7일)
+  var TABSEL = {};                                     // 순위 줄 탭(예측 조회수 · 100만 단위 돌파)마다 마지막으로 본 영상 id
   var PRED = {};                                       // 영상·목표별 예측 (한 번 계산하면 재사용)
 
   // 화면 상태: 순위 기준 창(24시간/7일), 종류 거르기, 표 정렬·검색·보이는 줄 수, 그래프 모드, 펼친 줄
@@ -1218,8 +1219,15 @@
     }
     var rvb = e.target.closest('[data-rv]');
     if (rvb){
-      rv = rvb.getAttribute('data-rv'); renderRank();
-      if (rv === 'ms'){ var MB = board(); if (MB.length && !MB.some(function(x){ return x.v === sel; })) pick(MB[0].v); }
+      // 탭마다 보던 영상을 기억해 두고, 탭을 바꾸면 아래 상세도 그 탭의 영상으로 (100만 탭은 목록 안의 영상만)
+      var to = rvb.getAttribute('data-rv');
+      if (to === rv) return;
+      if (sel) TABSEL[rv] = sel.id;
+      rv = to; renderRank();
+      var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
+      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
+      else next = back || VIDEOS[0];
+      if (next && next !== sel) pick(next);
       return;
     }
     var f = e.target.closest('[data-ft]');
