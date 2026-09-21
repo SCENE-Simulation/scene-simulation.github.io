@@ -690,7 +690,6 @@ body.has-sfloat #totop{bottom:84px}
 .mg-slot small{font-size:11.5px;color:var(--ink2)}
 .mg-arrow{font-size:20px;color:var(--dim)}
 .mg-target .mg-card{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink-soft)}
-.mg-change{padding:4px 10px;font-size:11.5px;border-radius:999px!important;background:transparent;color:var(--ink2);border-color:var(--line)!important}
 .mg-draw > b{font:700 18px "JetBrains Mono",monospace}
 .mg-draw.hit .mg-card{border-color:var(--gold);box-shadow:0 0 0 3px rgba(236,210,91,.35),0 0 26px rgba(236,210,91,.4);animation:mgHit .6s cubic-bezier(.3,1.6,.5,1)}
 .mg-draw.hit > b{color:var(--gold-t)}
@@ -698,9 +697,6 @@ body.has-sfloat #totop{bottom:84px}
 .mg-go{width:100%}
 .mg-go.skip{--g1:#55555a;--g2:#3e3e42;--gd:#242427;--gs:transparent;color:var(--ink)}
 #g-mini.busy .mg-draw{cursor:pointer}
-.mg-pick{margin:0 0 14px}
-.mg-ph{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.mg-ph .ahead{margin:0}
 .mg-grp{margin-bottom:12px}
 .mg-gh{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12.5px;font-weight:700;color:var(--ink)}
 .mg-gh i{width:10px;height:10px;border-radius:3px}
@@ -743,3 +739,21 @@ body.has-sfloat #totop{bottom:84px}
 .mg-grade.mg-g0{background:rgba(255,255,255,.1);color:var(--ink2)}
 .mg-res.empty .mg-rh b{color:var(--ink2)}
 .mg-res.empty .cmeta .mt > b{color:var(--dim)}
+/* 카드 고르기 토글: 뽑기 상자 위. 머리를 누를 때마다 목록을 펼치고 접는다 */
+.mg-acc{margin:0 0 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line);overflow:hidden}
+.mg-tog{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;
+  border:0!important;border-radius:0!important;background:transparent;color:var(--ink);text-align:left}
+.mg-tog:hover:not(:disabled){background:rgba(255,255,255,.05)}
+.mg-acc.open .mg-tog{border-bottom:1px solid var(--line)}
+.mg-tog-l{display:flex;align-items:center;gap:10px;min-width:0}
+.mg-tog-l > svg{width:18px;height:18px;flex:0 0 auto;color:var(--pink-t)}
+.mg-tog-l > span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mg-tog-l small{font-size:11px;font-weight:600;color:var(--ink2)}
+.mg-tog-l b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mg-tog-r{display:flex;align-items:center;gap:5px;flex:0 0 auto;padding:5px 10px;border-radius:999px;
+  background:var(--pink-soft);font-size:12.5px;font-weight:700;color:var(--pink-t)}
+.mg-tog-r svg{width:15px;height:15px;transition:transform .2s ease}
+.mg-acc.open .mg-tog-r{background:rgba(255,255,255,.07);color:var(--ink2)}
+.mg-acc.open .mg-tog-r svg{transform:rotate(180deg)}
+.mg-acc .mg-pick{padding:12px 14px 2px}
+#g-mini.busy .mg-tog{pointer-events:none;opacity:.55}

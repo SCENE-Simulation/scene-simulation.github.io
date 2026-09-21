@@ -17,7 +17,8 @@
     ff: svg('<path d="M4 6l7 6-7 6zM13 6l7 6-7 6z"/>'),
     swap: svg('<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>'),
     tag: svg('<path d="M3.5 12.5l8.8-8.8H20v7.7l-8.8 8.8z"/><circle cx="15.6" cy="8.4" r="1.3"/>'),
-    reset: svg('<path d="M4 4v5h5"/><path d="M5.1 15a7.5 7.5 0 1 0 1.3-7.6L4 9"/>')
+    reset: svg('<path d="M4 4v5h5"/><path d="M5.1 15a7.5 7.5 0 1 0 1.3-7.6L4 9"/>'),
+    chev: svg('<path d="M6 9l6 6 6-6"/>')
   };
 
   function $(id){ return document.getElementById(id); }
@@ -223,12 +224,19 @@
     + '</div>'
     + '<div id="g-mini" hidden>'
     +   '<p class="mg-lead">원하는 카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요.</p>'
-    // 순서: 카드 고르기(고르면 접힘) → 뽑기 무대 → 결과 → 기록. 결과는 늘 뽑기 버튼 바로 아래에 온다
-    +   '<div class="mg-pick" id="mg-pick"></div>'
+    // 순서: 카드 고르기 토글(뽑기 상자 위, 눌러서 펼치고 접음) → 뽑기 상자 → 결과 → 기록.
+    // 결과는 늘 뽑기 버튼 바로 아래에 온다
+    +   '<div class="mg-acc" id="mg-acc">'
+    +     '<button type="button" class="mg-tog" id="mg-tog" aria-controls="mg-pick" aria-expanded="true">'
+    +       '<span class="mg-tog-l">' + ICON.one + '<span id="mg-togt"></span></span>'
+    +       '<span class="mg-tog-r"><span id="mg-togr"></span>' + ICON.chev + '</span>'
+    +     '</button>'
+    +     '<div class="mg-pick" id="mg-pick"></div>'
+    +   '</div>'
     +   '<div class="mg-stage" id="mg-stage">'
     +     '<div class="mg-slots">'
     +       '<div class="mg-slot mg-target"><span class="mg-k">목표 카드</span><div class="mg-card" id="mg-tcard"><img alt=""></div>'
-    +         '<b id="mg-tname"></b><button type="button" class="mg-change" id="mg-change">다른 카드 고르기</button></div>'
+    +         '<b id="mg-tname"></b></div>'
     +       '<div class="mg-arrow" aria-hidden="true">→</div>'
     +       '<div class="mg-slot mg-draw" id="mg-draw"><span class="mg-k">뽑기 창</span><div class="mg-card" id="mg-dcard"><img alt=""></div>'
     +         '<b id="mg-count" aria-live="polite"></b><small id="mg-sub"></small></div>'
@@ -812,7 +820,8 @@
     { t: '흙손', c: '#c9a27e', max: 0.97 },
     { t: '저주받은 손', c: '#f28aa7', max: 2 }
   ];
-  function mini(){ return MINI[G.id] || (MINI[G.id] = { target: null, res: null, picking: true }); }
+  // open: 카드 고르기 목록을 펼쳤는지. 처음엔 펼쳐 두고, 카드를 고르면 접는다
+  function mini(){ return MINI[G.id] || (MINI[G.id] = { target: null, res: null, open: true }); }
   function mgKey(){ return 'gacha:mini:' + G.id; }
   function mgLoad(key){ try { return JSON.parse(localStorage.getItem(key || mgKey()) || '[]'); } catch (e){ return []; } }
   function within(n){ return 1 - Math.pow(1 - 1 / G.N, n); }
@@ -839,7 +848,6 @@
     var tImg = $('mg-tcard').firstChild, dImg = $('mg-dcard').firstChild;
     if (has) cardImg(tImg, m.target); else backImg(tImg);
     $('mg-tname').textContent = has ? G.names[m.target] : '카드를 골라 주세요';
-    $('mg-change').hidden = !has || m.picking;
     if (!run){
       if (m.res){ cardImg(dImg, m.res.i); $('mg-count').textContent = won(m.res.n) + '번째'; $('mg-draw').classList.add('hit'); }
       else { coverImg(dImg); $('mg-count').textContent = '—'; $('mg-draw').classList.remove('hit'); }
@@ -850,17 +858,20 @@
     $('mg-gos').textContent = run ? '결과 바로 보기'
       : has ? '나올 때까지 뽑기 · 평균 ' + G.N + '번'
       : '위에서 뽑고 싶은 카드를 먼저 고르세요';
-    var pick = $('mg-pick');
-    pick.hidden = has && !m.picking;
-    if (!pick.hidden) mgPicker();
+    // 카드 고르기 토글: 접혀 있으면 "다른 카드 고르기 ▾", 펼치면 "접기 ▴"
+    $('mg-acc').classList.toggle('open', m.open);
+    $('mg-tog').setAttribute('aria-expanded', String(m.open));
+    $('mg-togt').innerHTML = has ? '<small>목표 카드</small><b>' + name(m.target) + '</b>' : '<b>뽑고 싶은 카드를 골라 주세요</b>';
+    $('mg-togr').textContent = m.open ? '접기' : (has ? '다른 카드 고르기' : '카드 고르기');
+    $('mg-pick').hidden = !m.open;
+    if (m.open) mgPicker();
     mgResult();
     mgHist();
   }
 
   function mgPicker(){
     var m = mini(), box = $('mg-pick');
-    box.innerHTML = '<div class="mg-ph"><h3 class="ahead">어떤 카드를 뽑고 싶으세요?</h3>'
-      + (m.target != null ? '<button type="button" class="gs" id="mg-fold">접기</button>' : '') + '</div>';
+    box.innerHTML = '';
     G.groups.forEach(function(gr){
       var g = document.createElement('div'); g.className = 'mg-grp';
       g.innerHTML = '<div class="mg-gh"><i style="background:' + gr.color + '"></i>' + esc(gr.name) + '</div>';
@@ -986,8 +997,7 @@
       +   tile('제일 많이 나온 카드', r && topN >= 2 ? esc(G.names[top]) : '—', r ? (topN >= 2 ? topN + '번이나 나왔습니다' : '겹친 카드 없음') : '그 사이 가장 자주 겹친 카드')
       + '</div>'
       + '<div class="mg-strip" id="mg-strip">' + (r ? '' : '<em>목표 카드가 나오기까지 뽑힌 카드가 여기에 순서대로 나옵니다</em>') + '</div>'
-      + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'
-        + '<button type="button" class="gs" id="mg-repick">다른 카드 고르기</button></div>' : '');
+      + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button></div>' : '');
     if (!r) return;
     // 목표가 나오기까지 뽑힌 카드들 (최근 40장, 마지막이 목표 카드)
     var strip = $('mg-strip'), last = r.seq.slice(-40);
@@ -1024,24 +1034,18 @@
     var m = mini(), b = e.target.closest('[data-mg]');
     if (b){
       if (mgEnd) return;
-      m.target = +b.getAttribute('data-mg'); m.picking = false; m.res = null;
+      m.target = +b.getAttribute('data-mg'); m.open = false; m.res = null;
       renderMini();
-      $('mg-stage').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      $('mg-acc').scrollIntoView({ block: 'start', behavior: 'smooth' });
       return;
     }
-    if (e.target.closest('#mg-fold')){
-      m.picking = false; renderMini();
-      $('mg-stage').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (e.target.closest('#mg-tog')){                         // 카드 고르기 펼치기 / 접기
+      if (mgEnd) return;
+      m.open = !m.open; renderMini();
       return;
     }
     if (e.target.closest('#mg-go')){ mgRun(); return; }
     if (e.target.closest('#mg-again')){ $('mg-stage').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); mgRun(); return; }
-    if (e.target.closest('#mg-change, #mg-repick')){
-      if (mgEnd) return;
-      m.picking = true; renderMini();
-      $('mg-pick').scrollIntoView({ block: 'start', behavior: 'smooth' });
-      return;
-    }
     if (mgEnd && e.target.closest('#mg-draw')) mgEnd();       // 뽑기 창을 눌러도 건너뛴다
   });
 
