@@ -10,7 +10,7 @@
   --lav:#a080d0; --lav-t:#c1a8ea; --lav-soft:rgba(160,128,208,.16);
   --glass:rgba(255,255,255,.05); --glass-h:rgba(255,255,255,.09);
   --cellfilter:grayscale(1) brightness(.42);
-  --sbw:232px;
+  --sbw:240px;   /* 232 → 240: 장난감 메뉴 [배지 자리][아이콘][긴 이름]이 스크롤바가 있어도 한 줄에 들어가게 */
 }
 html{scroll-padding-top:16px}
 [hidden]{display:none!important}
@@ -20,7 +20,8 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 /* --- 레이아웃: 사이드바 + 본문 --- */
 .sb{position:fixed;left:0;top:0;bottom:0;width:var(--sbw);padding:16px 10px calc(16px + env(safe-area-inset-bottom,0px));
   padding-top:calc(16px + env(safe-area-inset-top,0px));
-  overflow-y:auto;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;z-index:40}
+  overflow-y:auto;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;z-index:40;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}   /* 화면이 낮아 스크롤될 때 기본 15px 막대 대신 얇게 */
 .mn{margin-left:var(--sbw);min-height:100vh;background:var(--main)}
 .nv{display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;border-radius:10px;color:var(--ink);
   text-decoration:none;font-size:14px;font-weight:500;border:1px solid transparent;cursor:pointer}
@@ -33,7 +34,31 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .nv.off svg{color:var(--dim)}
 .nv .wn{margin-left:auto;min-width:20px;padding:1px 7px;border-radius:999px;text-align:center;
   font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:#ff8095;background:rgba(255,77,109,.16);border:1px solid rgba(255,77,109,.35)}
-.nv .bd,.yr summary .bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t)}
+.nv .bd,.yr summary .bd{margin-left:auto;padding-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--pink-t);
+  animation:bdGlow 3.2s ease-in-out infinite}
+/* SOON: 은은하게 숨 쉬듯 빛남. text-shadow·opacity 만 바꿔서 글자 크기·자리는 그대로 */
+@keyframes bdGlow{0%,100%{opacity:.78;text-shadow:0 0 3px rgba(242,138,167,.2)}
+  50%{opacity:1;text-shadow:0 0 6px rgba(242,138,167,.75),0 0 14px rgba(233,99,135,.4)}}
+/* 메뉴 배지 HOT · NEW — shell.js 맨 위 TAGS 로 붙인다.
+   하위 메뉴 글자 왼쪽의 들여쓰기 빈자리(36~38px)에 띄운다(absolute) → 메뉴 글자 자리·크기·줄 높이는 그대로.
+   가운데가 위쪽 화살표(›)·그룹 아이콘과 같은 세로줄. 고정폭 글꼴이라 HOT·NEW 상자 폭이 같다(약 24px) */
+.nv{position:relative}
+.nv .ntag{position:absolute;left:7px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;
+  height:15px;padding:0 3.5px;border-radius:4px;overflow:hidden;pointer-events:none;
+  font:700 9px/1 "JetBrains Mono",monospace;letter-spacing:.02em;color:#fff}
+.nv .ntag.hot{background:linear-gradient(135deg,#ff8a3d,#ff3b5c);text-shadow:0 1px 0 rgba(120,0,20,.35);
+  box-shadow:0 0 10px rgba(255,72,88,.45),inset 0 0 0 1px rgba(255,255,255,.18)}
+.nv .ntag.new{background:linear-gradient(135deg,#7cf0c2,#34c98f);color:#053b27;
+  box-shadow:0 0 10px rgba(71,209,154,.4),inset 0 0 0 1px rgba(255,255,255,.25)}
+/* 몇 초마다 빛줄기가 한 번 지나감 */
+.nv .ntag::after{content:"";position:absolute;top:-2px;bottom:-2px;left:0;width:9px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);
+  transform:translateX(-14px) skewX(-18deg);animation:ntShine 3.4s ease-in-out infinite}
+@keyframes ntShine{0%,68%{transform:translateX(-14px) skewX(-18deg)}100%{transform:translateX(34px) skewX(-18deg)}}
+@media (prefers-reduced-motion:reduce){
+  .nv .bd,.yr summary .bd{animation:none;opacity:1;text-shadow:0 0 6px rgba(242,138,167,.45)}
+  .nv .ntag::after{display:none}
+}
 /* 메뉴 그룹: 컬렉션 북 / 장난감 */
 .grp{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .gl{display:flex;align-items:center;gap:8px;padding:2px 6px 9px 12px;font-size:13px;font-weight:700;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
@@ -43,6 +68,10 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .glbtn.on{background:rgba(255,255,255,.14);color:var(--ink);border-color:rgba(255,255,255,.22)}
 .gl svg{width:17px;height:17px;flex:0 0 17px;color:var(--ink2)}
 .nv.sub{padding:7px 12px 7px 38px;font-size:13.5px}
+/* 아이콘 달린 하위 메뉴(장난감): 아이콘은 그룹 이름 글자 시작선(37px)에 두고, 그 왼쪽 빈자리는 HOT·NEW 배지 자리로 남긴다.
+   오른쪽 여백을 조금 줄여 긴 이름(포토카드 뽑기 시뮬레이션)도 한 줄에 들어가게 함 */
+.nv.sub.ico{padding-left:36px;padding-right:8px;gap:8px}
+.nv.sub.ico svg{width:16px;height:16px;flex:0 0 16px}
 .yr summary{display:flex;align-items:center;gap:9px;padding:8px 12px 8px 13px;border-radius:10px;cursor:pointer;list-style:none;
   font-family:"Pretendard Variable","Noto Sans KR",sans-serif;font-size:13.5px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
 .yr summary::-webkit-details-marker{display:none}

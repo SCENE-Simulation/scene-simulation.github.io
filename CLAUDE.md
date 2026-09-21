@@ -57,6 +57,8 @@ node tools/build.js tools/source.html index.html
 - `tools/source.html` — 원본 페이지 (405빵 카드 데이터 · 컬렉션 북)
 - `tools/theme.css` — 디자인
 - `tools/shell-top.html`, `tools/shell-bottom.html`, `tools/shell.js` — 사이드바·홈·메뉴
+  - 메뉴 배지 **HOT · NEW** 는 `shell.js` 맨 위 `TAGS` (탭 id → `'hot'`/`'new'`) 에서 붙이고 뗀다.
+    들여쓴 하위 메뉴 글자 왼쪽 빈자리에 떠서 글자 자리·크기는 그대로다. 사이드바와 모바일 하단 시트에 같이 나온다
 - `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
 - `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
 - `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석 · 뽑기 미니게임). 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
