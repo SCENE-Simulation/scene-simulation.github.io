@@ -1,0 +1,70 @@
+# 센둥이 시뮬레이터
+
+리센느 빵카드 뽑기 시뮬레이터 + 포토카드 컬렉션 북. GitHub Pages 사이트.
+
+## 저장소가 2개다 (중요)
+
+이 프로젝트는 **공개/비공개 저장소 두 개**로 나뉘어 있고, 두 폴더가 나란히 있어야 동작한다.
+
+| 폴더 | 저장소 | 공개 | 내용 |
+|---|---|---|---|
+| `scene-simulation.github.io/` (여기) | `SCENE-Simulation/scene-simulation.github.io` | 공개 | 사이트 소스 |
+| `../scene-workspace/` | `SCENE-Simulation/scene-workspace` | **비공개** | 스킬, 작업 로그 |
+
+GitHub Pages가 무료 플랜에서 비공개 저장소를 지원하지 않아, 사이트 소스만 공개로 두고
+노하우에 해당하는 스킬과 작업 로그는 비공개 저장소로 분리했다.
+
+`.claude/skills` 는 실제 폴더가 아니라 `../scene-workspace/skills` 를 가리키는
+**디렉터리 정션**이다. `.gitignore` 에 `.claude/skills/` 가 있어 이 공개 저장소에는 커밋되지 않는다.
+
+- 새 스킬을 만들거나 고칠 때는 **`../scene-workspace/skills/` 쪽이 실체**다. 거기서 커밋한다.
+- 이 저장소에 스킬 파일을 추가하지 말 것. 공개된다.
+
+## 작업 규칙
+
+집 PC와 외부 작업용 PC 두 대에서 번갈아 작업한다. **저장소 2개 모두** 받고 올려야 한다.
+
+작업 시작 전 — 양쪽 pull:
+
+```powershell
+cd $HOME\projects\scene-simulation.github.io; git pull
+cd $HOME\projects\scene-workspace;            git pull
+```
+
+작업 끝난 후 — 양쪽 commit & push:
+
+```powershell
+cd $HOME\projects\scene-simulation.github.io; git add -A; git commit -m "내용"; git push
+cd $HOME\projects\scene-workspace;            git add -A; git commit -m "내용"; git push
+```
+
+한쪽을 빠뜨리면 다른 PC에서 충돌이 난다.
+
+## 작업 로그
+
+작업이 끝나면 `../scene-workspace/worklog/YYYY-MM-DD.md` 에 기록한다.
+다른 PC에서 이어받을 때 필요하므로 **"다음에 할 일"을 반드시 남긴다.**
+비공개 저장소이므로 파일 경로나 시행착오를 적어도 된다. 단 토큰·비밀번호는 어디에도 적지 않는다.
+
+## 빌드
+
+`index.html` 은 `tools/` 의 파일들로부터 생성된다. 직접 수정하지 말 것.
+
+```
+node tools/build.js tools/source.html index.html
+```
+
+- `tools/source.html` — 원본 시뮬레이터
+- `tools/theme.css` — 디자인
+- `tools/shell-top.html`, `tools/shell-bottom.html`, `tools/shell.js` — 사이드바·홈·메뉴
+- `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
+- `tools/collections.js` — 도감 설정 모음
+
+## 커밋 신원
+
+공개 저장소이므로 실제 이메일을 쓰지 않는다.
+
+```
+user.name   dogns754-boop
+user.email  331373950+dogns754-boop@users.noreply.github.com
+```
