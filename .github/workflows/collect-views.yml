@@ -1,0 +1,53 @@
+# 조회수 예측기 수집기: 1시간마다 유튜브 채널 수치를 읽어 data 브랜치의 views.json 에 쌓는다.
+# API 키는 저장소 Settings → Secrets and variables → Actions 의 YT_API_KEY (코드·로그에 드러나지 않는다)
+name: 조회수 수집
+
+on:
+  schedule:
+    - cron: '17 * * * *'          # 매시 17분 (정각은 GitHub 가 붐벼 늦어지기 쉽다)
+  workflow_dispatch:
+    inputs:
+      full:
+        description: '영상 목록 전체 다시 읽기'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect-views
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 수집 스크립트 (main 의 tools/)
+        uses: actions/checkout@v4
+        with:
+          path: site
+          sparse-checkout: tools
+
+      - name: 기록 (data 브랜치)
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          path: store
+
+      - name: 수집
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+          FULL: ${{ inputs.full && '1' || '' }}
+        run: node site/tools/collect-views.js store/views.json
+
+      - name: 기록 올리기
+        working-directory: store
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add views.json
+          if git diff --cached --quiet; then echo '바뀐 기록 없음'; exit 0; fi
+          git commit -q -m "기록 $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push -q
