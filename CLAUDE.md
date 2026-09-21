@@ -60,6 +60,7 @@ node tools/build.js tools/source.html index.html
 - `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
 - `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
 - `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석 · 뽑기 미니게임). 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
+- `tools/views.js` — 조회수 예측기. 기록 파일 `data/views.json`(1시간마다 쌓는 스냅샷, 형식은 views.js 맨 위 주석)을 읽고, videos 가 비어 있으면 예시 데이터를 만들어 "예시"로 표시한다
 
 ## 커밋 신원
 

@@ -45,6 +45,8 @@ rep('</body>',
   '<script>\n' + fs.readFileSync(__dirname + '/collections.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/gacha.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/pages.js', 'utf8') + '\n</script>\n' +
+  // 조회수 예측기: pages.js 가 만든 window.SG 에 페이지를 붙이므로 그 뒤, shell.js 앞에 온다
+  '<script>\n' + fs.readFileSync(__dirname + '/views.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/shell.js', 'utf8') + '\n</script>\n</body>');
 
 fs.writeFileSync(out, h);
