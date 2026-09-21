@@ -155,8 +155,23 @@
   // 8주 안에 닿는다고 계산되면 "유력"
   function likely(m){ return m.week != null && m.week <= WEEKS; }
 
+  // ---------- 100만 단위 구간 채점 ----------
+  // 구간 = 100만 단위 하나 (예: 1,300만 → 1,400만). 구간마다 세 지점 — 100만·50만·20만 남았을 때(시작 M0, M0+50만, M0+80만) —
+  // 을 넘은 순간 ④ 로 구간 끝(M0+100만) 도달을 예측해 고정하고, 실제로 닿은 때와 비교한다 (수집기가 고정, 사이트가 채점).
+  // 멀리서 한 예측일수록 오차가 큰 게 정상이라 지점별로 따로 본다. 우하향은 영상마다 r(하루 증가가 하루마다 몇 배)로 반영.
+  //   범위: r 을 ±RSPAN 바꿔 본 도달 (빨리 = r + RSPAN, 늦게 = r − RSPAN. 늦게 보면 못 닿으면 hi = null) — 멀리 볼수록 넓어진다
+  //   far: FAR 일(8주)보다 멀거나 못 닿는다고 본 예측 — 참고로만 (평균에서 뺀다)
+  var SEGK = [0, 5e5, 8e5], RSPAN = 0.03, FAR = 56;
+  function segPredict(vs, a, M){
+    var V = at(vs, a, 1), T = daily(vs, a); if (V == null || !T) return null;
+    var d = daysTo(V, M, T.g, T.r);
+    return { d: d, lo: daysTo(V, M, T.g, Math.min(1, T.r + RSPAN)), hi: daysTo(V, M, T.g, Math.max(0.8, T.r - RSPAN)),
+      g: T.g, r: T.r, src: T.src, far: d == null || d > FAR };
+  }
+
   var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
     poolFor: poolFor, METHODS: METHODS, predictAll: predictAll,
-    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely };
+    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely,
+    SEGK: SEGK, RSPAN: RSPAN, FAR: FAR, segPredict: segPredict };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);

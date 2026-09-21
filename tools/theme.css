@@ -1378,3 +1378,38 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 100만 카드 막대 범례: 숫자는 진행률(%), 밝은 막대는 돌파하는 주 */
 .wk-lg{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:10.5px;color:var(--ink2)}
 .wk-lg i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:#5bb4ec;box-shadow:0 0 6px rgba(91,180,236,.7);vertical-align:-1px}
+
+/* ===== 100만 단위 구간 채점 (성적표 "100만 단위 예측 확인" · 영상 상세 기록) ===== */
+.vs-cards.sg{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sg-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.sg-r{padding:10px 12px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.sg-r.on{border-color:rgba(255,77,79,.45);background:rgba(255,77,79,.06)}
+.sg-h{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px}
+.sg-m{font-size:13px;font-weight:700;color:var(--ink2)}
+.sg-m b{color:#5bb4ec;font-weight:800}
+.sg-st{margin-left:auto;font-size:12px;color:var(--ink2)}
+.sg-st b{color:var(--ink)}
+.sg-st small{color:var(--dim)}
+.sg-cs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.sg-c{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid var(--line);min-width:0}
+.sg-c small{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink2)}
+.sg-c b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.sg-c.none b{color:var(--dim)}
+.sg-c.far{opacity:.72}
+.sg-rg{font-size:10.5px;color:var(--dim)}
+.sg-e{font-size:11.5px;font-weight:700;color:var(--ink2)}
+.sg-e.hit{color:var(--mint-t)}
+.sg-e.miss{color:#ff8a8a}
+.sg-far{font-style:normal;font-size:9.5px;font-weight:800;padding:0 5px;border-radius:4px;background:rgba(255,255,255,.12);color:var(--ink)}
+.vd-mh .sg-list{margin-top:8px}
+@media (max-width:640px){
+  .vs-cards.sg{grid-template-columns:1fr}
+  .sg-cs{grid-template-columns:1fr}
+  .sg-c{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:10px}
+  .sg-c small{grid-column:1/-1}
+  .sg-c .sg-rg{grid-column:2}
+  .sg-c .sg-e{grid-column:1/-1}
+  .sg-st{margin-left:0;width:100%}
+}
+.sg-done{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:800;
+  color:var(--mint-t);background:rgba(71,209,154,.14);border:1px solid rgba(71,209,154,.45);box-shadow:0 0 10px rgba(71,209,154,.18)}
