@@ -757,3 +757,43 @@ body.has-sfloat #totop{bottom:84px}
 .mg-acc.open .mg-tog-r svg{transform:rotate(180deg)}
 .mg-acc .mg-pick{padding:12px 14px 2px}
 #g-mini.busy .mg-tog{pointer-events:none;opacity:.55}
+/* 결과 타일: 평균 대비 정도(mgTone)에 따라 글자색·테두리·효과가 바뀐다 */
+.mg-mt{--tc:var(--ink);position:relative}
+.mg-mt.tone-great{--tc:#ffe08a}
+.mg-mt.tone-good{--tc:#6fe0b3}
+.mg-mt.tone-bad{--tc:#f3a93b}
+.mg-mt.tone-worst{--tc:#ff6b81}
+.mg-mt.tone-great,.mg-mt.tone-good,.mg-mt.tone-bad,.mg-mt.tone-worst{border-color:color-mix(in srgb,var(--tc) 40%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 12%,transparent),var(--glass) 75%)}
+.cmeta .mg-mt > b{color:var(--tc)}
+.mg-mt.tone-great > b{text-shadow:0 0 14px color-mix(in srgb,var(--tc) 60%,transparent)}
+.mg-mt.tone-worst > b{animation:mgPulse 1.6s ease-in-out infinite}
+@keyframes mgPulse{50%{text-shadow:0 0 14px rgba(255,107,129,.6)}}
+.mg-mt small{line-height:1.45}
+.mg-d{font-weight:700}
+.mg-d.up{color:#ff8a9c}
+.mg-d.down{color:var(--mint-t)}
+/* 나 vs 평균 막대, 다른 카드 커버리지 막대 */
+.mg-cmp,.mg-cov{position:relative;height:7px;margin:2px 0;border-radius:999px;background:rgba(255,255,255,.08)}
+.mg-cmp i,.mg-cov i{display:block;height:100%;border-radius:999px;background:var(--tc);transform-origin:left center}
+.mg-cov i{background:var(--lav)}
+.mg-cmp em{position:absolute;top:-4px;width:2px;height:15px;border-radius:1px;background:var(--ink);transform:translateX(-50%)}
+.mg-res.fresh .mg-cmp i,.mg-res.fresh .mg-cov i{animation:mgGrow .8s cubic-bezier(.2,.8,.2,1)}
+@keyframes mgGrow{from{transform:scaleX(0)}}
+/* 제일 많이 나온 카드: 이미지 + 횟수 배지 + 위시리스트 하트 */
+.mg-topc{position:relative;width:min(108px,100%);aspect-ratio:3/4;margin-top:4px;border-radius:9px;overflow:hidden;
+  background:var(--slot2);border:1px solid color-mix(in srgb,var(--tc) 50%,var(--line))}
+.mg-topc.land{width:min(144px,100%);aspect-ratio:4/3}
+.mg-topc img{width:100%;height:100%;object-fit:cover;display:block}
+.mg-topc.empty{border-style:dashed;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 10px,rgba(255,255,255,.02) 10px 20px)}
+.mg-x{position:absolute;left:6px;top:6px;z-index:2;padding:2px 7px;border-radius:999px;background:var(--tc);color:#1c1c1e;
+  font:800 11.5px "JetBrains Mono",monospace;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.mg-top.tone-worst .mg-x{animation:mgShake 2.4s ease-in-out infinite}
+@keyframes mgShake{0%,84%,100%{transform:none}88%{transform:rotate(-9deg) scale(1.08)}92%{transform:rotate(8deg) scale(1.08)}96%{transform:rotate(-4deg)}}
+.mg-topc .wish{width:30px;height:30px;right:6px;bottom:6px}
+.mg-topc .wish svg{width:16px;height:16px}
+.mg-res.empty .mg-mt > b{color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.mg-mt.tone-worst > b,.mg-top.tone-worst .mg-x,.mg-res.fresh .mg-cmp i,.mg-res.fresh .mg-cov i{animation:none}}
+/* 타일 값은 단어 중간에서 끊지 않고, 좁은 화면에서는 글자를 줄인다 ("빨 / 리" 방지) */
+.cmeta .mg-mt > b{word-break:keep-all}
+@media (max-width:640px){.cmeta .mg-mt > b{font-size:16.5px}}
