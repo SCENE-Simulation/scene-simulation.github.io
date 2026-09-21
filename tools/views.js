@@ -595,15 +595,20 @@
     $('mb').innerHTML = '<div class="mb-sum"><span><b>' + B.length + '</b>편 · 조회수 100만 안팎 이상</span><span><b>' + B.filter(in8).length + '</b>편 · 8주 안에 다음 100만 돌파 예상</span></div>'
       + (B.length ? '<div class="mb-list">' + B.map(mbRow).join('') + '</div>' : '<p class="anote">조회수 100만 안팎 이상인 영상이 없습니다.</p>');
   }
+  // 100만 단위 목록 한 줄: 지금 → 다음 100만, 그리고 "남은 조회수"를 가장 크게
   function mbRow(x){
     var v = x.v, lo = x.M - VE.MSTEP, f = Math.max(0, Math.min(1, (x.V - lo) / VE.MSTEP)), ok = in8(x), wk = x.eta == null ? null : Math.max(1, Math.ceil(x.eta / 7));
+    var left = Math.max(0, x.M - x.V), leftTxt = left < 1e4 ? full(left) + '회' : fmtM(left);
+    var eta = x.eta == null ? (x.why === 'far' ? '지금 추세로는 어려움' : '기록이 쌓이면 나옵니다')
+      : (x.eta < 1 ? '하루 안' : '약 ' + Math.ceil(x.eta) + '일') + ' · ' + dday(v, x.eta * 24) + ' 무렵';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
-      + '<span class="mb-bar"><i style="width:' + (f * 100).toFixed(1) + '%"></i></span>'
-      + '<span class="mb-lab"><span>' + (lo ? fmtM(lo) : '0') + '</span><b>' + fmt(x.V) + ' · ' + Math.round(f * 100) + '%</b><span>' + fmtM(x.M) + '</span></span></span>'
-      + '<span class="mb-e"><em>' + fmtM(x.M) + '</em><b>' + (x.eta == null ? (x.why === 'far' ? '못 닿음' : '계산 중') : x.eta < 1 ? '하루 안' : '약 ' + Math.ceil(x.eta) + '일') + '</b>'
-      + '<small>' + (x.eta == null ? (x.why === 'far' ? '지금 추세로는 어려움' : '기록이 쌓이면 나옵니다') : (ok ? wk + '주 차 · ' : '8주 넘게 · ') + dday(v, x.eta * 24) + ' 무렵') + '</small></span></button>';
+      + '<span class="mb-now">지금 <b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span>'
+      + '<span class="mb-meta"><span>' + Math.round(f * 100) + '% 왔음</span>'
+      + (x.eta == null ? '' : '<span class="wk">' + (ok ? wk + '주 차' : '8주 넘게') + '</span>') + '</span></span>'
+      + '<span class="mb-e"><small>' + fmtM(x.M) + '까지</small><b>' + leftTxt + '</b><em>남음</em>'
+      + '<span class="mb-eta">' + eta + '</span></span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
@@ -617,10 +622,9 @@
     var W = 24, L = list().filter(function(v){ return !tq || v.title.toLowerCase().indexOf(tq.toLowerCase()) >= 0; });
     var sorters = { gain: byGain, pred: function(a, b){ var x = week1(a).gain, y = week1(b).gain; return (y == null ? -1 : y) - (x == null ? -1 : x); }, tot: function(a, b){ return av(b, age(b)) - av(a, age(a)); }, age: function(a, b){ return b.pub - a.pub; } };
     L.sort(sorters[ts]);
-    var mx = Math.max.apply(null, L.map(function(v){ return velo(v, W).x || 0; }).concat([1]));
     var th = function(k, t){ return '<th class="' + { gain: 'g', pred: 'w', tot: 't', age: 'a' }[k] + (ts === k ? ' on' : '') + '"><button type="button" data-ts="' + k + '">' + t + (ts === k ? ' ▾' : '') + '</button></th>'; };
     var h = '<div class="atab-w"><table class="atab vt-tab"><thead><tr><th class="n">#</th><th class="v">영상</th>'
-      + th('gain', '24시간 증가') + th('pred', '1주 뒤 예상') + '<th class="sp">시간별 추이</th>' + th('tot', '누적') + th('age', '경과') + '<th class="x"></th></tr></thead><tbody>';
+      + th('gain', '24시간 증가') + th('pred', '1주 뒤 예상') + th('tot', '누적') + th('age', '경과') + '<th class="x"></th></tr></thead><tbody>';
     L.slice(0, tn).forEach(function(v, i){
       var a = age(v), g = velo(v, W), s = soon(v), open = OPEN[v.id];
       h += '<tr class="vt-r' + (v === sel ? ' on' : '') + (open ? ' open' : '') + '">'
@@ -629,13 +633,12 @@
         + '<span class="vt-vt"><b>' + esc(v.title) + '</b><small><span class="vt-dt">' + ymd(v.pub) + (v.dur ? ' · ' + fmtDur(v.dur) : '') + '</span>'
         + (TYPE[v.type] ? '<i class="vtag">' + TYPE[v.type] + '</i>' : '') + (a < 24 ? '<i class="vtag new">24h</i>' : '')
         + (s ? '<i class="vtag ms">곧 ' + fmtM(s.M) + '</i>' : '') + '<span class="vt-tot">누적 ' + fmt(av(v, a)) + ' · ' + ageTxt(a) + '</span></small></span></button></td>'
-        + '<td class="g"><span class="vt-gb"><i style="width:' + ((g.x || 0) / mx * 100).toFixed(1) + '%"></i></span><span class="vt-gn">' + kindTag(g) + '<b>' + (g.x == null ? '—' : full(g.x)) + '</b></span></td>'
+        + '<td class="g"><span class="vt-gn">' + kindTag(g) + '<b>' + (g.x == null ? '—' : full(g.x)) + '</b></span></td>'
         + '<td class="w">' + (function(w){ return w.gain == null ? '—' : wTag(w) + ' <b>+' + fmt(w.gain) + '</b>'; })(week1(v)) + '</td>'
-        + '<td class="sp">' + bars(v, a, 1, 24) + '</td>'
         + '<td class="t">' + full(av(v, a)) + '</td>'
         + '<td class="a">' + ageTxt(a) + '</td>'
         + '<td class="x"><button type="button" class="vt-x" data-exp="' + esc(v.id) + '" aria-expanded="' + !!open + '" aria-label="시간별 그래프"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td></tr>'
-        + '<tr class="vt-d"' + (open ? '' : ' hidden') + '><td colspan="8"><div class="vt-dx" id="vt-d-' + esc(v.id) + '"></div></td></tr>';
+        + '<tr class="vt-d"' + (open ? '' : ' hidden') + '><td colspan="7"><div class="vt-dx" id="vt-d-' + esc(v.id) + '"></div></td></tr>';
     });
     h += '</tbody></table></div>';
     var rest = L.length - tn;
@@ -643,15 +646,21 @@
       + (rest > 0 ? '<button type="button" class="gs" data-more="1">' + Math.min(rest, 20) + '편 더 보기</button>' : '') + '</div>';
     L.slice(0, tn).forEach(function(v){ if (OPEN[v.id]) rowDetail(v); });
   }
-  // 펼친 줄: 24시간·7일·하루 평균 + 최근 7일 시간별 증가 + 기념 조회수 예상
+  // 펼친 줄: 24시간·7일·하루 평균·기념 조회수 예상 + 시간별 증가(24시간, 누르면 72시간)
+  var HSPAN = {};
   function rowDetail(v){
     var box = $('vt-d-' + v.id); if (!box) return;
-    var a = age(v), V = av(v, a), g1 = velo(v, 24), g7 = velo(v, 168), m = milestone(v);
+    var a = age(v), V = av(v, a), g1 = velo(v, 24), g7 = velo(v, 168), m = milestone(v), sp = HSPAN[v.id] || 24;
     var chip = function(k, o, unit){ return '<div class="vt-c"><span>' + k + '</span><b>' + (o.x == null ? '—' : full(o.x)) + '</b><small>' + unit + '</small>' + kindTag(o) + '</div>'; };
-    box.innerHTML = '<div class="vt-cs">' + chip('24시간', g1, '회') + chip('7일', g7, '회') + chip('전체 기간', { x: V / Math.max(a / 24, 1 / 24), kind: 'real' }, '회/일')
-      + (m.h != null ? '<div class="vt-c ms"><span>' + fmtM(m.M) + ' 돌파</span><b>' + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</b><small>' + (m.how === 'rate' ? '지금 속도라면' : '예측 곡선 기준') + '</small></div>' : '')
+    var tiles = [chip('24시간', g1, '회'), chip('7일', g7, '회'), chip('전체 기간', { x: V / Math.max(a / 24, 1 / 24), kind: 'real' }, '회/일')];
+    if (m.h != null) tiles.push('<div class="vt-c ms"><span>' + fmtM(m.M) + ' 돌파</span><b>' + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</b><small>' + (m.how === 'rate' ? '지금 속도라면' : '예측 곡선 기준') + '</small></div>');
+    box.innerHTML = '<div class="vt-cs" style="--n:' + tiles.length + '">' + tiles.join('')
       + '<button type="button" class="gs vt-go" data-vid="' + esc(v.id) + '" data-go="1">예측 자세히 ↑</button></div>'
-      + '<div class="vt-hc">' + hourChart(v, 168, Math.max(320, Math.min(900, box.clientWidth || 700)), 150) + '</div>'
+      + '<div class="vt-hh"><b>시간별 증가</b><span>최근 ' + sp + '시간 · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span>'
+      + '<div class="seg" role="tablist" aria-label="기간">'
+      + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
+      + '</div></div>'
+      + '<div class="vt-hc">' + hourChart(v, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
       + '<p class="gnote">막대 하나가 1시간 동안 는 조회수입니다. 기록 간격이 긴 구간은 그 사이를 고르게 나눠 그리고, 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
 
@@ -693,8 +702,15 @@
     inc.forEach(function(x, i){
       if (x == null) return;
       var y0 = Y(x), w = Math.max(1, bw * 0.78);
-      s += '<rect class="' + (i === n - 1 ? 'now' : '') + '" x="' + (X(i) + (bw - w) / 2).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + Math.max(0.5, Y(0) - y0).toFixed(1) + '" rx="' + Math.min(2, w / 3).toFixed(1) + '">'
-        + '<title>' + when(v.pub + (t0 + i) * 3600e3) + ' · 시간당 +' + full(x) + '회</title></rect>';
+      s += '<rect class="hb' + (i === n - 1 ? ' now' : '') + '" data-bi="' + i + '" x="' + (X(i) + (bw - w) / 2).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + Math.max(0.5, Y(0) - y0).toFixed(1) + '" rx="' + Math.min(2, w / 3).toFixed(1) + '"/>';
+    });
+    // 수치 말풍선용 감지 영역: 막대가 가늘어도 짚기 쉽게 칸 전체 높이로 (views.js 아래쪽 말풍선 처리)
+    inc.forEach(function(x, i){
+      if (x == null) return;
+      var t1 = v.pub + (t0 + i) * 3600e3, t2 = t1 + 3600e3;
+      s += '<rect class="hit" data-bi="' + i + '" x="' + X(i).toFixed(1) + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="transparent"'
+        + ' data-tt="' + when(t1) + ' ~ ' + two(new Date(t2).getHours()) + ':' + two(new Date(t2).getMinutes()) + '" data-tv="+' + full(x) + '회"'
+        + (i === n - 1 ? ' data-tn="1"' : '') + '/>';
     });
     return s + '</svg>';
   }
@@ -873,6 +889,21 @@
       + '<button type="button" data-cm="cum" class="' + (cm !== 'hour' ? 'on' : '') + '">누적·예측</button>'
       + '<button type="button" data-cm="hour" class="' + (cm === 'hour' ? 'on' : '') + '">시간별 증가</button></div></div>';
   }
+  // 방법 k(0~2 방법, 3 종합)의 예측이 아직 없으면 그 이유(언제 나오는지), 있으면 null
+  function mStatus(v, k){
+    var a = age(v), pool = null, ok = false;
+    TARGETS.forEach(function(tg, ti){
+      var o = hz(v, ti);
+      if (o.done) return;
+      if (o.pr && o.pr[k]) ok = true;
+      if (o.pool != null) pool = o.pool;
+    });
+    if (ok) return null;
+    var m3 = VE.m3From(v), t3 = m3 > a ? '약 ' + ageTxt(m3 - a) + ' 뒤' : null;
+    if (k === 2) return t3 ? t3 + ' 나옵니다' : '기록이 조금 더 쌓이면 나옵니다';
+    if (k === 3) return t3 ? '③이 나오는 ' + t3 + '부터' : '세 방법 중 하나라도 나오면';
+    return '수집 뒤 올라온 영상 ' + MINPOOL + '개가 모이면 (지금 ' + (pool || 0) + '개)';
+  }
   function cumChart(){
     var v = sel, m = ALLM[mi], a = age(v), box = $('vd-chart');
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 54, R = 22, Tp = 34, B = 34;
@@ -936,6 +967,13 @@
           + '<text x="' + (X(k.h) + (right ? -9 : 9)).toFixed(1) + '" y="' + (Y(k.p) - 9).toFixed(1) + '" text-anchor="' + (right ? 'end' : 'start') + '" font-size="12" font-weight="700" fill="' + m.color + '">' + fmt(k.p) + '</text>';
       });
     }
+    // 고른 방법의 예측이 아직 없으면, 예측선이 들어갈 자리(지금 오른쪽)에 이유를 적는다
+    var why = knots.length > 1 ? null : mStatus(v, mi);
+    if (why){
+      var fx = (X(a) + (W - R)) / 2, fy = Tp + (H - Tp - B) / 2;
+      s += '<text x="' + fx.toFixed(1) + '" y="' + (fy - 6).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + m.color + '">' + esc(m.tab) + ' 예측선 준비 중</text>'
+        + '<text x="' + fx.toFixed(1) + '" y="' + (fy + 13).toFixed(1) + '" text-anchor="middle" font-size="11.5" fill="#aeaeb2">' + esc(why) + '</text>';
+    }
     // 지난 목표: 실제(흰 점)와 그때 한 예측(고리 + 범위)
     past.forEach(function(p){
       var x = X(p.h);
@@ -958,7 +996,13 @@
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
       + (past.length ? '<span><i class="k-d"></i>지난 목표의 실제</span>' : '')
-      + (past.some(function(p){ return p.r; }) ? '<span style="--mc:' + m.color + '"><i class="k-o"></i>그때 한 예측</span>' : '') + '</div>';
+      + (past.some(function(p){ return p.r; }) ? '<span style="--mc:' + m.color + '"><i class="k-o"></i>그때 한 예측</span>' : '') + '</div>'
+      // 네 가지 예측의 상태를 따로 보여 준다. 누르면 그 방법의 예측선으로 바뀐다
+      + '<div class="vd-mst" role="group" aria-label="방법별 예측 상태">' + ORDER.map(function(k){
+          var mm = ALLM[k], st = mStatus(v, k);
+          return '<button type="button" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + (st ? ' off' : '') + '" style="--mc:' + mm.color + '">'
+            + '<i>' + mm.b + '</i><b>' + mm.tab + '</b><small>' + (st ? esc(st) : '예측선 있음') + '</small></button>';
+        }).join('') + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
     function valAt(h){
       if (h <= a){ var x = at(v, h, 1); return x == null ? null : { act: x }; }
@@ -1081,6 +1125,13 @@
     if (f){ ft = f.getAttribute('data-ft'); tn = 20; renderRank(); renderTable(); return; }
     var t = e.target.closest('[data-ts]');
     if (t){ ts = t.getAttribute('data-ts'); renderTable(); return; }
+    var hs = e.target.closest('[data-hs]');
+    if (hs){
+      var hv = hs.getAttribute('data-hv');
+      HSPAN[hv] = +hs.getAttribute('data-hs');
+      rowDetail(VIDEOS.filter(function(v){ return v.id === hv; })[0]);
+      return;
+    }
     var x = e.target.closest('[data-exp]');
     if (x){
       var id = x.getAttribute('data-exp'), tr = x.closest('tr'), d = tr.nextElementSibling;
@@ -1103,4 +1154,44 @@
     var sc = e.target.closest('[data-si]');
     if (sc){ si = +sc.getAttribute('data-si'); renderScore(); }
   });
+
+  // ----- 시간별 막대 수치 말풍선: PC는 마우스를 올리면, 모바일은 꾹 누르고 있는 동안 -----
+  var tip = document.createElement('div');
+  tip.className = 'vh-tip'; tip.hidden = true; tip.setAttribute('role', 'status');
+  document.body.appendChild(tip);
+  var tipBar = null, pressT = null, pressing = false;
+  function tipShow(hit, cx, cy){
+    if (!hit) return tipHide();
+    var svg = hit.ownerSVGElement, bar = svg && svg.querySelector('rect.hb[data-bi="' + hit.getAttribute('data-bi') + '"]');
+    if (tipBar && tipBar !== bar) tipBar.classList.remove('act');
+    tipBar = bar; if (bar) bar.classList.add('act');
+    tip.innerHTML = '<b>' + hit.getAttribute('data-tt') + (hit.getAttribute('data-tn') ? ' · 지금' : '') + '</b><em>' + hit.getAttribute('data-tv') + '</em><small>1시간 동안 는 조회수</small>';
+    tip.hidden = false;
+    var w = tip.offsetWidth, h = tip.offsetHeight, x = cx - w / 2, y = cy - h - 18;
+    x = Math.max(8, Math.min(window.innerWidth - w - 8, x));
+    if (y < 8) y = cy + 22;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function tipHide(){
+    tip.hidden = true;
+    if (tipBar){ tipBar.classList.remove('act'); tipBar = null; }
+  }
+  function hitAt(x, y){ var t = document.elementFromPoint(x, y); return t && t.closest ? t.closest('.vh-svg .hit') : null; }
+  document.addEventListener('pointermove', function(e){
+    if (e.pointerType === 'mouse'){ var h = e.target.closest && e.target.closest('.vh-svg .hit'); if (h) tipShow(h, e.clientX, e.clientY); else if (tipBar) tipHide(); return; }
+    if (pressing){ e.preventDefault(); tipShow(hitAt(e.clientX, e.clientY), e.clientX, e.clientY); }
+    else if (pressT){ clearTimeout(pressT); pressT = null; }                 // 누르자마자 움직이면 스크롤로 본다
+  }, { passive: false });
+  document.addEventListener('pointerdown', function(e){
+    if (e.pointerType === 'mouse') return;
+    var h = e.target.closest && e.target.closest('.vh-svg .hit'); if (!h) return;
+    var x = e.clientX, y = e.clientY;
+    pressT = setTimeout(function(){ pressT = null; pressing = true; tipShow(hitAt(x, y) || h, x, y); }, 320);
+  });
+  function pressEnd(){ if (pressT){ clearTimeout(pressT); pressT = null; } if (pressing){ pressing = false; tipHide(); } }
+  document.addEventListener('pointerup', pressEnd);
+  document.addEventListener('pointercancel', pressEnd);
+  document.addEventListener('scroll', function(){ if (!pressing) tipHide(); }, true);
+  // 꾹 누르는 동안 브라우저 메뉴(이미지 저장 등)가 뜨지 않게
+  document.addEventListener('contextmenu', function(e){ if (e.target.closest && e.target.closest('.vh-svg')) e.preventDefault(); });
 })();
