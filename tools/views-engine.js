@@ -12,6 +12,7 @@
   ];
   var MINPOOL = 5;                     // 과거 영상이 이보다 적으면 예측하지 않는다
   var EARLY = 2;                       // 첫 기록이 게시 후 이 시간 안이면 게시 순간(0)부터 이어 본다
+  var M3MIN = 0.75;                    // ③ 은 지나온 시간의 4분의 1 이상을 기록으로 봤을 때만
 
   function q(a, p){
     var s = a.slice().sort(function(x, y){ return x - y; }); if (!s.length) return NaN;
@@ -52,13 +53,13 @@
   function ratios(pool, f){ var r = []; pool.forEach(function(p){ var x = f(p); if (x != null && isFinite(x) && x > 0) r.push(x); }); return r; }
   var METHODS = [
     // ① 초기 속도 배수법: 예측 = V(t) × 중앙값[ Vᵢ(T) ÷ Vᵢ(t) ]
-    { key: 'm1', point: function(v, t, T, pool){
+    { key: 'm1', pool: true, point: function(v, t, T, pool){
         var x = at(v, t, 1), r = ratios(pool, function(p){ var a = at(p, t, 1); return a > 0 ? at(p, T, 1) / a : null; });
         return x > 0 && r.length ? x * q(r, 0.5) : null;
       } },
     // ② 참여도 환산법: 좋아요 환산 = L(t) × 중앙값[ Vᵢ(T) ÷ Lᵢ(t) ], 댓글 환산 = C(t) × 중앙값[ Vᵢ(T) ÷ Cᵢ(t) ]
     //    예측 = 좋아요 환산^⅔ × 댓글 환산^⅓ (댓글이 없으면 좋아요만)
-    { key: 'm2', point: function(v, t, T, pool){
+    { key: 'm2', pool: true, point: function(v, t, T, pool){
         var l = at(v, t, 2), c = at(v, t, 3);
         var rl = ratios(pool, function(p){ var a = at(p, t, 2); return a > 0 ? at(p, T, 1) / a : null; });
         var rc = ratios(pool, function(p){ var a = at(p, t, 3); return a > 0 ? at(p, T, 1) / a : null; });
@@ -67,14 +68,20 @@
         if (!(c > 0) || !rc.length) return byL;
         return Math.pow(byL, 2 / 3) * Math.pow(c * q(rc, 0.5), 1 / 3);
       } },
-    // ③ 추세 곡선 외삽법: b = [ V(t) − V(t/2) ] ÷ ln[ (1+t) ÷ (1+t/2) ], 예측 = V(t) + b × ln[ (1+T) ÷ (1+t) ]
+    // ③ 추세 곡선 외삽법: b = [ V(t) − V(s) ] ÷ ln[ (1+t) ÷ (1+s) ], 예측 = V(t) + b × ln[ (1+T) ÷ (1+t) ]
+    //    s 는 보통 t/2. 게시 직후부터 기록하지 못한 영상은 기록 시작점부터 (단 s ≤ t × M3MIN 일 때만 — 너무 짧은 구간은 흔들린다)
+    //    과거 영상이 필요 없어 수집 초기에도 나온다
     { key: 'm3', point: function(v, t, T){
-        var a = at(v, t, 1), h = at(v, t / 2, 1);
-        if (!(a > 0) || h == null || t < 1) return null;
-        var b = (a - h) / Math.log((1 + t) / (1 + t / 2));
+        var s = Math.max(t / 2, since(v));
+        if (t < 1 || s > t * M3MIN) return null;
+        var a = at(v, t, 1), h = at(v, s, 1);
+        if (!(a > 0) || h == null) return null;
+        var b = (a - h) / Math.log((1 + t) / (1 + s));
         return Math.max(a, a + b * Math.log((1 + T) / (1 + t)));
       } }
   ];
+  // ③ 을 쓸 수 있으려면 게시 t시간 째여야 하는지 (기록 시작 s 에 대해 t ≥ s ÷ M3MIN)
+  function m3From(v){ return since(v) / M3MIN; }
 
   // 과거 영상을 하나씩 빼 놓고 나머지로 예측해 본다. 결과: 실제 ÷ 예측 비율 목록
   function backtest(m, t, T, pool){
@@ -86,8 +93,10 @@
     return out;
   }
   // 예측값 + 오차 범위(과거 영상에서 본 실제 ÷ 예측 비율의 10~90% 구간을 곱한다 → 10번 중 8번은 들어오는 범위)
+  // 과거 영상이 MINPOOL 개보다 적으면 과거 영상과 비교하는 ①·② 는 내지 않는다 (③ 은 범위 없이 낸다)
   function predictAll(v, t, T, pool){
     var out = METHODS.map(function(m){
+      if (m.pool && pool.length < MINPOOL) return null;
       var p = m.point(v, t, T, pool);
       if (!(p > 0)) return null;
       var e = backtest(m, t, T, pool);
@@ -103,7 +112,7 @@
     return out;                                                // [①, ②, ③, 종합]
   }
 
-  var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since,
+  var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
     poolFor: poolFor, METHODS: METHODS, predictAll: predictAll };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);

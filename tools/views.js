@@ -79,20 +79,21 @@
       if (f !== undefined){ if (!f.pr) return; pr = f.pr; n = f.n; }   // 수집기가 저장한 예측이 있으면 그대로
       else {
         var pool = poolFor(v, tg.T, v.pub + tg.c * 3600e3, tg.c);
-        if (pool.length < MINPOOL) return;
         pr = predictAll(v, tg.c, tg.T, pool); n = pool.length;
       }
+      if (!pr.some(Boolean)) return;
       var done = age(v) >= tg.T, act = done ? at(v, tg.T, 1) : null;
       rows.push({ v: v, pr: pr, done: done, act: act, pool: n,
         res: pr.map(function(r){
           if (!r || !done) return null;
-          return { err: (r.p - act) / act, hit: r.lo != null && act >= r.lo && act <= r.hi };
+          // 범위 없이 낸 예측(과거 영상이 모자랄 때의 ③)은 적중 여부 없이 오차만 본다
+          return { err: (r.p - act) / act, hit: r.lo != null ? act >= r.lo && act <= r.hi : null };
         }) });
     });
     rows.sort(function(a, b){ return b.v.pub - a.v.pub; });
     var sum = [0, 1, 2, 3].map(function(k){
-      var d = rows.filter(function(r){ return r.res[k]; });
-      return { n: d.length, hit: d.length ? d.filter(function(r){ return r.res[k].hit; }).length / d.length : null,
+      var d = rows.filter(function(r){ return r.res[k]; }), h = d.filter(function(r){ return r.res[k].hit != null; });
+      return { n: d.length, hits: h.length, hit: h.length ? h.filter(function(r){ return r.res[k].hit; }).length / h.length : null,
         mape: d.length ? mean(d.map(function(r){ return Math.abs(r.res[k].err); })) : null };
     });
     return (TRACK[ti] = { rows: rows, sum: sum });
@@ -197,9 +198,11 @@
     else if (t < 1) o.err = '게시 1시간 뒤부터 예측합니다';
     else if (VE.since(v) > t) o.err = '수집을 시작하기 전에 ' + tg.from + '이 지나 예측할 수 없습니다';
     else {
-      var pool = poolFor(v, tg.T, v.pub + t * 3600e3, t);
-      if (pool.length < MINPOOL) o.err = '게시 직후부터 기록한 과거 영상이 ' + MINPOOL + '개 이상 필요합니다 (지금 ' + pool.length + '개)';
-      else o.pr = predictAll(v, t, tg.T, pool);
+      var pool = poolFor(v, tg.T, v.pub + t * 3600e3, t), pr = predictAll(v, t, tg.T, pool), m3 = VE.m3From(v);
+      o.pool = pool.length;
+      if (pr.some(Boolean)) o.pr = pr;
+      else o.err = !done && m3 > t && m3 < tg.T ? '기록이 조금 더 쌓이면(약 ' + ageTxt(m3 - t) + ' 뒤) ③ 추세 곡선 예측이 나옵니다'
+        : '게시 직후부터 기록한 같은 종류 영상이 ' + MINPOOL + '개 이상 모이면 예측합니다 (지금 ' + pool.length + '개)';
     }
     return (PRED[key] = o);
   }
@@ -227,7 +230,8 @@
       + '<a class="gs vp-yt" href="' + CHANNEL.url + '" target="_blank" rel="noopener">채널 ↗</a></div>'
       + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 1시간마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
         : fresh < MINPOOL ? '<p class="vp-note">' + (DATA.since ? when(Date.parse(DATA.since)) + '부터 ' : '') + '1시간마다 기록하고 있습니다. 유튜브는 지난 기록을 주지 않아 그 전에 올라온 영상은 초반 흐름을 알 수 없습니다. '
-          + '그래서 과거 영상과 비교하는 ①·② 예측과 성적표는 수집을 시작한 뒤 올라온 영상이 ' + MINPOOL + '개 이상 쌓이면 채워집니다 (지금 ' + fresh + '개). ③ 추세 곡선은 새 영상이 올라오면 바로 나옵니다.</p>' : '')
+          + '그래서 과거 영상과 비교하는 ①·② 예측과 예상 범위는 수집을 시작한 뒤 올라온 같은 종류(일반·쇼츠·라이브) 영상이 ' + MINPOOL + '개 이상 쌓이면 채워집니다 (지금 ' + fresh + '개). '
+          + '③ 추세 곡선은 기록이 조금만 쌓여도 나옵니다.</p>' : '')
       + '<div class="vc-wrap at-start"><button type="button" class="vc-nav prev" data-nav="-1" aria-label="이전 영상들">‹</button>'
       + '<div class="vc-row" id="vc-row">' + VIDEOS.map(card).join('') + '</div>'
       + '<button type="button" class="vc-nav next" data-nav="1" aria-label="다음 영상들">›</button></div>'
@@ -255,11 +259,11 @@
   }
 
   // ----- 고른 영상: 제목 · 썸네일과 지금 현황(같은 높이) · 예측 현황 · 그래프 -----
-  // 같은 게시 후 시간에서 다른 영상들의 값. k 1: 조회수(그 시간까지 기록이 있는 영상만), 2·3: 조회수 대비 좋아요·댓글 비율
+  // 같은 종류·같은 게시 후 시간의 다른 영상들 값. k 1: 조회수(그 시간 기록이 있는 영상만), 2·3: 조회수 대비 좋아요·댓글 비율
   function peers(v, a, k){
     var out = [];
     VIDEOS.forEach(function(i){
-      if (i === v) return;
+      if (i === v || i.type !== v.type) return;                                   // 쇼츠·라이브·일반 영상은 각자 비교
       if (k === 1){ var x = age(i) >= a ? at(i, a, 1) : null; if (x != null) out.push(x); return; }
       var t = Math.min(a, age(i)); if (at(i, t, 1) == null) t = age(i);          // 그 시점 기록이 없으면 가장 최근 값으로
       var V = at(i, t, 1), y = at(i, t, k);
@@ -344,7 +348,7 @@
     Array.prototype.forEach.call(el.querySelectorAll('.vd-mt [data-mi]'), function(b){
       var on = +b.getAttribute('data-mi') === mi; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on));
     });
-    var acc = TARGETS.map(function(tg, k){ var s = track(k).sum[mi]; return s.n ? tg.name + ' ' + pct(s.hit) : null; }).filter(Boolean);
+    var acc = TARGETS.map(function(tg, k){ var s = track(k).sum[mi]; return s.hits ? tg.name + ' ' + pct(s.hit) : null; }).filter(Boolean);
     $('vd-md').innerHTML = '<i style="background:' + m.color + '"></i><span>' + m.short + '</span>'
       + (acc.length ? '<em>지난 예측 범위 적중률 · ' + acc.join(' · ') + '</em>' : '');
     $('vd-hs').innerHTML = TARGETS.map(function(tg, k){ return hzCard(v, k); }).join('');
@@ -519,7 +523,7 @@
         + '<span class="vm-d">' + m.desc + '</span>'
         + '<span class="vp-tags">' + m.uses.map(function(u){ return '<span>' + u + '</span>'; }).join('') + '</span>'
         + '<span class="vm-pc"><span class="p">' + m.pro + '</span><span class="c">' + m.con + '</span></span>'
-        + '<span class="vm-acc">' + (s.n ? '7일 예측 <b>적중 ' + pct(s.hit) + '</b> · <b>오차 ' + pct(s.mape) + '</b>' : '7일 예측 기록 없음') + '<em>이 방법으로 보기 →</em></span>'
+        + '<span class="vm-acc">' + (s.n ? '7일 예측 ' + (s.hits ? '<b>적중 ' + pct(s.hit) + '</b> · ' : '') + '<b>오차 ' + pct(s.mape) + '</b>' : '7일 예측 기록 없음') + '<em>이 방법으로 보기 →</em></span>'
         + '</button>';
     }).join('');
   }
@@ -536,8 +540,8 @@
           var s = tr.sum[k], m = ALLM[k];
           return '<div class="vs-c' + (k === best ? ' best' : '') + '" style="--mc:' + m.color + '">'
             + '<div class="vs-ch"><span class="vp-no">' + m.b + '</span>' + m.tab + (k === best ? '<em>가장 정확</em>' : '') + '</div>'
-            + '<div class="vs-row"><span>범위 적중률</span><b>' + (s.n ? pct(s.hit) : '—') + '</b></div>'
-            + '<div class="vs-bar"><i style="width:' + (s.n ? s.hit * 100 : 0).toFixed(0) + '%"></i></div>'
+            + '<div class="vs-row"><span>범위 적중률</span><b>' + (s.hits ? pct(s.hit) : '—') + '</b></div>'
+            + '<div class="vs-bar"><i style="width:' + (s.hits ? s.hit * 100 : 0).toFixed(0) + '%"></i></div>'
             + '<div class="vs-row"><span>평균 오차</span><b>' + (s.n ? pct(s.mape) : '—') + '</b></div>'
             + '<div class="vs-bar err"><i style="width:' + (s.n ? Math.min(100, s.mape / 0.3 * 100) : 0).toFixed(0) + '%"></i></div>'
             + '<small>' + (s.n ? s.n + '개 영상에서 확인' : '아직 결과가 없습니다') + '</small></div>';
@@ -552,7 +556,7 @@
             + ORDER.map(function(k){
                 var p = r.pr[k], x = r.res[k];
                 if (!p) return '<td>—</td>';
-                return '<td>' + fmt(p.p) + (x ? '<span class="vp-e ' + (x.hit ? 'hit' : 'miss') + '">' + signPct(x.err) + (x.hit ? ' ✓' : ' ✗') + '</span>' : '') + '</td>';
+                return '<td>' + fmt(p.p) + (x ? '<span class="vp-e' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '">' + signPct(x.err) + (x.hit == null ? '' : x.hit ? ' ✓' : ' ✗') + '</span>' : '') + '</td>';
               }).join('') + '</tr>';
         }).join('') + '</tbody></table></div>'
       + '<p class="gnote">✓ 는 실제 조회수가 80% 범위 안에 들어온 경우입니다. 예측은 그 시점까지 있던 기록만으로 계산했습니다. '

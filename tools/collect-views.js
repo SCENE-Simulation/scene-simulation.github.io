@@ -11,7 +11,8 @@
 //                 snaps: [[h, 조회수, 좋아요, 댓글], ...]             ← 영상 나이에 따라 간격을 벌려 쌓는 기록
 //                 pred:  { "24" | "168" | "720": { t: 예측 시점(h), n: 비교한 과거 영상 수, made: ISO,
 //                                                  p: [[예측, 범위 아래, 범위 위] | null × 4 (①②③종합)] }
-//                                               | { none: 'pool', n } (그때 과거 영상이 모자라 예측 못 함) } } ] }
+//                                               | { none: 'pool', n } (그때 어느 방법으로도 예측 못 함) } } ] }
+//   과거 영상이 MINPOOL 개보다 적을 때는 ③ 만 범위 없이 저장된다 (①·②·범위는 null)
 //   좋아요·댓글이 숨겨져 있으면 null. 기록 간격: 게시 48시간까지 1시간, 7일까지 6시간, 30일까지 1일, 그 뒤 1주.
 //   API 사용량: 한 번에 약 3 (영상 50개마다 +1, 전체 목록을 읽는 날은 +영상 수/50). 무료 한도는 하루 10,000.
 'use strict';
@@ -132,9 +133,9 @@ async function main(){
       const key = String(tg.T);
       if (a < tg.c || (raw.pred && raw.pred[key]) || VE.since(V) > tg.c) continue;     // 수집 전 영상은 예측 시점 기록이 없다
       const pool = VE.poolFor(vids, V, tg.T, V.pub + tg.c * 3600e3, tg.c);
+      const pr = VE.predictAll(V, tg.c, tg.T, pool), R = x => x == null ? null : Math.round(x);   // 과거 영상이 모자라면 ③ 만
       raw.pred = raw.pred || {};
-      if (pool.length < VE.MINPOOL){ raw.pred[key] = { none: 'pool', n: pool.length }; continue; }
-      const pr = VE.predictAll(V, tg.c, tg.T, pool), R = x => x == null ? null : Math.round(x);
+      if (!pr.some(Boolean)){ raw.pred[key] = { none: 'pool', n: pool.length }; continue; }
       raw.pred[key] = { t: tg.c, n: pool.length, made: new Date(NOW).toISOString(), p: pr.map(r => r ? [R(r.p), R(r.lo), R(r.hi)] : null) };
       log.frozen++;
     }
