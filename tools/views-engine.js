@@ -112,7 +112,56 @@
     return out;                                                // [①, ②, ③, 종합]
   }
 
+  // ---------- ④ 장기 추세 (게시 3주 뒤부터): 100만 단위 돌파 예측 ----------
+  // 하루 증가량이 나이에 따라 거듭제곱으로 줄어든다고 본다:  d(t) = d × (A / t)^k   (t, A: 게시 후 일수, A 는 지금)
+  //   t일째 누적 = V + d·A^k·(t^(1−k) − A^(1−k)) ÷ (1−k)      (k = 1 이면 V + d·A·ln(t/A))
+  //   d: 최근 24시간 증가, k: 앞 구간(최대 2주)과 최근 24시간의 하루 증가를 비교해 구한다. 기록이 모자라면 KDEF
+  //   범위: k 를 ±KSPAN 바꿔 본 값 (k 가 작을수록 덜 줄어듦 = 빨리 닿음)
+  var LATE = 504, MSTEP = 1e6, SOON = 336, KDEF = 1, KSPAN = 0.4;
+  // vs: 조회수만 담은 기록 { snaps: [[h, 조회수], ...] }. h0~h1 사이 하루 평균 증가
+  function perDay(vs, h0, h1){ var x0 = at(vs, h0, 1), x1 = at(vs, h1, 1); return x0 == null || x1 == null || h1 - h0 < 1 ? null : (x1 - x0) / (h1 - h0) * 24; }
+  function longTerm(vs, a){
+    var s = since(vs), r0 = Math.max(s, a - 24), d = perDay(vs, r0, a), k = null;
+    if (!(d > 0) || a - r0 < 3) return null;                         // 최근 기록이 3시간은 있어야
+    var o0 = Math.max(s, a - 336), o1 = r0;
+    if (o1 - o0 >= 24){
+      var d0 = perDay(vs, o0, o1), c0 = (o0 + o1) / 48, c1 = (r0 + a) / 48;
+      if (d0 > 0 && c1 > c0) k = Math.log(d0 / d) / Math.log(c1 / c0);
+    }
+    var src = k != null && isFinite(k) ? 'data' : 'default';
+    return { d: d, k: src === 'data' ? Math.max(0.2, Math.min(3, k)) : KDEF, src: src, days: (a - s) / 24 };
+  }
+  // 지금(a시간, 조회수 V)부터 M 에 닿기까지 몇 시간. 줄어드는 속도상 영영 못 닿으면 null
+  function etaH(V, M, a, d, k){
+    if (V >= M) return 0;
+    var A = a / 24, need = M - V, t;
+    k = Math.max(0, k);
+    if (Math.abs(k - 1) < 1e-6) t = A * Math.exp(need / (d * A));
+    else {
+      var x = Math.pow(A, 1 - k) + need * (1 - k) / (d * Math.pow(A, k));
+      if (x <= 0) return null;
+      t = Math.pow(x, 1 / (1 - k));
+    }
+    return isFinite(t) && t < A + 3650 ? (t - A) * 24 : null;
+  }
+  // a 에서 h시간 뒤 누적 조회수
+  function project(V, a, d, k, h){
+    var A = a / 24, T = (a + h) / 24; k = Math.max(0, k);
+    return V + (Math.abs(k - 1) < 1e-6 ? d * A * Math.log(T / A) : d * Math.pow(A, k) * (Math.pow(T, 1 - k) - Math.pow(A, 1 - k)) / (1 - k));
+  }
+  // 다음 n개 100만 단위와 도달 예상. e: 지금부터 [빠르면, 가운데, 늦으면] 몇 시간 뒤 (null = 못 닿음)
+  function msPlan(vs, a, n){
+    var V = at(vs, a, 1), L = longTerm(vs, a); if (V == null || !L) return null;
+    var out = [], M = (Math.floor(V / MSTEP) + 1) * MSTEP;
+    for (var i = 0; i < (n || 3); i++, M += MSTEP)
+      out.push({ M: M, e: [etaH(V, M, a, L.d, L.k - KSPAN), etaH(V, M, a, L.d, L.k), etaH(V, M, a, L.d, L.k + KSPAN)] });
+    return { V: V, d: L.d, k: L.k, src: L.src, days: L.days, ms: out };
+  }
+  // 가능성: 늦게 잡아도 2주 안이면 high, 가운데 값이 2주 안이면 mid, 아니면 low
+  function chance(e){ return e[2] != null && e[2] <= SOON ? 'high' : e[1] != null && e[1] <= SOON ? 'mid' : 'low'; }
+
   var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
-    poolFor: poolFor, METHODS: METHODS, predictAll: predictAll };
+    poolFor: poolFor, METHODS: METHODS, predictAll: predictAll,
+    LATE: LATE, MSTEP: MSTEP, SOON: SOON, KSPAN: KSPAN, longTerm: longTerm, etaH: etaH, project: project, msPlan: msPlan, chance: chance };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);
