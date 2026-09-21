@@ -414,7 +414,7 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
 <body>
 <div class="wrap">
 <p class="credit">MADE BY <b>비효율주의자</b> OF <b>여자 아이돌 컨텐츠 마이너갤러리</b></p>
-<h1><span class="sub">BREAD GACHA 27</span>빵뽑기 27종 시뮬레이터</h1>
+<h1><span class="sub">PHOTOCARD GACHA</span>포토카드 뽑기 시뮬레이터</h1>
 <p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종이, 5명 × 4종 = 20종, 여기에 스페셜 카드 7종을 더해 27종입니다.</p>
 
 <div class="tabs">
@@ -422,56 +422,7 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
   <button id="tab-sim">뽑기 시뮬레이터</button>
 </div>
 <div id="page-sim" hidden>
-<div class="board">
-  <div class="top">
-    <div class="stage" id="stage">
-      <img id="hero" alt="">
-      <div class="tag" id="tag">READY</div>
-      <div class="tag2" id="tag2">빵을 뜯어 보십시오</div>
-    </div>
-    <div>
-      <div class="btns">
-        <button class="p" id="b1">빵 1개 뽑기</button>
-        <button class="p" id="b10">10개 뽑기</button>
-        <button id="bauto">자동 완성</button>
-        <button class="m" id="btrade">중복 2장 → 교환(가위바위보)</button>
-        <button class="m" id="bused">중고 구매 15,000원</button>
-        <button id="breset">처음부터</button>
-      </div>
-      <div class="rps" id="rps" hidden>
-        <div class="q">중복 2장을 넘기려면 가위바위보에서 이겨야 합니다. 지면 5,000원을 잃습니다.</div>
-        <div class="hands">
-          <button class="m" data-h="0">✌ 가위</button>
-          <button class="m" data-h="1">✊ 바위</button>
-          <button class="m" data-h="2">✋ 보</button>
-          <button id="rpsclose">닫기</button>
-        </div>
-        <div class="out" id="rpsout"></div>
-        <div class="sc" id="rpssc"></div>
-      </div>
-      <div class="stats">
-        <div class="st"><b id="s-w">0</b><span>쓴 돈(원)</span></div>
-        <div class="st"><b id="s-n">0</b><span>산 빵(개)</span></div>
-        <div class="st"><b id="s-o">0/27</b><span>모은 종</span></div>
-        <div class="st"><b id="s-d">0</b><span>중복 장수</span></div>
-      </div>
-      <div class="bar"><i id="bar"></i></div>
-      <div class="stats" style="grid-template-columns:1fr 1fr">
-        <div class="st"><b id="s-e">262,500</b><span>예상 총비용(원) = 지금까지 + 남은 기대</span></div>
-        <div class="st"><b id="s-c">0</b><span>평균 262,500원 대비(원)</span></div>
-      </div>
-      <div class="cmp" id="cmp"></div>
-    </div>
-  </div>
-
-  <div class="sets" id="sets"></div>
-  <div class="result" id="result" hidden></div>
-  <div class="graph" id="graph" hidden></div>
-  <div class="graph" id="cgraph" hidden></div>
-  <div class="log" id="log"></div>
-</div>
-
-<p class="rec" id="rec">완성 기록 없음</p>
+<!-- 포토카드 뽑기 시뮬레이터: tools/gacha.js 가 이 안을 채운다 -->
 </div>
 <div id="page-col">
   <div class="snote" id="c-note"><span class="ic" aria-hidden="true">!</span><div class="tx"><b>기록은 <em>저장</em> 버튼을 눌러야 저장됩니다.</b><span id="c-note-s">저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.</span></div></div>
@@ -530,7 +481,6 @@ var PHOTOS = {"0":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBA
 var LAND = [22, 23, 24, 25, 26];
 (function(){
 var N=27, PRICE=2500, USED=15000, SW=SPRITE.w, SH=SPRITE.h;
-var counts=new Array(N).fill(0), pulls=0, spent=0, auto=null, trades=0, buys=0;
 
 var MEM=[{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}];
 var VPER=4, MCOUNT=5, MTOTAL=VPER*MCOUNT;            // 멤버 5명 × 4종 = 20
@@ -564,341 +514,13 @@ var SRC=[];
 function isPix(k){return !PHOTOS[k];}
 function setImg(el,k){el.src=SRC[k];el.className=(isPix(k)?'pix':'')+(isLand(k)?' land':'');}
 
-var CB=[];(function(){for(var k=0;k<=N;k++){var r=1;for(var i=1;i<=k;i++)r=r*(N-k+i)/i;CB.push(r);}})();
-function cdf(n){var s=0;for(var k=0;k<=N;k++)s+=(k%2?-1:1)*CB[k]*Math.pow((N-k)/N,n);return Math.max(0,Math.min(1,s));}
-function rankTxt(p){
-  if(!isFinite(p)||p<=0) return '0.01% 미만';
-  var v=p*100;
-  if(v<0.01) return '0.01% 미만';
-  if(v>99.99) return '99.99% 이상';
-  return v.toFixed(2)+'%';
-}
-function costRank(c){return cdf(Math.floor(c/PRICE));}
 function won(v){return v.toLocaleString('ko-KR');}
-function owned(){var c=0;for(var i=0;i<N;i++)if(counts[i])c++;return c;}
 function H(k){var s=0;for(var i=1;i<=k;i++)s+=1/i;return s;}
 
-var hero=document.getElementById('hero'), tag=document.getElementById('tag'), tag2=document.getElementById('tag2'),
-    stage=document.getElementById('stage'), sets=document.getElementById('sets'), log=document.getElementById('log');
-setImg(hero,27);
-
-var cells=[], progs=[];
-function buildSet(title,color,ids,isSp){
-  var box=document.createElement('div'); box.className='set'+(isSp?' sp':'');
-  var hd=document.createElement('div'); hd.className='shead';
-  hd.innerHTML='<span class="chip" style="background:'+color+'"></span><b>'+title+'</b>'+
-    '<span class="vs">'+(isSp?'5인 전원 수록 7종':'같은 멤버 4종')+'</span><span class="pr num">0/'+ids.length+'</span>';
-  var row=document.createElement('div'); row.className='row';
-  var rowW=document.createElement('div'); rowW.className='row wide';
-  ids.forEach(function(i){
-    var wrap=document.createElement('div'); wrap.className='gitem'+(isLand(i)?' land':'');
-    var d=document.createElement('div'); d.className='cell'+(isLand(i)?' land':'');
-    var c=document.createElement('img'); setImg(c,i); c.alt='';
-    var b=document.createElement('span'); b.className='d'; b.style.display='none';
-    var v=document.createElement('div'); v.className='v'; v.textContent=(i+1)+'. '+CNAME[i]; v.title=(i+1)+'. '+CNAME[i];
-    d.appendChild(c); d.appendChild(b); d.title=label(i)+' (No.'+(i+1)+')';
-    wrap.appendChild(d); wrap.appendChild(v);
-    (isLand(i)?rowW:row).appendChild(wrap); cells[i]={el:d,dup:b,wrap:wrap};
-  });
-  box.appendChild(hd);
-  if(row.children.length) box.appendChild(row);
-  if(rowW.children.length) box.appendChild(rowW);
-  sets.appendChild(box);
-  progs.push({el:hd.querySelector('.pr'),ids:ids});
-}
-for(var m=0;m<MCOUNT;m++){var ids=[];for(var v=0;v<VPER;v++)ids.push(m*VPER+v);buildSet(MEM[m].n,MEM[m].c,ids,false);}
-(function(){var ids=[];for(var i=MTOTAL;i<N;i++)ids.push(i);buildSet('스페셜','#f5b23a',ids,true);})();
-
-function say(t,cls){var p=document.createElement('div');if(cls)p.className=cls;p.innerHTML=t;log.prepend(p);
-  while(log.children.length>60)log.lastChild.remove();}
-
-function render(){
-  var o=owned(), rem=N-o, dup=pulls-o;
-  document.getElementById('s-n').textContent=won(pulls);
-  document.getElementById('s-w').textContent=won(spent);
-  document.getElementById('s-o').textContent=o+'/27';
-  document.getElementById('s-d').textContent=won(dup);
-  var expTotal=spent+(rem?Math.round(N*H(rem)*PRICE):0), diff=expTotal-262500;
-  document.getElementById('s-e').textContent=won(expTotal);
-  var dEl=document.getElementById('s-c');
-  dEl.textContent=(diff>0?'+':'')+won(diff);
-  dEl.style.color=diff>0?'var(--pink)':'var(--mint)';
-  document.getElementById('bar').style.width=(o/N*100)+'%';
-  for(var i=0;i<N;i++){
-    cells[i].el.classList.toggle('own',counts[i]>0);
-    cells[i].wrap.classList.toggle('own',counts[i]>0);
-    if(counts[i]>1){cells[i].dup.style.display='';cells[i].dup.textContent='x'+counts[i];}
-    else cells[i].dup.style.display='none';
-  }
-  progs.forEach(function(p){var c=0;p.ids.forEach(function(i){if(counts[i])c++;});p.el.textContent=c+'/'+p.ids.length;});
-  document.getElementById('btrade').disabled=(dup<2||rem===0);
-  document.getElementById('bused').disabled=(rem===0);
-  document.getElementById('b1').disabled=document.getElementById('b10').disabled=(rem===0);
-  drawCmp();
-}
-function flash(i){var e=cells[i].el;e.classList.add('flash');setTimeout(function(){e.classList.remove('flash');},280);}
-
-function complete(){
-  var pure=(trades===0&&buys===0), rk=costRank(spent), rank=rankTxt(rk);
-  say('<b>27종 완성.</b> 빵 '+won(pulls)+'개 · 총 '+won(spent)+'원.','new');
-  var diff=spent-262500;
-  var box=document.getElementById('result'); box.hidden=false;
-  var qRank=rankTxt(cdf(pulls));
-  box.innerHTML='<div class="r1" id="r-rank">상위 <span class="fig">'+rank+'</span>'+
-    '<span class="tagx '+(pure?'pure':'mix')+'">['+(pure?'순수 운빨':'교환 및 구매 이용')+']</span></div>'+
-    '<div class="r2" id="r-body">총 '+won(spent)+'원(빵 '+won(pulls)+'개'+(pure?'':' + 교환·중고')+')으로 완성했습니다. '+
-    '빵만 사서 모을 때의 총비용 분포에서 이 금액 이하로 끝날 확률이 '+rank+'이므로 상위 '+rank+'입니다. 적게 쓸수록 수치가 낮아집니다. '+
-    '대괄호는 이번 판의 진행 방식으로, '+(pure?'빵 구매만 사용했습니다.':'교환과 중고 구매를 함께 사용해 지출을 줄인 판입니다.')+'</div>'+
-    '<div class="r3">평균 262,500원(빵 105개) 대비 '+(diff>0?'+':'')+won(diff)+'원 · 1종당 '+won(Math.round(spent/N))+'원 · 수량 기준 확률 '+qRank+
-    (pure?'':' · 교환 성공 '+trades+'회(가위바위보 '+rpsW+'승 '+rpsL+'패 '+rpsD+'무, 벌금 '+won(penalty)+'원), 중고 구매 '+buys+'회')+'</div>';
-  if(auto){clearInterval(auto);auto=null;document.getElementById('bauto').textContent='자동 완성';}
-  try{var r=JSON.parse(localStorage.getItem('bread27')||'[]');
-    r.push({n:pulls,w:spent,pure:pure}); if(r.length>20)r.shift();
-    localStorage.setItem('bread27',JSON.stringify(r)); showRec();}catch(e){}
-  drawGraph(pulls,pure);
-  drawCostGraph(spent, buys>0?2:(trades>0?1:0), pure);
-}
-function showRec(){
-  try{var r=JSON.parse(localStorage.getItem('bread27')||'[]');
-    if(!r.length){document.getElementById('rec').textContent='완성 기록 없음';return;}
-    var s=r.reduce(function(a,b){return a+b.n;},0), best=Math.min.apply(null,r.map(function(x){return x.n;}));
-    document.getElementById('rec').textContent='완성 '+r.length+'회 · 평균 '+Math.round(s/r.length)+'개 · 최소 '+best+'개('+won(best*PRICE)+'원, 상위 '+rankTxt(cdf(best))+')';
-  }catch(e){}
-}
-function drawCmp(){
-  var o=owned(), rem=N-o;
-  var expRemain=rem?Math.round(N*H(rem)*PRICE):0, expTotal=spent+expRemain, diff=expTotal-262500;
-  var rows=[
-    {k:'내 예상 총비용', v:expTotal, c:'var(--pink)',
-     n:rem?('지금 '+won(spent)+'원 + 남은 기대 '+won(expRemain)+'원'):'완성'},
-    {k:'평균(빵만)', v:262500, c:'var(--gold)', n:'빵 105개분'},
-    {k:'교환 활용 평균', v:122300, c:'var(--mint)', n:'빵 약 35개 + 교환'},
-    {k:'이론 최소', v:67500, c:'var(--lav)', n:'빵 27개가 전부 다른 카드'}
-  ];
-  var mx=Math.max.apply(null,rows.map(function(r){return r.v;}))*1.02;
-  var html='<div class="now"><b>'+won(spent)+'원</b>'+
-    '<span>지금까지 지출 · 빵 '+won(pulls)+'개'+(penalty?' · 교환 벌금 '+won(penalty)+'원':'')+(buys?' · 중고 '+buys+'회':'')+'</span>'+
-    '<em style="color:'+(diff>0?'var(--pink)':'var(--mint)')+'">예상 총비용 '+won(expTotal)+'원 ('+(diff>0?'+':'')+won(diff)+'원)</em></div>';
-  rows.forEach(function(r){
-    var pc=Math.max(1,Math.min(100,Math.round(r.v/mx*100)));
-    html+='<div class="crow"><div class="chead"><span class="ck">'+r.k+'</span>'+
-      '<span class="cv">'+won(r.v)+'원</span><span>'+r.n+'</span></div>'+
-      '<div class="track"><div class="fill" style="width:'+pc+'%;background:'+r.c+'"></div></div></div>';
-  });
-  html+='<p class="note2">빵 1개 2,500원 기준입니다. 평균 105개는 262,500원이고, 교환을 활용하면 평균 122,300원 수준까지 내려갑니다.</p>';
-  document.getElementById('cmp').innerHTML=html;
-}
-
-var SIMS=null;
-function simCost(policy, trials){
-  var res=new Float64Array(trials);
-  for(var t=0;t<trials;t++){
-    var cnt=new Uint8Array(N), o=0, dup=0, cost=0;
-    while(o<N){
-      var m=N-o, marg=PRICE*N/m, act;
-      if(policy===0) act=0;
-      else if(policy===1) act=(dup>=2)?1:0;
-      else act=(dup>=2)?1:((marg>USED)?2:0);
-      if(act===0){
-        var i=(Math.random()*N)|0; cost+=PRICE;
-        if(cnt[i]===0)o++; else dup++;
-        cnt[i]++;
-      }else if(act===1){
-        var loss=0;
-        for(;;){var r=(Math.random()*3)|0; if(r===0)break; if(r===1)loss++;}
-        cost+=loss*5000; dup-=2; o++;
-      }else{cost+=USED; o++;}
-    }
-    res[t]=cost;
-  }
-  res.sort();
-  return res;
-}
-function rankIn(arr,v){var lo=0,hi=arr.length;while(lo<hi){var mid=(lo+hi)>>1;if(arr[mid]<=v)lo=mid+1;else hi=mid;}return lo/arr.length;}
-function qOf(arr,p){return arr[Math.min(arr.length-1,Math.floor(p*arr.length))];}
-
-function drawCostGraph(myCost, policy, pure){
-  var box=document.getElementById('cgraph'); box.hidden=false;
-  box.innerHTML='<h3>총비용 기준 분포<span>계산 중…</span></h3>';
-  setTimeout(function(){
-    if(!SIMS) SIMS=[simCost(0,20000),simCost(1,20000),simCost(2,20000)];
-    var ink=cssv('--ink'), ink2=cssv('--ink2'), line=cssv('--line'), pink=cssv('--pink'),
-        pinkT=cssv('--pink-t'), mint=cssv('--mint'), mintT=cssv('--mint-t'), gold=cssv('--gold'),
-        goldT=cssv('--gold-t'), lav=cssv('--lav'), lavT=cssv('--lav-t'), cream=cssv('--cream');
-    var names=['빵만 구매','빵 + 교환','빵 + 교환 + 중고'], cols=[gold,mint,lav], colsT=[goldT,mintT,lavT];
-    var xmax=Math.max(qOf(SIMS[0],.985), myCost*1.1, 120000);
-    xmax=Math.ceil(xmax/50000)*50000;
-    var w=640,h=230,L=50,R=14,T=14,B=34;
-    function X(c){return L+Math.min(c,xmax)/xmax*(w-L-R);}
-    function Y(p){return T+(1-p)*(h-T-B);}
-    var s='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="전략별 총비용 누적분포">';
-    for(var g=0;g<=1.001;g+=0.25)
-      s+='<line x1="'+L+'" x2="'+(w-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="'+line+'"/>'+
-         '<text x="'+(L-7)+'" y="'+(Y(g)+4)+'" text-anchor="end" font-size="11" fill="'+ink2+'">'+Math.round(g*100)+'%</text>';
-    for(var c=0;c<=xmax;c+=50000)
-      s+='<text x="'+X(c)+'" y="'+(h-B+16)+'" text-anchor="middle" font-size="11" fill="'+ink2+'">'+(c/10000)+'만원</text>';
-    SIMS.forEach(function(arr,k){
-      var d='', step=Math.max(1,Math.floor(arr.length/240));
-      for(var j=0;j<arr.length;j+=step) d+=(j===0?'M':'L')+X(arr[j]).toFixed(1)+' '+Y(j/arr.length).toFixed(1)+' ';
-      d+='L'+X(arr[arr.length-1]).toFixed(1)+' '+Y(1).toFixed(1);
-      s+='<path d="'+d+'" fill="none" stroke="'+cols[k]+'" stroke-width="'+(k===policy?3:1.8)+'" opacity="'+(k===policy?1:.55)+'"/>';
-      s+='<text x="'+(w-R)+'" y="'+(T+14+k*15)+'" text-anchor="end" font-size="11" fill="'+colsT[k]+'">'+names[k]+' 평균 '+won(Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length))+'원</text>';
-    });
-    var rk=costRank(myCost), rkPol=rankIn(SIMS[policy],myCost);
-    s+='<line x1="'+X(myCost)+'" x2="'+X(myCost)+'" y1="'+T+'" y2="'+(h-B)+'" stroke="'+pink+'" stroke-width="2"/>';
-    s+='<circle cx="'+X(myCost)+'" cy="'+Y(rk)+'" r="5" fill="'+pink+'" stroke="'+cssv('--slot')+'" stroke-width="2"/>';
-    s+='<text x="'+(X(myCost)+(myCost>xmax*.7?-8:8))+'" y="'+(Y(rk)-10)+'" text-anchor="'+(myCost>xmax*.7?'end':'start')+'" font-size="12" fill="'+pinkT+'">내 지출 '+won(myCost)+'원 · 상위 '+rankTxt(rk)+'</text>';
-    s+='</svg>';
-    var unit=Math.round(myCost/N);
-
-    box.innerHTML='<h3>총비용 기준 분포<span>같은 전략 2만 회 시뮬레이션 · 가로축 총지출</span></h3>'+s+
-      '<p class="gnote">분홍 선이 이번 지출입니다. 배너의 상위 비율은 빵만 구매하는 분포(평균 262,500원)를 공통 기준으로 계산하며, 같은 전략('+names[policy]+') 안에서만 보면 상위 '+rankTxt(rkPol)+'입니다. 카드 1종당 평균 단가는 '+won(unit)+'원으로 이론 최소치(2,500원)의 '+(unit/PRICE).toFixed(1)+'배입니다. 교환 기대비용이 5,000원, 중고가 15,000원이므로 중고를 섞은 전략의 평균 총비용이 더 높게 나옵니다.</p>';
-  },30);
-}
-function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
-function drawGraph(nUser,pure){
-  var ink=cssv('--ink'), ink2=cssv('--ink2'), line=cssv('--line'), paper=cssv('--slot'),
-      pink=cssv('--pink'), pinkT=cssv('--pink-t'), lav=cssv('--lav'), lavT=cssv('--lav-t'),
-      mint=cssv('--mint'), gold=cssv('--gold'), goldT=cssv('--gold-t'), cream=cssv('--cream');
-  var xmin=27, xmax=Math.max(230, Math.ceil((nUser+25)/10)*10);
-  var w=640, L=48, R=14;
-  function X(n){return L+(n-xmin)/(xmax-xmin)*(w-L-R);}
-
-  // --- 누적 확률
-  var h1=210, T=14, B=32;
-  function Y1(p){return T+(1-p)*(h1-T-B);}
-  var s='<svg viewBox="0 0 '+w+' '+h1+'" role="img" aria-label="구매 수량별 누적 완성 확률">';
-  function band(a,b,c){a=Math.max(a,xmin);b=Math.min(b,xmax);if(b<=a)return;
-    s+='<rect x="'+X(a)+'" y="'+T+'" width="'+(X(b)-X(a))+'" height="'+(h1-T-B)+'" fill="'+c+'" opacity="0.16"/>';}
-  band(27,70,pink); band(99,128,lav); band(148,xmax,mint);
-  for(var g=0;g<=1.001;g+=0.25){
-    s+='<line x1="'+L+'" x2="'+(w-R)+'" y1="'+Y1(g)+'" y2="'+Y1(g)+'" stroke="'+line+'"/>'+
-       '<text x="'+(L-8)+'" y="'+(Y1(g)+4)+'" text-anchor="end" font-size="11" fill="'+ink2+'">'+Math.round(g*100)+'%</text>';}
-  var ticks=[27,50,70,99,105,150,200]; if(xmax>230)ticks.push(xmax);
-  ticks.forEach(function(n){ if(n>xmax) return;
-    s+='<text x="'+X(n)+'" y="'+(h1-B+16)+'" text-anchor="middle" font-size="11" fill="'+ink2+'">'+n+'개</text>'+
-       '<text x="'+X(n)+'" y="'+(h1-B+29)+'" text-anchor="middle" font-size="10" fill="'+ink2+'">'+(n*PRICE/10000).toFixed(1).replace('.0','')+'만원</text>';});
-  var d='';
-  for(var n=xmin;n<=xmax;n++) d+=(n===xmin?'M':'L')+X(n).toFixed(1)+' '+Y1(cdf(n)).toFixed(1)+' ';
-  s+='<path d="'+d+'" fill="none" stroke="'+ink+'" stroke-width="2.5"/>';
-  [[105,'평균 105개',gold],[99,'중앙값 99개',ink2]].forEach(function(a){
-    s+='<line x1="'+X(a[0])+'" x2="'+X(a[0])+'" y1="'+T+'" y2="'+(h1-B)+'" stroke="'+a[2]+'" stroke-dasharray="4 4"/>';});
-  s+='<text x="'+(X(105)+5)+'" y="'+(T+12)+'" font-size="11" fill="'+goldT+'">평균 105개</text>';
-  s+='<line x1="'+X(nUser)+'" x2="'+X(nUser)+'" y1="'+T+'" y2="'+(h1-B)+'" stroke="'+pink+'" stroke-width="2"/>';
-  s+='<circle cx="'+X(nUser)+'" cy="'+Y1(cdf(nUser))+'" r="5" fill="'+pink+'" stroke="'+paper+'" stroke-width="2"/>';
-  s+='<text x="'+(X(nUser)+(nUser>xmax*0.75?-8:8))+'" y="'+(Y1(cdf(nUser))-10)+'" text-anchor="'+(nUser>xmax*0.75?'end':'start')+'" font-size="12" fill="'+pinkT+'">내 결과 '+nUser+'개'+(pure?'':' (교환·구매 포함)')+'</text>';
-  s+='</svg>';
-
-  // --- 분포
-  var h2=170, T2=12, B2=30, pk=0;
-  for(var n2=xmin;n2<=xmax;n2++){var v=cdf(n2)-cdf(n2-1); if(v>pk)pk=v;}
-  function Y2(v){return T2+(1-v/pk)*(h2-T2-B2);}
-  var g2='<svg viewBox="0 0 '+w+' '+h2+'" role="img" aria-label="완성 수량 분포">';
-  var area='M'+X(xmin)+' '+(h2-B2)+' ';
-  for(var n3=xmin;n3<=xmax;n3++) area+='L'+X(n3).toFixed(1)+' '+Y2(cdf(n3)-cdf(n3-1)).toFixed(1)+' ';
-  area+='L'+X(xmax)+' '+(h2-B2)+' Z';
-  g2+='<path d="'+area+'" fill="'+lav+'" opacity="0.3"/>';
-  var fill='M'+X(xmin)+' '+(h2-B2)+' ';
-  for(var n4=xmin;n4<=Math.min(nUser,xmax);n4++) fill+='L'+X(n4).toFixed(1)+' '+Y2(cdf(n4)-cdf(n4-1)).toFixed(1)+' ';
-  fill+='L'+X(Math.min(nUser,xmax))+' '+(h2-B2)+' Z';
-  g2+='<path d="'+fill+'" fill="'+pink+'" opacity="0.45"/>';
-  var d2='';
-  for(var n5=xmin;n5<=xmax;n5++) d2+=(n5===xmin?'M':'L')+X(n5).toFixed(1)+' '+Y2(cdf(n5)-cdf(n5-1)).toFixed(1)+' ';
-  g2+='<path d="'+d2+'" fill="none" stroke="'+ink+'" stroke-width="2"/>';
-  g2+='<line x1="'+L+'" x2="'+(w-R)+'" y1="'+(h2-B2)+'" y2="'+(h2-B2)+'" stroke="'+line+'"/>';
-  ticks.forEach(function(n){ if(n>xmax) return;
-    g2+='<text x="'+X(n)+'" y="'+(h2-B2+16)+'" text-anchor="middle" font-size="11" fill="'+ink2+'">'+n+'개</text>';});
-  g2+='<line x1="'+X(nUser)+'" x2="'+X(nUser)+'" y1="'+T2+'" y2="'+(h2-B2)+'" stroke="'+pink+'" stroke-width="2"/>';
-  g2+='<text x="'+(X(nUser)+(nUser>xmax*0.75?-8:8))+'" y="'+(T2+12)+'" text-anchor="'+(nUser>xmax*0.75?'end':'start')+'" font-size="12" fill="'+pink+'">'+nUser+'개</text>';
-  try{
-    var rec=JSON.parse(localStorage.getItem('bread27')||'[]');
-    rec.forEach(function(r){ if(r.n>=xmin&&r.n<=xmax)
-      g2+='<polygon points="'+X(r.n)+','+(h2-B2-5)+' '+(X(r.n)-4)+','+(h2-B2+3)+' '+(X(r.n)+4)+','+(h2-B2+3)+'" fill="'+lavT+'" opacity="0.8"/>';});
-  }catch(e){}
-  g2+='</svg>';
-
-  var box=document.getElementById('graph'); box.hidden=false;
-  box.innerHTML='<h3>누적 완성 확률<span>가로축 구매 수량 · 세로축 그 수량 안에 27종을 끝낼 확률</span></h3>'+s+
-    '<h3>완성 수량 분포<span>정확히 그 수량에서 끝날 확률 · 삼각형은 지난 기록</span></h3>'+g2+
-    '<p class="gnote">'+(pure?'분홍 영역이 이번 결과보다 빨리 끝나는 경우입니다. 그 면적이 상위 '+rankTxt(cdf(nUser))+'에 해당합니다. ':'이 두 그래프는 빵만 사서 모을 때의 분포입니다. 이번 판은 교환·중고를 섞었으므로 순위 비교는 아래 총비용 분포를 보십시오. ')+'배경 띠는 도전 구간(27~70개), 최적 구간(99~128개), 안정 구간(148개 이상)입니다.</p>';
-}
-function show(i,state){
-  setImg(hero,i);
-  tag.textContent=state; tag.style.color=(state.indexOf('NEW')===0?'#4fd8c0':(state.indexOf('DUP')===0?'#a293c9':'#f5b23a'));
-  tag2.textContent=label(i)+(counts[i]>1?' x'+counts[i]:'');
-}
-function pull(quiet){
-  if(owned()===N)return;
-  var i=Math.floor(Math.random()*N), isNew=counts[i]===0;
-  counts[i]++; pulls++; spent+=PRICE;
-  show(i,isNew?'NEW No.'+(i+1):'DUP No.'+(i+1));
-  if(!quiet){stage.classList.remove('pop');void stage.offsetWidth;stage.classList.add('pop');}
-  flash(i);
-  if(isNew)say('빵 '+pulls+'개째 — <b>'+label(i)+'</b> 획득 ('+owned()+'/27)','new');
-  else if(!quiet)say('빵 '+pulls+'개째 — '+label(i)+' 중복');
-  render();
-  if(owned()===N)complete();
-}
-function missing(){var m=[];for(var i=0;i<N;i++)if(!counts[i])m.push(i);return m;}
-
-document.getElementById('b1').onclick=function(){pull(false);};
-document.getElementById('b10').onclick=function(){for(var k=0;k<10&&owned()<N;k++)pull(true);
-  stage.classList.remove('pop');void stage.offsetWidth;stage.classList.add('pop');
-  say('10개 개봉 — 누적 '+pulls+'개 · '+won(spent)+'원');};
-document.getElementById('bauto').onclick=function(){
-  if(auto){clearInterval(auto);auto=null;this.textContent='자동 완성';return;}
-  this.textContent='멈추기';
-  auto=setInterval(function(){for(var k=0;k<3;k++)pull(true);},40);};
-var HAND=['가위','바위','보'], rpsW=0, rpsL=0, rpsD=0, penalty=0;
-function rpsScore(){
-  document.getElementById('rpssc').textContent='교환 승부 '+(rpsW+rpsL+rpsD)+'회 — '+rpsW+'승 '+rpsL+'패 '+rpsD+'무 · 벌금 누적 '+won(penalty)+'원';
-}
-function rpsPlay(me){
-  var m=missing();
-  if(!m.length||pulls-owned()<2){document.getElementById('rps').hidden=true;render();return;}
-  var cpu=Math.floor(Math.random()*3), out=document.getElementById('rpsout');
-  var head='나 '+HAND[me]+' vs 상대 '+HAND[cpu]+' — ';
-  if(me===cpu){
-    rpsD++; out.innerHTML=head+'<b>무승부.</b> 다시 내십시오. (비용 없음)';
-    say('교환 가위바위보 — 무승부 ('+HAND[me]+')');
-  }else if((me+2)%3===cpu){
-    rpsW++;
-    var src=-1,best=0; for(var i=0;i<N;i++)if(counts[i]>best){best=counts[i];src=i;}
-    var need=Math.min(2,best-1); counts[src]-=need;
-    var tt=m[Math.floor(Math.random()*m.length)]; counts[tt]=1; trades++;
-    show(tt,'TRADE No.'+(tt+1)); flash(tt);
-    out.innerHTML=head+'<span class="w"><b>승리.</b></span> '+label(tt)+' 획득';
-    say('교환 성공 — '+label(src)+' 중복 '+need+'장을 내주고 <b>'+label(tt)+'</b> 획득','new');
-    render(); if(owned()===N){document.getElementById('rps').hidden=true; complete(); return;}
-  }else{
-    rpsL++; penalty+=5000; spent+=5000;
-    out.innerHTML=head+'<span class="l"><b>패배.</b></span> 5,000원을 잃었습니다.';
-    say('교환 실패 — 가위바위보 패배로 5,000원 차감 (누적 벌금 '+won(penalty)+'원)');
-    render();
-  }
-  rpsScore();
-}
-document.getElementById('btrade').onclick=function(){
-  var m=missing(); if(!m.length||pulls-owned()<2)return;
-  var p=document.getElementById('rps'); p.hidden=false;
-  document.getElementById('rpsout').textContent='가위·바위·보 중 하나를 내십시오.';
-  rpsScore();
-};
-document.getElementById('rpsclose').onclick=function(){document.getElementById('rps').hidden=true;};
-Array.prototype.forEach.call(document.querySelectorAll('.rps .hands button[data-h]'),function(b){
-  b.onclick=function(){rpsPlay(+b.getAttribute('data-h'));};});
-document.getElementById('bused').onclick=function(){
-  var m=missing(); if(!m.length)return;
-  var t=m[Math.floor(Math.random()*m.length)]; counts[t]=1; spent+=USED; buys++;
-  show(t,'BUY No.'+(t+1)); flash(t);
-  say('중고 구매 — <b>'+label(t)+'</b> 15,000원에 확보');
-  render(); if(owned()===N)complete();};
-document.getElementById('breset').onclick=function(){
-  if(auto){clearInterval(auto);auto=null;document.getElementById('bauto').textContent='자동 완성';}
-  counts=new Array(N).fill(0); pulls=0; spent=0; trades=0; buys=0;
-  document.getElementById('result').hidden=true;
-  setImg(hero,27); tag.textContent='READY'; tag.style.color='#f5b23a'; tag2.textContent='빵을 뜯어 보십시오';
-  log.innerHTML=''; render();};
+// 포토카드 뽑기 시뮬레이터(tools/gacha.js)가 405빵 뽑기를 만들 때 쓰는 카드 데이터.
+// 시뮬레이터 코드는 gacha.js 로 옮겼고, 여기에는 컬렉션 북과 함께 쓰는 카드 데이터만 남아 있다.
+window.SG405={N:N, price:PRICE, used:USED, members:MEM, vper:VPER, mtotal:MTOTAL,
+  names:CNAME.slice(0,N), src:SRC.slice(0,N), cover:SRC[N], land:isLand, pix:isPix};
 
 
 // ================= 컬렉션(실물 기록) =================
@@ -1886,8 +1508,6 @@ goTab(true,true);
   upd();
 })();
 
-render(); showRec();
-say('27종은 멤버 5명 × 4종에 5인 스페셜 7종을 더한 구성입니다. 카드 1종당 확률은 1/27입니다.');
 })();
 </script>
 </body>

@@ -579,3 +579,32 @@ body.has-sfloat #totop{bottom:84px}
   #page-col[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
   #page-col[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
 }
+
+/* ===== 포토카드 뽑기 시뮬레이터: 뽑기 종류 선택 · 화면 전환 · 분석 (gacha.js) ===== */
+.gsel{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.gsel-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-bottom:10px;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--ink)}
+.gsel-h small{font-size:12px;font-weight:500;letter-spacing:0;color:var(--ink2)}
+.gsel-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.gsel-list .gopt{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:9px 14px;text-align:left;
+  background:rgba(255,255,255,.04);border-color:var(--line)!important;color:var(--ink2)}
+.gsel-list .gopt b{font-size:13.5px;font-weight:700;color:var(--ink)}
+.gsel-list .gopt small{font-size:11.5px;font-weight:500}
+.gsel-list .gopt.on{background:color-mix(in srgb,var(--pink) 16%,transparent);border-color:var(--pink)!important;color:var(--ink)}
+.gsel-info{margin:10px 0 0;font-size:12.5px;color:var(--ink2)}
+.gview{margin:0 0 12px}
+.gview button{font-size:13px;padding:7px 20px}
+.g-go{margin-top:12px;font-size:13px;padding:8px 14px}
+.anote .g-go{margin:0 2px;padding:4px 10px;font-size:12.5px}
+.ahead{margin:18px 0 8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+#g-ana > .ahead:first-child{margin-top:0}
+#g-ana .cmeta{margin:0}
+.anote{margin:0;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:13px;color:var(--ink2);line-height:1.7}
+.atab-w{overflow-x:auto;margin-top:8px}
+.atab{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+.atab th,.atab td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right}
+.atab th{font-weight:600;color:var(--ink2)}
+.atab td{font-family:"JetBrains Mono",monospace;color:var(--ink)}
+.atab th:first-child,.atab td:first-child,.atab th:nth-child(4),.atab td:nth-child(4){text-align:left}
+.atab td:nth-child(4){font-family:inherit}
+/* 표지나 카드 이미지가 없을 때: 카드 뒷면 무늬 */
+#hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}

@@ -1,6 +1,6 @@
 # 센둥이 시뮬레이터
 
-리센느 빵카드 뽑기 시뮬레이터 + 포토카드 컬렉션 북. GitHub Pages 사이트.
+리센느 포토카드 뽑기 시뮬레이터 + 포토카드 컬렉션 북. GitHub Pages 사이트.
 
 ## 저장소가 2개다 (중요)
 
@@ -54,11 +54,12 @@ cd $HOME\projects\scene-workspace;            git add -A; git commit -m "내용"
 node tools/build.js tools/source.html index.html
 ```
 
-- `tools/source.html` — 원본 시뮬레이터
+- `tools/source.html` — 원본 페이지 (405빵 카드 데이터 · 컬렉션 북)
 - `tools/theme.css` — 디자인
 - `tools/shell-top.html`, `tools/shell-bottom.html`, `tools/shell.js` — 사이드바·홈·메뉴
 - `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
-- `tools/collections.js` — 도감 설정 모음
+- `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
+- `tools/gacha.js` — 포토카드 뽑기 시뮬레이터. 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
 
 ## 커밋 신원
 
