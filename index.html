@@ -1827,6 +1827,14 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 }
 .sg-done{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:800;
   color:var(--mint-t);background:rgba(71,209,154,.14);border:1px solid rgba(71,209,154,.45);box-shadow:0 0 10px rgba(71,209,154,.18)}
+/* 100만 카드 막대: 돌파하는 주 다음부터 100% 가 된 주는 황금색 (이미 달성) */
+.wk i.wkgd{background:linear-gradient(180deg,#ffd76a,#e8a93a);box-shadow:0 0 6px rgba(255,200,80,.35)}
+.wk.big i.wkgd em{color:#ffd76a}
+.wk-lk{display:inline-flex;flex-wrap:wrap;justify-content:flex-end;gap:2px 10px}
+.wk-lg i.wkgd{background:#ffc84a;box-shadow:0 0 6px rgba(255,200,80,.6)}
+/* 펼친 줄: 단위·기간 버튼은 왼쪽에 고정, 안내 글은 오른쪽 (15분일 때만 기간 버튼이 생겨도 버튼 자리가 안 바뀌게) */
+.vt-hh .seg{margin-left:0}
+.vt-hh > span{margin-left:auto}
 
 </style>
 </head>
@@ -5637,11 +5645,11 @@ goTab(true,true);
   // 주차 막대: 그 주가 끝날 때까지 다음 100만까지 남은 조회수를 얼마나 채우는지 (100% = 돌파). 넘는 주를 강조
   function wkBars(v, p, m, big){
     var gap = m.M - p.V, wk = pubWeeks(v, p), mw = msWeek(v, m);
-    return (big ? '<span class="wk-lg"><span title="남은 조회수를 그 주가 끝날 때까지 몇 % 채우는지 (100 = 돌파)">주차별 진행률 (%)</span><span><i></i>돌파하는 주</span></span>' : '')
+    return (big ? '<span class="wk-lg"><span title="남은 조회수를 그 주가 끝날 때까지 몇 % 채우는지 (100 = 돌파)">주차별 진행률 (%)</span><span class="wk-lk"><span><i></i>돌파하는 주</span><span><i class="wkgd"></i>달성</span></span></span>' : '')
       + '<span class="wk' + (big ? ' big' : '') + '" role="img" aria-label="주차별 진행률 ' + wk.map(function(o){ return o.k + '주 차 ' + Math.min(100, Math.round((o.x - p.V) / gap * 100)) + '%'; }).join(', ') + '">'
       + wk.map(function(o){
           var f = Math.max(0, Math.min(1, (o.x - p.V) / gap));
-          return '<i class="' + (o.k === mw ? 'lw' : f >= 1 ? 'on' : '') + '" style="--h:' + Math.max(4, f * 100).toFixed(0) + '%" title="' + o.k + '주 차 끝(' + dday(v, o.d * 24) + ') ' + fmt(o.x) + ' (' + Math.round(f * 100) + '%)">'
+          return '<i class="' + (o.k === mw ? 'lw' : f >= 1 ? 'wkgd' : '') + '" style="--h:' + Math.max(4, f * 100).toFixed(0) + '%" title="' + o.k + '주 차 끝(' + dday(v, o.d * 24) + ') ' + fmt(o.x) + ' (' + Math.round(f * 100) + '%)">'
             + (big ? '<em>' + Math.round(f * 100) + '</em>' : '') + '</i>';
         }).join('') + '</span>'
       + (big ? '<span class="wk-x">' + wk.map(function(o){ return '<span>' + o.k + '주</span>'; }).join('') + '</span>' : '');

@@ -403,11 +403,11 @@
   // 주차 막대: 그 주가 끝날 때까지 다음 100만까지 남은 조회수를 얼마나 채우는지 (100% = 돌파). 넘는 주를 강조
   function wkBars(v, p, m, big){
     var gap = m.M - p.V, wk = pubWeeks(v, p), mw = msWeek(v, m);
-    return (big ? '<span class="wk-lg"><span title="남은 조회수를 그 주가 끝날 때까지 몇 % 채우는지 (100 = 돌파)">주차별 진행률 (%)</span><span><i></i>돌파하는 주</span></span>' : '')
+    return (big ? '<span class="wk-lg"><span title="남은 조회수를 그 주가 끝날 때까지 몇 % 채우는지 (100 = 돌파)">주차별 진행률 (%)</span><span class="wk-lk"><span><i></i>돌파하는 주</span><span><i class="wkgd"></i>달성</span></span></span>' : '')
       + '<span class="wk' + (big ? ' big' : '') + '" role="img" aria-label="주차별 진행률 ' + wk.map(function(o){ return o.k + '주 차 ' + Math.min(100, Math.round((o.x - p.V) / gap * 100)) + '%'; }).join(', ') + '">'
       + wk.map(function(o){
           var f = Math.max(0, Math.min(1, (o.x - p.V) / gap));
-          return '<i class="' + (o.k === mw ? 'lw' : f >= 1 ? 'on' : '') + '" style="--h:' + Math.max(4, f * 100).toFixed(0) + '%" title="' + o.k + '주 차 끝(' + dday(v, o.d * 24) + ') ' + fmt(o.x) + ' (' + Math.round(f * 100) + '%)">'
+          return '<i class="' + (o.k === mw ? 'lw' : f >= 1 ? 'wkgd' : '') + '" style="--h:' + Math.max(4, f * 100).toFixed(0) + '%" title="' + o.k + '주 차 끝(' + dday(v, o.d * 24) + ') ' + fmt(o.x) + ' (' + Math.round(f * 100) + '%)">'
             + (big ? '<em>' + Math.round(f * 100) + '</em>' : '') + '</i>';
         }).join('') + '</span>'
       + (big ? '<span class="wk-x">' + wk.map(function(o){ return '<span>' + o.k + '주</span>'; }).join('') + '</span>' : '');
