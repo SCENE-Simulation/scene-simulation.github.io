@@ -1126,7 +1126,7 @@
             + '<small>' + (s.n ? s.n + '개 영상에서 확인' : '아직 결과가 없습니다') + '</small></div>';
         }).join('') + '</div>';
     if (!tr.rows.length){ $('vs').innerHTML = h + '<p class="anote">아직 비교할 예측이 없습니다.</p>'; return; }
-    // 열: 영상 · ① 기준 시점(예측을 만든 때) 조회수 · ② 목표 시점 실제 조회수 · ③ 예측(종합, 누르면 방법별 3개) · ④ 오차
+    // 열: 영상 · ① 기준 당시(예측을 만든 때) 조회수 · ② 목표 시 실제 조회수 · ③ 예측(종합, 누르면 방법별 3개) · ④ 오차
     var row = function(r){
       var p = r.pr[3], x = r.res[3], base = at(r.v, tg.c, 1), open = !!SOPEN[r.v.id + '|' + si];
       var errCell = !r.done ? '<span class="vs-err vs-wait"><b>' + ageTxt(tg.T - age(r.v)) + '</b><small>뒤 채점</small></span>'
@@ -1149,12 +1149,13 @@
       return h1 + h2;
     };
     h += '<div class="atab-w"><table class="atab vs-tab"><thead><tr><th>영상</th>'
-      + '<th class="num">기준 시점<small>게시 ' + tg.from + ' 뒤</small></th>'
-      + '<th class="num">실제 조회수<small>게시 ' + tg.name + ' 뒤</small></th>'
-      + '<th class="num">예측<small>종합 · 눌러서 방법별</small></th>'
-      + '<th class="num">오차<small>예측 − 실제</small></th>'
+      + '<th class="num">기준 당시 조회수</th>'
+      + '<th class="num">목표 시 실제 조회수</th>'
+      + '<th class="num">예측</th>'
+      + '<th class="num">오차</th>'
       + '</tr></thead><tbody>' + tr.rows.slice(0, 15).map(row).join('') + '</tbody></table></div>'
-      + '<p class="gnote">기준 시점은 예측을 만든 때(게시 ' + tg.from + ' 뒤)의 조회수이고, 예측은 그때까지 있던 기록만으로 계산했습니다. '
+      + '<p class="gnote">기준 당시 조회수는 예측을 만든 때(게시 ' + tg.from + ' 뒤), 목표 시 실제 조회수는 게시 ' + tg.name + ' 뒤의 조회수입니다. '
+      + '예측은 기준 당시까지 있던 기록만으로 계산했고, 예측 값을 누르면 세 방법의 예측이 따로 나옵니다. '
       + '오차가 + 이면 실제보다 높게, − 이면 낮게 예측한 것입니다. ✓ 는 실제 조회수가 80% 범위 안에 들어온 경우입니다.</p>';
     $('vs').innerHTML = h;
   }
