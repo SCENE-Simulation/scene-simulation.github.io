@@ -903,6 +903,10 @@ document.getElementById('breset').onclick=function(){
 
 // ================= 컬렉션(실물 기록) =================
 var COL=new Array(N).fill(0), LG={buy:0,trade:0,used:0,uprice:15000,usedList:[]}, LOG=[];
+// STRK: 빵 구매 연속 기록. nodup 새 카드가 이어진 횟수, nosp 스페셜 없이 이어진 횟수, b* 는 최고 기록.
+// 저장할 때 netPend() 가 같은 카드 기록을 합쳐 구매 순서가 사라지므로 기록에서 다시 셀 수 없다.
+// 그래서 빵을 살 때마다 세고 저장 데이터에 함께 넣는다.
+var STRK={nodup:0,nosp:0,bNodup:0,bNosp:0};
 // PEND: 아직 저장하지 않은 변경, SAVED: 마지막으로 저장한 상태(JSON)
 var PEND=[], SAVED=null, savedAt=null;
 function usedWon(){var s=0;LG.usedList.forEach(function(u){s+=u.p;});return s;}
@@ -1183,55 +1187,65 @@ function cardRain(idx,n){
 }
 
 // ---------------- 업적
-// 이 컬렉션(CU 405빵 27종)에서만 얻는 칭호. c: 색, r: 단계(높을수록 화려함)
+// 이 컬렉션(CU 405빵 27종)에서만 얻는 칭호. c: 부문 색, r: 등급(TIER 참고, 높을수록 화려함)
+// 조건이 예전과 같은 칭호는 id를 그대로 둬서 이미 얻은 칭호가 이어지게 한다.
+var TIER=['','브론즈','실버','골드','플래티넘','특수'];
 var ACHDEF=[
   // 수집
   {id:'first',   n:'첫 장의 설렘',      d:'카드 1종 보유',                 c:'#55a1e7', r:1, t:function(c){return c.own>=1;}},
-  {id:'mem1',    n:'최애 한 세트',      d:'한 멤버의 4종 모두 수집',        c:'#55a1e7', r:2, t:function(c){return c.memberDone>=1;}},
+  {id:'own5',    n:'수집가의 시작',      d:'5종 보유',                     c:'#55a1e7', r:2, t:function(c){return c.own>=5;}},
   {id:'own14',   n:'절반의 수집가',      d:'14종 보유',                    c:'#55a1e7', r:2, t:function(c){return c.own>=14;}},
-  {id:'spAll',   n:'스페셜 컴플리트',    d:'스페셜 7종 모두 수집',           c:'#55a1e7', r:3, t:function(c){return c.spOwn>=c.spTotal;}},
-  {id:'own27',   n:'컴플리터',          d:'27종 전부 수집',                c:'#55a1e7', r:4, t:function(c){return c.own>=27;}},
-  // 빵 구매
-  {id:'buy10',   n:'빵 좀 먹을 줄 아는 사람', d:'빵 10개 구매',             c:'#ecd25b', r:1, t:function(c){return c.buy>=10;}},
-  {id:'buy50',   n:'빵집 단골',          d:'빵 50개 구매',                 c:'#ecd25b', r:2, t:function(c){return c.buy>=50;}},
-  {id:'buy105',  n:'기댓값의 사도',      d:'빵 105개 구매 · 이론 평균 도달',  c:'#ecd25b', r:3, t:function(c){return c.buy>=105;}},
-  {id:'buy200',  n:'확률의 순교자',      d:'빵 200개 구매',                c:'#ecd25b', r:4, t:function(c){return c.buy>=200;}},
-  // 지출
-  {id:'money10', n:'십만원의 벽',        d:'누적 지출 10만 원 돌파',         c:'#e09050', r:2, t:function(c){return c.money>=100000;}},
-  {id:'moneyAvg',n:'평균을 넘어선 자',   d:'누적 지출 262,500원 돌파 · 평균 컴플리트 비용', c:'#e09050', r:3, t:function(c){return c.money>=262500;}},
-  // 교환
-  {id:'tr1',     n:'첫 교환',            d:'교환 1회',                     c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
-  {id:'tr10',    n:'교환의 달인',        d:'교환 10회',                    c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
-  // 중고 구매
-  {id:'us1',     n:'당근 하세요?',       d:'중고 구매 첫 거래',              c:'#e96387', r:1, t:function(c){return c.used>=1;}},
-  {id:'us5',     n:'마음이 따듯하다는 증거', d:'중고 구매 5회',              c:'#e96387', r:2, t:function(c){return c.used>=5;}},
-  {id:'us10',    n:'마음이 너무 따듯하다는 증거', d:'중고 구매 10회',        c:'#e96387', r:3, t:function(c){return c.used>=10;}},
-  // 중복
-  {id:'dup6',    n:'중복 지옥',          d:'같은 카드 6장 보유',             c:'#a080d0', r:2, t:function(c){return c.maxDup>=6;}},
-  {id:'dup10',   n:'중복의 군주',        d:'같은 카드 10장 보유',            c:'#a080d0', r:3, t:function(c){return c.maxDup>=10;}},
-  // 효율
-  {id:'thrifty', n:'알뜰 컴플리터',      d:'20만 원 이하로 27종 완성',       c:'#f6b93c', r:4, t:function(c){return c.own>=27&&c.money<=200000;}}
+  {id:'mem1',    n:'최애 한 세트',      d:'한 멤버 4종 수집',               c:'#55a1e7', r:3, t:function(c){return c.memberDone>=1;}},
+  {id:'memAll1', n:'회전문 회오리',      d:'각 멤버 1종씩 수집',             c:'#55a1e7', r:3, t:function(c){return c.memMin>=1;}},
+  {id:'spAll',   n:'스페셜한 사람',      d:'스페셜 7종 모두 수집',           c:'#55a1e7', r:3, t:function(c){return c.spOwn>=c.spTotal;}},
+  {id:'memAll3', n:'센둥이가 3배',       d:'각 멤버 3종씩 수집',             c:'#55a1e7', r:4, t:function(c){return c.memMin>=3;}},
+  {id:'own27',   n:'마스터 컴플리터',    d:'27종 전부 수집',                c:'#55a1e7', r:4, t:function(c){return c.own>=27;}},
+  // 소비 및 재화
+  {id:'buy10',   n:'CU가 빵집이던가',    d:'빵 10개 구매',                  c:'#ecd25b', r:1, t:function(c){return c.buy>=10;}},
+  {id:'money10', n:'어 형은 부자야',     d:'누적 지출 10만 원',              c:'#ecd25b', r:1, t:function(c){return c.money>=100000;}},
+  {id:'nodup7',  n:'확률의 사도',        d:'빵 7개 연속 구매 중 중복 없음',   c:'#ecd25b', r:2, t:function(c){return c.nodup>=7;}},
+  {id:'buy20',   n:'빵최몇',            d:'빵 20개 구매',                  c:'#ecd25b', r:3, t:function(c){return c.buy>=20;}},
+  {id:'moneyAvg',n:'가성비의 영역',      d:'누적 지출 262,500원',            c:'#ecd25b', r:3, t:function(c){return c.money>=262500;}},
+  {id:'buy30',   n:'당뇨병 주의',        d:'빵 30개 구매',                  c:'#ecd25b', r:4, t:function(c){return c.buy>=30;}},
+  // 거래 및 커뮤니티
+  {id:'us1',     n:'혹시... 당근?',      d:'중고 구매 첫 거래',              c:'#47d19a', r:1, t:function(c){return c.used>=1;}},
+  {id:'tr1',     n:'나눔인줄 아셨어요?',  d:'첫 교환',                      c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
+  {id:'us5',     n:'당근이 체질',        d:'중고 구매 5회',                  c:'#47d19a', r:2, t:function(c){return c.used>=5;}},
+  {id:'tr5',     n:'교환의 고수',        d:'교환 5회',                      c:'#47d19a', r:2, t:function(c){return c.trade>=5;}},
+  {id:'tr10',    n:'이 구역의 보부상',    d:'교환 10회',                     c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
+  // 'us15' 는 예전 버전이 쓰던 키라 겹치지 않게 새 id를 쓴다
+  {id:'used15',  n:'평화로운 중고나라',   d:'중고 거래 누적 15회',            c:'#47d19a', r:4, t:function(c){return c.used>=15;}},
+  {id:'tr15',    n:'지역 환전 NPC',      d:'교환 누적 15회',                 c:'#47d19a', r:4, t:function(c){return c.trade>=15;}},
+  // 히든 및 기믹 — 얻기 전에는 조건을 가린다
+  {id:'dup6',    n:'또 너야?',           d:'같은 카드 6장',                  c:'#a080d0', r:5, t:function(c){return c.maxDup>=6;}},
+  {id:'dup10',   n:'아 복사버그 ㅡㅡ',    d:'같은 카드 10장',                 c:'#a080d0', r:5, t:function(c){return c.maxDup>=10;}},
+  {id:'thrifty', n:'확율의 여신의 사도의 운', d:'20만 원 이하로 27종 완성',     c:'#a080d0', r:5, t:function(c){return c.own>=27&&c.money<=200000;}},
+  {id:'nosp20',  n:'이거 모두 같은 확률인거 아시죠?', d:'연속 20회 스페셜 카드 미출현', c:'#a080d0', r:5, t:function(c){return c.nosp>=20;}}
 ];
 
 function achCtx(){
-  var own=0,maxDup=0,spOwn=0,memberDone=0;
+  var own=0,maxDup=0,spOwn=0,memberDone=0,memMin=VPER;
   for(var i=0;i<N;i++){ if(COL[i]>0)own++; if(COL[i]>maxDup)maxDup=COL[i]; }
   for(var s2=MTOTAL;s2<N;s2++) if(COL[s2]>0) spOwn++;
+  // memMin: 가장 적게 모은 멤버가 가진 종 수(각 멤버 n종씩 조건에 씀)
   for(var m=0;m<MCOUNT;m++){
-    var full=true;
-    for(var v=0;v<VPER;v++) if(!COL[m*VPER+v]) full=false;
-    if(full) memberDone++;
+    var has=0;
+    for(var v=0;v<VPER;v++) if(COL[m*VPER+v]) has++;
+    if(has===VPER) memberDone++;
+    if(has<memMin) memMin=has;
   }
   return {buy:LG.buy,trade:LG.trade,used:LG.used,own:own,maxDup:maxDup,
-          money:totalWon(),spOwn:spOwn,spTotal:N-MTOTAL,memberDone:memberDone};
+          money:totalWon(),spOwn:spOwn,spTotal:N-MTOTAL,memberDone:memberDone,memMin:memMin,
+          nodup:STRK.bNodup,nosp:STRK.bNosp};
 }
 function achRender(){
   var box=document.getElementById('c-badges'); if(!box)return;
   var got=ACHDEF.filter(function(a){return ACH[a.id];});
   var cnt=document.getElementById('c-ach-n'); if(cnt)cnt.textContent=got.length+' / '+ACHDEF.length;
   function badge(a,lock){
-    return '<span class="bdg'+(lock?' lock':'')+'" data-r="'+(a.r||1)+'" style="--bc:'+a.c+'" title="'+a.n+' · '+a.d+'">'
-      +'<span class="em"><i>'+(lock?'✧':'✦')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+a.d+'</small></span></span>';
+    var r=a.r||1, d=(lock&&r===5)?'???':a.d;   // 특수(히든)는 얻기 전까지 조건을 가린다
+    return '<span class="bdg'+(lock?' lock':'')+(r===5?' holo':'')+'" data-r="'+r+'" style="--bc:'+a.c+'" title="['+TIER[r]+'] '+a.n+' · '+d+'">'
+      +'<span class="em"><i>'+(lock?'✧':'✦')+'</i></span><span class="bt"><b>'+a.n+'</b><small>'+d+'</small></span></span>';
   }
   box.innerHTML = got.length
     ? got.map(function(a){ return badge(a,false); }).join('')
@@ -1250,7 +1264,7 @@ function achAward(id,silent){
     if(id==='dup6'||id==='dup10'){
       var top=-1,tv=0;
       for(var i=0;i<N;i++) if(COL[i]>tv){tv=COL[i];top=i;}
-      if(top>=0) cardRain(top,14);
+      if(top>=0) cardRain(top,id==='dup10'?42:14);   // 복사버그는 카드 비를 세 배로 길게
     }
   }
 }
@@ -1581,6 +1595,16 @@ function applyLoss(kind,idx,qty){
   achCheck(true);
 }
 
+// 빵 qty개에서 모두 idx 카드가 나왔을 때 연속 기록을 센다. prev: 사기 전 보유 수
+// 같은 카드를 여러 장 사면 두 번째부터는 중복이므로 nodup 이 끊긴다.
+function streakAdd(idx,prev,qty){
+  for(var u=0;u<qty;u++){
+    STRK.nodup=(prev+u===0)?STRK.nodup+1:0;
+    STRK.nosp=(idx<MTOTAL)?STRK.nosp+1:0;
+    if(STRK.nodup>STRK.bNodup) STRK.bNodup=STRK.nodup;
+    if(STRK.nosp>STRK.bNosp) STRK.bNosp=STRK.nosp;
+  }
+}
 function applyGain(kind,idx,qty,price){
   qty=Math.max(1,Math.min(99,qty||1));
   var w=0, eid=newId();
@@ -1590,6 +1614,7 @@ function applyGain(kind,idx,qty,price){
     LG.used=LG.usedList.length; w=p*qty;
   }else if(kind!=='adj'){ LG[kind]=Math.min(9999,LG[kind]+qty); if(kind==='buy') w=qty*PRICE; }
   var prev=COL[idx];
+  if(kind==='buy') streakAdd(idx,prev,qty);
   COL[idx]=Math.min(999,COL[idx]+qty);
   addLog(kind,idx,qty,w,eid);
   colRender(); colDirty();
@@ -1611,7 +1636,8 @@ function colSet(i,v){
 }
 function colSnap(){
   return {counts:COL.slice(),ledger:{buy:LG.buy,trade:LG.trade,used:LG.used,uprice:LG.uprice,usedList:LG.usedList.slice()},
-    log:LOG.slice(-200),ach:ACH,updated:new Date().toISOString()};
+    log:LOG.slice(-200),ach:ACH,
+    strk:{nodup:STRK.nodup,nosp:STRK.nosp,bNodup:STRK.bNodup,bNosp:STRK.bNosp},updated:new Date().toISOString()};
 }
 function colLoad(d){
   for(var i=0;i<N;i++)COL[i]=(d&&d.counts&&d.counts[i])||0;
@@ -1626,10 +1652,15 @@ function colLoad(d){
   LOG=(d&&d.log)?d.log.slice(-200):[];
   LOG.forEach(function(e,n){ if(!e.id) e.id='L'+n+'_'+e.t; });
   ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
+  var sk=(d&&d.strk)||{};   // 예전 기록에는 없으므로 0부터 센다
+  STRK={nodup:sk.nodup||0,nosp:sk.nosp||0,bNodup:sk.bNodup||0,bNosp:sk.bNosp||0};
   // 예전 칭호 → 새 칭호
   if(ACH.money&&!ACH.money10) ACH.money10=ACH.money;
   if(ACH.tr3&&!ACH.tr1) ACH.tr1=ACH.tr3;
   if(ACH.us15&&!ACH.us10) ACH.us10=ACH.us15;
+  // 없어진 빵 50·105·200개 칭호를 얻었다면 새 빵 20·30개 칭호도 이미 넘긴 것
+  var bigBuy=ACH.buy50||ACH.buy105||ACH.buy200;
+  if(bigBuy){ if(!ACH.buy20) ACH.buy20=bigBuy; if(!ACH.buy30) ACH.buy30=bigBuy; }
 }
 function colDirty(){ colStatus(); }
 function colStatus(){
@@ -1796,6 +1827,7 @@ numFmt(document.getElementById('c-uprice'),function(v){ setUprice(v); });
 document.getElementById('c-reset').onclick=function(){
   for(var i=0;i<N;i++)COL[i]=0;
   LG.buy=0; LG.trade=0; LG.used=0; LG.usedList=[]; LOG=[]; ACH={}; allCelebrated=false;
+  STRK={nodup:0,nosp:0,bNodup:0,bNosp:0};
   PEND.push({t:Date.now(),k:'reset',i:null,d:0,w:0});
   logRender(); achRender(); colRender(); colDirty();
 };
