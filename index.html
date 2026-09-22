@@ -1300,18 +1300,23 @@ body.has-sfloat #totop{bottom:84px}
 .vd-play svg{width:24px;height:24px;margin-left:3px}
 a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:10px}
-/* 다음 100만 단위 카운터 (아랫줄 두 칸). 숫자는 고정폭, 시간·분 글자는 Pretendard 작게 */
-.vd-ms{grid-column:span 2}
-.vd-ms b i{font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin:0 6px 0 2px}
+/* 다음 100만 단위 카운터 (아랫줄 두 칸, 황금색). 숫자는 고정폭, 시간·분 글자는 Pretendard 작게.
+   맨 아래는 지난 100만 → 다음 100만 사이를 10칸으로 나눈 통통한 막대 — 채운 만큼 황금색으로 켜진다 */
+.vd-ms{grid-column:span 2;border-color:rgba(236,210,91,.38)!important;background:linear-gradient(180deg,rgba(236,210,91,.11),rgba(236,210,91,.04))!important}
+.vd-ms .vd-sh span{color:var(--gold-t)}
+.vd-ms b{color:#f4dd72}
+.vd-ms b i{font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:rgba(244,221,114,.7);margin:0 6px 0 2px}
 .vd-ms b i:last-child{margin-right:0}
-.vd-ms .vd-sh em{background:rgba(91,180,236,.16);color:#8fd0f7}
-.vd-ms.soon{border-color:rgba(91,180,236,.5)!important;background:rgba(91,180,236,.07)!important}
-.vd-ms.soon b{color:#8fd0f7}
+.vd-ms small em{font-style:normal;font-weight:800;color:#f4dd72}
+.vd-ms.soon{border-color:rgba(236,210,91,.7)!important;box-shadow:0 0 0 1px rgba(236,210,91,.12),0 0 20px rgba(236,210,91,.14)}
+.vd-ms.na{border-color:var(--line)!important;background:rgba(255,255,255,.04)!important}
+.vd-ms.na .vd-sh span{color:var(--ink2)}
 .vd-ms.na b{font:800 17px/1.4 "Pretendard Variable",sans-serif;color:var(--ink2)}
-.vd-msg{position:relative;height:7px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
-.vd-msg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(91,180,236,.35),#5bb4ec)}
-.vd-msl{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 10.5px "JetBrains Mono",monospace;color:var(--dim)}
-.vd-msl b{font:700 11px "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.vd-msb{display:flex;align-items:center;gap:7px;font:600 10px "JetBrains Mono",monospace;color:var(--dim)}
+.vd-msg{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:3px;height:11px}
+.vd-msg i{display:block;border-radius:3px;background:rgba(255,255,255,.07)}
+.vd-msg i.on{background:linear-gradient(180deg,#f7e27a,#d4b232);box-shadow:0 0 7px rgba(236,210,91,.45)}
+.vd-msg i.part{background:linear-gradient(90deg,#e3c853 var(--p),rgba(255,255,255,.07) var(--p))}
 .vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
@@ -6266,14 +6271,18 @@ goTab(true,true);
   function msTile(v){
     var a = age(v), V = av(v, a), m = milestone(v), p = m.p, M0 = m.M - VE.MSTEP, f = Math.max(0, Math.min(1, (V - M0) / VE.MSTEP));
     var hd = '<div class="vd-sh"><span>다음 ' + fmtM(m.M) + '까지</span></div>';
-    var bar = '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + Math.round(f * 100) + '%"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
-      + '<div class="vd-msl"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span><b>' + fmt(m.M - V) + ' 남음</b><span>' + fmtM(m.M) + '</span></div>';
+    // 맨 아래: 지난 100만 단위 → 다음 100만 단위 사이를 10칸으로 나눠 채운 만큼 황금색으로 켠다 (진행 중인 칸은 그만큼만)
+    var lit = f * 10, segs = '';
+    for (var k = 0; k < 10; k++){ var pk = Math.max(0, Math.min(1, lit - k)); segs += '<i class="' + (pk >= 1 ? 'on' : pk > 0 ? 'part' : '') + '" style="--p:' + (pk * 100).toFixed(0) + '%"></i>'; }
+    var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + Math.round(f * 100) + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
+      + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + Math.round(f * 100) + '%">' + segs + '</div><span>' + fmtM(m.M) + '</span></div>';
+    var leftTxt = '<em>' + fmt(m.M - V) + '</em> 남음';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
       + '<b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>'
-      + '<small>' + ddayAP(v, m.h) + ' 무렵 ' + fmtM(m.M) + ' 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small>'
+      + '<small>' + leftTxt + ' · ' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small>'
       + '<div class="vd-sv">' + bar + '</div></div>';
   }
   function cntTxt(atMs){
