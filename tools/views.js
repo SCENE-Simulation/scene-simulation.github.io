@@ -605,13 +605,13 @@
     });
   }
   // 선 그래프 말풍선: PC는 마우스를 올리면, 모바일은 누르고 있는 동안(옆으로 밀면 따라감) 세로선 · 점 · 값
-  //   at(x: SVG 가로 좌표) → { x, y, color, html } | null
+  //   at(x, y: SVG 좌표) → { x, y, color, html } | null
   function lineTip(box, W, H, L, R, at){
     var svg = box.querySelector('svg'), tip = $('vd-tip'), cx = svg.querySelector('#vd-cx'), cd = svg.querySelector('#vd-cd');
     function hide(){ tip.hidden = true; cx.style.display = cd.style.display = 'none'; }
     function move(e){
-      var rc = svg.getBoundingClientRect(), bx = box.getBoundingClientRect(), x = (e.clientX - rc.left) * W / rc.width;
-      var o = x < L - 4 || x > W - R + 4 ? null : at(x);
+      var rc = svg.getBoundingClientRect(), bx = box.getBoundingClientRect(), x = (e.clientX - rc.left) * W / rc.width, y = (e.clientY - rc.top) * H / rc.height;
+      var o = x < L - 4 || x > W - R + 4 ? null : at(x, y);
       if (!o){ hide(); return; }
       cx.setAttribute('x1', o.x); cx.setAttribute('x2', o.x); cx.style.display = '';
       cd.setAttribute('cx', o.x); cd.setAttribute('cy', o.y); cd.setAttribute('fill', o.color); cd.style.display = '';
@@ -1231,16 +1231,14 @@
       var x = X(p.h);
       s += '<circle cx="' + x.toFixed(1) + '" cy="' + Y(p.act).toFixed(1) + '" r="5" fill="#fff" stroke="#ff4d4f" stroke-width="2.2"/>';
     });
-    // 다음 100만 단위 돌파 예상: 단위마다 돌파선 + 점 + 날짜. 첫 점(가장 가까운 단위)만 글자를 늘 보여 주고,
-    //   나머지는 점만 두고 글자는 마우스를 올리면(휴대폰은 누르면) 보인다 (.ms-pt)
+    // 다음 100만 단위 돌파 예상: 단위마다 돌파선 + 점. 첫 점(가장 가까운 단위)만 글자를 늘 보여 주고,
+    //   모든 점은 마우스를 올리면(휴대폰은 누르면) 말풍선에 돌파 예상 날짜·시각이 나온다 (아래 lineTip 의 msHit)
     mss.forEach(function(o, i){
-      var mx = X(o.h), my = Y(o.M), mr = mx > W - 130, op = i ? .75 : 1;
+      var mx = X(o.h), my = Y(o.M), mr = mx > W - 130;
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + my.toFixed(1) + '" y2="' + my.toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .22 : .45) + '" stroke-dasharray="6 5"/>'
         + '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + my.toFixed(1) + '" y2="' + (H - B) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .18 : .3) + '" stroke-dasharray="2 4"/>'
-        + (i ? '<g class="ms-pt"><circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="13" fill="transparent"/>' : '')
-        + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + LT.color + '" fill-opacity="' + op + '" stroke="#1c1c1e" stroke-width="2"/>'
-        + '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="' + (i ? 11 : 12) + '" font-weight="800" fill="' + LT.color + '">' + fmtM(o.M) + ' 돌파 · ' + ddayAP(v, o.d * 24) + '</text>'
-        + (i ? '</g>' : '');
+        + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + LT.color + '" fill-opacity="' + (i ? .75 : 1) + '" stroke="#1c1c1e" stroke-width="2"/>'
+        + (i ? '' : '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="12" font-weight="800" fill="' + LT.color + '">' + fmtM(o.M) + ' 돌파 · ' + ddayAP(v, o.d * 24) + '</text>');
     });
     if (!mss.length && ms.how === 'lt')
       s += '<text x="' + (W - R - 4) + '" y="' + (Tp - 12) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춤' : fmtM(ms.M) + ' 돌파는 60일 밖 (' + ddayAP(v, ms.h) + ')') + '</text>';
@@ -1267,7 +1265,18 @@
       }
       return null;
     }
-    lineTip(box, W, H, L, R, function(x){
+    // 100만 단위 점 가까이(14px 안)면 그 점의 말풍선: 게시 후 시간 · 돌파 예상 날짜와 시각 · 지금부터 얼마 뒤
+    function msHit(x, y){
+      var best = null, bd = 14;
+      mss.forEach(function(o){ var d = Math.max(Math.abs(X(o.h) - x), Math.abs(Y(o.M) - y)); if (d < bd){ bd = d; best = o; } });
+      if (!best) return null;
+      var t = v.pub + best.h * 3600e3;                                       // 날짜는 dday (이 함수 안에서 md 는 예측선 path 변수)
+      return { x: X(best.h), y: Y(best.M), color: LT.color,
+        html: '<b>게시 후 ' + ageTxt(best.h) + '</b><span>' + fmtM(best.M) + ' 돌파 예상 <em style="color:' + LT.color + '">' + dday(v, best.h - a) + ' ' + hm(t) + '</em></span>'
+          + '<small>지금부터 약 ' + etaHM(best.d) + ' 뒤 · 추세가 바뀌면 달라집니다</small>' };
+    }
+    lineTip(box, W, H, L, R, function(x, y){
+      var hit = msHit(x, y); if (hit) return hit;
       var h = Hx(x), val = valAt(h);
       if (!val) return null;
       var yv = val.act != null ? val.act : val.p;
