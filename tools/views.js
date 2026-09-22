@@ -245,7 +245,7 @@
       var pool = poolFor(v, tg.T, v.pub + t * 3600e3, t), pr = predictAll(v, t, tg.T, pool), m3 = VE.m3From(v);
       o.pool = pool.length;
       if (pr.some(Boolean)) o.pr = pr;
-      else o.err = !done && m3 > t && m3 < tg.T ? '기록이 조금 더 쌓이면(약 ' + ageTxt(m3 - t) + ' 뒤) ③ 추세 곡선 예측이 나옵니다'
+      else o.err = !done && m3 > t && m3 < tg.T ? '기록이 조금 더 쌓이면(약 ' + ageTxt(m3 - t) + ' 뒤) 추세 곡선 예측이 나옵니다'
         : '게시 직후부터 기록한 영상이 ' + MINPOOL + '개 이상 모이면 예측합니다 (지금 ' + pool.length + '개)';
     }
     return (PRED[key] = o);
@@ -588,10 +588,10 @@
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · ' + (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ') → ' + endTxt,
+    box.innerHTML = chHead('100만 단위 돌파 예상', (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ') → ' + endTxt,
         ['d', 'w'].map(function(k){ return '<button type="button" data-mu="' + k + '" class="' + (mu === k ? 'on' : '') + '" aria-selected="' + (mu === k) + '">' + MU[k].tab + '</button>'; }).join(''))
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
-      + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상 (1일 추세)</span>' : '')
+      + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
     // 말풍선: 지금까지는 실제, 그 뒤는 ④ 1일 추세 예상
     lineTip(box, W, H, L, R, function(x){
@@ -689,10 +689,10 @@
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
       + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
-      + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 ④ 1일 추세로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
+      + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 1일 추세법으로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 ④ 1일 추세로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
-      + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 ④ 1일 추세로 모은 탭입니다. 오른쪽 아래 추이는 ④로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
+      + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
+      + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -709,7 +709,7 @@
     $('vr-tb').innerHTML = '예측 조회수'; $('vr-msb').innerHTML = '100만 단위 돌파<b>' + n8 + '</b>';
     [['vr-tb', !ms], ['vr-msb', ms]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
     $('vr-cap').innerHTML = ms
-      ? '<b>다음 100만 단위</b>를 먼저 넘을 것으로 보이는 영상부터 보여 줍니다. 게시 15일이 지난 영상만 ④ 1일 추세로 계산합니다.'
+      ? '<b>다음 100만 단위</b>를 먼저 넘을 것으로 보이는 영상부터 보여 줍니다. 게시 15일이 지난 영상만 보여 줍니다.'
       : '최근 24시간 동안 조회수가 많이 오른 영상부터 보여 줍니다. <b>추이</b>는 채널 영상 중 순위에 따라 강함·중간·약함으로 나눕니다.';
     $('vc-wrap').hidden = ms; $('mb').hidden = !ms;
     if (ms){ renderBoard(B); return; }
@@ -749,7 +749,7 @@
     else foot = fmtM(x.M) + ' 달성 예상, <b>' + etaHM(x.eta) + ' 내</b>, <span class="mb-when">' + ddayAP(v, x.eta * 24) + ' 무렵</span>'
       + (ok ? '' : ' <span class="mb-far">8주 넘게</span>');
     // 아래 줄 오른쪽: 추이 (④ 1일 추세로 본 1주 증가가 게시 15일 지난 영상 중 몇 번째인지)
-    var tr = ltTrend(v), trTxt = !tr ? '' : '<span class="mb-tr ' + tr.lv.c + '" title="④ 1일 추세로 1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이'
+    var tr = ltTrend(v), trTxt = !tr ? '' : '<span class="mb-tr ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이'
       + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
@@ -1005,13 +1005,13 @@
   //   아래 막대는 지난 100만 단위 → 다음 100만 단위 사이 어디쯤인지
   function msTile(v){
     var a = age(v), V = av(v, a), m = milestone(v), p = m.p, M0 = m.M - VE.MSTEP, f = Math.max(0, Math.min(1, (V - M0) / VE.MSTEP));
-    var chip = '<em title="최근 하루 증가량과, 그 증가량이 하루마다 얼마나 줄어드는지로 다음 100만 단위까지 남은 시간을 셉니다 (게시 15일 전 영상은 참고용)">④ 1일 추세</em>', hd = '<div class="vd-sh"><span>다음 ' + fmtM(m.M) + '까지</span>' + chip + '</div>';
+    var hd = '<div class="vd-sh"><span>다음 ' + fmtM(m.M) + '까지</span></div>';
     var bar = '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + Math.round(f * 100) + '%"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
       + '<div class="vd-msl"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span><b>' + fmt(m.M - V) + ' 남음</b><span>' + fmtM(m.M) + '</span></div>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
-    if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세(최근 하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + ')로는 ' + fmtM(m.M) + ' 전에 멈춥니다</small><div class="vd-sv">' + bar + '</div></div>';
+    if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
-    return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + (p.src === 'data' ? '' : ' (기록 2일 전이라 지금 속도 그대로)') + '">' + hd
+    return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
       + '<b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>'
       + '<small>' + ddayAP(v, m.h) + ' 무렵 ' + fmtM(m.M) + ' 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small>'
       + '<div class="vd-sv">' + bar + '</div></div>';
@@ -1041,7 +1041,7 @@
       + trendTile(tr) + msTile(v)
       + '</div></div>'
       + '<div class="vd-pred' + (late(v) ? ' late' : '') + '" id="vd-pred"><div class="vd-ph">' + (late(v)
-        ? '<h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + LT.color + '"><i>' + LT.b + '</i>' + LT.name + ' · 게시 15일 뒤부터</span></div>'
+        ? '<h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + LT.color + '">게시 15일 뒤부터</span></div>'
         : '<h4>예측 현황</h4><div class="vd-mt" role="tablist" aria-label="예측 방법">'
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
@@ -1053,8 +1053,8 @@
 
   function msPill(v){
     var m = milestone(v); if (m.h == null) return '';
-    if (late(v)) return m.far ? '' : '<span class="vp-ms" title="④ 1일 추세 · ' + daysTxt(m.h / 24) + ' 안">' + fmtM(m.M) + ' 돌파 유력 · ' + msWeek(v, m.p.ms[0]) + '주 차</span>';
-    return '<span class="vp-ms" title="' + (m.how === 'lt' ? '④ 1일 추세 기준' : '종합 예측 곡선 기준') + '">' + fmtM(m.M) + ' 돌파 예상 · '
+    if (late(v)) return m.far ? '' : '<span class="vp-ms" title="' + daysTxt(m.h / 24) + ' 안">' + fmtM(m.M) + ' 돌파 유력 · ' + msWeek(v, m.p.ms[0]) + '주 차</span>';
+    return '<span class="vp-ms" title="' + (m.how === 'lt' ? '최근 추세 기준' : '종합 예측 곡선 기준') + '">' + fmtM(m.M) + ' 돌파 예상 · '
       + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</span>';
   }
 
@@ -1147,7 +1147,7 @@
     if (ok) return null;
     var m3 = VE.m3From(v), t3 = m3 > a ? '약 ' + ageTxt(m3 - a) + ' 뒤' : null;
     if (k === 2) return t3 ? t3 + ' 나옵니다' : '기록이 조금 더 쌓이면 나옵니다';
-    if (k === 3) return t3 ? '③이 나오는 ' + t3 + '부터' : '세 방법 중 하나라도 나오면';
+    if (k === 3) return t3 ? '추세 곡선 예측이 나오는 ' + t3 + '부터' : '세 방법 중 하나라도 나오면';
     return '수집 뒤 올라온 영상 ' + MINPOOL + '개가 모이면 (지금 ' + (pool || 0) + '개)';
   }
   function cumChart(){
@@ -1252,7 +1252,7 @@
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
       + (past.length ? '<span><i class="k-d"></i>예측 포인트</span>' : '')
-      + (mss.length ? '<span style="--mc:' + LT.color + '"><i class="k-ms"></i>100만 단위 돌파 예상 (④ 1일 추세)</span><small class="vd-kn">100만 단위 예상은 추세가 바뀌면 달라집니다</small>' : '')
+      + (mss.length ? '<span style="--mc:' + LT.color + '"><i class="k-ms"></i>100만 단위 돌파 예상</span><small class="vd-kn">100만 단위 예상은 추세가 바뀌면 달라집니다</small>' : '')
       + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
     function valAt(h){
