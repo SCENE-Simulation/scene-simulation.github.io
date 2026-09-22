@@ -1639,3 +1639,20 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vd-sc .vs-row{gap:8px}
 .vd-sc .vs-row > span{flex:0 0 auto;white-space:nowrap}
 .vd-sc .vs-row em{text-align:right}
+/* 카운터 칸: "N만 남음" 은 남은 시간 줄 오른쪽 끝에, 날짜는 그 아래 한 줄 (좁은 화면에서 맨 아랫줄이 잘리던 것) */
+.vd-msr .vd-msl{font-size:11.5px;color:var(--ink2)}
+.vd-msr .vd-msl em{font:800 14px "JetBrains Mono",monospace;font-style:normal;color:var(--au)}
+.vd-msr small{flex-basis:100%}
+/* 현황 칸: 추이 · 다음 100만 카운터를 위아래 2단(각각 한 줄 전체 폭)으로 — 좁은 칸에서 "추/이"처럼 꺾이거나 글자가 잘리지 않게.
+   넓어진 추이 칸은 [추이 ··· 1위 / 31편] / [강함 · 최근 24시간 +N ··· 약함|중간|강함] 두 줄 */
+.vd-stats{grid-template-rows:auto}
+.vd-stats > .vd-s:nth-child(4),.vd-stats > .vd-ms{grid-column:1/-1}
+.vd-stats > .vd-tr{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(120px,180px);grid-template-areas:"h h h" "b s m";align-items:center;column-gap:12px;row-gap:2px}
+.vd-stats > .vd-tr .vd-sh{grid-area:h}
+.vd-stats > .vd-tr > b{grid-area:b}
+.vd-stats > .vd-tr > small{grid-area:s}
+.vd-stats > .vd-tr .vd-trm{grid-area:m;margin-top:0}
+/* 현황 칸이 3줄로 높아져도 썸네일은 16:9 그대로(늘려 자르지 않음), 현황 칸 옆 가운데 */
+.vd-top > .vd-th{align-self:center}
+.vd-stats > .vd-tr{grid-template-columns:auto minmax(0,1fr) auto}
+.vd-stats > .vd-tr .vd-trm{width:clamp(104px,32vw,140px)}       /* 약함|중간|강함 막대: 좁은 화면(320px)에서 가운데 글자 칸을 누르지 않게 */

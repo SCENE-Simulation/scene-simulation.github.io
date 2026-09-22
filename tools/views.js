@@ -1044,16 +1044,16 @@
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
-    // 맨 아랫줄: 왼쪽에 최근 1시간 · 1일 증가, 오른쪽에 남은 조회수. 1시간 전 기록이 없으면 하루 증가 ÷ 24
+    // 맨 아랫줄: 최근 1시간 · 1일 증가 (1시간 전 기록이 없으면 하루 증가 ÷ 24). 남은 조회수는 윗줄 남은 시간 오른쪽에 (좁은 화면에서 잘리지 않게)
     var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 하루 동안 는 조회수">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em> · 1일 <em>+' + fmt(p.g) + '</em></span>';
-    var leftTxt = '<small class="vd-msn">' + rate + '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span></small>';
+    var leftTxt = '<small class="vd-msn">' + rate + '</small>', remain = '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
     if (!WAVE.raf) WAVE.raf = requestAnimationFrame(waveLoop);
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
-      // 줄 순서: [남은 시간 · 날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [N만 남음]
-      + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b><small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
+      // 줄 순서: [남은 시간 ········ N만 남음] / [날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [1시간 · 1일 증가]
+      + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>' + remain + '<small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
       + '<div class="vd-sv">' + bar + leftTxt + '</div></div>';
   }
   // 카운터 막대의 액체: SVG 로 그린다. 오른쪽 끝선은 사인파 두 개를 겹친 물결이고, waveLoop 가 매 프레임 위상을 옮겨 마루가 위아래로 흐른다.
