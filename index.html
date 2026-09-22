@@ -5870,9 +5870,11 @@ goTab(true,true);
     }
     var kNow = wkOf(a / 24), kEnd = kNow + WKN - 1;
     // 가로축: 100만 단위 추적을 시작하는 게시 15일 뒤가 왼쪽 끝(한 번 표시), 오른쪽은 1일 = 14일 뒤 · 1주 = 지금 주차부터 6개 주 끝.
-    //   시간이 갈수록 실제 선이 오른쪽으로 자라는 그래프. 눈금은 12개(실제 날짜). 기록이 없는 구간(수집 시작 전)은 빗금으로 "기록 없음"
+    //   시간이 갈수록 실제 선이 오른쪽으로 자라는 그래프. 눈금은 12개(실제 날짜).
+    //   수집 시작 전 구간(기록 없음)이 하루 넘게 길면 그 구간은 왼쪽 좁은 칸(GAPW)으로 접고 ⋯ 표시 — 시작점만 보이고 중간은 생략
     var s = VE.LATE, end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
-    var s0 = VE.since(v.vs), endTxt = mu === 'w' ? kEnd + '주 차 끝(' + md(v.pub + end * 3600e3) + ')' : md(v.pub + end * 3600e3);
+    var s0 = VE.since(v.vs), gapW = s0 > s + 24 ? 46 : 0, sB = gapW ? Math.max(s, s0 - 6) : s;      // sB: 접힌 칸 오른쪽 = 기록 시작 조금 앞
+    var endTxt = mu === 'w' ? kEnd + '주 차 끝(' + md(v.pub + end * 3600e3) + ')' : md(v.pub + end * 3600e3);
     var pts = v.vs.snaps.filter(function(q){ return q[0] > s + 1e-6 && q[0] <= a + 1e-6; }), sv = av(v, s);
     if (sv != null) pts.unshift([s, sv]);
     if (p){
@@ -5884,13 +5886,22 @@ goTab(true,true);
     var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), M1 = p && p.ms[0].M, showM1 = M1 && M1 <= y1 + (y1 - y0) * 0.35;
     if (showM1) y1 = Math.max(y1, M1);
     var pad = (y1 - y0) * 0.08 || y1 * 0.02; y0 = Math.max(0, y0 - pad); y1 += pad;
-    function X(h){ return L + (h - s) / (end - s) * (W - L - R); }
-    function Hx(x){ return s + Math.max(0, Math.min(1, (x - L) / (W - L - R))) * (end - s); }
+    // 가로 위치: 접힌 칸(s~sB)은 gapW 픽셀에, 나머지(sB~end)는 남은 폭에 고르게
+    var PW = W - L - R - gapW;
+    function X(h){ return h <= sB ? L + (gapW ? (h - s) / (sB - s) * gapW : 0) : L + gapW + (h - sB) / (end - sB) * PW; }
+    function Hx(x){ return x <= L + gapW ? (gapW ? s + Math.max(0, (x - L) / gapW) * (sB - s) : s) : sB + Math.max(0, Math.min(1, (x - L - gapW) / PW)) * (end - sB); }
     function Y(y){ return Tp + (1 - (y - y0) / (y1 - y0)) * (H - Tp - B); }
     var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + U.tab + ' 단위 100만 돌파 예상">'
       + '<defs><pattern id="vg-h3" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(255,255,255,.015)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,.07)" stroke-width="2"/></pattern></defs>';
-    // 수집을 시작하기 전 구간: 빗금 + "기록 없음"
-    if (s0 > s + 1e-6){
+    // 수집을 시작하기 전 구간: 접힌 칸이면 빗금 + ⋯ + 축 끊김 표시(//), 아니면 빗금 + "기록 없음"
+    if (gapW){
+      var gx = L + gapW;
+      svg += '<rect x="' + L + '" y="' + Tp + '" width="' + gapW + '" height="' + (H - Tp - B) + '" fill="url(#vg-h3)"/>'
+        + '<text x="' + (L + gapW / 2).toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="12" font-weight="800" fill="#8e8e93">⋯</text>'
+        + '<line x1="' + (gx - 4) + '" x2="' + (gx + 4) + '" y1="' + (H - B + 5) + '" y2="' + (H - B - 5) + '" stroke="#8e8e93" stroke-width="1.5"/>'
+        + '<line x1="' + (gx + 1) + '" x2="' + (gx + 9) + '" y1="' + (H - B + 5) + '" y2="' + (H - B - 5) + '" stroke="#8e8e93" stroke-width="1.5"/>'
+        + '<line x1="' + gx + '" x2="' + gx + '" y1="' + Tp + '" y2="' + (H - B - 6) + '" stroke="rgba(255,255,255,.12)" stroke-dasharray="3 4"/>';
+    } else if (s0 > s + 1e-6){
       var hx0 = X(s), hx1 = X(Math.min(s0, a)), hw = hx1 - hx0;
       svg += '<rect x="' + hx0.toFixed(1) + '" y="' + Tp + '" width="' + hw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="url(#vg-h3)"/>'
         + (hw > 120 ? '<text x="' + (hx0 + hw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 - 4).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#8e8e93">수집 시작 전 · 기록 없음</text>'
@@ -5904,9 +5915,9 @@ goTab(true,true);
     // 가로 눈금 12개: 게시 15일 뒤(왼쪽 끝)부터 끝까지 고르게, 실제 날짜. 앞으로의 날짜는 굵게. 왼쪽 끝은 "게시 15일 뒤"라고 한 번 적는다
     var NT = 12;
     for (var ti = 0; ti < NT; ti++){
-      var th = s + (end - s) * ti / (NT - 1), tx = X(th), tms = v.pub + th * 3600e3;
+      var th = gapW ? (ti ? sB + (end - sB) * (ti - 1) / (NT - 2) : s) : s + (end - s) * ti / (NT - 1), tx = X(th), tms = v.pub + th * 3600e3;
       svg += (ti && ti < NT - 1 ? '<line x1="' + tx.toFixed(1) + '" x2="' + tx.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.06)"/>' : '')
-        + '<text x="' + tx.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="' + (ti ? ti === NT - 1 ? 'end' : 'middle' : 'start') + '" font-size="10.5" font-weight="' + (th > a ? 700 : ti ? 500 : 700) + '" fill="' + (ti ? th > a ? '#aeaeb2' : '#8e8e93' : '#ff9e9a') + '">' + md(tms) + '</text>';
+        + '<text x="' + tx.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="' + (ti ? ti === NT - 1 ? 'end' : ti === 1 && gapW ? 'start' : 'middle' : 'start') + '" font-size="10.5" font-weight="' + (th > a ? 700 : ti ? 500 : 700) + '" fill="' + (ti ? th > a ? '#aeaeb2' : '#8e8e93' : '#ff9e9a') + '">' + md(tms) + '</text>';
     }
     svg += '<line x1="' + L + '" x2="' + L + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff9e9a" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<text x="' + (L + 4) + '" y="' + (Tp - 8) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">게시 15일 뒤부터</text>';
@@ -5932,7 +5943,7 @@ goTab(true,true);
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', '게시 15일 뒤(' + md(t0) + ') → ' + endTxt, msTabs())
+    box.innerHTML = chHead('100만 단위 돌파 예상', '게시 15일 뒤(' + md(t0) + ')' + (gapW ? ' ⋯ ' + md(v.pub + s0 * 3600e3) + '부터 기록' : '') + ' → ' + endTxt, msTabs())
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
