@@ -747,7 +747,9 @@
   }
   // 100만 단위 돌파 목록: 지난 100만 → 다음 100만 진행 막대, 넘는 때. 8주 안에 넘는 영상은 강조
   function renderBoard(B){
-    $('mb').innerHTML = '<div class="mb-sum"><span><b>' + B.length + '</b>편 · 게시 15일 지남 · 조회수 90만 이상</span><span><b>' + B.filter(in8).length + '</b>편 · 8주 안에 다음 100만 돌파 예상</span></div>'
+    // 요약: 7일 안 · 30일 안에 새 100만 단위를 달성할 것으로 보이는 영상 수
+    var within = function(d){ return B.filter(function(x){ return x.eta != null && x.eta <= d; }).length; };
+    $('mb').innerHTML = '<div class="mb-sum"><span><b>' + within(7) + '</b>편 · 7일 안에 새 100만 단위 달성 예상</span><span><b>' + within(30) + '</b>편 · 30일 안에 새 100만 단위 달성 예상</span></div>'
       + (B.length ? '<div class="mb-list">' + B.map(mbRow).join('') + '</div>' : '<p class="anote">게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 없습니다.</p>');
   }
   // 100만 단위 목록 한 줄
