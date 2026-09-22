@@ -511,7 +511,11 @@
   // 그래프(15일 뒤): 지금 구간의 100만 단위를 넘은 때부터 → 지금 → 앞으로 (④ 1일 추세). 가로 눈금은 [1일 | 1주]
   //   1일: 14일 뒤까지 · 1주: 게시일 기준 주차 칸, 지금 주차부터 WKN(6)개 주가 끝날 때까지.
   //   넘은 때가 기록 전이면(수집 전에 넘은 영상) 첫 기록부터
-  var mu = 'w', MU = { d: { tab: '1일', n: 14, step: 24, u: '일' }, w: { tab: '1주' } };
+  //   1시간: 예측 대신 최근 7일의 1시간 단위 증가 막대 (게시 15일 전 영상의 "1시간" 탭과 같은 barChart)
+  var mu = 'w', MU = { h: { tab: '1시간' }, d: { tab: '1일', n: 14, step: 24, u: '일' }, w: { tab: '1주' } };
+  function msTabs(){
+    return ['h', 'd', 'w'].map(function(k){ return '<button type="button" data-mu="' + k + '" class="' + (mu === k ? 'on' : '') + '" aria-selected="' + (mu === k) + '">' + MU[k].tab + '</button>'; }).join('');
+  }
   function msStart(v, a){
     var V = av(v, a), M0 = Math.floor(V / VE.MSTEP) * VE.MSTEP, s0 = VE.since(v.vs), sn = v.vs.snaps;
     if (!(M0 > 0)) return { h: s0, M: null };                                         // 아직 100만 전
@@ -525,6 +529,13 @@
   function msChart(){
     var v = sel, a = age(v), p = plan(v), box = $('vd-chart'), U = MU[mu];
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 24, B = 30;
+    if (mu === 'h'){
+      var HU = UNITS.h;
+      box.innerHTML = chHead('조회수 증가', HU.tab + ' 단위 · ' + HU.range, msTabs())
+        + '<div class="vt-hc">' + barChart(v, 'h', HU.span, W, 240) + '</div>'
+        + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
+      return;
+    }
     var kNow = wkOf(a / 24), kEnd = kNow + WKN - 1;
     var st = msStart(v, a), s = Math.min(st.h, a - 1), end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
     var endTxt = mu === 'w' ? kEnd + '주 차 끝' : U.n + U.u + ' 뒤';
@@ -589,7 +600,7 @@
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
     box.innerHTML = chHead('100만 단위 돌파 예상', (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ') → ' + endTxt,
-        ['d', 'w'].map(function(k){ return '<button type="button" data-mu="' + k + '" class="' + (mu === k ? 'on' : '') + '" aria-selected="' + (mu === k) + '">' + MU[k].tab + '</button>'; }).join(''))
+        msTabs())
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
@@ -1010,7 +1021,9 @@
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
-    var leftTxt = '<small class="vd-msn"><em>' + fmt(m.M - V) + '</em> 남음</small>';
+    // 맨 아랫줄: 왼쪽에 최근 1시간 · 1일 증가, 오른쪽에 남은 조회수. 1시간 전 기록이 없으면 하루 증가 ÷ 24
+    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 하루 동안 는 조회수"><i>1시간</i>+' + fmt(g1 != null ? g1 : p.g / 24) + '<i>1일</i>+' + fmt(p.g) + '</span>';
+    var leftTxt = '<small class="vd-msn">' + rate + '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span></small>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
