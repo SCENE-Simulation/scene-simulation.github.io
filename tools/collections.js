@@ -108,7 +108,10 @@
     modes: [{k:'buy', label:'피자 포장 주문', price:29520, random:true, hint:'프리미엄 피자(L) 1판 · 랜덤 1장'},
             {k:'trade', label:'교환', price:0},
             {k:'used', label:'중고 구매', var:true, price:15000}],
-    pkg: [],
+    // 패키징: 광고 사진 2장 (사용자 제공). 둘 다 세로인데 비율이 조금 달라 한 줄에 같은 높이로 (자르지 않음)
+    pkgRow: true,
+    pkg: [{src:'img/dmn2026/model.webp', size:[670,999], cap:'도미노 공식 모델 리센느'},
+          {src:'img/dmn2026/wonee-ad.webp', size:[640,884], cap:'도미노 광고 원이'}],
     // 관련 미디어: 사용자가 준 순서. 유튜브 주소는 공유 추적값(?si=)을 뺐고, 날짜는 한국 시간(업로드 2026-09-17 01:17 PDT = 17:17 KST)
     news: [{title:'[무슈스 x 리센느] 무슈스 함 무 보이소_사투리 ver.', src:'도미노피자 · YouTube', date:'2026.09.17', url:'https://youtu.be/9cJIVzT7YVY'},
            {title:'도미노피자 주문하고 리센느 포토카드 받자! 랜덤 증정 이벤트 💕', src:'도미노피자 공식 블로그', date:'2026.07.31', url:'https://blog.naver.com/dominostory/224362868903', kind:'이벤트'},

@@ -312,6 +312,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .pk img.fit{box-sizing:border-box;height:auto;object-fit:cover}
 /* 한 줄 나란히(pkgRow): 칸 폭을 이미지 비율대로 나눠(--pkc, collection.js) 높이를 맞춘다. 좁은 화면에서는 세로로 쌓는다 */
 .pk.row{grid-template-columns:var(--pkc);align-items:start}
+/* 한 줄의 높이는 최대 --pkh. 줄 폭을 "비율 합 × 높이 + 칸 사이"로 막아서, 사진이 적어도 한 장이 화면을 다 차지하지 않게 (넓으면 왼쪽 정렬) */
+.pk.row{--pkh:440px;max-width:calc(var(--pks,99) * var(--pkh) + var(--pkgap,0px))}
 @media (max-width:700px){.pk.row{grid-template-columns:1fr}}
 .pk-ph{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;
   border:1.5px dashed var(--line2);background:var(--glass);color:var(--dim)}

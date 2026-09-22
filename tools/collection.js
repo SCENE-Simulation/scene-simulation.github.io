@@ -284,7 +284,9 @@
         + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '"><svg class="xi"><use href="#i-log"/></svg>기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '>'
         + (cfg.pkgRow && pkg.length > 1 && pkg.every(pkRatio)
-           ? '<div class="pk row" style="--pkc:' + pkg.map(function(p){ return pkRatio(p).toFixed(4) + 'fr'; }).join(' ') + '">'
+           ? '<div class="pk row" style="--pkc:' + pkg.map(function(p){ return pkRatio(p).toFixed(4) + 'fr'; }).join(' ')
+             // 줄 폭 상한 = 비율 합 × 최대 높이 + 칸 사이 — 세로 사진 두어 장만 있어도 너무 커지지 않게 (theme.css --pkh)
+             + ';--pks:' + pkg.reduce(function(s, p){ return s + pkRatio(p); }, 0).toFixed(4) + ';--pkgap:' + (pkg.length - 1) * 10 + 'px">'
            : '<div class="pk">')
         + (pkg.length ? pkg.map(function(p){
               return '<figure' + (p.wide ? ' class="wide"' : '') + '>'
