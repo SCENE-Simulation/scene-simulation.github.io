@@ -81,6 +81,15 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .yr[open] summary .cv{transform:rotate(90deg)}
 .yr summary .bd{font-family:"Pretendard Variable",sans-serif}
 .yr .nv.sub{padding-left:36px}
+/* 컬렉션 북 메뉴 오른쪽 끝 "N월" 상자(출시 달) — shell.js 가 ym 으로 붙인다. 모든 포토카드 · 굿즈 컬렉션 북 메뉴의 규칙.
+   글자와 상자 사이 6px · 오른쪽 여백 6px · 상자 안쪽 4px → 가장 긴 이름(CU 리센느 405빵 콜라보, 133.5px)도 사이드바에 스크롤 막대가 있을 때(칸 165px) 한 줄.
+   더 길면 이름 끝이 "…"(두 줄로 꺾이지 않게) — 메뉴 이름은 짧게 짓는다 */
+.nv.sub:has(> .nv-mo){gap:6px;padding-right:6px}
+.nv.sub > .nv-t{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nv-mo{flex:none;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:18px;padding:0 4px;border-radius:5px;
+  font:600 10.5px/1 "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap;
+  color:var(--ink2);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.nv.on .nv-mo{color:var(--ink);background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
 .sb .ft{margin-top:auto;padding:12px 8px 0;font-size:11px;line-height:1.6;color:var(--dim)}
 .sb .ft b{color:var(--ink2);font-weight:600}
 

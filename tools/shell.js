@@ -156,6 +156,32 @@
     var lv = Math.max(1, Math.min(5, +card.getAttribute('data-lv') || 3));
     m.innerHTML = (ym ? '<span class="mchip"><svg><use href="#i-cal"/></svg>' + ym.split('-').slice(0, 2).join('.') + ' 출시</span>' : '') + bars(lv, DIFF[lv - 1]);
   });
+  // ===== 컬렉션 북 메뉴 오른쪽 끝 "N월" 상자 (출시 달) =====
+  // 규칙: 포토카드 · 굿즈 컬렉션 북의 모든 메뉴에 붙인다. 새 컬렉션을 만들면 출시 연-월(ym, 'YYYY-MM')을 꼭 채울 것.
+  //   405빵 = COLS.cu405.ym · 엔진 도감 = collections.js 의 cfg.ym · 굿즈 = 아래 GOODS_YM (탭 id → 'YYYY-MM'). ym 이 없으면 상자를 안 붙인다
+  //   상자는 달만("9월"). 메뉴가 속한 연도(2026 포카 등)와 출시 연도가 다르면 "25.12월"
+  var GOODS_YM = {
+    goods2026: '2026-09'   // 더현대 팝업 스토어 'Scent Archive' 2026.9.15~23 (텐아시아 2026.09.16)
+  };
+  (function(){
+    var ym = { cu405: COLS.cu405.ym };
+    Object.keys(GOODS_YM).forEach(function(k){ ym[k] = GOODS_YM[k]; });
+    (window.SGCOLS || []).forEach(function(c){ if (c.ym) ym[c.id] = c.ym; });
+    document.querySelectorAll('#grp-pc .nv.sub[data-tab], #grp-gd .nv.sub[data-tab]').forEach(function(a){
+      var p = String(ym[a.getAttribute('data-tab')] || '').split('-'), y = p[0], m = +p[1];
+      if (!m) return;
+      // 메뉴 이름은 span 으로 감싼다: 상자와 같이 들어가지 않을 만큼 길면 두 줄로 꺾이지 않고 끝이 "…" (theme.css .nv-t)
+      var txt = [].filter.call(a.childNodes, function(n){ return n.nodeType === 3 && n.nodeValue.trim(); });
+      if (txt.length) {
+        var s = document.createElement('span'); s.className = 'nv-t';
+        a.insertBefore(s, txt[0]); txt.forEach(function(n){ s.appendChild(n); });
+      }
+      var yr = a.closest('details.yr'), gy = yr ? (yr.querySelector('summary').textContent.match(/\d{4}/) || [''])[0] : '';
+      a.insertAdjacentHTML('beforeend', '<span class="nv-mo" title="' + y + '년 ' + m + '월 출시">' + (gy && gy !== y ? y.slice(2) + '.' : '') + m + '월</span>');
+      // 잘렸으면 마우스를 올려 전체 이름 (웹 글꼴이 들어온 뒤에 잰다 — 그 전엔 글자 폭이 다름)
+      if (s) (document.fonts && document.fonts.ready || Promise.resolve()).then(function(){ if (s.scrollWidth > s.clientWidth) a.title = s.textContent.trim(); });
+    });
+  })();
   document.querySelectorAll('.cmeta[data-col]').forEach(function(box){
     var x = info(box.getAttribute('data-col'));
     var html = '<div class="mt"><span class="mk">출시</span><b>' + x.ym + '</b><small>' + x.ymK + '</small></div>'
