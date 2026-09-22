@@ -908,17 +908,9 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msb{display:flex;align-items:center;gap:8px}
 .vd-msb > span{flex:none;font:800 12.5px "JetBrains Mono",monospace;color:var(--au);text-shadow:0 0 10px rgba(240,199,94,.35)}
 .vd-msg{flex:1;position:relative;height:26px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.vd-msg i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);border-radius:7px;overflow:hidden;
-  background:linear-gradient(180deg,var(--au) 0%,var(--au2) 50%,var(--au3) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 12px rgba(217,164,65,.4);animation:msFill 1s cubic-bezier(.2,.8,.2,1) both}
-.vd-msg i::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.22) 50%,transparent 100%);background-size:200% 100%;animation:msShine 2.6s linear infinite}
-/* 오른쪽 끝: 비슷한 황금 투톤이 서로 교차한다 (밝은 톤 ↔ 짙은 톤이 천천히 바뀜) */
-.vd-msg i::after{content:"";position:absolute;top:0;bottom:0;right:0;width:14px;border-radius:0 7px 7px 0;
-  background:linear-gradient(180deg,#f7dc8e 0%,#e2b04c 50%,#c48f2e 100%);animation:msTip 1.4s ease-in-out infinite alternate}
+/* 액체는 views.js 의 waveSvg/waveLoop 가 SVG 로 그린다 (오른쪽 끝이 물결). 여기서는 자리와 빛만 */
+.vd-msg svg{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 0 6px rgba(217,164,65,.45))}
 .vd-msg em{position:absolute;left:8px;top:0;bottom:0;z-index:1;display:flex;align-items:center;font:800 10.5px "JetBrains Mono",monospace;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px rgba(0,0,0,.6)}
-@keyframes msFill{from{width:0}}
-@keyframes msShine{from{background-position:150% 0}to{background-position:-150% 0}}
-@keyframes msTip{from{opacity:1}to{opacity:.25}}
-@media (prefers-reduced-motion:reduce){.vd-msg i,.vd-msg i::before,.vd-msg i::after{animation:none}}
 .vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}

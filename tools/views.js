@@ -1006,18 +1006,43 @@
   function msTile(v){
     var a = age(v), V = av(v, a), m = milestone(v), p = m.p, M0 = m.M - VE.MSTEP, f = Math.max(0, Math.min(1, (V - M0) / VE.MSTEP));
     var hd = '<div class="vd-sh"><span>다음 ' + fmtM(m.M) + '까지</span></div>';
-    // 맨 아래: 지난 100만 단위 → 다음 100만 단위 사이를 가로 막대 하나로. 채운 만큼 황금 액체가 왼쪽에서 차오른다 (CSS .vd-msg)
+    // 맨 아래: 지난 100만 단위 → 다음 100만 단위 사이를 가로 막대 하나로. 채운 만큼 황금 액체가 왼쪽에서 차오르고 오른쪽 끝은 물결 (waveSvg · waveLoop)
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
-      + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%"><i style="--p:' + (f * 100).toFixed(1) + '%"></i><em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
+      + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
     var leftTxt = '<small class="vd-msn"><em>' + fmt(m.M - V) + '</em> 남음</small>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
+    if (!WAVE.raf) WAVE.raf = requestAnimationFrame(waveLoop);
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
       // 줄 순서: [남은 시간 · 날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [N만 남음]
       + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b><small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
       + '<div class="vd-sv">' + bar + leftTxt + '</div></div>';
+  }
+  // 카운터 막대의 액체: SVG 로 그린다. 오른쪽 끝선은 사인파 두 개를 겹친 물결이고, waveLoop 가 매 프레임 위상을 옮겨 마루가 위아래로 흐른다.
+  //   처음 1초는 0 에서 채운 만큼까지 차오른다. 진폭도 천천히 숨 쉬듯 변한다. 움직임 줄이기 설정이면 멈춘 물결
+  var WAVE = { raf: 0, W: 200, H: 26 };
+  function waveSvg(f){
+    return '<svg id="vd-wave" viewBox="0 0 ' + WAVE.W + ' ' + WAVE.H + '" preserveAspectRatio="none" aria-hidden="true" data-f="' + f.toFixed(4) + '">'
+      + '<defs><linearGradient id="vd-wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0c75e"/><stop offset=".5" stop-color="#d9a441"/><stop offset="1" stop-color="#b07d26"/></linearGradient></defs>'
+      + '<path class="wf" fill="url(#vd-wg)" d="M0 0 L0 ' + WAVE.H + ' Z"/><path class="wl" fill="none" stroke="#f9e2a0" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke" d=""/></svg>';
+  }
+  function waveLoop(ts){
+    WAVE.raf = requestAnimationFrame(waveLoop);
+    var s = $('vd-wave'); if (!s || document.hidden || el.hidden) return;
+    if (!s._t0) s._t0 = ts;
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var W = WAVE.W, H = WAVE.H, f = +s.getAttribute('data-f'), t = ts / 1000;
+    var e = still ? 1 : Math.min(1, (ts - s._t0) / 1000), ease = 1 - Math.pow(1 - e, 3);            // 차오름 (1초, 끝에서 느려짐)
+    var x0 = f * W * ease, ph = still ? 0 : t * 2.4, A = f >= 0.999 ? 0 : 5 * (0.75 + 0.25 * Math.sin(t * 1.1));
+    var pts = [];
+    for (var y = 0; y <= H; y += 1){
+      var x = x0 + A * Math.sin(y / H * Math.PI * 2 - ph) + A * 0.45 * Math.sin(y / H * Math.PI * 4 + ph * 0.6);
+      pts.push(Math.max(0, Math.min(W, x)).toFixed(2) + ' ' + y);
+    }
+    s.firstElementChild.nextElementSibling.setAttribute('d', 'M0 0 L' + pts.join(' L') + ' L0 ' + H + ' Z');
+    s.lastElementChild.setAttribute('d', x0 > 0.5 ? 'M' + pts.join(' L') : '');
   }
   function cntTxt(atMs){
     var d = (atMs - Date.now()) / 864e5;
