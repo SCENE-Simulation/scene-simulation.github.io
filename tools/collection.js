@@ -11,6 +11,7 @@
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
+//   modes[].ach : 그 방식의 칭호를 직접 정함 [{at:횟수, n:칭호, d:한마디}] — 설명은 "<방식> N회 · 한마디". 없으면 첫걸음(1회)·단골(10회)
 (function(){
   var REG = window.SGCOLS = window.SGCOLS || [];
 
@@ -119,8 +120,12 @@
       }
       cfg.modes.forEach(function(m){
         if (m.k === 'adj') return;
-        list.push({ id:'m_' + m.k + '1', n:m.label + ' 첫걸음', d:m.label + ' 1회', c:m.badge || '#ecd25b', r:1, t:function(x){ return x.mode[m.k] >= 1; } });
-        list.push({ id:'m_' + m.k + '10', n:m.label + ' 단골', d:m.label + ' 10회', c:m.badge || '#ecd25b', r:2, t:function(x){ return x.mode[m.k] >= 10; } });
+        // 방식마다 칭호를 따로 정했으면(ach) 그걸 쓰고, 없으면 "첫걸음(1회) · 단골(10회)". id 는 둘 다 m_<k><횟수> 라 받은 칭호가 이어진다
+        var tiers = m.ach || [{ at:1, n:m.label + ' 첫걸음' }, { at:10, n:m.label + ' 단골' }];
+        tiers.forEach(function(a, i){
+          list.push({ id:'m_' + m.k + a.at, n:a.n, d:m.label + ' ' + a.at + '회' + (a.d ? ' · ' + a.d : ''), c:m.badge || '#ecd25b',
+            r:Math.min(4, i + 1), t:function(x){ return x.mode[m.k] >= a.at; } });
+        });
       });
       if (ex && ex.cost) {
         list.push({ id:'avg', n:'평균을 넘어선 자', d:'누적 지출 ' + won(ex.cost) + '원 돌파 · 평균 컴플리트 비용', c:'#e09050', r:3, t:function(x){ return x.money >= ex.cost; } });
