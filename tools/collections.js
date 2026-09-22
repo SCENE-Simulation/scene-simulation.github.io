@@ -16,7 +16,7 @@
   //   pkg: [], news: []
   // }
   {
-    id: 'hollys2026', title: 'HOLLYS 콜라보', year: '2026', diff: 3,
+    id: 'hollys2026', title: 'HOLLYS 콜라보', year: '2026', ym: '2026-08', diff: 3,          // 공식 이벤트 기간 2026.08.26 ~ 10.31
     desc: '커피 브랜드 할리스(HOLLYS)가 1998년 창사 이래 28년 만의 첫 브랜드 모델로 5인조 걸그룹 리센느(RESCENE)를 발탁하고 다양한 콜라보 프로모션을 진행하고 있습니다. 세트를 사면 포토카드 5종 중 1장이 랜덤으로 들어 있습니다.',
     parts: '멤버 5종',
     members: [{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}],
@@ -34,6 +34,11 @@
           {cap:'미나미의 냐미 냐미 세트', sub:'흑임자 라이스 할리치노 + 모과배차 · 13,500원 · 유일한 음료 2잔 구성'},
           {cap:'메이의 어메이징 세트', sub:'바닐라 딜라이트 + 흑임자 초코 롤케이크 · 13,500원'},
           {cap:'리브의 아이 리브 유 세트', sub:'흑임자 버터크림 라떼 + 티라미수 쏘스윗박스 · 13,500원'}],
-    news: []
+    // 관련 미디어: 유튜브 주소는 공유 추적값(?si=)을 뺐다
+    news: [{title:'리센느 세트 구매 시, 포토카드 랜덤 증정', src:'할리스 공식', date:'2026.08.26 ~ 10.31', url:'https://m.hollys.co.kr/news/eventView.do?idx=555', kind:'이벤트'},
+           {title:"\"28년 만에 첫 모델\"…할리스가 '리센느' 발탁한 진짜 이유", src:'한국경제', date:'2026.08.28', url:'https://www.hankyung.com/article/202608289743g'},
+           {title:'원이🌸 숲속에서 만난 호랑이의 정체는? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/0_1dV02TA3Y'},
+           {title:'임자를 찾아 헤매는 리브🌳 과연 진짜 임자를 찾았을까? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/-Y8mgIOHOVo'},
+           {title:'용궁에 간 토끼 메이🐰🌊 용궁공주 제나를 만나다! | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/Ku9gpeky_UU'}]
   }
 ].forEach(function(cfg){ window.SGCollection(cfg); });

@@ -96,7 +96,7 @@
 
   // ===== 컬렉션 정보: 출시 달 · 수집 난이도 =====
   // desc: 페이지 설명(홈 카드에도 그대로 표시), ym: 출시 연-월, types: 종류 수, price: 1개 가격
-  // pkg: 패키징 이미지 [{src, cap, wide?}] (wide: 한 줄 전체·원본 크기), news: 관련 기사 [{title, src(언론사), date, url}] — 비어 있으면 SOON
+  // pkg: 패키징 이미지 [{src, cap, wide?}] (wide: 한 줄 전체·원본 크기), news: 관련 미디어(기사·영상) [{title, src(언론사), date, url}] — 비어 있으면 SOON
   // diff: 수집 난이도(1~5). 비용과 판매 기간·물량 같은 조건을 함께 보고 운영자가 직접 정함
   var COLS = {
     cu405: {
@@ -158,7 +158,7 @@
       + '<div class="mt"><span class="mk">수집 난이도</span>' + bars(x.lv, x.t) + '<small>비용 · 구하기 종합 · 5단계 중 ' + x.lv + '</small></div>';
     box.innerHTML = html;
   });
-  // 패키징 보기 · 관련 기사 보기: 하나를 펼치면 다른 하나는 닫힘
+  // 패키징 보기 · 관련 미디어 보기: 하나를 펼치면 다른 하나는 닫힘
   function esc(s){
     return String(s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
@@ -173,13 +173,13 @@
             return '<figure' + (p.wide ? ' class="wide"' : '') + '><img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
               + (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>';
           }).join('') : soonBox('i-img', '패키징 이미지 준비 중')) + '</div>' },
-      { k: 'news', icon: 'i-news', label: '관련 기사 보기', n: news.length,
+      { k: 'news', icon: 'i-news', label: '관련 미디어 보기', n: news.length,
         body: news.length ? '<div class="nws">' + news.map(function(a){
             return '<a class="nw" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">'
               + '<span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
               + '<span class="nw-m">' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span>'
               + '<svg><use href="#i-ext"/></svg></a>';
-          }).join('') + '</div>' : '<div class="pk">' + soonBox('i-news', '관련 기사 준비 중') + '</div>' }
+          }).join('') + '</div>' : '<div class="pk">' + soonBox('i-news', '관련 미디어 준비 중') + '</div>' }
     ];
     x.innerHTML = '<div class="xt-bar">' + tabs.map(function(t){
         return '<button type="button" class="xt-b" data-x="' + t.k + '" aria-expanded="false">'

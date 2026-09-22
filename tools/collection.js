@@ -1,7 +1,8 @@
 // 포토카드 컬렉션 페이지 엔진
 // 설정(cfg) 하나로 도감 페이지 한 장을 통째로 만든다. CU 405빵 페이지(source.html)의 구성을 따른다.
 // cfg = { id, title, year, ym, diff, desc, members[{n,c}], cards[{n,img,m,land}],
-//         modes[{k,label,price,random,var,hint}], pkg[{src?,cap,sub?,wide?}], news[{title,src,date,url}] }
+//         modes[{k,label,price,random,var,hint}], pkg[{src?,cap,sub?,wide?}], news[{title,src,date,url,kind?}] }
+//   news[] : 관련 미디어. 유튜브 주소면 썸네일이 붙는다. kind 는 종류 칩 글자(없으면 영상/기사)
 //   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
@@ -15,6 +16,8 @@
   function when(t){ var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
   function newId(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
+  // 유튜브 주소에서 영상 id (youtu.be/ID · watch?v=ID · shorts/ID)
+  function ytId(u){ var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/)([\w-]{11})/.exec(u || ''); return m ? m[1] : null; }
 
   // 천 단위 쉼표 입력칸
   function numVal(inp){ var v = parseInt(String(inp.value).replace(/\D/g, ''), 10); return isNaN(v) ? 0 : v; }
@@ -233,7 +236,7 @@
         return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '">' + label
           + (cnt ? '<span class="xt-c">' + cnt + '</span>' : '<span class="xt-c soon">SOON</span>') + '<svg class="xv"><use href="#i-chev"/></svg></button>';
       }
-      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 기사 보기', news.length)
+      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 미디어 보기', news.length)
         + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '><div class="pk">'
         + (pkg.length ? pkg.map(function(p){
@@ -245,10 +248,14 @@
            : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div>') + '</div></div>';
       h += '<div class="xt-p" data-panel="news"' + (state.open === 'news' ? '' : ' hidden') + '>'
         + (news.length ? '<div class="nws">' + news.map(function(a){
-              return '<a class="nw" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer"><span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
-                + '<span class="nw-m">' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span><svg><use href="#i-ext"/></svg></a>';
+              // 유튜브 링크는 썸네일 + 재생 표시, 모든 항목에 종류 칩(kind 가 없으면 영상/기사로 자동)
+              var yt = ytId(a.url), kind = a.kind || (yt ? '영상' : '기사');
+              return '<a class="nw' + (yt ? ' vid' : '') + '" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">'
+                + (yt ? '<span class="nw-th"><img src="https://i.ytimg.com/vi/' + yt + '/mqdefault.jpg" alt="" loading="lazy"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></i></span>' : '')
+                + '<span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
+                + '<span class="nw-m"><i class="nw-k' + (yt ? ' v' : '') + '">' + esc(kind) + '</i>' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span><svg><use href="#i-ext"/></svg></a>';
             }).join('') + '</div>'
-           : '<div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg><span>관련 기사 준비 중</span><span class="chip">SOON</span></div></div>') + '</div>';
+           : '<div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg><span>관련 미디어 준비 중</span><span class="chip">SOON</span></div></div>') + '</div>';
       return h + logBox() + '</div>';
     }
     function grid(){
