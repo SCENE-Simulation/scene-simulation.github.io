@@ -6723,7 +6723,6 @@ goTab(true,true);
       var s = track(1).sum[k];
       return '<button type="button" class="vm" data-mi="' + k + '" style="--mc:' + m.color + '">'
         + '<span class="vm-h"><span class="vp-no">' + m.b + '</span><b>' + m.name + '</b></span>'
-        + '<span class="vm-d">' + m.desc + '</span>'
         + '<span class="vp-tags">' + m.uses.map(function(u){ return '<span>' + u + '</span>'; }).join('') + '</span>'
         + '<span class="vm-pc"><span class="p">' + m.pro + '</span><span class="c">' + m.con + '</span></span>'
         + '<span class="vm-acc">' + (s.n ? '7일 예측 ' + (s.hits ? '<b>적중 ' + pct(s.hit) + '</b> · ' : '') + '<b>오차 ' + pct(s.mape) + '</b>' : '7일 예측 기록 없음') + '<em>이 방법으로 보기 →</em></span>'
@@ -6732,7 +6731,6 @@ goTab(true,true);
       + (function(){
         var S = segAll().sum, any = S.some(function(x){ return x.n; });
         return '<div class="vm lt" style="--mc:' + LT.color + '"><span class="vm-h"><span class="vp-no">' + LT.b + '</span><b>' + LT.name + '</b><small>게시 15일 뒤부터</small></span>'
-          + '<span class="vm-d">' + LT.desc + '</span>'
           + '<span class="vp-tags">' + LT.uses.map(function(u){ return '<span>' + u + '</span>'; }).join('') + '</span>'
           + '<span class="vm-pc"><span class="p">' + LT.pro + '</span><span class="c">' + LT.con + '</span></span>'
           + '<span class="vm-acc">' + (any ? '구간 예측 평균 오차 ' + S.map(function(x, k){ return SEGS[k] + ' <b>' + (x.mape != null ? pct(x.mape) : '—') + '</b>'; }).join(' · ') : '100만 단위 구간 채점 결과 아직 없음') + '</span></div>';
