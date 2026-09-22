@@ -14,6 +14,8 @@
   //   title  메뉴 · 페이지 이름(짧게) / desc 페이지 설명 / card 홈 카드 설명(없으면 desc) / c 홈 카드 색
   //   items  상품 [{ id, name, price, parts(한 줄 설명), date(출시), img(이미지 주소) }] — 상품 id 는 보유 수량 · 위시리스트 저장 키라 바꾸지 않는다
   //   ratio  상품 그림 칸 비율 [가로, 세로] — 없으면 4:3. 사진 비율을 넣으면 잘리지 않는다(크림 티셔츠 셀카 399×501)
+  //   ach    칭호 [{ at: 보유 종류 수, n: 칭호, d?: 한마디, r?: 등급 1~4, c?: 색 }] — 있으면 페이지에 칭호 창(도감 페이지와 같은 모양).
+  //          설명은 "N종 보유 · 한마디"(마지막 단계는 "N종 전부 보유"). 지금 보유한 종류 수로 매번 계산한다(따로 저장하지 않음)
   //   news   관련 미디어 [{ title, src(언론사 · 채널), date, url, kind? }] — 있으면 페이지 위쪽에 "관련 미디어 보기" 토글(도감 페이지와 같은 모양).
   //          유튜브 주소면 썸네일이 붙고, 종류 칩은 kind(없으면 영상/기사). 공유 주소의 추적값(?si= 등)은 빼고 넣는다
   var GCOLS = [
@@ -31,6 +33,14 @@
       news: [{ title: '리센느 야-호★ 김씨네과일 야-호★', src: 'KREAM · YouTube', date: '2026.07.16', url: 'https://www.youtube.com/shorts/3SMQxQdPVJk' }],
       // 사진: 사용자 제공 멤버 셀카(각자 고향 티셔츠, 399×501). 티셔츠 글자로 짝을 확인함
       ratio: [399, 501],
+      // 칭호: 사용자 요청 "5장 구매에 따른 컬렉션을 1~5장 별로" → 보유 종류 1~5종. '야호'(산에서 외치는 소리 · 메아리)와 멤버 고향 순회를 엮음
+      ach: [
+        { at: 1, n: '첫 야호',         d: '산 정상에서 외치는 첫 한마디', r: 1 },
+        { at: 2, n: '야호 메아리',     d: '한 번 외치면 두 번 돌아온다', r: 1 },
+        { at: 3, n: '전국 야호 투어',  d: '반은 넘게 돌았다', r: 2 },
+        { at: 4, n: '야호 원정대',     d: '이제 한 곳만 남았다', r: 3 },
+        { at: 5, n: '야호 그랜드슬램', d: '거제 · 경주 · 수원 · 치바 · 고양 완주', r: 4 }
+      ],
       items: [
         { id: 'kream2026-geoje',    name: '거제 야호', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림', img: 'img/kream2026/geoje.jpg' },
         { id: 'kream2026-gyeongju', name: '경주 야호', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림', img: 'img/kream2026/gyeongju.jpg' },
@@ -183,9 +193,33 @@
          : '<div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg><span>관련 미디어 준비 중</span><span class="chip">SOON</span></div></div>')
       + '</div></div>';
   }
+  // 굿즈 칭호 창 (GCOLS 의 ach) — 도감 페이지 칭호 창(collection.js achBox · badge)과 같은 클래스라 모양이 같다.
+  // 받은 칭호 = 지금 보유한 종류 수가 at 이상인 것. "전체 보기" 펼침은 GACHALL 에 두어 다시 그려도 유지
+  var GACHALL = {};
+  function gOwnKinds(c){ return c.items.filter(function(g){ return GOWN[g.id] > 0; }).length; }
+  function gAchDefs(c){
+    var N = c.items.length;
+    return (c.ach || []).map(function(a, i){
+      return { at: a.at, n: a.n, r: a.r || Math.min(4, i + 1), c: a.c || '#55a1e7',
+        d: a.at + '종' + (a.at >= N ? ' 전부' : '') + ' 보유' + (a.d ? ' · ' + a.d : '') };
+    });
+  }
+  function gBadge(a, lock){
+    return '<span class="bdg' + (lock ? ' lock' : '') + '" data-r="' + a.r + '" style="--bc:' + a.c + '" title="' + esc(a.n) + ' · ' + esc(a.d) + '">'
+      + '<span class="em"><i>' + (lock ? '✧' : '✦') + '</i></span><span class="bt"><b>' + esc(a.n) + '</b><small>' + esc(a.d) + '</small></span></span>';
+  }
+  function goodsAch(c){
+    if (!c.ach) return '';
+    var defs = gAchDefs(c), own = gOwnKinds(c), got = defs.filter(function(a){ return own >= a.at; });
+    return '<div class="cach gd-ach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n">' + got.length + ' / ' + defs.length + '</span>'
+      + '<button type="button" class="cach-btn" data-gach="' + esc(c.id) + '" aria-expanded="' + !!GACHALL[c.id] + '">전체 보기</button></div>'
+      + '<div class="badges">' + (got.length ? got.map(function(a){ return gBadge(a, false); }).join('')
+          : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>') + '</div>'
+      + '<div class="badges all"' + (GACHALL[c.id] ? '' : ' hidden') + '>' + defs.map(function(a){ return gBadge(a, own < a.at); }).join('') + '</div></div>';
+  }
   function renderGoodsPage(c){
     elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
-      + goodsStats(c.items) + goodsNews(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items, c);
+      + goodsStats(c.items) + goodsNews(c) + goodsAch(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items, c);
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
@@ -391,11 +425,25 @@
       gx.closest('.xt').querySelector('.xt-p').hidden = !op;
       return;
     }
+    var ga = e.target.closest('[data-gach]');                  // 굿즈 칭호 "전체 보기" 펼치기 · 접기
+    if (ga) {
+      var aid = ga.getAttribute('data-gach');
+      GACHALL[aid] = !GACHALL[aid];
+      ga.setAttribute('aria-expanded', String(GACHALL[aid]));
+      ga.closest('.cach').querySelector('.badges.all').hidden = !GACHALL[aid];
+      return;
+    }
     var g = e.target.closest('[data-gd]');
     if (g) {
       var card = g.closest('[data-g]'), id = card.getAttribute('data-g'), d = +g.getAttribute('data-gd');
+      var gc = (goodsAll().filter(function(x){ return x.g.id === id; })[0] || {}).c, before = gc ? gOwnKinds(gc) : 0;
       GOWN[id] = Math.max(0, Math.min(99, (GOWN[id] || 0) + d));
       save(LS.goods, GOWN);
+      // 보유 종류가 늘어 칭호 단계를 넘으면 알림 (도감 페이지와 같은 toastSG)
+      if (gc && gc.ach && window.toastSG) {
+        var after = gOwnKinds(gc);
+        gAchDefs(gc).forEach(function(a){ if (before < a.at && after >= a.at) window.toastSG('칭호 획득 — ' + esc(a.n), esc(a.d)); });
+      }
       renderGoods(); renderAllGoods(); renderWish(); renderSum();
     }
   });
