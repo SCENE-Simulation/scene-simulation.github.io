@@ -2,3 +2,10 @@
 # Windows 의 core.autocrlf=true 가 체크아웃 때 CRLF 로 바꾸면 빌드가 깨지므로,
 # 어느 PC에서 clone 하든 작업트리를 LF 로 고정한다.
 * text=auto eol=lf
+
+# 이미지는 바이너리 (줄끝 변환 안 함)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary

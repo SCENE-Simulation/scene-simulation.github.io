@@ -96,13 +96,16 @@
 
   // ===== 컬렉션 정보: 출시 달 · 수집 난이도 =====
   // desc: 페이지 설명(홈 카드에도 그대로 표시), ym: 출시 연-월, types: 종류 수, price: 1개 가격
-  // pkg: 패키징 이미지 [{src, cap}], news: 관련 기사 [{title, src(언론사), date, url}] — 비어 있으면 SOON
+  // pkg: 패키징 이미지 [{src, cap, wide?}] (wide: 한 줄 전체·원본 크기), news: 관련 기사 [{title, src(언론사), date, url}] — 비어 있으면 SOON
   // diff: 수집 난이도(1~5). 비용과 판매 기간·물량 같은 조건을 함께 보고 운영자가 직접 정함
   var COLS = {
     cu405: {
       desc: 'CU의 PB 브랜드인 405베이커리와의 콜라보입니다. 리센느 멤버들의 피드백을 받아 출시한 빵으로, 빵을 사면 포토카드 27종 중 1장이 랜덤으로 들어 있습니다.',
       ym: '2026-09', types: 27, price: 2500, comp: '멤버 20종 + 스페셜 7종', diff: 4,
-      pkg: [],
+      pkg: [
+        // wide: 큰 가로 이미지 — 작은 칸 대신 한 줄 전체에 원본 크기 그대로 (칸보다 크면 칸 폭에 맞춤)
+        { src: 'img/cu405/pkg-sweet-scene.webp', cap: '리센느와 CU의 SWEET Scene! · 빵 5종 패키지', wide: true }
+      ],
       news: [
         { title: "CU, '리센느 빵' 출시 나흘 만에 10만개 판매", src: '연합뉴스', date: '2026.09.21', url: 'https://www.yna.co.kr/view/AKR20260921039400030' },
         { title: 'CU 리센느빵 출시일·가격·예약 방법은?', src: '위키푸디', date: '2026.09.17', url: 'https://www.wikifoodie.co.kr/news/articleView.html?idxno=14443' }
@@ -167,7 +170,7 @@
     var tabs = [
       { k: 'pkg', icon: 'i-box', label: '패키징 보기', n: pkg.length,
         body: '<div class="pk">' + (pkg.length ? pkg.map(function(p){
-            return '<figure><img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+            return '<figure' + (p.wide ? ' class="wide"' : '') + '><img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
               + (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>';
           }).join('') : soonBox('i-img', '패키징 이미지 준비 중')) + '</div>' },
       { k: 'news', icon: 'i-news', label: '관련 기사 보기', n: news.length,

@@ -63,6 +63,8 @@ node tools/build.js tools/source.html index.html
 - `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
 - `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석) + **뽑기 미니게임** 별도 페이지(`?tab=minigame`, `window.SGMINI` 를 pages.js 가 등록).
   뽑기 종류 선택은 두 페이지가 같이 쓴다. 405빵 카드 데이터는 `source.html` 이 `window.SG405` 로 넘겨준다
+- `img/` — index.html 에 넣지 않고 따로 두는 큰 이미지(예: `img/cu405/` 패키징 사진). 사이트가 상대 경로로 읽는다.
+  패키징·기사는 `shell.js` 의 `COLS.<id>.pkg` / `.news` 에 적는다 (큰 가로 이미지는 `wide: true` → 한 줄 전체·원본 크기)
 - `tools/views.js` — 조회수 예측기 화면. 기록이 비어 있으면 예시 데이터를 만들어 "예시"로 표시한다
 - `tools/views-engine.js` — 조회수 예측 계산식. 사이트와 수집기가 같이 쓴다 (브라우저 `window.VE`, Node `require`)
 
