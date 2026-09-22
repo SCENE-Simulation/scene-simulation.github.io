@@ -898,6 +898,7 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(91,180,236,.35),#5bb4ec)}
 .vd-msl{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 10.5px "JetBrains Mono",monospace;color:var(--dim)}
 .vd-msl b{font:700 11px "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .vd-sh{display:flex;align-items:center;justify-content:space-between;gap:6px}

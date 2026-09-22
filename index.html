@@ -1312,6 +1312,7 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(91,180,236,.35),#5bb4ec)}
 .vd-msl{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 10.5px "JetBrains Mono",monospace;color:var(--dim)}
 .vd-msl b{font:700 11px "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .vd-sh{display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -5847,7 +5848,7 @@ goTab(true,true);
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · ' + (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ')부터 → 지금 → ' + endTxt + ' · 마우스를 올리거나 누르면 수치',
+    box.innerHTML = chHead('100만 단위 돌파 예상', '④ 1일 추세 · ' + (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ') → ' + endTxt,
         ['d', 'w'].map(function(k){ return '<button type="button" data-mu="' + k + '" class="' + (mu === k ? 'on' : '') + '" aria-selected="' + (mu === k) + '">' + MU[k].tab + '</button>'; }).join(''))
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상 (1일 추세)</span>' : '')
@@ -6387,7 +6388,7 @@ goTab(true,true);
     if (late(sel)){ msChart(); return; }
     if (!UNITS[cm]){ cumChart(); return; }
     var U = UNITS[cm];
-    box.innerHTML = chHead('조회수 증가', U.range + ' · 막대 하나가 ' + U.per + ' 는 조회수 · 막대에 마우스를 올리거나 꾹 누르면 수치')
+    box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + U.range)
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
       + '<p class="gnote">기록 간격이 긴 구간은 그 사이를 고르게 나눠 그립니다. 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
@@ -6415,9 +6416,11 @@ goTab(true,true);
     var v = sel, m = ALLM[mi], a = age(v), box = $('vd-chart');
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 54, R = 22, Tp = 34, B = 34;
     var xmax = Math.max(720, a * 1.04);
-    // ④ 로 본 다음 100만 단위 돌파 시점 (현황 칸 카운터와 같은 값). 30일 밖이면 60일까지는 가로축을 늘려서 보여 준다
-    var ms = milestone(v), mh = ms.h != null && ms.how === 'lt' ? a + ms.h : null;
-    if (mh != null && mh > xmax){ if (mh <= 1440) xmax = mh * 1.06; else mh = null; }
+    // ④ 로 본 다음 100만 단위 세 개(예: 800만·900만·1,000만)의 돌파 시점 (첫 번째는 현황 칸 카운터와 같은 값).
+    //   60일 안에 드는 점까지 가로축을 늘려서 보여 준다. 하나도 안 들면 오른쪽 위에 한 줄
+    var ms = milestone(v), mss = ms.how === 'lt' ? ms.p.ms.filter(function(o){ return o.days != null && a + o.days * 24 <= 1440; })
+      .map(function(o){ return { M: o.M, h: a + o.days * 24, d: o.days }; }) : [];
+    if (mss.length) xmax = Math.max(xmax, mss[mss.length - 1].h * 1.06);
     function X(h){ return L + Math.sqrt(Math.max(0, h) / xmax) * (W - L - R); }
     function Hx(x){ var f = Math.max(0, Math.min(1, (x - L) / (W - L - R))); return f * f * xmax; }
     var V0 = at(v, a, 1), knots = [{ h: a, p: V0, lo: V0, hi: V0 }], past = [];
@@ -6430,8 +6433,8 @@ goTab(true,true);
     v.vs.snaps.forEach(function(s){ ymax = Math.max(ymax, s[1]); });
     knots.forEach(function(k){ ymax = Math.max(ymax, k.hi); });
     past.forEach(function(p){ ymax = Math.max(ymax, p.act, p.r ? (p.r.hi || p.r.p) : 0); });
-    if (mh != null) ymax = Math.max(ymax, ms.M);
-    var st = niceStep(ymax * 1.08 / 4), top = Math.ceil(ymax * 1.08 / st) * st;
+    mss.forEach(function(o){ ymax = Math.max(ymax, o.M); });
+    var st = niceStep(ymax * 1.08 / 5), top = Math.ceil(ymax * 1.08 / st) * st;      // 눈금 5칸쯤 → 100만 단위 점들이 덜 붙는다
     function Y(y){ return Tp + (1 - y / top) * (H - Tp - B); }
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="조회수 추이와 예측">'
       + '<defs><linearGradient id="vg-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff4d4f" stop-opacity=".38"/><stop offset="1" stop-color="#ff4d4f" stop-opacity="0"/></linearGradient>'
@@ -6490,28 +6493,28 @@ goTab(true,true);
       var x = X(p.h);
       s += '<circle cx="' + x.toFixed(1) + '" cy="' + Y(p.act).toFixed(1) + '" r="5" fill="#fff" stroke="#ff4d4f" stroke-width="2.2"/>';
     });
-    // 다음 100만 단위 돌파 예상 (④): 돌파선 + 점 + 날짜
-    if (mh != null){
-      var mx = X(mh), my = Y(ms.M), mr = mx > W - 130;
-      s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + my.toFixed(1) + '" y2="' + my.toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity=".45" stroke-dasharray="6 5"/>'
-        + '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + my.toFixed(1) + '" y2="' + (H - B) + '" stroke="' + LT.color + '" stroke-opacity=".3" stroke-dasharray="2 4"/>'
-        + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="5.5" fill="' + LT.color + '" stroke="#1c1c1e" stroke-width="2"/>'
-        + '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="12" font-weight="800" fill="' + LT.color + '">' + fmtM(ms.M) + ' 돌파 · ' + ddayAP(v, ms.h) + '</text>';
-    } else if (ms.how === 'lt') {
+    // 다음 100만 단위 돌파 예상 (④): 단위마다 돌파선 + 점 + 날짜. 첫 점만 진하게
+    mss.forEach(function(o, i){
+      var mx = X(o.h), my = Y(o.M), mr = mx > W - 130, op = i ? .75 : 1;
+      s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + my.toFixed(1) + '" y2="' + my.toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .22 : .45) + '" stroke-dasharray="6 5"/>'
+        + '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + my.toFixed(1) + '" y2="' + (H - B) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .18 : .3) + '" stroke-dasharray="2 4"/>'
+        + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + LT.color + '" fill-opacity="' + op + '" stroke="#1c1c1e" stroke-width="2"/>'
+        + '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="' + (i ? 11 : 12) + '" font-weight="800" fill="' + LT.color + '" fill-opacity="' + op + '">' + fmtM(o.M) + ' 돌파 · ' + ddayAP(v, o.d * 24) + '</text>';
+    });
+    if (!mss.length && ms.how === 'lt')
       s += '<text x="' + (W - R - 4) + '" y="' + (Tp - 12) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춤' : fmtM(ms.M) + ' 돌파는 60일 밖 (' + ddayAP(v, ms.h) + ')') + '</text>';
-    }
     // 지금
     s += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V0).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>';
     // 마우스 따라가는 선과 점
     s += '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('조회수 추이와 예측', m.tab + ' 기준 · 가로축은 게시 후 시간 (초반을 넓게 보는 눈금)')
+    box.innerHTML = chHead('조회수 추이와 예측', m.tab + ' 예측 · 게시 후 시간')
       + s + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
       + (past.length ? '<span><i class="k-d"></i>예측 포인트</span>' : '')
-      + (mh != null ? '<span style="--mc:' + LT.color + '"><i class="k-ms"></i>' + fmtM(ms.M) + ' 돌파 예상 (④ 1일 추세)</span>' : '')
+      + (mss.length ? '<span style="--mc:' + LT.color + '"><i class="k-ms"></i>100만 단위 돌파 예상 (④ 1일 추세)</span><small class="vd-kn">100만 단위 예상은 추세가 바뀌면 달라집니다</small>' : '')
       + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
     function valAt(h){
