@@ -6581,8 +6581,10 @@ goTab(true,true);
     var ms = milestone(v), mss = ms.how === 'lt' ? ms.p.ms.filter(function(o){ return o.days != null && a + o.days * 24 <= 1440; })
       .map(function(o){ return { M: o.M, h: a + o.days * 24, d: o.days }; }) : [];
     if (mss.length) xmax = Math.max(xmax, mss[mss.length - 1].h * 1.06);
-    function X(h){ return L + Math.sqrt(Math.max(0, h) / xmax) * (W - L - R); }
-    function Hx(x){ var f = Math.max(0, Math.min(1, (x - L) / (W - L - R))); return f * f * xmax; }
+    // 가로축: 게시(왼쪽 끝)부터. 수집 시작 전 구간(기록 없음)이 1시간 넘게 길면 좁은 칸(gapW)으로 접고 ⋯, 그 뒤는 기록 시작부터 초반을 넓게 보는 눈금(제곱근)
+    var s0 = VE.since(v), gapW = s0 > 1 ? 46 : 0, sB = gapW ? Math.max(0, s0 - 1) : 0, PW = W - L - R - gapW;
+    function X(h){ return h <= sB ? L + (gapW ? Math.max(0, h) / sB * gapW : 0) : L + gapW + Math.sqrt((h - sB) / (xmax - sB)) * PW; }
+    function Hx(x){ if (x <= L + gapW) return gapW ? Math.max(0, (x - L) / gapW) * sB : 0; var f = Math.max(0, Math.min(1, (x - L - gapW) / PW)); return sB + f * f * (xmax - sB); }
     var V0 = at(v, a, 1), knots = [{ h: a, p: V0, lo: V0, hi: V0 }], past = [];
     TARGETS.forEach(function(tg, k){
       var o = hz(v, k), r = o.pr ? o.pr[mi] : null;
@@ -6603,25 +6605,30 @@ goTab(true,true);
     for (var y = 0; y <= top + 1e-9; y += st)
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,' + (y ? .07 : .18) + ')"/>'
         + '<text x="' + (L - 8) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#8e8e93">' + fmt(y) + '</text>';
-    var lastX = -99;
-    [1, 6, 24, 72, 168, 336, 720, 1440, 2160, 2880, 4320, 8760, 17520, 26280, 35040, 43800].forEach(function(h){
-      if (h > xmax || X(h) - lastX < 42) return; lastX = X(h);
-      s += '<text x="' + X(h).toFixed(1) + '" y="' + (H - B + 19) + '" text-anchor="middle" font-size="11" fill="#8e8e93">' + hLab(h) + '</text>';
-    });
-    // 목표 시점 세로선
+    // 가로 눈금: 왼쪽 끝은 게시 날짜(빨강), 그 뒤는 자정마다 실제 날짜 (겹치면 건너뜀, 앞으로의 날짜는 굵게)
+    s += '<text x="' + L + '" y="' + (H - B + 19) + '" text-anchor="start" font-size="11" font-weight="700" fill="#ff9e9a">' + md(v.pub) + '</text>';
+    var lastX = L + 30, dt = new Date(v.pub + sB * 3600e3); dt.setHours(24, 0, 0, 0);
+    for (; dt.getTime() <= v.pub + xmax * 3600e3; dt.setDate(dt.getDate() + 1)){
+      var th = (dt.getTime() - v.pub) / 3600e3, tx = X(th);
+      if (tx - lastX < 40 || tx > W - R - 14) continue; lastX = tx;
+      s += '<text x="' + tx.toFixed(1) + '" y="' + (H - B + 19) + '" text-anchor="middle" font-size="11" font-weight="' + (th > a ? 700 : 500) + '" fill="' + (th > a ? '#aeaeb2' : '#8e8e93') + '">' + md(dt.getTime()) + '</text>';
+    }
+    // 목표 시점 세로선 (기록 시작 전에 지난 목표는 접힌 칸 안이라 생략)
     TARGETS.forEach(function(tg){
+      if (tg.T < sB) return;
       s += '<line x1="' + X(tg.T).toFixed(1) + '" x2="' + X(tg.T).toFixed(1) + '" y1="' + (Tp - 6) + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.14)" stroke-dasharray="3 5"/>'
         + '<text x="' + X(tg.T).toFixed(1) + '" y="' + (Tp - 12) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#aeaeb2">' + tg.name + '</text>';
     });
-    // 수집을 시작하기 전 구간 (기록 없음) — 빗금으로 표시
-    var sb = Math.min(VE.since(v), xmax);
-    if (sb > 0){
-      var bw = X(sb) - L;
-      s += '<rect x="' + L + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="url(#vg-h)"/>'
-        + (bw > 150 ? '<text x="' + (L + bw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 - 4).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#8e8e93">수집 시작 전 · 기록 없음</text>'
-          + '<text x="' + (L + bw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 + 14).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6e6e73">'
-          + (DATA.since ? when(Date.parse(DATA.since)) + '부터 기록 · ' : '') + '유튜브는 지난 기록을 주지 않습니다</text>' : '');
+    // 수집을 시작하기 전 구간(기록 없음)은 접힌 칸: 빗금 + ⋯ + 축 끊김 표시(//). 왼쪽 위에 게시 시각
+    if (gapW){
+      var gx = L + gapW;
+      s += '<rect x="' + L + '" y="' + Tp + '" width="' + gapW + '" height="' + (H - Tp - B) + '" fill="url(#vg-h)"/>'
+        + '<text x="' + (L + gapW / 2).toFixed(1) + '" y="' + (H - B + 19) + '" text-anchor="middle" font-size="12" font-weight="800" fill="#8e8e93">⋯</text>'
+        + '<line x1="' + (gx - 4) + '" x2="' + (gx + 4) + '" y1="' + (H - B + 5) + '" y2="' + (H - B - 5) + '" stroke="#8e8e93" stroke-width="1.5"/>'
+        + '<line x1="' + (gx + 1) + '" x2="' + (gx + 9) + '" y1="' + (H - B + 5) + '" y2="' + (H - B - 5) + '" stroke="#8e8e93" stroke-width="1.5"/>'
+        + '<line x1="' + gx + '" x2="' + gx + '" y1="' + Tp + '" y2="' + (H - B - 6) + '" stroke="rgba(255,255,255,.12)" stroke-dasharray="3 4"/>';
     }
+    s += '<text x="' + (L + 2) + '" y="' + (Tp - 12) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">게시 ' + when(v.pub) + '</text>';
     // 실제 추이 (면 + 선)
     var pts = v.vs.snaps.filter(function(p){ return p[0] <= xmax; }), s0 = VE.since(v);       // 15분 간격 값까지 써서 촘촘하게. 게시 직후 기록이 없으면 기록 시작점부터
     var line = s0 ? '' : 'M' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1);
@@ -6630,11 +6637,11 @@ goTab(true,true);
       + '<path d="' + line + '" fill="none" stroke="#ff4d4f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
     // 예측 부채꼴
     if (knots.length > 1){
-      var up = '', dn = '', md = '';
-      knots.forEach(function(k, i){ up += (i ? ' L' : 'M') + X(k.h).toFixed(1) + ' ' + Y(k.hi).toFixed(1); md += (i ? ' L' : 'M') + X(k.h).toFixed(1) + ' ' + Y(k.p).toFixed(1); });
+      var up = '', dn = '', mdp = '';
+      knots.forEach(function(k, i){ up += (i ? ' L' : 'M') + X(k.h).toFixed(1) + ' ' + Y(k.hi).toFixed(1); mdp += (i ? ' L' : 'M') + X(k.h).toFixed(1) + ' ' + Y(k.p).toFixed(1); });
       knots.slice().reverse().forEach(function(k){ dn += ' L' + X(k.h).toFixed(1) + ' ' + Y(k.lo).toFixed(1); });
       s += '<path d="' + up + dn + ' Z" fill="url(#vg-f)" stroke="' + m.color + '" stroke-opacity=".35" stroke-width="1"/>'
-        + '<path d="' + md + '" fill="none" stroke="' + m.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
+        + '<path d="' + mdp + '" fill="none" stroke="' + m.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
       knots.slice(1).forEach(function(k){
         var right = X(k.h) > W - 90;
         s += '<circle cx="' + X(k.h).toFixed(1) + '" cy="' + Y(k.p).toFixed(1) + '" r="5" fill="' + m.color + '" stroke="#1c1c1e" stroke-width="2"/>'
@@ -6666,11 +6673,12 @@ goTab(true,true);
       s += '<text x="' + (W - R - 4) + '" y="' + (Tp - 12) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춤' : fmtM(ms.M) + ' 돌파는 60일 밖 (' + ddayAP(v, ms.h) + ')') + '</text>';
     // 지금
     s += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
+      + '<text x="' + X(a).toFixed(1) + '" y="' + (Tp - 24) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff9e9a">지금</text>'
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V0).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>';
     // 마우스 따라가는 선과 점
     s += '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('조회수 추이와 예측', m.tab + ' 예측 · 게시 후 시간')
+    box.innerHTML = chHead('조회수 추이와 예측', m.tab + ' 예측 · 게시 ' + md(v.pub) + (gapW ? ' ⋯ ' + md(v.pub + s0 * 3600e3) + '부터 기록' : '') + ' → ' + md(v.pub + xmax * 3600e3))
       + s + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
       + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
