@@ -1499,7 +1499,16 @@ tabC.onclick=function(){
 goTab(true,true);
 (function(){
   var btn=document.getElementById('totop');
-  function upd(){btn.classList.toggle('show', (window.pageYOffset||document.documentElement.scrollTop)>260);}
+  // 휴대폰(하단 탭 바가 있는 폭)에서는 오른쪽 끝 버튼(+ 등)을 가리지 않게, 위로 스크롤할 때만 나타났다가 2.5초 멈추면 숨는다
+  //   방향은 마지막으로 판정한 위치(ancY)에서 8px 넘게 움직였을 때 정한다 (천천히 올리면 한 번에 1~3px 씩 와서)
+  var mob=window.matchMedia?window.matchMedia('(max-width:900px)'):null, ancY=window.pageYOffset||0, hideT=0;
+  function upd(){
+    var y=window.pageYOffset||document.documentElement.scrollTop, far=y>260, dy=y-ancY;
+    if(!mob||!mob.matches){ancY=y;btn.classList.toggle('show',far);return;}
+    if(!far){ancY=y;clearTimeout(hideT);btn.classList.remove('show');return;}
+    if(dy>8){ancY=y;clearTimeout(hideT);btn.classList.remove('show');}
+    else if(dy<-8){ancY=y;btn.classList.add('show');clearTimeout(hideT);hideT=setTimeout(function(){btn.classList.remove('show');},2500);}
+  }
   window.addEventListener('scroll',upd,{passive:true});
   btn.onclick=function(){
     var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;

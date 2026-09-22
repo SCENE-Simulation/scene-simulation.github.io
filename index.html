@@ -418,6 +418,7 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
   --bg:#1c1c1e; --main:#232325; --board:#2c2c2e; --slot:#3a3a3c; --slot2:#323234; --cell:#262628;
   --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.18); --shadow:rgba(0,0,0,.32);
   --ink:#e8e8ed; --ink2:#aeaeb2; --dim:#6e6e73; --cream:#e8e8ed; --btn-ink:#1c1c1e;
+  --ink3:#8e8e93;   /* ink2 와 dim 사이: 안내문·보조 라벨처럼 읽혀야 하는 흐린 글자 (dim 은 카드 위에서 명암비 2.7:1 로 너무 흐림) */
   --pink:#e96387; --pink-t:#f28aa7; --pink-d:#b8466a; --pink-soft:rgba(233,99,135,.16);
   --mint:#47d19a; --mint-t:#6fe0b3; --mint-d:#2c9d70; --mint-soft:rgba(71,209,154,.14);
   --gold:#ecd25b; --gold-t:#f1dc7c; --gold-d:#b89c2a; --gold-soft:rgba(236,210,91,.14);
@@ -516,6 +517,10 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .sec-t .lt{letter-spacing:0}
 .sec-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;letter-spacing:.05em;color:var(--ink)}
 .sec-t svg{width:16px;height:16px;color:var(--ink)}
+/* 경로(포카 컬렉션 북 › 2026 포카 › 제목)가 좁은 화면에 안 들어가면 낱말 중간이 아니라 › 자리에서 줄을 바꾼다.
+   마지막 제목(.lt)만 그 자체가 한 줄보다 길 때 띄어쓰기에서 꺾인다 */
+.sec-t:has(> .cr){flex-wrap:wrap;row-gap:2px;white-space:nowrap}
+.sec-t:has(> .cr) .lt{white-space:normal;word-break:keep-all}
 .sec-d{margin:0 0 18px;font-size:13.5px;line-height:1.65;color:var(--ink2);max-width:72ch}
 
 /* --- 원본 요소 다듬기 --- */
@@ -633,6 +638,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 /* 홈 정렬 버튼 */
 .seg{display:inline-flex;padding:3px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid var(--line)}
 .seg button{border:0!important;border-radius:7px!important;background:none;color:var(--ink2);font-size:12px;font-weight:600;padding:5px 11px}
+.sec2 > .seg button{white-space:nowrap}   /* 홈 정렬(최신순·난이도순): 좁은 화면에서 "최신/순" 으로 꺾이지 않게 */
 .seg button:hover:not(:disabled){background:rgba(255,255,255,.06)}
 .seg button.on{background:rgba(255,255,255,.12);color:var(--ink)}
 
@@ -961,7 +967,7 @@ body.has-sfloat #totop{bottom:84px}
 .gd-c button{width:34px;padding:6px 0;font-size:16px;line-height:1;text-align:center}
 .gd-c b{min-width:26px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink)}
 .pk-ph.tall{aspect-ratio:auto;padding:40px 20px;gap:6px}
-.pk-ph small{font-size:12px;color:var(--dim)}
+.pk-ph small{font-size:12px;color:var(--ink3)}
 
 /* ===== 통합 포토카드 ===== */
 .pcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
@@ -1007,7 +1013,7 @@ body.has-sfloat #totop{bottom:84px}
 /* 카드 크기 조절 */
 .colbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .colbar .cb-k{font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
-.colbar .cb-s{font-size:11.5px;color:var(--dim);white-space:nowrap}
+.colbar .cb-s{font-size:11.5px;color:var(--ink3);white-space:nowrap}
 .colbar b{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
 .colbar input[type=range]{flex:1;min-width:90px;height:26px;margin:0;padding:0;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:ew-resize}
 .colbar input[type=range]:focus-visible{outline:2px solid var(--lav-t);outline-offset:3px}
@@ -1033,6 +1039,20 @@ body.has-sfloat #totop{bottom:84px}
 .cbody.compact .shead b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cbody.compact .shead .pr{margin-left:auto;flex:none}
 @media (max-width:640px){.cbody.compact{--setw:104px;gap:8px}.cbody.compact .set{padding:8px}}
+
+/* 터치 화면: 높이 16~22px 인 작은 버튼은 모양·자리는 그대로 두고 누르는 영역만 위아래로 넓힌다 (투명한 ::after).
+   전체보기 "페이지 열기 →" · 405빵 중고 안내 · 조회수 예측기 그래프 단위 버튼 · 표 정렬 · "용어와 계산 방법" */
+@media (pointer:coarse){
+  .w-go,.uhint,.vd-ch .seg button,#v-views th > button,.vx-about > summary{position:relative}
+  .w-go::after,.uhint::after,#v-views th > button::after,.vx-about > summary::after{content:"";position:absolute;left:0;right:0;top:-9px;bottom:-9px}
+  .vd-ch .seg button::after{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+}
+
+/* 카드 이름이 칸보다 길면 두 줄까지 (예전엔 한 줄 말줄임이라 "14. 반하트 미나…"). 낱말 중간에서는 안 꺾는다.
+   이름이 두 줄인 칸이 섞여도 같은 줄의 +/- 는 칸 맨 아래로 맞춘다 */
+.ctile{display:flex;flex-direction:column}
+.ctile .nm{white-space:normal;word-break:keep-all;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.ctile .ctr{margin-top:auto}
 
 /* 카드가 작아지면 조작부도 작게 */
 :is(#page-col,.colpg)[data-cols="5"] .ctile,:is(#page-col,.colpg)[data-cols="6"] .ctile,:is(#page-col,.colpg)[data-cols="7"] .ctile,:is(#page-col,.colpg)[data-cols="8"] .ctile{padding:5px}
@@ -1071,6 +1091,9 @@ body.has-sfloat #totop{bottom:84px}
 .ahead{margin:18px 0 8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
 #g-ana > .ahead:first-child{margin-top:0}
 #g-ana .cmeta{margin:0}
+/* 좁은 화면의 전략별 총비용 범례 (그래프 안 오른쪽 아래 대신 그래프 아래 줄) */
+.glg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:-2px 0 8px;font-size:12px;font-weight:600}
+.glg i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 .anote{margin:0;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:13px;color:var(--ink2);line-height:1.7}
 .atab-w{overflow-x:auto;margin-top:8px}
 .atab{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
@@ -1095,7 +1118,8 @@ body.has-sfloat #totop{bottom:84px}
 .gp10{--g1:#ffe08a;--g2:#f3a93b;--gd:#b56f16;--gs:rgba(243,169,59,.3);color:#3d2500}
 .gp-l{display:flex;align-items:center;gap:7px;font-size:16.5px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
 .gp-l svg{width:19px;height:19px;flex:0 0 auto}
-.gp-s{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;opacity:.82}
+/* 숫자는 고정폭, 한글("위에서 뽑고 싶은 카드를…", "중복 2장")은 JetBrains Mono 에 글자가 없어 Pretendard 로 */
+.gp-s{font-family:"JetBrains Mono","Pretendard Variable",monospace;font-size:12px;font-weight:700;opacity:.82}
 .gp-x{position:absolute;top:7px;right:8px;padding:2px 7px;border-radius:999px;background:rgba(61,37,0,.16);font:800 10.5px "JetBrains Mono",monospace}
 /* 올려 두면 광택이 한 번 훑고 지나간다 */
 .gp::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -1109,7 +1133,7 @@ body.has-sfloat #totop{bottom:84px}
 .gs{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px!important;font-size:12.5px;font-weight:600;
   background:rgba(255,255,255,.05);border-color:var(--line)!important;color:var(--ink2)}
 .gs svg{width:14px;height:14px;flex:0 0 auto}
-.gs small{font:700 11px "JetBrains Mono",monospace;opacity:.75}
+.gs small{font:700 11px "JetBrains Mono","Pretendard Variable",monospace;opacity:.75}
 .gs:hover:not(:disabled){background:rgba(255,255,255,.11);color:var(--ink)}
 .gs-m{background:rgba(71,209,154,.08);border-color:rgba(71,209,154,.3)!important;color:var(--mint-t)}
 .gs-m:hover:not(:disabled){background:rgba(71,209,154,.18);color:var(--mint-t)}
@@ -1366,8 +1390,12 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-sh em{padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;font-style:normal;white-space:nowrap;background:rgba(255,255,255,.07);color:var(--ink2)}
 .vd-sh em.up{background:rgba(71,209,154,.15);color:var(--mint-t)}
 .vd-s b{font:700 21px/1.2 "JetBrains Mono",monospace;color:var(--ink)}
-.vd-s small{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vd-sv{margin-top:auto;padding-top:6px}
+/* 설명이 칸보다 길면 두 줄까지 (예전엔 한 줄 말줄임이라 "보통 0.30%" 가 잘렸다). 낱말 중간에서는 안 끊고, i(뒷부분)는 통째로 */
+.vd-s small{font-size:11px;color:var(--ink2)}
+.vd-s small:not(.vd-msn){line-height:1.3;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.vd-s small:not(.vd-msn) i{font-style:normal;white-space:nowrap}
+.vd-s small.vd-msn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-sv{margin-top:auto;padding-top:3px}   /* 설명이 두 줄이 돼도 현황 칸 높이가 썸네일 16:9 와 같게 (1280px 에서 263px) */
 .vd-spark{display:block;width:100%;height:24px}
 .vd-spark .a{fill:rgba(255,77,79,.16)}
 .vd-spark .l{fill:none;stroke:var(--vg);stroke-width:2;stroke-linejoin:round}
@@ -1789,7 +1817,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vt-tr.hi,.vd-tr.hi{border-color:rgba(255,90,95,.45)!important;background:rgba(255,77,79,.07)!important}
 .vt-tr.mid,.vd-tr.mid{border-color:rgba(255,181,71,.4)!important;background:rgba(255,181,71,.06)!important}
 .vd-trm{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:6px}
-.vd-trm i{font-style:normal;text-align:center;font-size:10px;font-weight:700;padding:2px 0;border-radius:5px;background:rgba(255,255,255,.06);color:var(--dim)}
+.vd-trm i{font-style:normal;text-align:center;font-size:10px;font-weight:700;padding:2px 0;border-radius:5px;background:rgba(255,255,255,.06);color:var(--ink3)}
 .vd-trm i.on.lo{background:rgba(255,255,255,.18);color:var(--ink)}
 .vd-trm i.on.mid{background:#ffb547;color:#2a1a00}
 .vd-trm i.on.hi{background:#ff5a5f;color:#fff}
@@ -3192,7 +3220,16 @@ tabC.onclick=function(){
 goTab(true,true);
 (function(){
   var btn=document.getElementById('totop');
-  function upd(){btn.classList.toggle('show', (window.pageYOffset||document.documentElement.scrollTop)>260);}
+  // 휴대폰(하단 탭 바가 있는 폭)에서는 오른쪽 끝 버튼(+ 등)을 가리지 않게, 위로 스크롤할 때만 나타났다가 2.5초 멈추면 숨는다
+  //   방향은 마지막으로 판정한 위치(ancY)에서 8px 넘게 움직였을 때 정한다 (천천히 올리면 한 번에 1~3px 씩 와서)
+  var mob=window.matchMedia?window.matchMedia('(max-width:900px)'):null, ancY=window.pageYOffset||0, hideT=0;
+  function upd(){
+    var y=window.pageYOffset||document.documentElement.scrollTop, far=y>260, dy=y-ancY;
+    if(!mob||!mob.matches){ancY=y;btn.classList.toggle('show',far);return;}
+    if(!far){ancY=y;clearTimeout(hideT);btn.classList.remove('show');return;}
+    if(dy>8){ancY=y;clearTimeout(hideT);btn.classList.remove('show');}
+    else if(dy<-8){ancY=y;btn.classList.add('show');clearTimeout(hideT);hideT=setTimeout(function(){btn.classList.remove('show');},2500);}
+  }
   window.addEventListener('scroll',upd,{passive:true});
   btn.onclick=function(){
     var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4388,6 +4425,16 @@ goTab(true,true);
     var v = e.target.closest('#g-view [data-v]'); if (v){ setView(v.getAttribute('data-v')); return; }
     var go = e.target.closest('[data-go]'); if (go){ setView(go.getAttribute('data-go')); window.scrollTo(0, 0); }
   });
+  // 분석 그래프는 그 칸 폭으로 그리므로, 창 폭이 바뀌거나 숨어 있던 시뮬레이터가 다시 보이면 새로 그린다
+  // (모바일은 스크롤만 해도 높이가 바뀌며 resize 가 오므로 폭이 바뀔 때만)
+  var lastW = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    if (view === 'ana') anaSoon();
+  });
+  var tabSim = document.getElementById('tab-sim');
+  if (tabSim) tabSim.addEventListener('click', function(){ if (view === 'ana') anaSoon(); });
 
   // ---------- 분석 ----------
   var anaT = null;
@@ -4409,6 +4456,15 @@ goTab(true,true);
     return c[c.length - 1];
   }
   function manwon(v){ return (v / 10000).toFixed(1).replace(/\.0$/, '') + '만원'; }
+  // 분석 그래프를 그리는 폭 = 그 칸의 실제 폭(320~640). 640 으로 그려 모바일에서 줄이면 글자가 5px 로 작아진다.
+  // 숨어 있어 폭을 못 재면 640 (다시 보일 때 anaSoon 으로 새로 그림)
+  function gw(id){
+    var b = $(id); if (!b || !b.clientWidth) return 640;
+    var cs = getComputedStyle(b), cw = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return Math.round(Math.max(320, Math.min(640, cw)));
+  }
+  // 가로축 눈금 글자: 맨 오른쪽 눈금은 가운데 정렬하면 반쯤 그래프 밖으로 잘리므로 오른쪽 끝에 맞춘다
+  function tickAt(x, w, R){ return x > w - R - 6 ? { x: w - 2, a: 'end' } : { x: x, a: 'middle' }; }
   function tile(k, v, s){ return '<div class="mt"><span class="mk">' + k + '</span><b>' + v + '</b>' + (s ? '<small>' + s + '</small>' : '') + '</div>'; }
 
   function renderMeta(){
@@ -4445,10 +4501,10 @@ goTab(true,true);
 
   // 수집 곡선: 뽑은 장수에 따라 모은 종 수가 어떻게 늘어나는지
   function renderProg(){
-    var C = palette(), N = G.N, p = S.pulls;
-    var xmax = Math.max(G.q90 * 1.1, p + 10), st = niceStep(xmax, 7); xmax = Math.ceil(xmax / st) * st;
+    var C = palette(), N = G.N, p = S.pulls, w = gw('a-prog');
+    var xmax = Math.max(G.q90 * 1.1, p + 10), st = niceStep(xmax, w < 480 ? 4 : 7); xmax = Math.ceil(xmax / st) * st;
     var band = ownedBand(N, xmax);
-    var w = 640, h = 230, L = 40, R = 14, T = 14, B = 30;
+    var h = 230, L = 40, R = 14, T = 14, B = 30;
     function X(n){ return L + n / xmax * (w - L - R); }
     function Y(o){ return T + (1 - o / N) * (h - T - B); }
     var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="뽑은 장수에 따른 모은 종 수">';
@@ -4456,7 +4512,7 @@ goTab(true,true);
       var o = Math.round(N * f);
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(o) + '" y2="' + Y(o) + '" stroke="' + C.line + '"/>' + t(L - 7, Y(o) + 4, o + '종', C.ink2, { a: 'end' });
     });
-    for (var x = 0; x <= xmax; x += st) s += t(X(x), h - B + 16, x + '장', C.ink2);
+    for (var x = 0; x <= xmax; x += st){ var q = tickAt(X(x), w, R); s += t(q.x, h - B + 16, x + '장', C.ink2, { a: q.a }); }
     var d = '';
     for (var n = 0; n <= xmax; n++) d += (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(band.hi[n]).toFixed(1) + ' ';
     for (var n2 = xmax; n2 >= 0; n2--) d += 'L' + X(n2).toFixed(1) + ' ' + Y(band.lo[n2]).toFixed(1) + ' ';
@@ -4485,13 +4541,14 @@ goTab(true,true);
 
   // 누적 완성 확률 + 완성 장수 분포
   function renderCdf(){
-    var C = palette(), N = G.N, p = S.pulls, o = owned(), done = S.done, pu = pure();
-    var xmin = N, xmax = Math.max(firstAt(G.curve, 0.995), p + 25), st = niceStep(xmax - xmin, 7);
+    var C = palette(), N = G.N, p = S.pulls, o = owned(), done = S.done, pu = pure(), w = gw('a-cdf');
+    var xmin = N, xmax = Math.max(firstAt(G.curve, 0.995), p + 25), st = niceStep(xmax - xmin, w < 480 ? 4 : 7);
     xmax = Math.ceil(xmax / st) * st;
-    var w = 640, L = 48, R = 14;
+    var L = 48, R = 14;
     function X(n){ return L + (Math.max(xmin, Math.min(xmax, n)) - xmin) / (xmax - xmin) * (w - L - R); }
     var ticks = [xmin];
-    for (var k = Math.ceil((xmin + 1) / st) * st; k <= xmax; k += st) if (X(k) - X(ticks[ticks.length - 1]) > 34) ticks.push(k);
+    // 눈금 아래 금액("37.5만원")이 겹치지 않게 44px 넘게 벌어진 것만
+    for (var k = Math.ceil((xmin + 1) / st) * st; k <= xmax; k += st) if (X(k) - X(ticks[ticks.length - 1]) > 44) ticks.push(k);
     var mean = Math.round(G.mean), med = G.median;
 
     var h1 = 220, T = 14, B = 34;
@@ -4499,7 +4556,7 @@ goTab(true,true);
     var s = '<svg viewBox="0 0 ' + w + ' ' + h1 + '" role="img" aria-label="뽑은 장수별 누적 완성 확률">';
     for (var g = 0; g <= 1.001; g += 0.25)
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y1(g) + '" y2="' + Y1(g) + '" stroke="' + C.line + '"/>' + t(L - 8, Y1(g) + 4, Math.round(g * 100) + '%', C.ink2, { a: 'end' });
-    ticks.forEach(function(n){ s += t(X(n), h1 - B + 16, n + '장', C.ink2) + t(X(n), h1 - B + 29, manwon(n * G.price), C.ink2, { fs: 10 }); });
+    ticks.forEach(function(n){ var q = tickAt(X(n), w, R); s += t(q.x, h1 - B + 16, n + '장', C.ink2, { a: q.a }) + t(q.x, h1 - B + 29, manwon(n * G.price), C.ink2, { fs: 10, a: q.a }); });
     s += '<line x1="' + X(mean) + '" x2="' + X(mean) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.gold + '" stroke-dasharray="4 4"/>'
       + '<line x1="' + X(med) + '" x2="' + X(med) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.ink2 + '" stroke-dasharray="4 4"/>'
       + t(X(mean) + 5, T + 12, '평균 ' + mean + '장', C.goldT, { a: 'start' }) + t(X(med) - 5, T + 12, '중앙값 ' + med + '장', C.ink2, { a: 'end' });
@@ -4512,10 +4569,12 @@ goTab(true,true);
       for (var n1 = Math.max(p, xmin); n1 <= xmax; n1++) dd += (dd ? 'L' : 'M') + X(n1).toFixed(1) + ' ' + Y1(at(cc, n1 - p)).toFixed(1) + ' ';
       s += '<path d="' + dd + '" fill="none" stroke="' + C.pink + '" stroke-width="2.5" stroke-dasharray="6 4"/>';
       if (p >= xmin) s += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.pink + '" stroke-width="1.5"/>';
-      var right = X(p) > w * 0.7;
-      s += t(X(p) + (right ? -8 : 8), T + 30, '지금 ' + p + '장 · 이어서 뽑으면', C.pinkT, { a: right ? 'end' : 'start', fs: 12 });
+      // 글자가 오른쪽 밖으로 나가면 왼쪽으로. 좁은 화면은 곡선에 걸리지 않게 두 줄
+      var two = w < 480, right = X(p) > w - R - (two ? 90 : 160), ax = right ? 'end' : 'start', lx = X(p) + (right ? -8 : 8);
+      s += two ? t(lx, T + 30, '지금 ' + p + '장', C.pinkT, { a: ax, fs: 12 }) + t(lx, T + 45, '이어서 뽑으면', C.pinkT, { a: ax, fs: 12 })
+               : t(lx, T + 30, '지금 ' + p + '장 · 이어서 뽑으면', C.pinkT, { a: ax, fs: 12 });
     } else if (done){
-      var right2 = X(p) > w * 0.75;
+      var right2 = X(p) > w - R - (pu ? 110 : 190);
       s += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.pink + '" stroke-width="2"/>'
         + '<circle cx="' + X(p) + '" cy="' + Y1(at(G.curve, p)) + '" r="5" fill="' + C.pink + '" stroke="' + C.paper + '" stroke-width="2"/>'
         + t(X(p) + (right2 ? -8 : 8), Y1(at(G.curve, p)) - 10, '내 결과 ' + p + '장' + (pu ? '' : ' (교환·중고 포함)'), C.pinkT, { a: right2 ? 'end' : 'start', fs: 12 });
@@ -4539,7 +4598,7 @@ goTab(true,true);
     for (var n5 = xmin; n5 <= xmax; n5++) d2 += (n5 === xmin ? 'M' : 'L') + X(n5).toFixed(1) + ' ' + Y2(pm(n5)).toFixed(1) + ' ';
     g2 += '<path d="' + d2 + '" fill="none" stroke="' + C.ink + '" stroke-width="2"/>';
     g2 += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + (h2 - B2) + '" y2="' + (h2 - B2) + '" stroke="' + C.line + '"/>';
-    ticks.forEach(function(n){ g2 += t(X(n), h2 - B2 + 16, n + '장', C.ink2); });
+    ticks.forEach(function(n){ var q = tickAt(X(n), w, R); g2 += t(q.x, h2 - B2 + 16, n + '장', C.ink2, { a: q.a }); });
     if (p && (done || p >= xmin)) g2 += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T2 + '" y2="' + (h2 - B2) + '" stroke="' + C.pink + '" stroke-width="2"/>'
       + t(X(p) + (X(p) > w * 0.75 ? -8 : 8), T2 + 12, (done ? '' : '지금 ') + p + '장', C.pinkT, { a: X(p) > w * 0.75 ? 'end' : 'start', fs: 12 });
     loadRec().forEach(function(r){
@@ -4574,17 +4633,18 @@ goTab(true,true);
       }, 30);
       return;
     }
-    var C = palette(), sims = g.sims, ps = policies(g), pol = sessPolicy(), done = S.done, my = S.spent;
+    var C = palette(), sims = g.sims, ps = policies(g), pol = sessPolicy(), done = S.done, my = S.spent, w = gw('a-cost');
     var cols = [C.gold, C.mint, C.lav], colsT = [C.goldT, C.mintT, C.lavT];
-    var xmax = Math.max(qOf(sims[0], 0.985), done ? my * 1.1 : 0), stw = niceStep(xmax / 10000, 6) * 10000;
+    var xmax = Math.max(qOf(sims[0], 0.985), done ? my * 1.1 : 0), stw = niceStep(xmax / 10000, w < 480 ? 4 : 6) * 10000;
     xmax = Math.ceil(xmax / stw) * stw;
-    var w = 640, h = 230, L = 50, R = 14, T = 14, B = 34;
+    var h = 230, L = 50, R = 14, T = 14, B = 34;
     function X(c){ return L + Math.min(c, xmax) / xmax * (w - L - R); }
     function Y(q){ return T + (1 - q) * (h - T - B); }
     var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="전략별 총비용 누적분포">';
     for (var gg = 0; gg <= 1.001; gg += 0.25)
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(gg) + '" y2="' + Y(gg) + '" stroke="' + C.line + '"/>' + t(L - 7, Y(gg) + 4, Math.round(gg * 100) + '%', C.ink2, { a: 'end' });
-    for (var c = 0; c <= xmax; c += stw) s += t(X(c), h - B + 16, manwon(c), C.ink2);
+    for (var c = 0; c <= xmax; c += stw){ var q = tickAt(X(c), w, R); s += t(q.x, h - B + 16, manwon(c), C.ink2, { a: q.a }); }
+    var narrow = w < 480, lg = '';   // 좁으면 범례가 곡선을 덮으므로 그래프 아래 줄로 뺀다
     sims.forEach(function(arr, k){
       var d = '', stp = Math.max(1, Math.floor(arr.length / 240));
       for (var j = 0; j < arr.length; j += stp) d += (j === 0 ? 'M' : 'L') + X(arr[j]).toFixed(1) + ' ' + Y(j / arr.length).toFixed(1) + ' ';
@@ -4592,11 +4652,12 @@ goTab(true,true);
       var hot = done && k === pol;
       s += '<path d="' + d + '" fill="none" stroke="' + cols[k] + '" stroke-width="' + (hot ? 3 : 2) + '" opacity="' + (done && !hot ? 0.55 : 1) + '"/>';
       // 범례는 곡선이 다 올라간 뒤라 비어 있는 오른쪽 아래에 둔다
-      s += t(w - R - 4, h - B - 10 - (sims.length - 1 - k) * 15, ps[k].name + ' 평균 ' + won(avg(arr)) + '원', colsT[k], { a: 'end' });
+      if (narrow) lg += '<span style="color:' + colsT[k] + '"><i style="background:' + cols[k] + '"></i>' + ps[k].name + ' 평균 ' + won(avg(arr)) + '원</span>';
+      else s += t(w - R - 4, h - B - 10 - (sims.length - 1 - k) * 15, ps[k].name + ' 평균 ' + won(avg(arr)) + '원', colsT[k], { a: 'end' });
     });
     var extra = '';
     if (done){
-      var rk = at(g.curve, Math.floor(my / g.price)), rkPol = rankIn(sims[pol], my), right = my > xmax * 0.7;
+      var rk = at(g.curve, Math.floor(my / g.price)), rkPol = rankIn(sims[pol], my), right = X(my) > w - R - 190;
       s += '<line x1="' + X(my) + '" x2="' + X(my) + '" y1="' + T + '" y2="' + (h - B) + '" stroke="' + C.pink + '" stroke-width="2"/>'
         + '<circle cx="' + X(my) + '" cy="' + Y(rk) + '" r="5" fill="' + C.pink + '" stroke="' + C.paper + '" stroke-width="2"/>'
         + t(X(my) + (right ? -8 : 8), Y(rk) - 10, '내 지출 ' + won(my) + '원 · 상위 ' + pctTxt(rk), C.pinkT, { a: right ? 'end' : 'start', fs: 12 });
@@ -4605,6 +4666,7 @@ goTab(true,true);
     }
     s += '</svg>';
     box.innerHTML = '<h3>전략별 총비용 분포<span>전략마다 ' + won(sims[0].length) + '판씩 끝까지 모아 본 결과 · 가로축 총지출</span></h3>' + s
+      + (lg ? '<div class="glg">' + lg + '</div>' : '')
       + '<p class="gnote">' + extra + (done ? '' : '완성하면 내 총비용이 분홍 선으로 표시됩니다. ')
       + (g.trade ? '교환은 중복 2장을 가위바위보로 걸고, 지면 ' + won(PENALTY) + '원을 잃는 규칙입니다. ' : '')
       + (g.used ? '중고는 다음 새 카드를 뽑는 기대 비용이 중고가(' + won(g.used) + '원)보다 비싸질 때 삽니다.' : '') + '</p>';
@@ -6521,7 +6583,7 @@ goTab(true,true);
     if (!tr) return tile('추이', '', '—', '기록이 조금 더 쌓이면 나옵니다', '');
     return '<div class="vd-s vd-tr ' + tr.lv.c + '" title="최근 24시간 증가가 채널 영상 ' + tr.n + '편 중 몇 번째인지로 나눕니다 (상위 20% 강함 · 50% 중간 · 그 아래 약함)">'
       + '<div class="vd-sh"><span>추이</span><em>' + tr.rank + '위 / ' + tr.n + '편</em></div>'
-      + '<b>' + tr.lv.t + '</b><small>최근 24시간 +' + fmt(tr.g.x) + (tr.g.kind === 'est' ? ' (추정)' : tr.g.kind === 'pred' ? ' (예측)' : '') + '</small>'
+      + '<b>' + tr.lv.t + '</b><small>최근 24시간 +' + fmt(tr.g.x) + (tr.g.kind === 'est' ? ' <i>(추정)</i>' : tr.g.kind === 'pred' ? ' <i>(예측)</i>' : '') + '</small>'
       + '<div class="vd-trm" aria-hidden="true">' + TREND.slice().reverse().map(function(t){ return '<i class="' + t.c + (t === tr.lv ? ' on' : '') + '">' + t.t + '</i>'; }).join('') + '</div></div>';
   }
   // 현황 칸 카운터: 다음 100만 단위까지 남은 시간 (④ 1일 추세, milestone). 마지막 기록 시각부터 흐른 만큼 빼서 30초마다 다시 센다 (cntTick)
@@ -6586,11 +6648,12 @@ goTab(true,true);
       + thumb(v) + '<span class="vd-play">' + PLAY + '</span>' + (link ? '</a>' : '</div>')
       // 현황 칸: 윗줄 조회수 · 좋아요 · 댓글, 아랫줄 추이 · 다음 100만 단위 카운터(두 칸)
       + '<div class="vd-stats">'
-      + tile('조회수', rank(V, pv), fmt(V), full(V) + '회' + (pv.length >= 3 ? ' · 같은 시점 보통 ' + fmt(q(pv, 0.5)) : ''), spark(v, a))
+      // 설명 글이 칸보다 길면 두 줄로: 뒷부분(<i>)은 통째로 다음 줄에 (CSS .vd-s small i)
+      + tile('조회수', rank(V, pv), fmt(V), full(V) + '회' + (pv.length >= 3 ? ' <i>· 같은 시점 보통 ' + fmt(q(pv, 0.5)) + '</i>' : ''), spark(v, a))
       + (L == null ? tile('좋아요', '', '숨김', '좋아요 수를 공개하지 않은 영상', '')
-         : tile('좋아요', rank(L / V, pl), full(L), '조회수의 ' + pct(L / V, 1) + (pl.length >= 3 ? ' · 보통 ' + pct(q(pl, 0.5), 1) : ''), strip(L / V, pl)))
+         : tile('좋아요', rank(L / V, pl), full(L), '조회수의 ' + pct(L / V, 1) + (pl.length >= 3 ? ' <i>· 보통 ' + pct(q(pl, 0.5), 1) + '</i>' : ''), strip(L / V, pl)))
       + (C == null ? tile('댓글', '', '꺼짐', '댓글을 막아 둔 영상', '')
-         : tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' · 보통 ' + pct(q(pc, 0.5), 2) : ''), strip(C / V, pc)))
+         : tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' <i>· 보통 ' + pct(q(pc, 0.5), 2) + '</i>' : ''), strip(C / V, pc)))
       + trendTile(tr) + msTile(v)
       + '</div></div>'
       + '<div class="vd-pred' + (late(v) ? ' late' : '') + '" id="vd-pred"><div class="vd-ph">' + (late(v)

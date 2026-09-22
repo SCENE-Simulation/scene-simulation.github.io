@@ -556,6 +556,16 @@
     var v = e.target.closest('#g-view [data-v]'); if (v){ setView(v.getAttribute('data-v')); return; }
     var go = e.target.closest('[data-go]'); if (go){ setView(go.getAttribute('data-go')); window.scrollTo(0, 0); }
   });
+  // 분석 그래프는 그 칸 폭으로 그리므로, 창 폭이 바뀌거나 숨어 있던 시뮬레이터가 다시 보이면 새로 그린다
+  // (모바일은 스크롤만 해도 높이가 바뀌며 resize 가 오므로 폭이 바뀔 때만)
+  var lastW = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    if (view === 'ana') anaSoon();
+  });
+  var tabSim = document.getElementById('tab-sim');
+  if (tabSim) tabSim.addEventListener('click', function(){ if (view === 'ana') anaSoon(); });
 
   // ---------- 분석 ----------
   var anaT = null;
@@ -577,6 +587,15 @@
     return c[c.length - 1];
   }
   function manwon(v){ return (v / 10000).toFixed(1).replace(/\.0$/, '') + '만원'; }
+  // 분석 그래프를 그리는 폭 = 그 칸의 실제 폭(320~640). 640 으로 그려 모바일에서 줄이면 글자가 5px 로 작아진다.
+  // 숨어 있어 폭을 못 재면 640 (다시 보일 때 anaSoon 으로 새로 그림)
+  function gw(id){
+    var b = $(id); if (!b || !b.clientWidth) return 640;
+    var cs = getComputedStyle(b), cw = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return Math.round(Math.max(320, Math.min(640, cw)));
+  }
+  // 가로축 눈금 글자: 맨 오른쪽 눈금은 가운데 정렬하면 반쯤 그래프 밖으로 잘리므로 오른쪽 끝에 맞춘다
+  function tickAt(x, w, R){ return x > w - R - 6 ? { x: w - 2, a: 'end' } : { x: x, a: 'middle' }; }
   function tile(k, v, s){ return '<div class="mt"><span class="mk">' + k + '</span><b>' + v + '</b>' + (s ? '<small>' + s + '</small>' : '') + '</div>'; }
 
   function renderMeta(){
@@ -613,10 +632,10 @@
 
   // 수집 곡선: 뽑은 장수에 따라 모은 종 수가 어떻게 늘어나는지
   function renderProg(){
-    var C = palette(), N = G.N, p = S.pulls;
-    var xmax = Math.max(G.q90 * 1.1, p + 10), st = niceStep(xmax, 7); xmax = Math.ceil(xmax / st) * st;
+    var C = palette(), N = G.N, p = S.pulls, w = gw('a-prog');
+    var xmax = Math.max(G.q90 * 1.1, p + 10), st = niceStep(xmax, w < 480 ? 4 : 7); xmax = Math.ceil(xmax / st) * st;
     var band = ownedBand(N, xmax);
-    var w = 640, h = 230, L = 40, R = 14, T = 14, B = 30;
+    var h = 230, L = 40, R = 14, T = 14, B = 30;
     function X(n){ return L + n / xmax * (w - L - R); }
     function Y(o){ return T + (1 - o / N) * (h - T - B); }
     var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="뽑은 장수에 따른 모은 종 수">';
@@ -624,7 +643,7 @@
       var o = Math.round(N * f);
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(o) + '" y2="' + Y(o) + '" stroke="' + C.line + '"/>' + t(L - 7, Y(o) + 4, o + '종', C.ink2, { a: 'end' });
     });
-    for (var x = 0; x <= xmax; x += st) s += t(X(x), h - B + 16, x + '장', C.ink2);
+    for (var x = 0; x <= xmax; x += st){ var q = tickAt(X(x), w, R); s += t(q.x, h - B + 16, x + '장', C.ink2, { a: q.a }); }
     var d = '';
     for (var n = 0; n <= xmax; n++) d += (n ? 'L' : 'M') + X(n).toFixed(1) + ' ' + Y(band.hi[n]).toFixed(1) + ' ';
     for (var n2 = xmax; n2 >= 0; n2--) d += 'L' + X(n2).toFixed(1) + ' ' + Y(band.lo[n2]).toFixed(1) + ' ';
@@ -653,13 +672,14 @@
 
   // 누적 완성 확률 + 완성 장수 분포
   function renderCdf(){
-    var C = palette(), N = G.N, p = S.pulls, o = owned(), done = S.done, pu = pure();
-    var xmin = N, xmax = Math.max(firstAt(G.curve, 0.995), p + 25), st = niceStep(xmax - xmin, 7);
+    var C = palette(), N = G.N, p = S.pulls, o = owned(), done = S.done, pu = pure(), w = gw('a-cdf');
+    var xmin = N, xmax = Math.max(firstAt(G.curve, 0.995), p + 25), st = niceStep(xmax - xmin, w < 480 ? 4 : 7);
     xmax = Math.ceil(xmax / st) * st;
-    var w = 640, L = 48, R = 14;
+    var L = 48, R = 14;
     function X(n){ return L + (Math.max(xmin, Math.min(xmax, n)) - xmin) / (xmax - xmin) * (w - L - R); }
     var ticks = [xmin];
-    for (var k = Math.ceil((xmin + 1) / st) * st; k <= xmax; k += st) if (X(k) - X(ticks[ticks.length - 1]) > 34) ticks.push(k);
+    // 눈금 아래 금액("37.5만원")이 겹치지 않게 44px 넘게 벌어진 것만
+    for (var k = Math.ceil((xmin + 1) / st) * st; k <= xmax; k += st) if (X(k) - X(ticks[ticks.length - 1]) > 44) ticks.push(k);
     var mean = Math.round(G.mean), med = G.median;
 
     var h1 = 220, T = 14, B = 34;
@@ -667,7 +687,7 @@
     var s = '<svg viewBox="0 0 ' + w + ' ' + h1 + '" role="img" aria-label="뽑은 장수별 누적 완성 확률">';
     for (var g = 0; g <= 1.001; g += 0.25)
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y1(g) + '" y2="' + Y1(g) + '" stroke="' + C.line + '"/>' + t(L - 8, Y1(g) + 4, Math.round(g * 100) + '%', C.ink2, { a: 'end' });
-    ticks.forEach(function(n){ s += t(X(n), h1 - B + 16, n + '장', C.ink2) + t(X(n), h1 - B + 29, manwon(n * G.price), C.ink2, { fs: 10 }); });
+    ticks.forEach(function(n){ var q = tickAt(X(n), w, R); s += t(q.x, h1 - B + 16, n + '장', C.ink2, { a: q.a }) + t(q.x, h1 - B + 29, manwon(n * G.price), C.ink2, { fs: 10, a: q.a }); });
     s += '<line x1="' + X(mean) + '" x2="' + X(mean) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.gold + '" stroke-dasharray="4 4"/>'
       + '<line x1="' + X(med) + '" x2="' + X(med) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.ink2 + '" stroke-dasharray="4 4"/>'
       + t(X(mean) + 5, T + 12, '평균 ' + mean + '장', C.goldT, { a: 'start' }) + t(X(med) - 5, T + 12, '중앙값 ' + med + '장', C.ink2, { a: 'end' });
@@ -680,10 +700,12 @@
       for (var n1 = Math.max(p, xmin); n1 <= xmax; n1++) dd += (dd ? 'L' : 'M') + X(n1).toFixed(1) + ' ' + Y1(at(cc, n1 - p)).toFixed(1) + ' ';
       s += '<path d="' + dd + '" fill="none" stroke="' + C.pink + '" stroke-width="2.5" stroke-dasharray="6 4"/>';
       if (p >= xmin) s += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.pink + '" stroke-width="1.5"/>';
-      var right = X(p) > w * 0.7;
-      s += t(X(p) + (right ? -8 : 8), T + 30, '지금 ' + p + '장 · 이어서 뽑으면', C.pinkT, { a: right ? 'end' : 'start', fs: 12 });
+      // 글자가 오른쪽 밖으로 나가면 왼쪽으로. 좁은 화면은 곡선에 걸리지 않게 두 줄
+      var two = w < 480, right = X(p) > w - R - (two ? 90 : 160), ax = right ? 'end' : 'start', lx = X(p) + (right ? -8 : 8);
+      s += two ? t(lx, T + 30, '지금 ' + p + '장', C.pinkT, { a: ax, fs: 12 }) + t(lx, T + 45, '이어서 뽑으면', C.pinkT, { a: ax, fs: 12 })
+               : t(lx, T + 30, '지금 ' + p + '장 · 이어서 뽑으면', C.pinkT, { a: ax, fs: 12 });
     } else if (done){
-      var right2 = X(p) > w * 0.75;
+      var right2 = X(p) > w - R - (pu ? 110 : 190);
       s += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T + '" y2="' + (h1 - B) + '" stroke="' + C.pink + '" stroke-width="2"/>'
         + '<circle cx="' + X(p) + '" cy="' + Y1(at(G.curve, p)) + '" r="5" fill="' + C.pink + '" stroke="' + C.paper + '" stroke-width="2"/>'
         + t(X(p) + (right2 ? -8 : 8), Y1(at(G.curve, p)) - 10, '내 결과 ' + p + '장' + (pu ? '' : ' (교환·중고 포함)'), C.pinkT, { a: right2 ? 'end' : 'start', fs: 12 });
@@ -707,7 +729,7 @@
     for (var n5 = xmin; n5 <= xmax; n5++) d2 += (n5 === xmin ? 'M' : 'L') + X(n5).toFixed(1) + ' ' + Y2(pm(n5)).toFixed(1) + ' ';
     g2 += '<path d="' + d2 + '" fill="none" stroke="' + C.ink + '" stroke-width="2"/>';
     g2 += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + (h2 - B2) + '" y2="' + (h2 - B2) + '" stroke="' + C.line + '"/>';
-    ticks.forEach(function(n){ g2 += t(X(n), h2 - B2 + 16, n + '장', C.ink2); });
+    ticks.forEach(function(n){ var q = tickAt(X(n), w, R); g2 += t(q.x, h2 - B2 + 16, n + '장', C.ink2, { a: q.a }); });
     if (p && (done || p >= xmin)) g2 += '<line x1="' + X(p) + '" x2="' + X(p) + '" y1="' + T2 + '" y2="' + (h2 - B2) + '" stroke="' + C.pink + '" stroke-width="2"/>'
       + t(X(p) + (X(p) > w * 0.75 ? -8 : 8), T2 + 12, (done ? '' : '지금 ') + p + '장', C.pinkT, { a: X(p) > w * 0.75 ? 'end' : 'start', fs: 12 });
     loadRec().forEach(function(r){
@@ -742,17 +764,18 @@
       }, 30);
       return;
     }
-    var C = palette(), sims = g.sims, ps = policies(g), pol = sessPolicy(), done = S.done, my = S.spent;
+    var C = palette(), sims = g.sims, ps = policies(g), pol = sessPolicy(), done = S.done, my = S.spent, w = gw('a-cost');
     var cols = [C.gold, C.mint, C.lav], colsT = [C.goldT, C.mintT, C.lavT];
-    var xmax = Math.max(qOf(sims[0], 0.985), done ? my * 1.1 : 0), stw = niceStep(xmax / 10000, 6) * 10000;
+    var xmax = Math.max(qOf(sims[0], 0.985), done ? my * 1.1 : 0), stw = niceStep(xmax / 10000, w < 480 ? 4 : 6) * 10000;
     xmax = Math.ceil(xmax / stw) * stw;
-    var w = 640, h = 230, L = 50, R = 14, T = 14, B = 34;
+    var h = 230, L = 50, R = 14, T = 14, B = 34;
     function X(c){ return L + Math.min(c, xmax) / xmax * (w - L - R); }
     function Y(q){ return T + (1 - q) * (h - T - B); }
     var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="전략별 총비용 누적분포">';
     for (var gg = 0; gg <= 1.001; gg += 0.25)
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(gg) + '" y2="' + Y(gg) + '" stroke="' + C.line + '"/>' + t(L - 7, Y(gg) + 4, Math.round(gg * 100) + '%', C.ink2, { a: 'end' });
-    for (var c = 0; c <= xmax; c += stw) s += t(X(c), h - B + 16, manwon(c), C.ink2);
+    for (var c = 0; c <= xmax; c += stw){ var q = tickAt(X(c), w, R); s += t(q.x, h - B + 16, manwon(c), C.ink2, { a: q.a }); }
+    var narrow = w < 480, lg = '';   // 좁으면 범례가 곡선을 덮으므로 그래프 아래 줄로 뺀다
     sims.forEach(function(arr, k){
       var d = '', stp = Math.max(1, Math.floor(arr.length / 240));
       for (var j = 0; j < arr.length; j += stp) d += (j === 0 ? 'M' : 'L') + X(arr[j]).toFixed(1) + ' ' + Y(j / arr.length).toFixed(1) + ' ';
@@ -760,11 +783,12 @@
       var hot = done && k === pol;
       s += '<path d="' + d + '" fill="none" stroke="' + cols[k] + '" stroke-width="' + (hot ? 3 : 2) + '" opacity="' + (done && !hot ? 0.55 : 1) + '"/>';
       // 범례는 곡선이 다 올라간 뒤라 비어 있는 오른쪽 아래에 둔다
-      s += t(w - R - 4, h - B - 10 - (sims.length - 1 - k) * 15, ps[k].name + ' 평균 ' + won(avg(arr)) + '원', colsT[k], { a: 'end' });
+      if (narrow) lg += '<span style="color:' + colsT[k] + '"><i style="background:' + cols[k] + '"></i>' + ps[k].name + ' 평균 ' + won(avg(arr)) + '원</span>';
+      else s += t(w - R - 4, h - B - 10 - (sims.length - 1 - k) * 15, ps[k].name + ' 평균 ' + won(avg(arr)) + '원', colsT[k], { a: 'end' });
     });
     var extra = '';
     if (done){
-      var rk = at(g.curve, Math.floor(my / g.price)), rkPol = rankIn(sims[pol], my), right = my > xmax * 0.7;
+      var rk = at(g.curve, Math.floor(my / g.price)), rkPol = rankIn(sims[pol], my), right = X(my) > w - R - 190;
       s += '<line x1="' + X(my) + '" x2="' + X(my) + '" y1="' + T + '" y2="' + (h - B) + '" stroke="' + C.pink + '" stroke-width="2"/>'
         + '<circle cx="' + X(my) + '" cy="' + Y(rk) + '" r="5" fill="' + C.pink + '" stroke="' + C.paper + '" stroke-width="2"/>'
         + t(X(my) + (right ? -8 : 8), Y(rk) - 10, '내 지출 ' + won(my) + '원 · 상위 ' + pctTxt(rk), C.pinkT, { a: right ? 'end' : 'start', fs: 12 });
@@ -773,6 +797,7 @@
     }
     s += '</svg>';
     box.innerHTML = '<h3>전략별 총비용 분포<span>전략마다 ' + won(sims[0].length) + '판씩 끝까지 모아 본 결과 · 가로축 총지출</span></h3>' + s
+      + (lg ? '<div class="glg">' + lg + '</div>' : '')
       + '<p class="gnote">' + extra + (done ? '' : '완성하면 내 총비용이 분홍 선으로 표시됩니다. ')
       + (g.trade ? '교환은 중복 2장을 가위바위보로 걸고, 지면 ' + won(PENALTY) + '원을 잃는 규칙입니다. ' : '')
       + (g.used ? '중고는 다음 새 카드를 뽑는 기대 비용이 중고가(' + won(g.used) + '원)보다 비싸질 때 삽니다.' : '') + '</p>';

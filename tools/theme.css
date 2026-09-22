@@ -4,6 +4,7 @@
   --bg:#1c1c1e; --main:#232325; --board:#2c2c2e; --slot:#3a3a3c; --slot2:#323234; --cell:#262628;
   --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.18); --shadow:rgba(0,0,0,.32);
   --ink:#e8e8ed; --ink2:#aeaeb2; --dim:#6e6e73; --cream:#e8e8ed; --btn-ink:#1c1c1e;
+  --ink3:#8e8e93;   /* ink2 와 dim 사이: 안내문·보조 라벨처럼 읽혀야 하는 흐린 글자 (dim 은 카드 위에서 명암비 2.7:1 로 너무 흐림) */
   --pink:#e96387; --pink-t:#f28aa7; --pink-d:#b8466a; --pink-soft:rgba(233,99,135,.16);
   --mint:#47d19a; --mint-t:#6fe0b3; --mint-d:#2c9d70; --mint-soft:rgba(71,209,154,.14);
   --gold:#ecd25b; --gold-t:#f1dc7c; --gold-d:#b89c2a; --gold-soft:rgba(236,210,91,.14);
@@ -102,6 +103,10 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .sec-t .lt{letter-spacing:0}
 .sec-t{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;letter-spacing:.05em;color:var(--ink)}
 .sec-t svg{width:16px;height:16px;color:var(--ink)}
+/* 경로(포카 컬렉션 북 › 2026 포카 › 제목)가 좁은 화면에 안 들어가면 낱말 중간이 아니라 › 자리에서 줄을 바꾼다.
+   마지막 제목(.lt)만 그 자체가 한 줄보다 길 때 띄어쓰기에서 꺾인다 */
+.sec-t:has(> .cr){flex-wrap:wrap;row-gap:2px;white-space:nowrap}
+.sec-t:has(> .cr) .lt{white-space:normal;word-break:keep-all}
 .sec-d{margin:0 0 18px;font-size:13.5px;line-height:1.65;color:var(--ink2);max-width:72ch}
 
 /* --- 원본 요소 다듬기 --- */
@@ -219,6 +224,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 /* 홈 정렬 버튼 */
 .seg{display:inline-flex;padding:3px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid var(--line)}
 .seg button{border:0!important;border-radius:7px!important;background:none;color:var(--ink2);font-size:12px;font-weight:600;padding:5px 11px}
+.sec2 > .seg button{white-space:nowrap}   /* 홈 정렬(최신순·난이도순): 좁은 화면에서 "최신/순" 으로 꺾이지 않게 */
 .seg button:hover:not(:disabled){background:rgba(255,255,255,.06)}
 .seg button.on{background:rgba(255,255,255,.12);color:var(--ink)}
 
@@ -547,7 +553,7 @@ body.has-sfloat #totop{bottom:84px}
 .gd-c button{width:34px;padding:6px 0;font-size:16px;line-height:1;text-align:center}
 .gd-c b{min-width:26px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink)}
 .pk-ph.tall{aspect-ratio:auto;padding:40px 20px;gap:6px}
-.pk-ph small{font-size:12px;color:var(--dim)}
+.pk-ph small{font-size:12px;color:var(--ink3)}
 
 /* ===== 통합 포토카드 ===== */
 .pcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
@@ -593,7 +599,7 @@ body.has-sfloat #totop{bottom:84px}
 /* 카드 크기 조절 */
 .colbar{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .colbar .cb-k{font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
-.colbar .cb-s{font-size:11.5px;color:var(--dim);white-space:nowrap}
+.colbar .cb-s{font-size:11.5px;color:var(--ink3);white-space:nowrap}
 .colbar b{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
 .colbar input[type=range]{flex:1;min-width:90px;height:26px;margin:0;padding:0;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:ew-resize}
 .colbar input[type=range]:focus-visible{outline:2px solid var(--lav-t);outline-offset:3px}
@@ -619,6 +625,20 @@ body.has-sfloat #totop{bottom:84px}
 .cbody.compact .shead b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cbody.compact .shead .pr{margin-left:auto;flex:none}
 @media (max-width:640px){.cbody.compact{--setw:104px;gap:8px}.cbody.compact .set{padding:8px}}
+
+/* 터치 화면: 높이 16~22px 인 작은 버튼은 모양·자리는 그대로 두고 누르는 영역만 위아래로 넓힌다 (투명한 ::after).
+   전체보기 "페이지 열기 →" · 405빵 중고 안내 · 조회수 예측기 그래프 단위 버튼 · 표 정렬 · "용어와 계산 방법" */
+@media (pointer:coarse){
+  .w-go,.uhint,.vd-ch .seg button,#v-views th > button,.vx-about > summary{position:relative}
+  .w-go::after,.uhint::after,#v-views th > button::after,.vx-about > summary::after{content:"";position:absolute;left:0;right:0;top:-9px;bottom:-9px}
+  .vd-ch .seg button::after{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px}
+}
+
+/* 카드 이름이 칸보다 길면 두 줄까지 (예전엔 한 줄 말줄임이라 "14. 반하트 미나…"). 낱말 중간에서는 안 꺾는다.
+   이름이 두 줄인 칸이 섞여도 같은 줄의 +/- 는 칸 맨 아래로 맞춘다 */
+.ctile{display:flex;flex-direction:column}
+.ctile .nm{white-space:normal;word-break:keep-all;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.ctile .ctr{margin-top:auto}
 
 /* 카드가 작아지면 조작부도 작게 */
 :is(#page-col,.colpg)[data-cols="5"] .ctile,:is(#page-col,.colpg)[data-cols="6"] .ctile,:is(#page-col,.colpg)[data-cols="7"] .ctile,:is(#page-col,.colpg)[data-cols="8"] .ctile{padding:5px}
@@ -657,6 +677,9 @@ body.has-sfloat #totop{bottom:84px}
 .ahead{margin:18px 0 8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
 #g-ana > .ahead:first-child{margin-top:0}
 #g-ana .cmeta{margin:0}
+/* 좁은 화면의 전략별 총비용 범례 (그래프 안 오른쪽 아래 대신 그래프 아래 줄) */
+.glg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:-2px 0 8px;font-size:12px;font-weight:600}
+.glg i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 .anote{margin:0;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-size:13px;color:var(--ink2);line-height:1.7}
 .atab-w{overflow-x:auto;margin-top:8px}
 .atab{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
@@ -681,7 +704,8 @@ body.has-sfloat #totop{bottom:84px}
 .gp10{--g1:#ffe08a;--g2:#f3a93b;--gd:#b56f16;--gs:rgba(243,169,59,.3);color:#3d2500}
 .gp-l{display:flex;align-items:center;gap:7px;font-size:16.5px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
 .gp-l svg{width:19px;height:19px;flex:0 0 auto}
-.gp-s{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;opacity:.82}
+/* 숫자는 고정폭, 한글("위에서 뽑고 싶은 카드를…", "중복 2장")은 JetBrains Mono 에 글자가 없어 Pretendard 로 */
+.gp-s{font-family:"JetBrains Mono","Pretendard Variable",monospace;font-size:12px;font-weight:700;opacity:.82}
 .gp-x{position:absolute;top:7px;right:8px;padding:2px 7px;border-radius:999px;background:rgba(61,37,0,.16);font:800 10.5px "JetBrains Mono",monospace}
 /* 올려 두면 광택이 한 번 훑고 지나간다 */
 .gp::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -695,7 +719,7 @@ body.has-sfloat #totop{bottom:84px}
 .gs{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px!important;font-size:12.5px;font-weight:600;
   background:rgba(255,255,255,.05);border-color:var(--line)!important;color:var(--ink2)}
 .gs svg{width:14px;height:14px;flex:0 0 auto}
-.gs small{font:700 11px "JetBrains Mono",monospace;opacity:.75}
+.gs small{font:700 11px "JetBrains Mono","Pretendard Variable",monospace;opacity:.75}
 .gs:hover:not(:disabled){background:rgba(255,255,255,.11);color:var(--ink)}
 .gs-m{background:rgba(71,209,154,.08);border-color:rgba(71,209,154,.3)!important;color:var(--mint-t)}
 .gs-m:hover:not(:disabled){background:rgba(71,209,154,.18);color:var(--mint-t)}
@@ -952,8 +976,12 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-sh em{padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;font-style:normal;white-space:nowrap;background:rgba(255,255,255,.07);color:var(--ink2)}
 .vd-sh em.up{background:rgba(71,209,154,.15);color:var(--mint-t)}
 .vd-s b{font:700 21px/1.2 "JetBrains Mono",monospace;color:var(--ink)}
-.vd-s small{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vd-sv{margin-top:auto;padding-top:6px}
+/* 설명이 칸보다 길면 두 줄까지 (예전엔 한 줄 말줄임이라 "보통 0.30%" 가 잘렸다). 낱말 중간에서는 안 끊고, i(뒷부분)는 통째로 */
+.vd-s small{font-size:11px;color:var(--ink2)}
+.vd-s small:not(.vd-msn){line-height:1.3;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.vd-s small:not(.vd-msn) i{font-style:normal;white-space:nowrap}
+.vd-s small.vd-msn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-sv{margin-top:auto;padding-top:3px}   /* 설명이 두 줄이 돼도 현황 칸 높이가 썸네일 16:9 와 같게 (1280px 에서 263px) */
 .vd-spark{display:block;width:100%;height:24px}
 .vd-spark .a{fill:rgba(255,77,79,.16)}
 .vd-spark .l{fill:none;stroke:var(--vg);stroke-width:2;stroke-linejoin:round}
@@ -1375,7 +1403,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vt-tr.hi,.vd-tr.hi{border-color:rgba(255,90,95,.45)!important;background:rgba(255,77,79,.07)!important}
 .vt-tr.mid,.vd-tr.mid{border-color:rgba(255,181,71,.4)!important;background:rgba(255,181,71,.06)!important}
 .vd-trm{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:6px}
-.vd-trm i{font-style:normal;text-align:center;font-size:10px;font-weight:700;padding:2px 0;border-radius:5px;background:rgba(255,255,255,.06);color:var(--dim)}
+.vd-trm i{font-style:normal;text-align:center;font-size:10px;font-weight:700;padding:2px 0;border-radius:5px;background:rgba(255,255,255,.06);color:var(--ink3)}
 .vd-trm i.on.lo{background:rgba(255,255,255,.18);color:var(--ink)}
 .vd-trm i.on.mid{background:#ffb547;color:#2a1a00}
 .vd-trm i.on.hi{background:#ff5a5f;color:#fff}

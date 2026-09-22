@@ -1058,7 +1058,7 @@
     if (!tr) return tile('추이', '', '—', '기록이 조금 더 쌓이면 나옵니다', '');
     return '<div class="vd-s vd-tr ' + tr.lv.c + '" title="최근 24시간 증가가 채널 영상 ' + tr.n + '편 중 몇 번째인지로 나눕니다 (상위 20% 강함 · 50% 중간 · 그 아래 약함)">'
       + '<div class="vd-sh"><span>추이</span><em>' + tr.rank + '위 / ' + tr.n + '편</em></div>'
-      + '<b>' + tr.lv.t + '</b><small>최근 24시간 +' + fmt(tr.g.x) + (tr.g.kind === 'est' ? ' (추정)' : tr.g.kind === 'pred' ? ' (예측)' : '') + '</small>'
+      + '<b>' + tr.lv.t + '</b><small>최근 24시간 +' + fmt(tr.g.x) + (tr.g.kind === 'est' ? ' <i>(추정)</i>' : tr.g.kind === 'pred' ? ' <i>(예측)</i>' : '') + '</small>'
       + '<div class="vd-trm" aria-hidden="true">' + TREND.slice().reverse().map(function(t){ return '<i class="' + t.c + (t === tr.lv ? ' on' : '') + '">' + t.t + '</i>'; }).join('') + '</div></div>';
   }
   // 현황 칸 카운터: 다음 100만 단위까지 남은 시간 (④ 1일 추세, milestone). 마지막 기록 시각부터 흐른 만큼 빼서 30초마다 다시 센다 (cntTick)
@@ -1123,11 +1123,12 @@
       + thumb(v) + '<span class="vd-play">' + PLAY + '</span>' + (link ? '</a>' : '</div>')
       // 현황 칸: 윗줄 조회수 · 좋아요 · 댓글, 아랫줄 추이 · 다음 100만 단위 카운터(두 칸)
       + '<div class="vd-stats">'
-      + tile('조회수', rank(V, pv), fmt(V), full(V) + '회' + (pv.length >= 3 ? ' · 같은 시점 보통 ' + fmt(q(pv, 0.5)) : ''), spark(v, a))
+      // 설명 글이 칸보다 길면 두 줄로: 뒷부분(<i>)은 통째로 다음 줄에 (CSS .vd-s small i)
+      + tile('조회수', rank(V, pv), fmt(V), full(V) + '회' + (pv.length >= 3 ? ' <i>· 같은 시점 보통 ' + fmt(q(pv, 0.5)) + '</i>' : ''), spark(v, a))
       + (L == null ? tile('좋아요', '', '숨김', '좋아요 수를 공개하지 않은 영상', '')
-         : tile('좋아요', rank(L / V, pl), full(L), '조회수의 ' + pct(L / V, 1) + (pl.length >= 3 ? ' · 보통 ' + pct(q(pl, 0.5), 1) : ''), strip(L / V, pl)))
+         : tile('좋아요', rank(L / V, pl), full(L), '조회수의 ' + pct(L / V, 1) + (pl.length >= 3 ? ' <i>· 보통 ' + pct(q(pl, 0.5), 1) + '</i>' : ''), strip(L / V, pl)))
       + (C == null ? tile('댓글', '', '꺼짐', '댓글을 막아 둔 영상', '')
-         : tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' · 보통 ' + pct(q(pc, 0.5), 2) : ''), strip(C / V, pc)))
+         : tile('댓글', rank(C / V, pc), full(C), '조회수의 ' + pct(C / V, 2) + (pc.length >= 3 ? ' <i>· 보통 ' + pct(q(pc, 0.5), 2) + '</i>' : ''), strip(C / V, pc)))
       + trendTile(tr) + msTile(v)
       + '</div></div>'
       + '<div class="vd-pred' + (late(v) ? ' late' : '') + '" id="vd-pred"><div class="vd-ph">' + (late(v)
