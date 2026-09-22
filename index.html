@@ -3703,7 +3703,13 @@ goTab(true,true);
         if (a === 'save') save();
         else if (a === 'revert') revert();
         else if (a === 'achall') { state.achAll = !state.achAll; render(); }
-        else if (a === 'reset') { PEND = PEND.concat(ENTRIES.map(function(e){ return { id: newId(), t: Date.now(), k: e.k, i: e.i, d: -e.d, w: -(e.w || 0) }; })); render(); }
+        else if (a === 'reset') {
+          PEND = PEND.concat(ENTRIES.map(function(e){ return { id: newId(), t: Date.now(), k: e.k, i: e.i, d: -e.d, w: -(e.w || 0) }; }));
+          // 칭호도 비운다 (405빵과 같게. 예전엔 초기화하고 저장해도 받은 칭호가 그대로 남았음). 저장해야 확정되고, 되돌리기를 누르면 저장된 칭호로 돌아간다.
+          // 기록은 이미 0인데 칭호만 남은 경우(예전에 초기화한 기록)도 저장할 수 있게 변경 1건으로 센다
+          if (Object.keys(ACH).length) { ACH = {}; EDITS++; }
+          render();
+        }
         return;
       }
       var card = t.closest('[data-card]');
