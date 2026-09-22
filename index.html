@@ -1479,8 +1479,10 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 
 /* ===== 조회수 예측기: 상승 속도 화면 (velocity 참고) ===== */
 .vx-hero{margin:4px 0 18px}
-.vx-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;font:500 12px "JetBrains Mono",monospace;color:var(--ink2)}
-.vx-meta b{color:var(--ink);font-weight:600}
+.vx-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;font:500 12px "Pretendard Variable",sans-serif;color:var(--ink2)}
+.vx-meta b{font:600 12px "JetBrains Mono",monospace;color:var(--ink)}
+/* 고정폭 숫자 안에 낀 한글(단위 말고 낱말)은 Pretendard 로 — 고정폭 한글은 글자 간격이 벌어진다 */
+.ko{font-family:"Pretendard Variable",sans-serif;font-style:normal}
 .vx-chk{display:inline-flex;align-items:center;gap:7px;padding:4px 11px 4px 9px!important;border-radius:999px!important;font:600 11.5px "Pretendard Variable",sans-serif;
   background:rgba(255,255,255,.05);border:1px solid var(--line)!important;color:var(--ink2)}
 .vx-chk i{width:11px;height:11px;border-radius:50%;border:2px solid rgba(255,255,255,.18);border-top-color:var(--vg)}
@@ -5574,12 +5576,12 @@ goTab(true,true);
   }
   // 1주 뒤 예상 조회수 { x: 예상 누적, gain: 늘 양, kind: 'pred' | 'est' | 'wait' }
   //   게시 15일 전: 지금 → 24시간·7일·30일 종합 예측을 로그 시간으로 이은 곡선 위 1주 뒤, 15일 뒤: ④ 1일 추세의 1주 뒤
-  //   예측이 없으면 최근 24시간 증가 × 7 (추정)
+  //   예측이 없으면 ④ 감쇠 곡선의 1주 뒤 (추정 — 24시간 증가 × 7 직선은 며칠 된 영상에서 크게 부풀어 버림)
   function week1(v){
     var key = v.id + '|w1';
     if (VC[key]) return VC[key];
     var a = age(v), V = av(v, a), T = a + 168, o = null;
-    if (a >= VE.LATE){ var p = VE.msPlan(v.vs, a, 1); if (p) o = { x: p.wk[0], kind: 'pred' }; }
+    if (a >= VE.LATE){ var p = plan(v); if (p) o = { x: p.wk[0], kind: 'pred' }; }
     else {
       var pts = [[a, V]];
       TARGETS.forEach(function(tg, k){ if (tg.T <= a) return; var r = hz(v, k).pr, x = r && r[3] ? r[3].p : null; if (x && x > pts[pts.length - 1][1]) pts.push([tg.T, x]); });
@@ -5588,7 +5590,7 @@ goTab(true,true);
         o = { x: p0[1] + f * (p1[1] - p0[1]), kind: 'pred' };
       }
     }
-    if (!o){ var g = velo(v, 24); if (g.x != null && (g.kind === 'real' || g.kind === 'est')) o = { x: V + g.x * 7, kind: 'est' }; }
+    if (!o){ var p4 = plan(v); if (p4) o = { x: p4.wk[0], kind: 'est' }; }                          // 예측이 없으면 ④ 감쇠 곡선의 1주 뒤 (추정)
     return (VC[key] = o ? { x: o.x, gain: o.x - V, kind: o.kind } : { x: null, gain: null, kind: 'wait' });
   }
   // 100만 단위 돌파 목록: 게시 15일이 지난 영상 중 조회수 90만 이상. 다음 100만까지 며칠 — ④ 1일 추세(하루 증가 × 하루마다 줄어드는 비율)로만
@@ -5719,7 +5721,7 @@ goTab(true,true);
   function msCard(v, p, m){
     var ok = VE.likely(m);
     return '<div class="vh ms" style="--mc:' + LT.color + '">'
-      + '<div class="vh-h"><div><b>' + fmtM(m.M) + ' 돌파</b><small>' + fmt(m.M - p.V) + ' 남음</small></div>'
+      + '<div class="vh-h"><div><b>' + fmtM(m.M) + ' 돌파</b><small>' + fmt(m.M - p.V) + ' <i class="ko">남음</i></small></div>'
       + '<span class="vh-tag ' + (ok ? 'hit' : '') + '">' + (ok ? msWeek(v, m) + '주 차' : m.days == null ? '지금 추세로는 못 닿음' : '8주 넘게') + '</span></div>'
       + '<div class="vh-v">' + (m.days == null ? '—' : Math.ceil(m.days) + '<small>일 뒤 · ' + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
       + '<div class="vh-up">하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + '</div>'
@@ -5993,7 +5995,7 @@ goTab(true,true);
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
       + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
-      + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 1일 추세법으로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
+      + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 1일 추세법으로 계산합니다. 예측이 아직 없으면 최근 하루 증가가 줄어드는 곡선으로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다.</li>'
       + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로 계산합니다.</li>'
@@ -6082,7 +6084,7 @@ goTab(true,true);
       h += '<tr class="vt-r' + (v === sel ? ' on' : '') + (open ? ' open' : '') + '">'
         + '<td class="n">' + (ts === 'gain' ? i + 1 : '') + '</td>'
         + '<td class="v"><button type="button" class="vt-v" data-vid="' + esc(v.id) + '" data-go="1"><span class="vs-th">' + thumb(v) + '</span>'
-        + '<span class="vt-vt"><b>' + esc(v.title) + '</b><small><span class="vt-dt">' + ymd(v.pub) + (v.dur ? ' · ' + fmtDur(v.dur) : '') + '</span>'
+        + '<span class="vt-vt"><b>' + esc(v.title) + '</b><small><span class="vt-dt">' + ymd(v.pub) + (v.dur ? ' · <i class="ko">' + fmtDur(v.dur) + '</i>' : '') + '</span>'
         + (TYPE[v.type] ? '<i class="vtag">' + TYPE[v.type] + '</i>' : '') + (a < 24 ? '<i class="vtag new">24h</i>' : '')
         + (s ? '<i class="vtag ms">곧 ' + fmtM(s.M) + '</i>' : '') + '<span class="vt-tot">누적 ' + fmt(av(v, a)) + ' · ' + ageTxt(a) + '</span></small></span></button></td>'
         + '<td class="g"><span class="vt-gn">' + kindTag(g) + '<b>' + (g.x == null ? '—' : full(g.x)) + '</b></span></td>'
