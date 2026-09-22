@@ -765,24 +765,24 @@
     $('mb').innerHTML = '<div class="mb-sum"><span><b>' + within(7) + '</b>편 · 7일 안에 새 100만 단위 달성 예상</span><span><b>' + within(30) + '</b>편 · 30일 안에 새 100만 단위 달성 예상</span></div>'
       + (B.length ? '<div class="mb-list">' + B.map(mbRow).join('') + '</div>' : '<p class="anote">게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 없습니다.</p>');
   }
-  // 100만 단위 목록 한 줄
-  //   왼쪽: 제목 / 구간(지금 → 목표)   오른쪽: 목표까지 / N만 남음   아래(두 칸 걸침): 달성까지 며칠
+  // 100만 단위 목록 한 줄 — 목표(다음 100만)는 한 번만:
+  //   [썸네일] 제목 / 지금 → 목표        | 오른쪽(두 줄 높이): 달성까지 / 남은 시간(크게) / 날짜 오전·오후 무렵
+  //   [칩] N 남음 · 추이 ▂▄▆ 강함 · 8주 넘게 (썸네일 아래부터 한 줄)
+  //   못 닿거나 기록이 모자라면 오른쪽은 — 와 까닭
   function mbRow(x){
-    var v = x.v, ok = in8(x);
-    var left = Math.max(0, x.M - x.V), leftTxt = left < 1e4 ? full(left) + '회' : fmtM(left);
-    var foot;
-    if (x.eta == null) foot = x.why === 'far' ? '지금 추세로는 ' + fmtM(x.M) + ' 달성이 어렵습니다' : '기록이 조금 더 쌓이면 달성 예상일이 나옵니다';
-    else foot = fmtM(x.M) + ' 달성 예상, <b>' + etaHM(x.eta) + ' 내</b>, <span class="mb-when">' + ddayAP(v, x.eta * 24) + ' 무렵</span>'
-      + (ok ? '' : ' <span class="mb-far">8주 넘게</span>');
-    // 아래 줄 오른쪽: 추이 (④ 1일 추세로 본 1주 증가가 게시 15일 지난 영상 중 몇 번째인지)
-    var tr = ltTrend(v), trTxt = !tr ? '' : '<span class="mb-tr ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이'
-      + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>';
+    var v = x.v, ok = in8(x), left = Math.max(0, x.M - x.V), tr = ltTrend(v);
+    var chips = '<span class="mb-cp"><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b>남음</span>'
+      + (tr ? '<span class="mb-cp tr ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
+      + (x.eta != null && !ok ? '<span class="mb-cp far">8주 넘게</span>' : '');
+    var eta = x.eta != null
+      ? '<b class="mb-eta">' + etaHM(x.eta).replace(/(시간|분|일|주)/g, '<i>$1</i>') + '</b><small>' + ddayAP(v, x.eta * 24) + ' 무렵</small>'
+      : '<b class="mb-eta na">—</b><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
-      + '<span class="mb-now">구간 <b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span></span>'
-      + '<span class="mb-e"><small>' + fmtM(x.M) + '까지</small><span class="mb-left"><b>' + leftTxt + '</b><em>남음</em></span></span>'
-      + '<span class="mb-f"><span class="mb-ft">' + foot + '</span>' + trTxt + '</span></button>';
+      + '<span class="mb-now"><b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span>'
+      + '</span><span class="mb-cps">' + chips + '</span>'
+      + '<span class="mb-e"><small>달성까지</small>' + eta + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){

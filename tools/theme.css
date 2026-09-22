@@ -1657,3 +1657,37 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vd-top > .vd-th{align-self:center}
 .vd-stats > .vd-tr{grid-template-columns:auto minmax(0,1fr) auto}
 .vd-stats > .vd-tr .vd-trm{width:clamp(104px,32vw,140px)}       /* 약함|중간|강함 막대: 좁은 화면(320px)에서 가운데 글자 칸을 누르지 않게 */
+
+/* ===== 100만 단위 목록 한 줄 (새 디자인): [썸네일] [제목 / 지금 → 목표 / 칩] | [달성까지 · 남은 시간 · 날짜] — 아래 상자 줄 없음 ===== */
+#v-views .mb-r{grid-template-areas:"th b e";row-gap:0!important}
+#v-views .mb-r .mb-b{gap:6px}
+.mb-cps{display:flex;flex-wrap:wrap;gap:4px 5px}
+.mb-cp{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.mb-cp b{font:700 11.5px "JetBrains Mono",monospace;color:var(--ink)}
+.mb-cp.tr b{font-family:"Pretendard Variable","Noto Sans KR",sans-serif;font-weight:800}
+.mb-cp.tr svg{width:12px;height:9px;flex:0 0 auto}
+.mb-cp.tr rect{fill:rgba(255,255,255,.16)}
+.mb-cp.tr.hi{background:rgba(255,90,95,.1);border-color:rgba(255,90,95,.32)}
+.mb-cp.tr.hi b{color:#ff7478}.mb-cp.tr.hi rect.on{fill:#ff5a5f}
+.mb-cp.tr.mid{background:rgba(255,181,71,.09);border-color:rgba(255,181,71,.3)}
+.mb-cp.tr.mid b{color:#ffb547}.mb-cp.tr.mid rect.on{fill:#ffb547}
+.mb-cp.tr.lo b{color:var(--ink2)}.mb-cp.tr.lo rect.on{fill:var(--ink2)}
+.mb-cp.far{color:var(--dim)}
+#v-views .mb-r .mb-e{justify-content:center;min-width:88px}
+.mb-eta{font:800 20px/1.15 "JetBrains Mono",monospace;color:var(--ink);white-space:nowrap}
+.mb-eta i{font:700 11px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin:0 4px 0 1px}
+.mb-eta i:last-child{margin-right:0}
+.mb-eta.na{color:var(--dim)}
+#v-views .mb-r.in .mb-eta{color:var(--vg)}
+@media (max-width:640px){
+  .mb-eta{font-size:17px}
+  .mb-eta i{margin:0 3px 0 1px}
+  #v-views .mb-r .mb-e{min-width:78px}
+}
+/* 칩 줄은 썸네일 아래부터 가운데까지 한 줄, 오른쪽 달성까지 칸은 두 줄 높이 가운데 */
+#v-views .mb-r{grid-template-areas:"th b e" "cp cp e";row-gap:8px!important}
+#v-views .mb-r > .mb-cps{grid-area:cp}
+#v-views .mb-r .mb-now b{font-size:13px}
+/* PC 두 칸 목록(카드 약 370px): 썸네일 84px · 남은 시간 18px → 가운데 "1196만 → 1,200만" 이 한 줄에 */
+@media (min-width:641px){#v-views .mb-r{grid-template-columns:84px minmax(0,1fr) auto}.mb-eta{font-size:18px}}
