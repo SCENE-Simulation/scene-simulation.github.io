@@ -2096,7 +2096,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
     <div class="gl"><svg><use href="#i-gift"/></svg>굿즈 컬렉션 북<a class="glbtn" href="?tab=allgoods" data-tab="allgoods" title="굿즈 전체보기">전체보기</a></div>
     <details class="yr" open>
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 굿즈</summary>
-      <a class="nv sub" href="?tab=goods2026" data-tab="goods2026">더현대 팝업 스토어</a>
+      <!-- 메뉴는 pages.js 의 GCOLS(굿즈 컬렉션 목록)에서 붙인다 (더현대 팝업 스토어 · 크림 티셔츠 …) -->
     </details>
     <a class="nv yl" href="?tab=goods2025" data-tab="goods2025"><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈<span class="bd">SOON</span></a>
     <a class="nv yl" href="?tab=goods2024" data-tab="goods2024"><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈<span class="bd">SOON</span></a>
@@ -2143,13 +2143,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   </div>
 
   <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg>굿즈 컬렉션 북</div></div>
-  <div class="hgrid">
-    <a class="hc" href="?tab=goods2026" data-tab="goods2026" style="--c:#ecd25b">
-      <div class="k">2026 굿즈</div>
-      <h2>더현대 팝업 스토어</h2>
-      <p>더현대 팝업 스토어에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈를 기록해 보세요.</p>
-      <span class="go">굿즈 보기 →</span>
-    </a>
+  <div class="hgrid" id="gd-grid">
+    <!-- 굿즈 컬렉션 카드는 pages.js 의 GCOLS 에서 이 자리(준비 중 카드 앞)에 붙인다 -->
     <div class="hc soon" style="--c:#6e6e73">
       <div class="k">2025 굿즈</div>
       <h2>2025년 굿즈</h2>
@@ -5270,12 +5265,33 @@ goTab(true,true);
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
 
   // ===== 굿즈 자료 =====
-  // 연도별 상품 목록. 자료를 받으면 여기에 넣으면 페이지·통합 보기·위시리스트에 모두 반영됨
-  // { id, name, price, parts(구성), date(출시), img(이미지 주소) }
-  var GOODS = { '2026': [], '2025': [], '2024': [] };
-  var YEARS = ['2026', '2025', '2024'];
-  // 연도별 굿즈 컬렉션 이름
-  var GCOLL = { '2026': '더현대 팝업 스토어', '2025': '2025년 굿즈', '2024': '2024년 굿즈' };
+  // 굿즈 컬렉션(페이지) 목록. 여기에 하나 넣으면 페이지 · 사이드바 메뉴(그 연도 줄 아래) · 홈 카드 · 굿즈 전체보기 · 위시리스트에 모두 반영된다.
+  //   id     탭 이름(주소 ?tab=id). 한 번 정하면 바꾸지 않는다
+  //   y      연도 — 사이드바 "2026 굿즈" 같은 연도 줄 아래에 붙는다
+  //   ym     출시 연-월 'YYYY-MM' — 사이드바 메뉴 오른쪽 끝 "N월" 상자(shell.js). 꼭 채울 것
+  //   title  메뉴 · 페이지 이름(짧게) / desc 페이지 설명 / card 홈 카드 설명(없으면 desc) / c 홈 카드 색
+  //   items  상품 [{ id, name, price, parts(한 줄 설명), date(출시), img(이미지 주소) }] — 상품 id 는 보유 수량 · 위시리스트 저장 키라 바꾸지 않는다
+  var GCOLS = [
+    { id: 'goods2026', y: '2026', ym: '2026-09',   // 'Scent Archive (memories of RESCENE)' 2026.9.15~23 더현대 서울 5층 (텐아시아 2026.09.16)
+      title: '더현대 팝업 스토어', c: '#ecd25b',
+      desc: '더현대 팝업 스토어에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈는 보유 수량을 올려 두면 통합 현황에 반영됩니다.',
+      card: '더현대 팝업 스토어에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈를 기록해 보세요.',
+      items: [] },
+    { id: 'kream2026', y: '2026', ym: '2026-07',   // KREAM 단독 2026.7.9 11:00 ~ 7.31 23:59, 32,000원 (패스트페이퍼 2026.07.08 · 금강일보 2026.07.11)
+      title: '크림 티셔츠', c: '#99ce64',
+      desc: '한정판 거래 플랫폼 KREAM에서 단독으로 판매한 리센느 × 김씨네과일 \'야호 티셔츠\' 5종입니다. 멤버들이 고향의 추억과 풍경을 직접 그린 손그림이 들어 있습니다. '
+        + '2026년 7월 9일부터 31일까지 판매했고, 구매자에게 멤버 친필 사인 티셔츠를 랜덤으로 주는 이벤트도 있었습니다.',
+      card: 'KREAM에서 단독 판매한 리센느 × 김씨네과일 \'야호 티셔츠\' 5종. 멤버들이 직접 그린 고향 손그림 티셔츠를 모아 보세요.',
+      items: [
+        { id: 'kream2026-geoje',    name: '거제 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림' },
+        { id: 'kream2026-gyeongju', name: '경주 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림' },
+        { id: 'kream2026-suwon',    name: '수원 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '리브의 고향 수원 · 수원 치킨 손그림' },
+        { id: 'kream2026-chiba',    name: '치바 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '미나미의 고향 치바 · 비행기와 나리타 공항 손그림' },
+        { id: 'kream2026-goyang',   name: '고양 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '메이의 고향 고양 · 고양시 마스코트와 물고기 손그림' }
+      ] }
+  ];
+  function gcol(id){ return GCOLS.filter(function(c){ return c.id === id; })[0]; }
+  window.SGGOODS = GCOLS;   // shell.js 가 사이드바 "N월" 상자(ym)에 쓴다
 
   // ===== 포토카드 컬렉션 =====
   function cu(){ return window.CU405; }
@@ -5288,7 +5304,7 @@ goTab(true,true);
     }, 0);
   }
   function goodsAll(){
-    return YEARS.reduce(function(a, y){ return a.concat(GOODS[y].map(function(g){ return { y: y, g: g }; })); }, []);
+    return GCOLS.reduce(function(a, c){ return a.concat(c.items.map(function(g){ return { c: c, g: g }; })); }, []);
   }
   function gdOwned(){ return goodsAll().filter(function(x){ return GOWN[x.g.id] > 0; }).length; }
 
@@ -5324,7 +5340,9 @@ goTab(true,true);
     main.appendChild(s);
     return s;
   }
-  var elGoods = page('v-goods2026'), elAllCards = page('v-allcards'), elAllGoods = page('v-allgoods'), elWish = page('v-wish');
+  var elGd = {};                                               // 굿즈 컬렉션 페이지 (GCOLS 마다 하나, id v-<id>)
+  GCOLS.forEach(function(c){ elGd[c.id] = page('v-' + c.id); });
+  var elAllCards = page('v-allcards'), elAllGoods = page('v-allgoods'), elWish = page('v-wish');
 
   function sec(icon, crumbs, desc){
     var t = crumbs.map(function(c, i){
@@ -5355,7 +5373,7 @@ goTab(true,true);
     var d = NOBUILD[k], what = d.pc ? '포토카드' : '굿즈', icon = d.pc ? 'i-book' : 'i-gift';
     var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않았습니다.';
     var desc = d.d || NB_DESC, im = d.img || NB_IMG;
-    var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['goods2026', '2026 굿즈 보기 →'];
+    var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['allgoods', '굿즈 전체보기 →'];
     return sec(icon, [d.pc ? '포카 컬렉션 북' : '굿즈 컬렉션 북', d.y + (d.pc ? ' 포카' : ' 굿즈')])
       + '<div class="pk-ph tall nbx">'
       + (im ? '<img class="nbx-img" src="' + esc(im.src) + '" width="' + im.w + '" height="' + im.h + '" alt="' + esc(im.alt || '') + '" loading="lazy">'
@@ -5388,22 +5406,21 @@ goTab(true,true);
   function goodsStats(list){
     var own = list.filter(function(g){ return GOWN[g.id] > 0; }).length;
     var spent = list.reduce(function(s, g){ return s + (GOWN[g.id] || 0) * (g.price || 0); }, 0);
-    return '<div class="cmeta"><div class="mt"><span class="mk">등록 상품</span><b>' + list.length + '종</b><small>이 연도에 나온 굿즈</small></div>'
+    return '<div class="cmeta"><div class="mt"><span class="mk">등록 상품</span><b>' + list.length + '종</b><small>이 컬렉션에 나온 굿즈</small></div>'
       + '<div class="mt"><span class="mk">보유</span><b>' + own + '/' + list.length + '</b><small>가지고 있는 종류</small></div>'
       + '<div class="mt"><span class="mk">쓴 금액</span><b>' + won(spent) + '원</b><small>보유 수량 × 가격</small></div></div>';
   }
 
   // ===== 각 페이지 =====
-  function renderGoods(){
-    var list = GOODS['2026'];
-    elGoods.innerHTML = sec('i-gift', ['굿즈 컬렉션 북', '2026 굿즈', GCOLL['2026']],
-      GCOLL['2026'] + '에서 나온 리센느 굿즈를 상품별로 모았습니다. 가지고 있는 굿즈는 보유 수량을 올려 두면 통합 현황에 반영됩니다.')
-      + goodsStats(list) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(list);
+  function renderGoodsPage(c){
+    elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
+      + goodsStats(c.items) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items);
   }
+  function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
-    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '2024년부터 2026년까지 나온 굿즈를 연도별로 모아서 봅니다.');
-    YEARS.forEach(function(y){
-      h += '<div class="sec sec2"><div class="sec-t">' + y + '년 · ' + esc(GCOLL[y]) + '<span class="cnt">' + GOODS[y].length + '종</span></div></div>' + goodsGrid(GOODS[y]);
+    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
+    GCOLS.forEach(function(c){
+      h += '<div class="sec sec2"><div class="sec-t">' + c.y + '년 · ' + esc(c.title) + '<span class="cnt">' + c.items.length + '종</span></div></div>' + goodsGrid(c.items);
     });
     elAllGoods.innerHTML = h;
   }
@@ -5534,9 +5551,9 @@ goTab(true,true);
         if (col) out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + col.names[i], from: col.title, img: col.src[i],
           pix: col.isPix(i), land: col.isLand(i), own: col.counts()[i] || 0, tab: col.id });
       } else if (key.indexOf('gd:') === 0) {
-        var id = key.slice(3), f = null, fy = null;
-        goodsAll().forEach(function(x){ if (x.g.id === id) { f = x.g; fy = x.y; } });
-        if (f) out.push({ key: key, type: 'gd', name: f.name, from: fy + ' · ' + GCOLL[fy], img: f.img, price: f.price, own: GOWN[id] || 0, tab: 'goods' + fy });
+        var id = key.slice(3), f = null;
+        goodsAll().forEach(function(x){ if (x.g.id === id) f = x; });
+        if (f) out.push({ key: key, type: 'gd', name: f.g.name, from: f.c.y + ' · ' + f.c.title, img: f.g.img, price: f.g.price, own: GOWN[id] || 0, tab: f.c.id });
       }
     });
     return out;
@@ -5587,7 +5604,7 @@ goTab(true,true);
         + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">전체보기 →</a>';
     }
     pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개 · 2024~2026년', 'allcards', '#e96387');
-    gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 2024~2026년') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
+    gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 컬렉션 ' + GCOLS.length + '개') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
     syncHearts();
   }
 
@@ -5658,13 +5675,37 @@ goTab(true,true);
       b.innerHTML = '<span><b>' + own + '/' + c.N + '</b>보유</span>' + (c.buys ? '<span><b>' + c.buys() + '회</b>구매</span>' : '');
     });
   }
+  // 굿즈 컬렉션(GCOLS)을 사이드바(그 연도 줄 아래)와 홈 굿즈 칸에 붙임 — 목록 순서대로, 홈은 준비 중(SOON) 카드보다 앞에
+  function mountGoods(){
+    var grid = document.getElementById('gd-grid');
+    GCOLS.forEach(function(c){
+      var yr = null;
+      document.querySelectorAll('#grp-gd details.yr').forEach(function(d){
+        if (d.querySelector('summary').textContent.indexOf(c.y) === 0) yr = d;
+      });
+      if (yr && !yr.querySelector('[data-tab="' + c.id + '"]')) {
+        var a = document.createElement('a');
+        a.className = 'nv sub'; a.href = '?tab=' + c.id; a.setAttribute('data-tab', c.id); a.textContent = c.title;
+        yr.appendChild(a);
+      }
+      if (grid) {
+        var card = document.createElement('a');
+        card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', c.c || '#ecd25b');
+        card.innerHTML = '<div class="k">' + esc(c.y) + ' 굿즈</div><h2>' + esc(c.title) + '</h2>'
+          + '<p>' + esc(c.card || c.desc || '') + '</p><span class="go">굿즈 보기 →</span>';
+        grid.insertBefore(card, grid.querySelector('.hc.soon'));
+      }
+    });
+  }
   mountCollections();
+  mountGoods();
   renderGoods(); renderAllGoods(); renderAllCards(); renderWish();
   injectCardHearts(); syncHearts();
 
   window.SG = {
     pages: (function(){
-      var m = { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
+      var m = { allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
+      GCOLS.forEach(function(c){ m[c.id] = elGd[c.id]; });      // 굿즈 컬렉션 (goods2026 · kream2026 …)
       (window.SGCOLS || []).forEach(function(c){ m[c.id] = c.el; });
       if (window.SGMINI) m.minigame = window.SGMINI.el;        // 뽑기 미니게임 (gacha.js)
       Object.keys(elNoBuild).forEach(function(k){ m[k] = elNoBuild[k]; });   // 만들지 않는 연도 안내 (pc2025 · pc2024 · goods2025 · goods2024)
@@ -5674,7 +5715,7 @@ goTab(true,true);
       if (tab === 'allcards') renderAllCards();
       else if (tab === 'wish') renderWish();
       else if (tab === 'allgoods') renderAllGoods();
-      else if (tab === 'goods2026') renderGoods();
+      else if (gcol(tab)) renderGoodsPage(gcol(tab));
       else if (tab === 'home') renderSum();
       else if (tab === 'minigame') { if (window.SGMINI) window.SGMINI.onShow(); }
       else (window.SGCOLS || []).forEach(function(c){ if (c.id === tab) c.onShow(); });
@@ -7454,7 +7495,7 @@ goTab(true,true);
 (function(){
   // ===== 메뉴 배지 (HOT · NEW) =====
   // 여기만 고치면 사이드바와 모바일 메뉴(하단 시트)에 같이 붙는다. 떼려면 그 줄을 지운다.
-  // 키 = 메뉴의 탭 이름(data-tab): cu405 405빵 콜라보 · goods2026 더현대 팝업 스토어 · gacha 포토카드 뽑기 시뮬레이션
+  // 키 = 메뉴의 탭 이름(data-tab): cu405 405빵 콜라보 · goods2026 더현대 팝업 스토어 · kream2026 크림 티셔츠 · gacha 포토카드 뽑기 시뮬레이션
   //       · views 조회수 예측기 · collections.js 로 추가한 콜라보는 그 설정의 id
   //       (들여쓴 하위 메뉴만 된다. 홈·위시리스트는 글자 왼쪽 자리에 아이콘이 있어서 붙지 않는다)
   // 값 = 'hot' 또는 'new'
@@ -7611,14 +7652,11 @@ goTab(true,true);
   });
   // ===== 컬렉션 북 메뉴 오른쪽 끝 "N월" 상자 (출시 달) =====
   // 규칙: 포토카드 · 굿즈 컬렉션 북의 모든 메뉴에 붙인다. 새 컬렉션을 만들면 출시 연-월(ym, 'YYYY-MM')을 꼭 채울 것.
-  //   405빵 = COLS.cu405.ym · 엔진 도감 = collections.js 의 cfg.ym · 굿즈 = 아래 GOODS_YM (탭 id → 'YYYY-MM'). ym 이 없으면 상자를 안 붙인다
+  //   405빵 = COLS.cu405.ym · 엔진 도감 = collections.js 의 cfg.ym · 굿즈 = pages.js 의 GCOLS[].ym ('YYYY-MM'). ym 이 없으면 상자를 안 붙인다
   //   상자는 달만("9월"). 메뉴가 속한 연도(2026 포카 등)와 출시 연도가 다르면 "25.12월"
-  var GOODS_YM = {
-    goods2026: '2026-09'   // 더현대 팝업 스토어 'Scent Archive' 2026.9.15~23 (텐아시아 2026.09.16)
-  };
   (function(){
     var ym = { cu405: COLS.cu405.ym };
-    Object.keys(GOODS_YM).forEach(function(k){ ym[k] = GOODS_YM[k]; });
+    (window.SGGOODS || []).forEach(function(c){ if (c.ym) ym[c.id] = c.ym; });
     (window.SGCOLS || []).forEach(function(c){ if (c.ym) ym[c.id] = c.ym; });
     document.querySelectorAll('#grp-pc .nv.sub[data-tab], #grp-gd .nv.sub[data-tab]').forEach(function(a){
       var p = String(ym[a.getAttribute('data-tab')] || '').split('-'), y = p[0], m = +p[1];

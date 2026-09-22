@@ -1,7 +1,7 @@
 (function(){
   // ===== 메뉴 배지 (HOT · NEW) =====
   // 여기만 고치면 사이드바와 모바일 메뉴(하단 시트)에 같이 붙는다. 떼려면 그 줄을 지운다.
-  // 키 = 메뉴의 탭 이름(data-tab): cu405 405빵 콜라보 · goods2026 더현대 팝업 스토어 · gacha 포토카드 뽑기 시뮬레이션
+  // 키 = 메뉴의 탭 이름(data-tab): cu405 405빵 콜라보 · goods2026 더현대 팝업 스토어 · kream2026 크림 티셔츠 · gacha 포토카드 뽑기 시뮬레이션
   //       · views 조회수 예측기 · collections.js 로 추가한 콜라보는 그 설정의 id
   //       (들여쓴 하위 메뉴만 된다. 홈·위시리스트는 글자 왼쪽 자리에 아이콘이 있어서 붙지 않는다)
   // 값 = 'hot' 또는 'new'
@@ -158,14 +158,11 @@
   });
   // ===== 컬렉션 북 메뉴 오른쪽 끝 "N월" 상자 (출시 달) =====
   // 규칙: 포토카드 · 굿즈 컬렉션 북의 모든 메뉴에 붙인다. 새 컬렉션을 만들면 출시 연-월(ym, 'YYYY-MM')을 꼭 채울 것.
-  //   405빵 = COLS.cu405.ym · 엔진 도감 = collections.js 의 cfg.ym · 굿즈 = 아래 GOODS_YM (탭 id → 'YYYY-MM'). ym 이 없으면 상자를 안 붙인다
+  //   405빵 = COLS.cu405.ym · 엔진 도감 = collections.js 의 cfg.ym · 굿즈 = pages.js 의 GCOLS[].ym ('YYYY-MM'). ym 이 없으면 상자를 안 붙인다
   //   상자는 달만("9월"). 메뉴가 속한 연도(2026 포카 등)와 출시 연도가 다르면 "25.12월"
-  var GOODS_YM = {
-    goods2026: '2026-09'   // 더현대 팝업 스토어 'Scent Archive' 2026.9.15~23 (텐아시아 2026.09.16)
-  };
   (function(){
     var ym = { cu405: COLS.cu405.ym };
-    Object.keys(GOODS_YM).forEach(function(k){ ym[k] = GOODS_YM[k]; });
+    (window.SGGOODS || []).forEach(function(c){ if (c.ym) ym[c.id] = c.ym; });
     (window.SGCOLS || []).forEach(function(c){ if (c.ym) ym[c.id] = c.ym; });
     document.querySelectorAll('#grp-pc .nv.sub[data-tab], #grp-gd .nv.sub[data-tab]').forEach(function(a){
       var p = String(ym[a.getAttribute('data-tab')] || '').split('-'), y = p[0], m = +p[1];
