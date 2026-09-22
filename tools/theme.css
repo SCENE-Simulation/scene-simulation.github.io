@@ -582,6 +582,7 @@ body.has-sfloat #totop{bottom:84px}
 /* 제목과 그 아래 설명("왜냐면 …")은 같은 글자 모양 — 두 줄짜리 제목 하나처럼 보이게 사이 간격도 줄 간격만큼만 */
 .nbx > b,.nbx > p{font-size:16px;font-weight:700;line-height:1.5;letter-spacing:-.02em;color:var(--ink);word-break:keep-all}   /* 좁은 화면에서도 단어 중간에서 안 꺾이게 */
 .nbx > p{margin:-8px 0 0}
+.nbx-img{display:block;width:220px;max-width:70%;height:auto;margin:0 0 10px;border-radius:18px;box-shadow:0 10px 28px rgba(0,0,0,.35)}   /* 상자 맨 위 그림 (NB_IMG) */
 .nbx-go{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
 .nbx-go a{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:10px;font-size:12.5px;font-weight:600;
   color:var(--ink);text-decoration:none;background:var(--glass-h);border:1px solid var(--line2)}

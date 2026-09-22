@@ -80,6 +80,8 @@
   // 안내 문구는 여기만 고치면 된다 — 제목은 연도 · 종류에 맞춰 만들고, 설명은 네 페이지 공통(NB_DESC, 사용자 문구 9/23).
   // 페이지마다 t(제목) · d(설명, HTML 가능)를 넣으면 기본 문구 대신 쓴다
   var NB_DESC = '왜냐면 내가 26년 6월부터 덕질을 시작했기 때문입니다.';
+  // 상자 맨 위 그림(네 페이지 공통, 사용자 제공 9/23). 페이지마다 img 를 넣으면 그걸 쓴다
+  var NB_IMG = { src: 'img/nobuild/pepe.webp', w: 623, h: 639, alt: '리센느 머리띠를 두르고 조끼에 빵과 피자를 가득 꽂은 개구리 그림' };
   var NOBUILD = {
     pc2025:    { pc: true,  y: '2025' },
     pc2024:    { pc: true,  y: '2024' },
@@ -89,10 +91,12 @@
   function noBuild(k){
     var d = NOBUILD[k], what = d.pc ? '포토카드' : '굿즈', icon = d.pc ? 'i-book' : 'i-gift';
     var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않습니다';
-    var desc = d.d || NB_DESC;
+    var desc = d.d || NB_DESC, im = d.img || NB_IMG;
     var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['goods2026', '2026 굿즈 보기 →'];
     return sec(icon, [d.pc ? '포카 컬렉션 북' : '굿즈 컬렉션 북', d.y + (d.pc ? ' 포카' : ' 굿즈')])
-      + '<div class="pk-ph tall nbx"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>'
+      + '<div class="pk-ph tall nbx">'
+      + (im ? '<img class="nbx-img" src="' + esc(im.src) + '" width="' + im.w + '" height="' + im.h + '" alt="' + esc(im.alt || '') + '" loading="lazy">'
+            : '<svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>')
       + '<b>' + esc(t) + '</b><p>' + desc + '</p>'
       + '<div class="nbx-go"><a href="?tab=' + go[0] + '" data-tab="' + go[0] + '">' + go[1] + '</a>'
       + '<a href="?tab=home" data-tab="home">홈으로</a></div></div>';
