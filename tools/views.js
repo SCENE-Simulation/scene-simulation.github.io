@@ -145,7 +145,7 @@
   var PRED = {};                                       // 영상·목표별 예측 (한 번 계산하면 재사용)
 
   // 화면 상태: 순위 기준 창(24시간/7일), 종류 거르기, 표 정렬·검색·보이는 줄 수, 그래프 모드, 펼친 줄
-  var SOPEN = {};                                        // 성적표: 방법별 예측을 펼친 줄
+  var siFor = null;                                      // 성적표 탭(si)을 마지막으로 정해 준 영상 — 영상이 바뀔 때만 탭을 다시 고른다
   var rv = 'rank', rk = 24, ft = 'all', ts = 'gain', tq = '', tn = 20, cm = 'cum', OPEN = {}, VC = {}, lastCheck = 0, timer = null;
 
   function show(){
@@ -411,7 +411,7 @@
       + (big ? '<span class="wk-x">' + wk.map(function(o){ return '<span>' + o.k + '주</span>'; }).join('') + '</span>' : '');
   }
 
-  // 상세(15일 뒤): 다음 100만 단위 세 개 · 초기 예측 결과 · 이 영상의 100만 돌파 예측 기록
+  // 상세(15일 뒤): 다음 100만 단위 세 개 (초기 예측 결과·구간 기록은 그래프 아래 예측 성적표에)
   function renderLate(){
     var v = sel, p = plan(v);
     $('vd-md').innerHTML = '<i style="background:' + LT.color + '"></i><span>' + LT.short + '</span>'
@@ -420,7 +420,7 @@
     $('vd-hs').innerHTML = p ? p.ms.map(function(m){ return msCard(v, p, m); }).join('')
       : '<div class="vh na" style="grid-column:1/-1"><div class="vh-h"><div><b>100만 단위 돌파</b></div><span class="vh-tag">예측 준비 중</span></div>'
         + '<small class="vh-n">최근 기록이 3시간 이상 쌓이면 예측합니다.</small></div>';
-    $('vd-ex').innerHTML = early(v) + history(v);
+    $('vd-ex').innerHTML = '';
     chart();
   }
   function msCard(v, p, m){
@@ -431,16 +431,6 @@
       + '<div class="vh-v">' + (m.days == null ? '—' : Math.ceil(m.days) + '<small>일 뒤 · ' + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
       + '<div class="vh-up">하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + '</div>'
       + wkBars(v, p, m, true) + '</div>';
-  }
-  // 초기(24시간·7일·30일) 예측 결과 한 줄 요약
-  function early(v){
-    return '<div class="vd-early"><span class="vd-el">초기 예측 결과</span>' + TARGETS.map(function(tg, k){
-      var o = hz(v, k), r = o.pr && o.pr[3], body;
-      if (!o.done) body = r ? '예측 <b>' + fmt(r.p) + '</b> <small>' + ageTxt(tg.T - age(v)) + ' 뒤</small>' : '<small>' + (o.err ? '예측 없음' : '진행 중') + '</small>';
-      else if (o.act == null) body = '<small>수집 전이라 기록 없음</small>';
-      else body = '실제 <b>' + fmt(o.act) + '</b>' + (r ? ' <small>예측 ' + fmt(r.p) + '</small><span class="vp-e' + (r.lo != null ? (o.act >= r.lo && o.act <= r.hi ? ' hit' : ' miss') : '') + '">' + signPct((r.p - o.act) / o.act) + '</span>' : ' <small>예측 없음</small>');
-      return '<span class="vd-e1"><em>' + tg.name + '</em>' + body + '</span>';
-    }).join('') + '</div>';
   }
   // ---------- 100만 단위 구간 채점 (수집기가 고정한 seg: 구간마다 100만·50만·20만 남은 지점에서 한 도달 예측) ----------
   //   오차 = (예측 − 실제) ÷ 그 지점부터 실제로 걸린 시간. 범위 안 = 실제가 예측 범위(r ± 3%p) 안.
@@ -500,12 +490,6 @@
       + (mine ? '' : '<button type="button" class="vs-v" data-vid="' + esc(v.id) + '" data-go="1"><span class="vs-th">' + thumb(v) + '</span>' + esc(v.title) + '</button>')
       + '<span class="sg-m">' + fmtM(s.M - VE.MSTEP) + ' → <b>' + fmtM(s.M) + '</b></span><span class="sg-st' + (done ? ' done' : '') + '">' + st + '</span></div>'
       + '<div class="sg-cs">' + [0, 1, 2].map(function(k){ return segCell(v, s, k); }).join('') + '</div></div>';
-  }
-  // 영상 상세: 이 영상의 구간 예측 기록
-  function history(v){
-    var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
-    return '<div class="vd-mh"><span class="vd-el">100만 단위 구간 예측 기록</span>' + (L.length ? '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
-      : '<small class="vh-n">100만·50만·20만이 남았을 때 한 예측이 실제 도달 시각과 얼마나 맞았는지 보여 줍니다.</small>') + '</div>';
   }
 
   // 그래프(15일 뒤): 지금 구간의 100만 단위를 넘은 때부터 → 지금 → 앞으로 (④ 1일 추세). 가로 눈금은 [1일 | 1주]
@@ -648,23 +632,6 @@
     svg.addEventListener('pointercancel', hide);
   }
 
-  // 성적표(15일 뒤): 100만 단위 구간마다 세 지점(100만·50만·20만 남음)에서 한 도달 예측이 맞았는지
-  function renderMsScore(h){
-    var A = segAll();
-    h += '<div class="vs-cards sg">' + [0, 1, 2].map(function(k){
-        var m = A.sum[k];
-        return '<div class="vs-c" style="--mc:' + LT.color + '"><div class="vs-ch"><span class="vp-no">' + LT.b + '</span>' + SEGS[k].replace('남음', '남았을 때') + '</div>'
-          + '<div class="vs-row"><span>평균 오차</span><b>' + (m.mape != null ? pct(m.mape) : '—') + '</b></div>'
-          + '<div class="vs-bar err"><i style="width:' + (m.mape != null ? Math.min(100, m.mape / 0.5 * 100) : 0).toFixed(0) + '%"></i></div>'
-          + '<div class="vs-row"><span>범위 적중</span><b>' + (m.hit != null ? pct(m.hit) : '—') + '</b></div>'
-          + '<div class="vs-bar"><i style="width:' + (m.hit != null ? m.hit * 100 : 0).toFixed(0) + '%"></i></div>'
-          + '<small>' + (m.n ? m.n + '개 채점' : '아직 결과 없음') + (m.far ? ' · 참고 ' + m.far + '개' : '') + (m.wait ? ' · 진행 중 ' + m.wait + '개' : '') + '</small></div>';
-      }).join('') + '</div>';
-    if (!A.rows.length){ $('vs').innerHTML = h + '<p class="anote">아직 채점된 예측이 없습니다. 영상이 100만·50만·20만 남은 지점을 지나면 예측이 쌓입니다.</p>'; return; }
-    h += '<div class="sg-list">' + A.rows.slice(0, 20).map(function(x){ return segRow(x.v, x.s); }).join('') + '</div>'
-      + '<p class="gnote">오차가 + 이면 실제보다 늦게, − 이면 빨리 넘을 것으로 예측한 것입니다. 8주보다 먼 예측은 <i class="sg-far">참고</i>로만 표시하고 평균에는 넣지 않습니다.</p>';
-    $('vs').innerHTML = h;
-  }
 
   function render(){
     if (!sel){ el.innerHTML = head() + '<p class="anote">기록된 영상이 없습니다.</p>'; return; }
@@ -697,7 +664,6 @@
       + '<div class="vd" id="vd"></div>'
       + '<div class="vt-head" id="vt-h"><h3 class="ahead">전체 영상</h3><input type="search" class="vt-q" id="vt-q" placeholder="제목 검색" value="' + esc(tq) + '" aria-label="제목 검색"></div>'
       + '<div class="vt" id="vt"></div>'
-      + '<h3 class="ahead" id="vs-h">예측 성적표</h3><div class="vs" id="vs"></div>'
       + '<h3 class="ahead">예측 방법</h3><div class="vm-list" id="vm-list"></div>'
       + about()
       + '<div class="vx-toast" id="vx-toast" role="status" hidden></div>';
@@ -706,7 +672,7 @@
     var row = $('vc-row');
     row.addEventListener('scroll', navState, { passive: true });
     $('vt-q').addEventListener('input', function(){ tq = this.value.trim(); tn = 20; renderTable(); });
-    renderRank(); renderVideo(); renderTable(); renderScore(); renderMethods(); tick();
+    renderRank(); renderVideo(); renderTable(); renderMethods(); tick();
   }
   function about(){
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
@@ -1146,8 +1112,12 @@
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
         }).join('') + '</div></div>')
       + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div></div>'
-      + '<div class="vd-chart" id="vd-chart"></div>';
+      + '<div class="vd-chart" id="vd-chart"></div>'
+      // 예측 성적표: 이 영상에 한 예측이 실제와 얼마나 맞았는지 (그래프 아래)
+      + '<div class="vd-sc" id="vs-h"><div class="vd-sch"><h4>예측 성적표</h4><span>이 영상에 한 예측이 실제와 얼마나 맞았는지</span></div><div class="vs" id="vs"></div></div>';
     renderPred();
+    if (v.id !== siFor){ si = autoSi(v); siFor = v.id; }                             // 영상이 바뀌면 그 영상에 맞는 탭으로
+    renderScore();
   }
 
   function msPill(v){
@@ -1414,59 +1384,66 @@
       })();
   }
 
-  // ----- 예측 성적표 -----
+  // ----- 예측 성적표 (영상 상세 상자 안, 그래프 아래): 선택한 영상 하나 -----
+  //   [6시간 → 24시간 | 24시간 → 7일 | 7일 → 30일]: 예측 시점(게시 6시간·24시간·7일)에 고정한 예측(①②③·종합) vs 목표 시점 실제
+  //   [100만 단위 예측 확인]: 이 영상의 100만 단위 구간 기록 (구간마다 100만·50만·20만 남은 지점의 도달 예측)
+  // 영상을 고르면 보여 줄 탭: 15일 지난 영상은 100만, 아니면 결과가 나온 가장 늦은 목표 → 고정된 예측이 있는 첫 목표 → 앞으로 고정할 첫 목표 → 24시간 → 7일
+  function autoSi(v){
+    if (late(v)) return 3;
+    var ks = [0, 1, 2].filter(function(k){ return track(k).rows.some(function(r){ return r.v === v; }); });
+    var done = ks.filter(function(k){ return age(v) >= TARGETS[k].T; });
+    if (done.length) return done[done.length - 1];
+    if (ks.length) return ks[0];
+    var up = [0, 1, 2].filter(function(k){ return age(v) < TARGETS[k].c && VE.since(v) <= TARGETS[k].c; });   // 앞으로 예측을 고정할 목표
+    return up.length ? up[0] : 1;
+  }
   function scoreSeg(){
     return '<div class="seg vs-seg" role="tablist" aria-label="성적표 목표">' + TARGETS.map(function(x, k){
         return '<button type="button" role="tab" data-si="' + k + '" class="' + (k === si ? 'on' : '') + '" aria-selected="' + (k === si) + '">' + x.from + ' → ' + x.name + '</button>';
       }).join('') + '<button type="button" role="tab" data-si="3" class="' + (si === 3 ? 'on' : '') + '" aria-selected="' + (si === 3) + '">100만 단위 예측 확인</button></div>';
   }
+
   function renderScore(){
-    if (si === 3){ renderMsScore('<div class="vs-top"><p>게시 15일이 지난 영상이 <b>100만 단위 구간</b>(예: 1,300만 → 1,400만)을 지날 때, <b>100만·50만·20만 남은 지점</b>에서 한 도달 예측이 맞았는지 봅니다.</p>' + scoreSeg() + '</div>'); return; }
-    var tg = TARGETS[si], tr = track(si), best = -1, bm = Infinity;
-    tr.sum.forEach(function(s, k){ if (k < 3 && s.n && s.mape < bm){ bm = s.mape; best = k; } });
-    var h = '<div class="vs-top"><p>게시 <b>' + tg.from + '</b> 뒤에 한 <b>' + tg.name + '</b> 조회수 예측이 실제와 얼마나 맞았는지 봅니다.</p>'
-      + scoreSeg() + '</div>'
+    var v = sel, box = $('vs'); if (!v || !box) return;
+    var h = '<div class="vs-top">' + scoreSeg() + '</div>';
+    if (si === 3){ box.innerHTML = h + segScore(v); return; }
+    var tg = TARGETS[si], a = age(v), row = track(si).rows.filter(function(r){ return r.v === v; })[0];
+    var at0 = v.pub + tg.c * 3600e3, atT = v.pub + tg.T * 3600e3;
+    if (!row){
+      var f = frozen(v, tg), why = a < tg.c ? '게시 ' + tg.from + ' 뒤(' + when(at0) + ')에 예측을 고정하고, ' + tg.name + ' 뒤(' + when(atT) + ')에 채점합니다. ' + ageTxt(tg.c - a) + ' 남았습니다.'
+        : VE.since(v) > tg.c ? '수집을 시작하기 전에 게시 ' + tg.from + '이 지나 이 예측은 없습니다.'
+        : f && f.err ? f.err + '.'
+        : '게시 ' + tg.from + ' 뒤에는 기록이 모자라 어느 방법으로도 예측하지 못했습니다.';
+      box.innerHTML = h + '<p class="anote">' + why + '</p>'; return;
+    }
+    var best = -1, bm = Infinity;
+    if (row.done) [0, 1, 2].forEach(function(k){ var x = row.res[k]; if (x && Math.abs(x.err) < bm){ bm = Math.abs(x.err); best = k; } });
+    var base = at(v, tg.c, 1);
+    h += '<p class="vs-line">게시 <b>' + tg.from + '</b> 뒤(' + when(at0) + ')' + (base != null ? ' 조회수 <b>' + fmt(base) + '</b>일 때' : '') + ' 고정한 예측 → '
+      + (row.done ? '게시 <b>' + tg.name + '</b> 뒤(' + when(atT) + ') 실제 <b>' + fmt(row.act) + '</b>'
+        : '<b>' + ageTxt(tg.T - a) + ' 뒤</b>(' + when(atT) + ')에 실제 조회수와 비교합니다') + '</p>'
       + '<div class="vs-cards">' + ORDER.map(function(k){
-          var s = tr.sum[k], m = ALLM[k];
+          var r = row.pr[k], x = row.res[k], m = ALLM[k];
           return '<div class="vs-c' + (k === best ? ' best' : '') + '" style="--mc:' + m.color + '">'
             + '<div class="vs-ch"><span class="vp-no">' + m.b + '</span>' + m.tab + (k === best ? '<em>가장 정확</em>' : '') + '</div>'
-            + '<div class="vs-row"><span>범위 적중률</span><b>' + (s.hits ? pct(s.hit) : '—') + '</b></div>'
-            + '<div class="vs-bar"><i style="width:' + (s.hits ? s.hit * 100 : 0).toFixed(0) + '%"></i></div>'
-            + '<div class="vs-row"><span>평균 오차</span><b>' + (s.n ? pct(s.mape) : '—') + '</b></div>'
-            + '<div class="vs-bar err"><i style="width:' + (s.n ? Math.min(100, s.mape / 0.3 * 100) : 0).toFixed(0) + '%"></i></div>'
-            + '<small>' + (s.n ? s.n + '개 영상에서 확인' : '아직 결과가 없습니다') + '</small></div>';
-        }).join('') + '</div>';
-    if (!tr.rows.length){ $('vs').innerHTML = h + '<p class="anote">아직 비교할 예측이 없습니다.</p>'; return; }
-    // 열: 영상 · ① 기준 당시(예측을 만든 때) 조회수 · ② 목표 시 실제 조회수 · ③ 예측(종합, 누르면 방법별 3개) · ④ 오차
-    var row = function(r){
-      var p = r.pr[3], x = r.res[3], base = at(r.v, tg.c, 1), open = !!SOPEN[r.v.id + '|' + si];
-      var errCell = !r.done ? '<span class="vs-err vs-wait"><b>' + ageTxt(tg.T - age(r.v)) + '</b><small>뒤 채점</small></span>'
-        : !x ? '—' : '<span class="vs-err' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '"><b>' + signPct(x.err) + '</b>'
-          + (x.hit == null ? '' : '<small>' + (x.hit ? '✓ 범위 안' : '✗ 범위 밖') + '</small>') + '</span>';
-      var h1 = '<tr class="vs-r' + (r.v === sel ? ' on' : '') + (open ? ' open' : '') + '">'
-        + '<td><button type="button" class="vs-v" data-vid="' + esc(r.v.id) + '"><span class="vs-th">' + thumb(r.v) + '</span>' + esc(r.v.title) + '</button></td>'
-        + '<td class="num">' + (base == null ? '—' : fmt(base)) + '</td>'
-        + '<td class="num">' + (r.done ? '<b>' + fmt(r.act) + '</b>' : '<span class="vs-wait">아직</span>') + '</td>'
-        + '<td class="num"><button type="button" class="vs-px" data-sx="' + esc(r.v.id) + '" aria-expanded="' + open + '" title="방법별 예측 보기">'
-        + '<span class="vp-no" style="--mc:' + ALL.color + '">' + ALL.b + '</span><b class="vs-pv">' + (p ? fmt(p.p) : '—') + '</b>'
-        + '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td>'
-        + '<td class="num">' + errCell + '</td></tr>';
-      var h2 = '<tr class="vs-sub"' + (open ? '' : ' hidden') + '><td colspan="5"><div class="vs-mx">' + [0, 1, 2].map(function(k){
-          var q2 = r.pr[k], y = r.res[k], m = METHODS[k];
-          return '<div class="vs-m' + (q2 ? '' : ' off') + '" style="--mc:' + m.color + '"><span class="vp-no">' + m.b + '</span><b>' + m.tab + '</b>'
-            + '<em>' + (q2 ? fmt(q2.p) : '예측 없음') + '</em>'
-            + (y ? '<span class="vs-err' + (y.hit == null ? '' : y.hit ? ' hit' : ' miss') + '">' + signPct(y.err) + (y.hit == null ? '' : y.hit ? ' ✓' : ' ✗') + '</span>' : '') + '</div>';
-        }).join('') + '</div></td></tr>';
-      return h1 + h2;
-    };
-    h += '<div class="atab-w"><table class="atab vs-tab vs-sc"><thead><tr><th>영상</th>'
-      + '<th class="num">기준 당시 조회수</th>'
-      + '<th class="num">목표 시 실제 조회수</th>'
-      + '<th class="num">예측</th>'
-      + '<th class="num">오차</th>'
-      + '</tr></thead><tbody>' + tr.rows.slice(0, 15).map(row).join('') + '</tbody></table></div>'
-      + '<p class="gnote">게시 ' + tg.from + ' 뒤에 한 예측을 ' + tg.name + ' 뒤 실제 조회수와 비교합니다. 오차가 + 이면 실제보다 높게, − 이면 낮게 예측한 것이고, ✓ 는 실제가 예측 범위 안에 들어온 경우입니다. 예측 값을 누르면 방법별 예측이 보입니다.</p>';
-    $('vs').innerHTML = h;
+            + (!r ? '<small>' + (k === 3 ? '예측이 없습니다' : k < 2 ? '비교할 과거 영상이 ' + MINPOOL + '개 모이면 예측합니다' : '기록이 모자라 예측하지 못했습니다') + '</small>'
+              : '<div class="vs-row"><span>예측</span><b>' + fmt(r.p) + '</b></div>'
+                + '<div class="vs-row"><span>범위</span><em>' + (r.lo != null ? fmt(r.lo) + ' ~ ' + fmt(r.hi) : '—') + '</em></div>'
+                + '<div class="vs-row"><span>오차</span>' + (x ? '<b class="sc-e' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '">' + signPct(x.err) + (x.hit == null ? '' : x.hit ? ' ✓' : ' ✗') + '</b>'
+                  : '<em>' + (row.done ? '—' : '채점 전') + '</em>') + '</div>')
+            + '</div>';
+        }).join('') + '</div>'
+      + '<p class="gnote">예측 시점에 한 번 고정한 값이라 위 "예측 현황"의 지금 예측과 다를 수 있습니다. 오차 = (예측 − 실제) ÷ 실제, ✓ 는 실제가 예측 범위(80%) 안에 들어온 경우입니다.</p>';
+    box.innerHTML = h;
+  }
+  // [100만 단위 예측 확인]: 이 영상의 구간 기록
+  function segScore(v){
+    var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
+    if (!L.length) return '<p class="anote">' + (late(v)
+        ? '이 영상은 아직 100만 단위 구간의 세 지점(100만·50만·20만 남음)을 지나지 않았습니다. 지나면 그때마다 다음 100만 도달 예측을 고정하고, 닿으면 채점합니다.'
+        : '게시 15일이 지나면(' + ageTxt(VE.LATE - age(v)) + ' 뒤) 100만 단위 구간을 채점합니다.') + '</p>';
+    return '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
+      + '<p class="gnote">100만·50만·20만이 남은 지점을 지날 때 한 도달 예측을 실제로 닿은 때와 비교합니다. 오차가 + 이면 실제보다 늦게, − 이면 빨리 닿는다고 본 것이고, 8주보다 먼 예측은 <i class="sg-far">참고</i>입니다.</p>';
   }
 
   function pick(v, scroll){
@@ -1479,7 +1456,7 @@
       var b = r.querySelector('[data-vid]'); r.classList.toggle('on', !!b && b.getAttribute('data-vid') === v.id);
     });
     Array.prototype.forEach.call(el.querySelectorAll('.mb-r, .hf-r'), function(b){ b.classList.toggle('on', b.getAttribute('data-vid') === v.id); });
-    renderVideo(); renderScore();
+    renderVideo();
   }
   el.addEventListener('click', function(e){
     var jp = e.target.closest('[data-jump]');
@@ -1546,8 +1523,6 @@
       if (mt.closest('.vm-list')) $('vd-pred').scrollIntoView({ block: 'start', behavior: 'smooth' });
       return;
     }
-    var sx = e.target.closest('[data-sx]');
-    if (sx){ var sk = sx.getAttribute('data-sx') + '|' + si; SOPEN[sk] = !SOPEN[sk]; renderScore(); return; }
     var sc = e.target.closest('[data-si]');
     if (sc){ si = +sc.getAttribute('data-si'); renderScore(); }
   });

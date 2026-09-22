@@ -1620,3 +1620,20 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 펼친 줄: 단위·기간 버튼은 왼쪽에 고정, 안내 글은 오른쪽 (15분일 때만 기간 버튼이 생겨도 버튼 자리가 안 바뀌게) */
 .vt-hh .seg{margin-left:0}
 .vt-hh > span{margin-left:auto}
+
+/* ===== 영상 상세: 예측 성적표 (그래프 아래, 선택한 영상 하나) ===== */
+.vd-sc{margin-top:16px;padding:14px;border-radius:14px;background:rgba(0,0,0,.2);border:1px solid var(--line)}
+.vd-sch{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-bottom:10px}
+.vd-sch h4{margin:0;font-size:14px;color:var(--ink)}
+.vd-sch span{font-size:11.5px;color:var(--ink2)}
+.vs-line{margin:0 0 10px;font-size:12.5px;line-height:1.6;color:var(--ink2)}
+.vs-line b{color:var(--ink)}
+.vd-sc .vs-c .vs-row em{font:600 12.5px "JetBrains Mono",monospace;font-style:normal;color:var(--ink2)}
+.vd-sc .vs-c .sc-e.hit{color:var(--mint-t)}
+.vd-sc .vs-c .sc-e.miss{color:#ff8a8a}
+.vd-sc .anote{margin-top:4px}
+.vd-sc .sg-list{margin-top:0}
+.vd-sc .gnote{margin-bottom:0}
+.vd-sc .vs-row{gap:8px}
+.vd-sc .vs-row > span{flex:0 0 auto;white-space:nowrap}
+.vd-sc .vs-row em{text-align:right}
