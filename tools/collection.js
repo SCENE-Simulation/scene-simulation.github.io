@@ -215,7 +215,7 @@
       return '<div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n">' + got.length + ' / ' + ACHDEF.length + '</span>'
         + '<button type="button" class="cach-btn" data-act="achall">전체 보기</button></div>'
         + '<div class="badges">' + (got.length ? got.map(function(a){ return badge(a, false); }).join('')
-            : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보십시오</span>') + '</div>'
+            : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>') + '</div>'
         + '<div class="badges all" data-all' + (state.achAll ? '' : ' hidden') + '>' + ACHDEF.map(function(a){ return badge(a, !ACH[a.id]); }).join('') + '</div></div>';
     }
     function ledgerRow(){
@@ -266,12 +266,13 @@
     function pkRatio(p){ var r = p.ratio || (p.crop ? [p.crop[2], p.crop[3]] : p.size); return r ? r[0] / r[1] : 0; }
     function toggles(){
       var pkg = cfg.pkg || [], news = cfg.news || [], n = ENTRIES.length + PEND.length;
-      function btn(k, label, cnt){
-        return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '">' + label
+      // 왼쪽 아이콘은 405빵 페이지(shell.js)와 같은 것
+      function btn(k, icon, label, cnt){
+        return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '"><svg class="xi"><use href="#' + icon + '"/></svg>' + label
           + (cnt ? '<span class="xt-c">' + cnt + '</span>' : '<span class="xt-c soon">SOON</span>') + '<svg class="xv"><use href="#i-chev"/></svg></button>';
       }
-      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 미디어 보기', news.length)
-        + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
+      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', 'i-box', '패키징 보기', pkg.length) + btn('news', 'i-news', '관련 미디어 보기', news.length)
+        + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '"><svg class="xi"><use href="#i-log"/></svg>기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '>'
         + (cfg.pkgRow && pkg.length > 1 && pkg.every(pkRatio)
            ? '<div class="pk row" style="--pkc:' + pkg.map(function(p){ return pkRatio(p).toFixed(4) + 'fr'; }).join(' ') + '">'
@@ -320,12 +321,18 @@
       }
       (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
-      // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종)
+      return '<div class="cbody' + (compact() ? ' compact' : '') + '">' + h + '</div>';
+    }
+    // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종).
+    // 이때 칸마다 카드가 1~2장이라 한 줄 카드 수(슬라이더)가 의미 없어서 슬라이더는 숨기고 기본 크기로 둔다
+    function compact(){
       var per = (cfg.members || []).map(function(m, mi){ return cardsOf(mi).length; }).concat([specials().length]).filter(Boolean);
-      return '<div class="cbody' + (per.length > 1 && Math.max.apply(null, per) <= 2 ? ' compact' : '') + '">' + h + '</div>';
+      return per.length > 1 && Math.max.apply(null, per) <= 2;
     }
     function sumRow(){
-      var c = counts(), h = '<div class="csum">';
+      // 칸 수(멤버 + 스페셜)가 6보다 적으면 한 줄을 그 수로 나눠 꽉 채운다 (--csn, theme.css). 405빵처럼 6칸이면 예전 그대로
+      var nu = (cfg.members || []).length + (specials().length ? 1 : 0);
+      var c = counts(), h = '<div class="csum"' + (nu && nu < 6 ? ' style="--csn:' + nu + '"' : '') + '>';
       (cfg.members || []).forEach(function(m, mi){
         var ids = cardsOf(mi), own = ids.filter(function(i){ return c[i] > 0; }).length, tot = ids.reduce(function(a, i){ return a + c[i]; }, 0);
         h += '<div class="u' + (own === ids.length && ids.length ? ' full' : '') + '" style="--c:' + m.c + '"><div class="t">' + esc(m.n) + '</div><div class="v">' + own + '/' + ids.length + '</div><div class="s">' + tot + '장</div></div>';
@@ -351,9 +358,9 @@
         + '</div></div>'
         + (cfg.desc ? '<p class="sec-d">' + esc(cfg.desc) + '</p>' : '')
         + metaTiles() + toggles() + noteBar() + statTiles() + ledgerRow() + sumRow()
-        + '<div class="colbar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
-        + '<input type="range" min="2" max="8" step="1" value="' + cols() + '" data-cols aria-label="한 줄에 보여 줄 카드 수">'
-        + '<span class="cb-s">작게</span><b>' + cols() + '열</b></div>'
+        + (compact() ? '' : '<div class="colbar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
+          + '<input type="range" min="2" max="8" step="1" value="' + cols() + '" data-cols aria-label="한 줄에 보여 줄 카드 수">'
+          + '<span class="cb-s">작게</span><b>' + cols() + '열</b></div>')
         + grid()
         + '<p class="csave">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>'
         + (dirtyN() ? '<div class="sfloat"><span class="sf-t">저장하지 않은 변경 <b>' + dirtyN() + '</b>건</span>'
@@ -373,7 +380,8 @@
       return state.cols;
     }
     function applyCols(){
-      var v = cols();
+      // 컴팩트(슬라이더 없음)면 예전에 슬라이더로 저장해 둔 값 대신 기본값 — 5열 이상 값이 남아 있으면 카드 이름·버튼이 작아지므로
+      var v = compact() ? (window.innerWidth <= 640 ? 3 : 4) : cols();
       el.setAttribute('data-cols', v);
       el.style.setProperty('--cols', v);
       el.style.setProperty('--colsw', Math.max(1, Math.round(v / 2)));
@@ -531,6 +539,7 @@
       mcount: (cfg.members || []).length,
       mtotal: N - specials().length,
       counts: counts,
+      buys: function(){ return ledger(cfg.modes[0].k); },   // 주 구매 방식 횟수 (홈 카드 "N회 구매", 405빵 카드와 같은 자리)
       tileEl: function(i){ return el.querySelectorAll('.ctile')[i]; },
       el: el,
       onShow: function(){ render(); },

@@ -871,7 +871,7 @@ function achRender(){
   }
   box.innerHTML = got.length
     ? got.map(function(a){ return badge(a,false); }).join('')
-    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 아래 “전체 보기”에서 조건을 확인해 보십시오</span>';
+    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>';
   var all=document.getElementById('c-badges-all');
   if(all) all.innerHTML=ACHDEF.map(function(a){ return badge(a,!ACH[a.id]); }).join('');
 }

@@ -91,7 +91,7 @@
   }
   function goodsGrid(list){
     return list.length ? '<div class="gdgrid">' + list.map(goodsCard).join('') + '</div>'
-      : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 알려주시면 이 자리에 채워집니다');
+      : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 준비하고 있습니다');
   }
   function goodsStats(list){
     var own = list.filter(function(g){ return GOWN[g.id] > 0; }).length;
@@ -232,7 +232,7 @@
   });
   // 도감 수량이 바뀌면 통합 현황도 갱신
   document.addEventListener('cu405change', function(){ renderSum(); if (!elAllCards.hidden) renderAllCards(); });
-  document.addEventListener('sgcolchange', function(){ renderSum(); syncHearts(); });
+  document.addEventListener('sgcolchange', function(){ renderSum(); syncColCards(); syncHearts(); });
   document.addEventListener('cu405ready', function(){ injectCardHearts(); renderSum(); syncHearts(); });
 
   // 도감 카드 타일 위에 하트 달기
@@ -266,13 +266,23 @@
         var card = document.createElement('a');
         card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', '#55a1e7');
         card.setAttribute('data-ym', c.ym || ''); card.setAttribute('data-lv', c.diff || 3);   // 홈 정렬(shell.js)용
-        var counts = c.counts(), own = counts.filter(function(v){ return v > 0; }).length;
+        // 405빵 카드와 같은 구성: .meta(출시 달 · 난이도)는 shell.js 가 data-ym · data-lv 로 채우고, 보유 · 구매 수는 syncColCards
         card.innerHTML = '<div class="k">' + esc(c.year) + ' 포카</div><h2>' + esc(c.title) + '</h2>'
-          + '<p class="cdesc">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
-          + '<div class="st2"><span><b>' + own + '/' + c.N + '</b>보유</span></div>'
+          + '<div class="meta"></div>'
+          + '<p class="cdesc" title="' + esc(c.desc || '') + '">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
+          + '<div class="st2"></div>'
           + '<span class="go">도감 열기 →</span>';
         grid.insertBefore(card, grid.querySelector('.hc.soon'));                  // 준비 중 카드보다 앞에
       }
+    });
+    syncColCards();
+  }
+  // 엔진 도감 홈 카드의 보유 · 구매 수. 기록이 바뀌면(sgcolchange) 다시 쓴다 (예전엔 새로 고치기 전까지 처음 값 그대로였음)
+  function syncColCards(){
+    (window.SGCOLS || []).forEach(function(c){
+      var b = document.querySelector('#col-grid a[data-tab="' + c.id + '"] .st2'); if (!b) return;
+      var own = c.counts().filter(function(v){ return v > 0; }).length;
+      b.innerHTML = '<span><b>' + own + '/' + c.N + '</b>보유</span>' + (c.buys ? '<span><b>' + c.buys() + '회</b>구매</span>' : '');
     });
   }
   mountCollections();

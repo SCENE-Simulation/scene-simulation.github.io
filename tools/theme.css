@@ -149,6 +149,9 @@ button:focus-visible{outline:2px solid var(--lav-t);outline-offset:2px}
 .shead .pr{font-size:12px}
 .cell .d{font-size:10px;font-weight:700;border-radius:4px}
 .csum .u .v{font-size:16px;font-weight:700}
+/* 엔진 도감의 요약 칸이 6개보다 적으면(예: 멤버 5명) 데스크톱에서 한 줄을 꽉 채움. 휴대폰은 예전처럼 3칸씩 */
+.csum[style*="--csn"]{grid-template-columns:repeat(var(--csn),minmax(0,1fr))}
+@media (max-width:640px){.csum[style*="--csn"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .cledger .ctr .n,.mqty .st .n{font-size:17px;font-weight:700}
 .ctile .ctr .n{font-size:14px;font-weight:700}
 .mcard .cq{font-size:11px;font-weight:700}
@@ -334,9 +337,10 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .snote.dirty span{color:var(--ink)}
 @keyframes notePulse{0%,100%{box-shadow:0 0 0 rgba(233,99,135,0)}50%{box-shadow:0 0 18px rgba(233,99,135,.28)}}
 .chead2 .sp{flex-direction:column;align-items:stretch;min-width:120px}
-#c-savebtn{padding:11px 16px;font-size:15px}
-#c-savebtn:disabled{opacity:1;background:var(--glass);color:var(--mint-t);border-color:rgba(71,209,154,.3)!important}
-#c-savebtn:disabled::before{content:"✓ "}
+/* 저장 버튼: 405빵(#c-savebtn)과 엔진 도감(.colpg .chead2) 같은 모양. 저장된 상태는 민트 "✓ 저장됨" (예전 엔진은 분홍 35% 투명) */
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]){padding:11px 16px;font-size:15px}
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]):disabled{opacity:1;background:var(--glass);color:var(--mint-t);border-color:rgba(71,209,154,.3)!important}
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]):disabled::before{content:"✓ "}
 .sfloat{position:fixed;z-index:70;left:calc(50% + var(--sbw)/2);transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));
   display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-radius:16px;width:max-content;max-width:calc(100vw - 24px);
   background:rgba(44,44,46,.94);border:1px solid rgba(233,99,135,.45);box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 0 3px rgba(233,99,135,.12);

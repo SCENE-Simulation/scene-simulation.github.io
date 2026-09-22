@@ -150,6 +150,12 @@
     card.querySelector('.meta').innerHTML =
       '<span class="mchip"><svg><use href="#i-cal"/></svg>' + x.ym + ' 출시</span>' + bars(x.lv, x.t);
   });
+  // 엔진 도감 카드(pages.js 가 만듦)도 같은 줄: 출시 달(data-ym, 없으면 생략) · 난이도(data-lv)
+  document.querySelectorAll('#col-grid .hc:not([data-col]) .meta').forEach(function(m){
+    var card = m.closest('.hc'), ym = card.getAttribute('data-ym') || '';
+    var lv = Math.max(1, Math.min(5, +card.getAttribute('data-lv') || 3));
+    m.innerHTML = (ym ? '<span class="mchip"><svg><use href="#i-cal"/></svg>' + ym.split('-').slice(0, 2).join('.') + ' 출시</span>' : '') + bars(lv, DIFF[lv - 1]);
+  });
   document.querySelectorAll('.cmeta[data-col]').forEach(function(box){
     var x = info(box.getAttribute('data-col'));
     var html = '<div class="mt"><span class="mk">출시</span><b>' + x.ym + '</b><small>' + x.ymK + '</small></div>'

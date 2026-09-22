@@ -563,6 +563,9 @@ button:focus-visible{outline:2px solid var(--lav-t);outline-offset:2px}
 .shead .pr{font-size:12px}
 .cell .d{font-size:10px;font-weight:700;border-radius:4px}
 .csum .u .v{font-size:16px;font-weight:700}
+/* 엔진 도감의 요약 칸이 6개보다 적으면(예: 멤버 5명) 데스크톱에서 한 줄을 꽉 채움. 휴대폰은 예전처럼 3칸씩 */
+.csum[style*="--csn"]{grid-template-columns:repeat(var(--csn),minmax(0,1fr))}
+@media (max-width:640px){.csum[style*="--csn"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .cledger .ctr .n,.mqty .st .n{font-size:17px;font-weight:700}
 .ctile .ctr .n{font-size:14px;font-weight:700}
 .mcard .cq{font-size:11px;font-weight:700}
@@ -748,9 +751,10 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .snote.dirty span{color:var(--ink)}
 @keyframes notePulse{0%,100%{box-shadow:0 0 0 rgba(233,99,135,0)}50%{box-shadow:0 0 18px rgba(233,99,135,.28)}}
 .chead2 .sp{flex-direction:column;align-items:stretch;min-width:120px}
-#c-savebtn{padding:11px 16px;font-size:15px}
-#c-savebtn:disabled{opacity:1;background:var(--glass);color:var(--mint-t);border-color:rgba(71,209,154,.3)!important}
-#c-savebtn:disabled::before{content:"✓ "}
+/* 저장 버튼: 405빵(#c-savebtn)과 엔진 도감(.colpg .chead2) 같은 모양. 저장된 상태는 민트 "✓ 저장됨" (예전 엔진은 분홍 35% 투명) */
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]){padding:11px 16px;font-size:15px}
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]):disabled{opacity:1;background:var(--glass);color:var(--mint-t);border-color:rgba(71,209,154,.3)!important}
+:is(#c-savebtn,.colpg .chead2 [data-act="save"]):disabled::before{content:"✓ "}
 .sfloat{position:fixed;z-index:70;left:calc(50% + var(--sbw)/2);transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));
   display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-radius:16px;width:max-content;max-width:calc(100vw - 24px);
   background:rgba(44,44,46,.94);border:1px solid rgba(233,99,135,.45);box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 0 3px rgba(233,99,135,.12);
@@ -2111,7 +2115,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
     <a class="hc" href="?tab=views" data-tab="views" style="--c:#ff4e5b">
       <div class="k"><svg><use href="#i-yt"/></svg>VIEW PREDICTOR</div>
       <h2>조회수 예측기</h2>
-      <p>유튜브 영상의 조회수·좋아요·댓글 흐름으로 24시간·7일·30일 조회수를 세 가지 공식으로 예측하고, 오차 범위와 적중률을 보여 줍니다.</p>
+      <p>유튜브 영상 조회수를 15분마다 모아 24시간·7일·30일 뒤 조회수와 다음 100만 단위 돌파 시점을 예측합니다.</p>
       <span class="go">예측 보러 가기 →</span>
     </a>
   </div>
@@ -2595,7 +2599,7 @@ function achRender(){
   }
   box.innerHTML = got.length
     ? got.map(function(a){ return badge(a,false); }).join('')
-    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · 아래 “전체 보기”에서 조건을 확인해 보십시오</span>';
+    : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>';
   var all=document.getElementById('c-badges-all');
   if(all) all.innerHTML=ACHDEF.map(function(a){ return badge(a,!ACH[a.id]); }).join('');
 }
@@ -3461,7 +3465,7 @@ goTab(true,true);
       return '<div class="cach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n">' + got.length + ' / ' + ACHDEF.length + '</span>'
         + '<button type="button" class="cach-btn" data-act="achall">전체 보기</button></div>'
         + '<div class="badges">' + (got.length ? got.map(function(a){ return badge(a, false); }).join('')
-            : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보십시오</span>') + '</div>'
+            : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>') + '</div>'
         + '<div class="badges all" data-all' + (state.achAll ? '' : ' hidden') + '>' + ACHDEF.map(function(a){ return badge(a, !ACH[a.id]); }).join('') + '</div></div>';
     }
     function ledgerRow(){
@@ -3512,12 +3516,13 @@ goTab(true,true);
     function pkRatio(p){ var r = p.ratio || (p.crop ? [p.crop[2], p.crop[3]] : p.size); return r ? r[0] / r[1] : 0; }
     function toggles(){
       var pkg = cfg.pkg || [], news = cfg.news || [], n = ENTRIES.length + PEND.length;
-      function btn(k, label, cnt){
-        return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '">' + label
+      // 왼쪽 아이콘은 405빵 페이지(shell.js)와 같은 것
+      function btn(k, icon, label, cnt){
+        return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '"><svg class="xi"><use href="#' + icon + '"/></svg>' + label
           + (cnt ? '<span class="xt-c">' + cnt + '</span>' : '<span class="xt-c soon">SOON</span>') + '<svg class="xv"><use href="#i-chev"/></svg></button>';
       }
-      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 미디어 보기', news.length)
-        + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
+      var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', 'i-box', '패키징 보기', pkg.length) + btn('news', 'i-news', '관련 미디어 보기', news.length)
+        + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '"><svg class="xi"><use href="#i-log"/></svg>기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '>'
         + (cfg.pkgRow && pkg.length > 1 && pkg.every(pkRatio)
            ? '<div class="pk row" style="--pkc:' + pkg.map(function(p){ return pkRatio(p).toFixed(4) + 'fr'; }).join(' ') + '">'
@@ -3566,12 +3571,18 @@ goTab(true,true);
       }
       (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
-      // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종)
+      return '<div class="cbody' + (compact() ? ' compact' : '') + '">' + h + '</div>';
+    }
+    // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종).
+    // 이때 칸마다 카드가 1~2장이라 한 줄 카드 수(슬라이더)가 의미 없어서 슬라이더는 숨기고 기본 크기로 둔다
+    function compact(){
       var per = (cfg.members || []).map(function(m, mi){ return cardsOf(mi).length; }).concat([specials().length]).filter(Boolean);
-      return '<div class="cbody' + (per.length > 1 && Math.max.apply(null, per) <= 2 ? ' compact' : '') + '">' + h + '</div>';
+      return per.length > 1 && Math.max.apply(null, per) <= 2;
     }
     function sumRow(){
-      var c = counts(), h = '<div class="csum">';
+      // 칸 수(멤버 + 스페셜)가 6보다 적으면 한 줄을 그 수로 나눠 꽉 채운다 (--csn, theme.css). 405빵처럼 6칸이면 예전 그대로
+      var nu = (cfg.members || []).length + (specials().length ? 1 : 0);
+      var c = counts(), h = '<div class="csum"' + (nu && nu < 6 ? ' style="--csn:' + nu + '"' : '') + '>';
       (cfg.members || []).forEach(function(m, mi){
         var ids = cardsOf(mi), own = ids.filter(function(i){ return c[i] > 0; }).length, tot = ids.reduce(function(a, i){ return a + c[i]; }, 0);
         h += '<div class="u' + (own === ids.length && ids.length ? ' full' : '') + '" style="--c:' + m.c + '"><div class="t">' + esc(m.n) + '</div><div class="v">' + own + '/' + ids.length + '</div><div class="s">' + tot + '장</div></div>';
@@ -3597,9 +3608,9 @@ goTab(true,true);
         + '</div></div>'
         + (cfg.desc ? '<p class="sec-d">' + esc(cfg.desc) + '</p>' : '')
         + metaTiles() + toggles() + noteBar() + statTiles() + ledgerRow() + sumRow()
-        + '<div class="colbar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
-        + '<input type="range" min="2" max="8" step="1" value="' + cols() + '" data-cols aria-label="한 줄에 보여 줄 카드 수">'
-        + '<span class="cb-s">작게</span><b>' + cols() + '열</b></div>'
+        + (compact() ? '' : '<div class="colbar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
+          + '<input type="range" min="2" max="8" step="1" value="' + cols() + '" data-cols aria-label="한 줄에 보여 줄 카드 수">'
+          + '<span class="cb-s">작게</span><b>' + cols() + '열</b></div>')
         + grid()
         + '<p class="csave">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>'
         + (dirtyN() ? '<div class="sfloat"><span class="sf-t">저장하지 않은 변경 <b>' + dirtyN() + '</b>건</span>'
@@ -3619,7 +3630,8 @@ goTab(true,true);
       return state.cols;
     }
     function applyCols(){
-      var v = cols();
+      // 컴팩트(슬라이더 없음)면 예전에 슬라이더로 저장해 둔 값 대신 기본값 — 5열 이상 값이 남아 있으면 카드 이름·버튼이 작아지므로
+      var v = compact() ? (window.innerWidth <= 640 ? 3 : 4) : cols();
       el.setAttribute('data-cols', v);
       el.style.setProperty('--cols', v);
       el.style.setProperty('--colsw', Math.max(1, Math.round(v / 2)));
@@ -3777,6 +3789,7 @@ goTab(true,true);
       mcount: (cfg.members || []).length,
       mtotal: N - specials().length,
       counts: counts,
+      buys: function(){ return ledger(cfg.modes[0].k); },   // 주 구매 방식 횟수 (홈 카드 "N회 구매", 405빵 카드와 같은 자리)
       tileEl: function(i){ return el.querySelectorAll('.ctile')[i]; },
       el: el,
       onShow: function(){ render(); },
@@ -5152,7 +5165,7 @@ goTab(true,true);
   }
   function goodsGrid(list){
     return list.length ? '<div class="gdgrid">' + list.map(goodsCard).join('') + '</div>'
-      : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 알려주시면 이 자리에 채워집니다');
+      : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 준비하고 있습니다');
   }
   function goodsStats(list){
     var own = list.filter(function(g){ return GOWN[g.id] > 0; }).length;
@@ -5293,7 +5306,7 @@ goTab(true,true);
   });
   // 도감 수량이 바뀌면 통합 현황도 갱신
   document.addEventListener('cu405change', function(){ renderSum(); if (!elAllCards.hidden) renderAllCards(); });
-  document.addEventListener('sgcolchange', function(){ renderSum(); syncHearts(); });
+  document.addEventListener('sgcolchange', function(){ renderSum(); syncColCards(); syncHearts(); });
   document.addEventListener('cu405ready', function(){ injectCardHearts(); renderSum(); syncHearts(); });
 
   // 도감 카드 타일 위에 하트 달기
@@ -5327,13 +5340,23 @@ goTab(true,true);
         var card = document.createElement('a');
         card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', '#55a1e7');
         card.setAttribute('data-ym', c.ym || ''); card.setAttribute('data-lv', c.diff || 3);   // 홈 정렬(shell.js)용
-        var counts = c.counts(), own = counts.filter(function(v){ return v > 0; }).length;
+        // 405빵 카드와 같은 구성: .meta(출시 달 · 난이도)는 shell.js 가 data-ym · data-lv 로 채우고, 보유 · 구매 수는 syncColCards
         card.innerHTML = '<div class="k">' + esc(c.year) + ' 포카</div><h2>' + esc(c.title) + '</h2>'
-          + '<p class="cdesc">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
-          + '<div class="st2"><span><b>' + own + '/' + c.N + '</b>보유</span></div>'
+          + '<div class="meta"></div>'
+          + '<p class="cdesc" title="' + esc(c.desc || '') + '">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
+          + '<div class="st2"></div>'
           + '<span class="go">도감 열기 →</span>';
         grid.insertBefore(card, grid.querySelector('.hc.soon'));                  // 준비 중 카드보다 앞에
       }
+    });
+    syncColCards();
+  }
+  // 엔진 도감 홈 카드의 보유 · 구매 수. 기록이 바뀌면(sgcolchange) 다시 쓴다 (예전엔 새로 고치기 전까지 처음 값 그대로였음)
+  function syncColCards(){
+    (window.SGCOLS || []).forEach(function(c){
+      var b = document.querySelector('#col-grid a[data-tab="' + c.id + '"] .st2'); if (!b) return;
+      var own = c.counts().filter(function(v){ return v > 0; }).length;
+      b.innerHTML = '<span><b>' + own + '/' + c.N + '</b>보유</span>' + (c.buys ? '<span><b>' + c.buys() + '회</b>구매</span>' : '');
     });
   }
   mountCollections();
@@ -7296,6 +7319,12 @@ goTab(true,true);
     card.setAttribute('data-lv', x.lv);
     card.querySelector('.meta').innerHTML =
       '<span class="mchip"><svg><use href="#i-cal"/></svg>' + x.ym + ' 출시</span>' + bars(x.lv, x.t);
+  });
+  // 엔진 도감 카드(pages.js 가 만듦)도 같은 줄: 출시 달(data-ym, 없으면 생략) · 난이도(data-lv)
+  document.querySelectorAll('#col-grid .hc:not([data-col]) .meta').forEach(function(m){
+    var card = m.closest('.hc'), ym = card.getAttribute('data-ym') || '';
+    var lv = Math.max(1, Math.min(5, +card.getAttribute('data-lv') || 3));
+    m.innerHTML = (ym ? '<span class="mchip"><svg><use href="#i-cal"/></svg>' + ym.split('-').slice(0, 2).join('.') + ' 출시</span>' : '') + bars(lv, DIFF[lv - 1]);
   });
   document.querySelectorAll('.cmeta[data-col]').forEach(function(box){
     var x = info(box.getAttribute('data-col'));
