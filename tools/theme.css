@@ -885,7 +885,20 @@ body.has-sfloat #totop{bottom:84px}
   background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:transform .15s,background .15s}
 .vd-play svg{width:24px;height:24px;margin-left:3px}
 a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
-.vd-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:10px}
+.vd-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:10px}
+/* 다음 100만 단위 카운터 (아랫줄 두 칸). 숫자는 고정폭, 시간·분 글자는 Pretendard 작게 */
+.vd-ms{grid-column:span 2}
+.vd-ms b i{font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin:0 6px 0 2px}
+.vd-ms b i:last-child{margin-right:0}
+.vd-ms .vd-sh em{background:rgba(91,180,236,.16);color:#8fd0f7}
+.vd-ms.soon{border-color:rgba(91,180,236,.5)!important;background:rgba(91,180,236,.07)!important}
+.vd-ms.soon b{color:#8fd0f7}
+.vd-ms.na b{font:800 17px/1.4 "Pretendard Variable",sans-serif;color:var(--ink2)}
+.vd-msg{position:relative;height:7px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.vd-msg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(91,180,236,.35),#5bb4ec)}
+.vd-msl{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 10.5px "JetBrains Mono",monospace;color:var(--dim)}
+.vd-msl b{font:700 11px "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .vd-sh{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .vd-sh span{font-size:11.5px;font-weight:600;color:var(--ink2)}
@@ -1022,6 +1035,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vp-e.hit{color:var(--mint-t)}
 .vp-e.miss{color:#ff8a9c}
 @media (max-width:820px){.vd-top{grid-template-columns:1fr}.vd-stats{grid-template-rows:auto}.vd-s small{white-space:normal}}
+@media (max-width:520px){.vd-stats{gap:7px}.vd-s{padding:8px 9px 9px}.vd-s b{font-size:17px}.vd-sh{flex-wrap:wrap;gap:2px 6px}.vd-sh span{white-space:nowrap}.vd-sh em{padding:1px 5px;font-size:10px}.vd-ms b i{margin:0 4px 0 1px}}
 @media (max-width:980px){.vm-list{grid-template-columns:1fr}.vs-cards{grid-template-columns:1fr 1fr}}
 @media (max-width:640px){.vd-hs{grid-template-columns:1fr}.vd-ph{align-items:stretch}.vd-mt{display:grid;grid-template-columns:1fr 1fr;width:100%}.vd-mt button{justify-content:flex-start}.vd-md{display:grid;grid-template-columns:8px 1fr;align-items:start}.vd-md > i{margin-top:5px}.vd-md em{grid-column:2}.vc{flex-basis:200px}.vc-nav{display:none}.vd{padding:12px}.vh-v{font-size:24px}}
 @media (prefers-reduced-motion:reduce){.vp-st.live::before{animation:none}.vc{transition:none}}
