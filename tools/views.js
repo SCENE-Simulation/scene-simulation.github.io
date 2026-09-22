@@ -670,7 +670,7 @@
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
-      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button></div>'
+      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button><button type="button" role="tab" id="vr-hof" data-rv="hof"></button></div>'
       + '<div class="vr-side"><div class="seg vr-ft" id="vr-ft"></div>'
       // 바로 가기: 아래 칸으로 한 번에 내려간다
       + '<nav class="vr-jump" aria-label="바로 가기">' + [['vd-pred', '예측 현황'], ['vt-h', '전체 영상'], ['vs-h', '예측 성적표']].map(function(x){
@@ -682,6 +682,7 @@
       + '<div class="vc-row" id="vc-row"></div>'
       + '<button type="button" class="vc-nav next" data-nav="1" aria-label="다음 영상들">›</button></div>'
       + '<div class="mb" id="mb" hidden></div>'
+      + '<div class="hof" id="hof" hidden></div>'
       + '<div class="vd" id="vd"></div>'
       + '<div class="vt-head" id="vt-h"><h3 class="ahead">전체 영상</h3><input type="search" class="vt-q" id="vt-q" placeholder="제목 검색" value="' + esc(tq) + '" aria-label="제목 검색"></div>'
       + '<div class="vt" id="vt"></div>'
@@ -704,6 +705,7 @@
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다.</li>'
       + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로 계산합니다.</li>'
+      + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상이고, 막대는 900만 → 1,000만 사이 어디쯤인지입니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -716,13 +718,16 @@
     $('vr-ft').innerHTML = [['all', '전체'], ['long', '일반'], ['short', '쇼츠'], ['live', '라이브']].filter(function(x){ return cnt[x[0]]; }).map(function(x){
       return '<button type="button" data-ft="' + x[0] + '" class="' + (ft === x[0] ? 'on' : '') + '">' + x[1] + '<small>' + cnt[x[0]] + '</small></button>';
     }).join('');
-    var B = board(), n8 = B.filter(in8).length, ms = rv === 'ms';
-    $('vr-tb').innerHTML = '예측 조회수'; $('vr-msb').innerHTML = '100만 단위 돌파<b>' + n8 + '</b>';
-    [['vr-tb', !ms], ['vr-msb', ms]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
-    $('vr-cap').innerHTML = ms
+    var B = board(), n8 = B.filter(in8).length, ms = rv === 'ms', hof = rv === 'hof', HF = hall();
+    $('vr-tb').innerHTML = '예측 조회수'; $('vr-msb').innerHTML = '100만 단위 돌파<b>' + n8 + '</b>'; $('vr-hof').innerHTML = CROWN + '1,000만 명예의 전당<b>' + HF.top.length + '</b>';
+    [['vr-tb', !ms && !hof], ['vr-msb', ms], ['vr-hof', hof]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
+    $('vr-cap').innerHTML = hof
+      ? '조회수 <b>1,000만</b>을 넘은 영상들을 조회수 순으로 보여 줍니다. 아래에는 900만을 넘어 달성을 앞둔 영상을 모았습니다.'
+      : ms
       ? '<b>다음 100만 단위</b>를 먼저 넘을 것으로 보이는 영상부터 보여 줍니다. 게시 15일이 지난 영상만 보여 줍니다.'
       : '최근 24시간 동안 조회수가 많이 오른 영상부터 보여 줍니다. <b>추이</b>는 채널 영상 중 순위에 따라 강함·중간·약함으로 나눕니다.';
-    $('vc-wrap').hidden = ms; $('mb').hidden = !ms;
+    $('vc-wrap').hidden = ms || hof; $('mb').hidden = !ms; $('hof').hidden = !hof;
+    if (hof){ renderHof(HF); return; }
     if (ms){ renderBoard(B); return; }
     var L = list().sort(byGain).slice(0, 12);                                              // 최근 24시간 동안 많이 는 순 (추이와 같은 기준)
     $('vc-row').innerHTML = L.map(function(v){ return card(v); }).join('') || '<p class="anote">해당하는 영상이 없습니다.</p>';
@@ -744,6 +749,37 @@
         : '<span class="vc-g vc-tr"><small>추이</small><b>—</b></span>')
       + '<span class="vc-t">' + esc(v.title) + '</span>'
       + '<span class="vc-m">' + ageTxt(age(v)) + ' 전</span></button>';
+  }
+  // ----- 1,000만 명예의 전당: 조회수 1,000만을 넘은 영상(조회수 순) + 달성 직전(900만 이상) -----
+  // 탭 버튼 왼쪽의 왕관 (이모지 대신 SVG — 기기마다 모양이 다르지 않게)
+  var CROWN = '<svg class="hf-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 1.8 7.2l5.4 4.1L12 4l4.8 7.3 5.4-4.1L21 17.5z" fill="currentColor"/><rect x="3" y="18.7" width="18" height="2.3" rx="1" fill="currentColor"/><circle cx="12" cy="12.5" r="1.4" fill="rgba(0,0,0,.35)"/></svg>';
+  function hall(){
+    var top = [], next = [];
+    list().forEach(function(v){ var V = av(v, age(v)); if (V >= 1e7) top.push({ v: v, V: V }); else if (V >= 9e6) next.push({ v: v, V: V }); });
+    var by = function(a, b){ return b.V - a.V; };
+    return { top: top.sort(by), next: next.sort(by) };
+  }
+  // 한 줄: 순위 · 썸네일 · 제목/게시·추이 · 조회수(24시간 증가) / 아랫줄: 다음 100만 단위 예상 (달성 직전은 900만 → 1,000만 진행 막대)
+  function hofRow(x, i, pre){
+    var v = x.v, a = age(v), g = velo(v, 24), tr = trend(v), m = milestone(v);
+    var when = m.h == null ? null : etaHM(m.h / 24) + ' 내 · ' + ddayAP(v, m.h) + ' 무렵';
+    var foot = pre
+      ? '<span class="hf-pg" role="img" aria-label="1,000만까지 ' + Math.round((x.V - 9e6) / 1e4) + '%"><i style="width:' + ((x.V - 9e6) / 1e4).toFixed(1) + '%"></i></span><span><b>' + fmt(1e7 - x.V) + '</b> 남음</span>'
+        + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : '달성 예상일은 기록이 더 쌓이면 나옵니다') + '</span>'
+      : '<span>' + (m.h == null ? '다음 ' + fmtM(m.M) + '은 지금 추세로는 어렵습니다' : '다음 <b>' + fmtM(m.M) + '</b> 달성 예상 <b>' + when + '</b>') + '</span>';
+    return '<button type="button" class="hf-r' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
+      + '<span class="hf-n' + (!pre && i < 3 ? ' r' + (i + 1) : '') + '">' + (i + 1) + '</span>'
+      + '<span class="mb-th">' + thumb(v) + '</span>'
+      + '<span class="hf-b"><span class="mb-t">' + esc(v.title) + '</span><span class="hf-m">게시 ' + dY(v.pub, nowMs(v)) + ' · ' + ageTxt(a) + ' 전'
+      + (tr ? '<span class="mb-tr ' + tr.lv.c + '" title="최근 24시간 증가 채널 ' + tr.rank + '위 / ' + tr.n + '편">추이' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '') + '</span></span>'
+      + '<span class="hf-v"><b>' + fmt(x.V) + '</b><small>' + full(x.V) + '회</small>' + (g.x != null ? '<em>24시간 <b>+' + fmt(g.x) + '</b></em>' : '') + '</span>'
+      + '<span class="hf-f">' + foot + '</span></button>';
+  }
+  function renderHof(HF){
+    $('hof').innerHTML = '<div class="hf-sec"><h4>1,000만 달성 <b>' + HF.top.length + '</b>편</h4>'
+      + (HF.top.length ? '<div class="hf-list">' + HF.top.map(function(x, i){ return hofRow(x, i, false); }).join('') + '</div>' : '<p class="anote">아직 1,000만을 넘은 영상이 없습니다.</p>') + '</div>'
+      + '<div class="hf-sec next"><h4>달성 직전 <small>900만 이상</small> <b>' + HF.next.length + '</b>편</h4>'
+      + (HF.next.length ? '<div class="hf-list">' + HF.next.map(function(x, i){ return hofRow(x, i, true); }).join('') + '</div>' : '<p class="anote">900만을 넘은 영상이 없습니다.</p>') + '</div>';
   }
   // 100만 단위 돌파 목록: 지난 100만 → 다음 100만 진행 막대, 넘는 때. 8주 안에 넘는 영상은 강조
   function renderBoard(B){
@@ -1416,6 +1452,7 @@
     Array.prototype.forEach.call(el.querySelectorAll('.vt-r'), function(r){
       var b = r.querySelector('[data-vid]'); r.classList.toggle('on', !!b && b.getAttribute('data-vid') === v.id);
     });
+    Array.prototype.forEach.call(el.querySelectorAll('.mb-r, .hf-r'), function(b){ b.classList.toggle('on', b.getAttribute('data-vid') === v.id); });
     renderVideo(); renderScore();
   }
   el.addEventListener('click', function(e){
@@ -1439,6 +1476,7 @@
       rv = to; renderRank();
       var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
       if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
+      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(back) >= 0 ? back : HA.indexOf(sel) >= 0 ? sel : HA[0] || VIDEOS[0]; }
       else next = back || VIDEOS[0];
       if (next && next !== sel) pick(next);
       return;
