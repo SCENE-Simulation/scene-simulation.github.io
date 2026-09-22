@@ -1533,7 +1533,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vt-tab th.on,.vt-tab th.on button{color:var(--ink)}
 .vt-tab .n{width:26px;text-align:center!important;color:var(--vg);font-weight:700}
 .vt-tab .v{text-align:left!important;white-space:normal;min-width:260px}
-.vt-tab .g{width:150px;text-align:right}
+.vt-tab .g{width:150px;text-align:left}                      /* 24시간 증가 · 1주 뒤 예상은 왼쪽 정렬 (추정 칩 + 숫자가 줄마다 같은 자리에서 시작) */
 .vt-tab .t{text-align:right}
 .vt-tab .a{text-align:right;color:var(--ink2)}
 .vt-tab .x{width:34px;text-align:center!important}
@@ -1683,7 +1683,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .mb-r.in .mb-f{background:rgba(255,77,79,.1);color:var(--ink)}
 #v-views .mb-r.in .mb-f b{color:var(--vg-t)}
 .mb-far{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink2)}
-.vt-tab .w{text-align:right;white-space:nowrap}
+.vt-tab .w{text-align:left;white-space:nowrap}
 .vt-tab td.w b{font-weight:700}
 @media (max-width:980px){.mb-list{grid-template-columns:1fr}}
 @media (max-width:760px){.vt-tab .w{display:none}}
@@ -5832,8 +5832,10 @@ goTab(true,true);
       return;
     }
     var kNow = wkOf(a / 24), kEnd = kNow + WKN - 1;
-    var st = msStart(v, a), s = Math.min(st.h, a - 1), end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
-    var endTxt = mu === 'w' ? kEnd + '주 차 끝' : U.n + U.u + ' 뒤';
+    // 시작: 100만 단위 추적은 게시 15일 뒤부터라 그보다 앞으로는 안 간다. 1일은 14일 전까지, 1주는 지금 구간의 100만 단위를 넘은 때(적어도 1주 전)까지.
+    //   그 사이 기록이 없는 구간(수집 시작 전)은 빗금으로 "기록 없음"
+    var st = msStart(v, a), s = Math.max(VE.LATE, mu === 'w' ? Math.min(st.h, a - 168) : a - U.n * U.step), end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
+    var s0 = VE.since(v.vs), endTxt = mu === 'w' ? kEnd + '주 차 끝' : md(v.pub + end * 3600e3);
     var pts = v.vs.snaps.filter(function(q){ return q[0] > s + 1e-6 && q[0] <= a + 1e-6; }), sv = av(v, s);
     if (sv != null) pts.unshift([s, sv]);
     if (p){
@@ -5848,7 +5850,16 @@ goTab(true,true);
     function X(h){ return L + (h - s) / (end - s) * (W - L - R); }
     function Hx(x){ return s + Math.max(0, Math.min(1, (x - L) / (W - L - R))) * (end - s); }
     function Y(y){ return Tp + (1 - (y - y0) / (y1 - y0)) * (H - Tp - B); }
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + U.tab + ' 단위 100만 돌파 예상">';
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + U.tab + ' 단위 100만 돌파 예상">'
+      + '<defs><pattern id="vg-h3" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(255,255,255,.015)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,.07)" stroke-width="2"/></pattern></defs>';
+    // 수집을 시작하기 전 구간: 빗금 + "기록 없음"
+    if (s0 > s + 1e-6){
+      var hx0 = X(s), hx1 = X(Math.min(s0, a)), hw = hx1 - hx0;
+      svg += '<rect x="' + hx0.toFixed(1) + '" y="' + Tp + '" width="' + hw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="url(#vg-h3)"/>'
+        + (hw > 120 ? '<text x="' + (hx0 + hw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 - 4).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#8e8e93">수집 시작 전 · 기록 없음</text>'
+          + '<text x="' + (hx0 + hw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 + 14).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#6e6e73">' + md(v.pub + s0 * 3600e3) + '부터 기록</text>'
+          : hw > 40 ? '<text x="' + (hx0 + hw / 2).toFixed(1) + '" y="' + (Tp + (H - Tp - B) / 2 + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#8e8e93">기록 없음</text>' : '');
+    }
     var gs = niceStep((y1 - y0) / 4);
     for (var y = Math.ceil(y0 / gs) * gs; y <= y1; y += gs)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,.06)"/>'
@@ -5862,14 +5873,14 @@ goTab(true,true);
         svg += '<text x="' + cx0.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (kk >= kNow ? 700 : 500) + '" fill="' + (kk >= kNow ? '#aeaeb2' : '#8e8e93') + '">' + kk + '주 차</text>';
       }
     } else {
-      // 1일: 지금을 0 으로 하루마다. 글자가 겹치지 않게 m 칸마다 적는다
-      var px1 = U.step / (end - s) * (W - L - R), m = Math.max(1, Math.ceil(34 / px1));
-      for (var k = -Math.floor((a - s) / U.step); k <= U.n; k++){
-        if (!k || k % m) continue;
-        var x = X(a + k * U.step);
-        if (x < X(s) + 44) continue;
+      // 1일: 자정마다 실제 날짜(9/23 …). 글자가 겹치지 않게 건너뛰고, 앞으로의 날짜는 굵게
+      var dt = new Date(t0), lastX = -99; dt.setHours(24, 0, 0, 0);
+      for (; dt.getTime() <= v.pub + end * 3600e3 + 1; dt.setDate(dt.getDate() + 1)){
+        var hh = (dt.getTime() - v.pub) / 3600e3, x = X(hh);
+        if (x - lastX < 38 || x > W - R - 14) continue;
+        lastX = x;
         svg += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.06)"/>'
-          + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (k > 0 ? 700 : 500) + '" fill="' + (k > 0 ? '#aeaeb2' : '#8e8e93') + '">' + (k > 0 ? k : '−' + (-k)) + U.u + '</text>';
+          + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (hh > a ? 700 : 500) + '" fill="' + (hh > a ? '#aeaeb2' : '#8e8e93') + '">' + md(dt.getTime()) + '</text>';
       }
     }
     for (var M = Math.ceil(y0 / VE.MSTEP) * VE.MSTEP; M <= y1; M += VE.MSTEP)
@@ -5886,15 +5897,16 @@ goTab(true,true);
       if (M1 && !showM1) svg += '<text x="' + (W - R - 4) + '" y="' + (Tp - 8) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">다음 ' + fmtM(M1) + '까지 ' + fmt(M1 - p.V) + ' — ' + endTxt + '까지는 어려움</text>';
     }
     if (pts.length > 1) svg += '<path d="' + pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="#ff4d4f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
-    // 시작점: 지금 구간의 100만 단위를 넘은 때 (기록 전에 넘었으면 첫 기록). 날짜는 가로축 맨 왼쪽에
+    // 시작점(1주): 지금 구간의 100만 단위를 넘은 때 (기록 전에 넘었으면 첫 기록). 날짜는 가로축 맨 왼쪽에. 1일은 가로축에 날짜가 있으니 생략
     if (sv != null) svg += '<circle cx="' + X(s).toFixed(1) + '" cy="' + Y(sv).toFixed(1) + '" r="4" fill="#1c1c1e" stroke="#ff9e9a" stroke-width="2"/>';
-    svg += '<text x="' + X(s).toFixed(1) + '" y="' + (H - 9) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">' + md(t0) + '</text>';
+    if (mu === 'w') svg += '<text x="' + X(s).toFixed(1) + '" y="' + (H - 9) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">' + md(t0) + '</text>';
     var V = av(v, a);
     svg += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
+      + '<text x="' + X(a).toFixed(1) + '" y="' + (Tp - 8) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff9e9a">지금</text>'
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', (st.M && !st.before ? fmtM(st.M) + ' 돌파' : '첫 기록') + '(' + md(t0) + ') → ' + endTxt,
+    box.innerHTML = chHead('100만 단위 돌파 예상', (s <= VE.LATE + 1e-6 ? '게시 15일 뒤(' + md(t0) + ')' : mu === 'w' && st.M && !st.before ? fmtM(st.M) + ' 돌파(' + md(t0) + ')' : md(t0)) + ' → ' + endTxt,
         msTabs())
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span>' : '')
