@@ -505,7 +505,7 @@
   function history(v){
     var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
     return '<div class="vd-mh"><span class="vd-el">100만 단위 구간 예측 기록</span>' + (L.length ? '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
-      : '<small class="vh-n">100만 단위 구간(예: 1,300만 → 1,400만)의 100만·50만·20만 남은 지점을 지날 때마다 도달 예측을 고정해 두고, 실제로 닿은 때와 비교해 채점합니다.</small>') + '</div>';
+      : '<small class="vh-n">100만 · 50만 · 20만 남았을 때 한 예측을 실제 도달과 비교합니다.</small>') + '</div>';
   }
 
   // 그래프(15일 뒤): 지금 구간의 100만 단위를 넘은 때부터 → 지금 → 앞으로 (④ 1일 추세). 가로 눈금은 [1일 | 1주]
@@ -638,11 +638,9 @@
           + '<div class="vs-bar"><i style="width:' + (m.hit != null ? m.hit * 100 : 0).toFixed(0) + '%"></i></div>'
           + '<small>' + (m.n ? m.n + '개 채점' : '아직 결과 없음') + (m.far ? ' · 참고 ' + m.far + '개' : '') + (m.wait ? ' · 진행 중 ' + m.wait + '개' : '') + '</small></div>';
       }).join('') + '</div>';
-    if (!A.rows.length){ $('vs').innerHTML = h + '<p class="anote">수집 중에 게시 15일이 지난 영상이 100만 단위 구간의 세 지점(100만·50만·20만 남음)을 지나면 그때부터 예측을 고정해 채점합니다.</p>'; return; }
+    if (!A.rows.length){ $('vs').innerHTML = h + '<p class="anote">아직 채점할 예측이 없습니다. 영상이 100만 · 50만 · 20만 남은 지점을 지나면 쌓입니다.</p>'; return; }
     h += '<div class="sg-list">' + A.rows.slice(0, 20).map(function(x){ return segRow(x.v, x.s); }).join('') + '</div>'
-      + '<p class="gnote">예측은 각 지점을 넘은 순간 ④ 1일 추세로 한 번 고정한 값입니다. 멀리서 한 예측일수록 오차가 큰 게 정상이라 지점별로 따로 봅니다. '
-      + '오차 %는 (예측 − 실제) ÷ 그 지점부터 실제로 걸린 시간이고, 범위는 하루 조회수가 줄어드는 비율을 ±3%p 바꿔 본 도달일입니다. '
-      + '8주보다 멀거나 못 닿는다고 본 예측은 <i class="sg-far">참고</i>로만 보여 주고 평균에서 뺍니다. 넘은 순간은 15분 기록 사이를 이어서 추정하고, 화면에는 100만 단위 그대로 적습니다.</p>';
+      + '<p class="gnote">오차 + 는 실제보다 늦게, − 는 빨리 본 것입니다. 8주보다 먼 예측은 <i class="sg-far">참고</i>로만 두고 평균에서 뺍니다.</p>';
     $('vs').innerHTML = h;
   }
 
@@ -711,8 +709,8 @@
     $('vr-tb').innerHTML = '예측 조회수'; $('vr-msb').innerHTML = '100만 단위 돌파<b>' + n8 + '</b>';
     [['vr-tb', !ms], ['vr-msb', ms]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
     $('vr-cap').innerHTML = ms
-      ? '게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 <b>다음 100만 단위를 언제 넘을지</b>입니다. 최근 하루 증가량과 그 증가량이 하루마다 줄어드는 비율(④ 1일 추세)로 계산하고, 빨리 넘는 순으로 보여 줍니다.'
-      : '영상마다 <b>추이</b>입니다. 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함이고, 많이 는 순서로 보여 줍니다.';
+      ? '<b>다음 100만 단위</b>를 빨리 넘는 순서입니다. 게시 15일 지난 영상 기준, ④ 1일 추세로 계산합니다.'
+      : '최근 24시간에 많이 는 순서입니다. <b>추이</b>는 채널 안 순위로 강함 · 중간 · 약함.';
     $('vc-wrap').hidden = ms; $('mb').hidden = !ms;
     if (ms){ renderBoard(B); return; }
     var L = list().sort(byGain).slice(0, 12);                                              // 최근 24시간 동안 많이 는 순 (추이와 같은 기준)
@@ -815,9 +813,9 @@
       + UORDER.map(function(k){ return '<button type="button" data-hu="' + k + '" data-hv="' + esc(v.id) + '" class="' + (k === u ? 'on' : '') + '" aria-selected="' + (k === u) + '">' + UNITS[k].tab + '</button>'; }).join('')
       + '</div>' + (u === 'q' ? '<div class="seg" role="tablist" aria-label="기간">'
       + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
-      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : UNITS[u].range) + ' · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span></div>'
+      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : UNITS[u].range) + '</span></div>'
       + '<div class="vt-hc">' + barChart(v, u, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
-      + '<p class="gnote">막대 하나가 ' + UNITS[u].per + ' 는 조회수입니다. 기록 간격이 긴 구간은 그 사이를 고르게 나눠 그리고, 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
+      + '<p class="gnote">유튜브가 조회수를 묶어서 갱신해 막대가 한 번씩 튀어도 정상입니다.</p>';
   }
 
   // ----- 조회수 증가 막대 그래프: 15분 · 1시간 · 1일 · 1주일 단위 (실제 날짜 눈금) -----
@@ -1130,7 +1128,7 @@
     var U = UNITS[cm];
     box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + U.range)
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
-      + '<p class="gnote">기록 간격이 긴 구간은 그 사이를 고르게 나눠 그립니다. 유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
+      + '<p class="gnote">유튜브가 조회수를 묶어서 갱신해 한 번씩 튀어도 정상입니다.</p>';
   }
   function chHead(t, sub, tabs){
     return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="' + (tabs ? '가로축 단위' : '그래프 종류') + '">'
@@ -1350,9 +1348,7 @@
       + '<th class="num">예측</th>'
       + '<th class="num">오차</th>'
       + '</tr></thead><tbody>' + tr.rows.slice(0, 15).map(row).join('') + '</tbody></table></div>'
-      + '<p class="gnote">기준 당시 조회수는 예측을 만든 때(게시 ' + tg.from + ' 뒤), 목표 시 실제 조회수는 게시 ' + tg.name + ' 뒤의 조회수입니다. '
-      + '예측은 기준 당시까지 있던 기록만으로 계산했고, 예측 값을 누르면 세 방법의 예측이 따로 나옵니다. '
-      + '오차가 + 이면 실제보다 높게, − 이면 낮게 예측한 것입니다. ✓ 는 실제 조회수가 80% 범위 안에 들어온 경우입니다.</p>';
+      + '<p class="gnote">게시 ' + tg.from + ' 뒤에 한 예측을 ' + tg.name + ' 실제와 비교합니다. 오차 + 는 높게, − 는 낮게 본 것, ✓ 는 범위 안. 예측 값을 누르면 방법별로 보입니다.</p>';
     $('vs').innerHTML = h;
   }
 
