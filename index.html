@@ -3286,6 +3286,8 @@ goTab(true,true);
 //   ach : 기본 칭호를 콜라보에 맞게 바꿈 {id:{n:칭호, d:한마디, at:장수}} — 설명은 "<조건> · 한마디", false 면 그 칭호를 뺀다.
 //         id: first(1종) · mem1(한 멤버 전부) · half(절반) · all(컴플리트) · dup3 · dup6(같은 카드 3·6장, at 으로 장수 변경) · avg(평균 비용) · thrifty(알뜰)
 //         멤버마다 카드가 1종이면 mem1 은 first 와 같은 때 받으니 false 로 빼는 게 낫다
+//   achSum : 여러 방식의 횟수를 합쳐 세는 칭호 [{id, modes:[k…], at:횟수, lb:조건 이름, n:칭호, d?:한마디, r?:등급 1~4, c?:색}]
+//            설명은 "<lb> N회 · 한마디". 예: 1·2차 피자 주문을 합쳐 3판 (id 앞에 s_ 가 붙어 저장된다)
 (function(){
   var REG = window.SGCOLS = window.SGCOLS || [];
 
@@ -3423,6 +3425,10 @@ goTab(true,true);
           list.push({ id:'m_' + m.k + a.at, n:a.n, d:m.label + ' ' + a.at + '회' + (a.d ? ' · ' + a.d : ''), c:m.badge || '#ecd25b',
             r:Math.min(4, i + 1), t:function(x){ return x.mode[m.k] >= a.at; } });
         });
+      });
+      (cfg.achSum || []).forEach(function(a){
+        list.push({ id:'s_' + a.id, n:a.n, d:a.lb + ' ' + a.at + '회' + (a.d ? ' · ' + a.d : ''), c:a.c || '#ecd25b', r:a.r || 4,
+          t:function(x){ return a.modes.reduce(function(s, k){ return s + (x.mode[k] || 0); }, 0) >= a.at; } });
       });
       if (ex && ex.cost) {
         list.push({ id:'avg', n:'평균을 넘어선 자', d:'누적 지출 ' + won(ex.cost) + '원 돌파 · 평균 컴플리트 비용', c:'#e09050', r:3, t:function(x){ return x.money >= ex.cost; } });
@@ -4002,10 +4008,33 @@ goTab(true,true);
             {n:'도미노 메이', img:'img/dmn2026/may.png', m:4},
             {n:'도미노 단체 싸인 프린팅 브로마이드', img:'img/dmn2026/bromide-sign.png', g:'brm'},
             {n:'도미노 리센느 꼴라주 브로마이드', img:'img/dmn2026/bromide-collage.png', g:'brm'}],
-    modes: [{k:'buy', label:'1차 피자 포장 주문', price:29520, random:true, hint:'프리미엄 피자(L) 1판 · 포토카드 랜덤 1장'},
-            {k:'buy2', label:'2차 피자 포장 주문', price:29520, random:true, g:'brm', hint:'프리미엄 피자 1판 · 브로마이드 2종 중 1종'},
-            {k:'trade', label:'교환', price:0},
-            {k:'used', label:'중고 구매', var:true, price:15000}],
+    // 칭호: 피자 5판 안팎 기준. 카드 모으기는 피자 조각(첫 조각 → 반 판 → 한 판), 구매는 사투리 광고("함 무 보이소")·도미노 효과.
+    //   멤버당 1종이라 mem1 은 첫 조각과 같은 때 받으므로 뺐다. 평균 비용(avg)은 엔진이 컴플리트 평균(약 14판)으로 계산해 조건은 그대로
+    ach: {first:{n:'첫 조각', d:'피자도 카드도 첫 조각이 제일 맛있죠'},
+          mem1: false,
+          half:{n:'반 판', d:'딱 반 판 모았어요'},
+          all:{n:'한 판 완성', d:'빈 조각 하나 없이 다 모았어요'},
+          dup3:{at:2, n:'어제 그 맛', d:'새 판인데 카드는 어제 그 카드'},
+          dup6:{at:3, n:'고정 메뉴', d:'고민 없이 늘 같은 카드가 와요'},
+          avg:{n:'크러스트만 남은 통장', d:'피자 14판 값이에요'},
+          thrifty:{n:'쿠폰 마스터', d:'쿠폰 한 장도 허투루 안 썼어요'}},
+    // 1·2차를 합쳐 센다 — 둘 다 플래티넘(r 4, 405빵 TIER 와 같은 등급). "피최몇"은 405빵 "빵최몇"에서
+    achSum: [{id:'pz3', modes:['buy','buy2'], at:3, lb:'1·2차 피자 포장 주문 합쳐', n:'님 피최몇?'},
+             {id:'pz5', modes:['buy','buy2'], at:5, lb:'1·2차 피자 포장 주문 합쳐', n:'몸 속에 흐르는 치즈가 흐르는'}],
+    modes: [{k:'buy', label:'1차 피자 포장 주문', price:29520, random:true, hint:'프리미엄 피자(L) 1판 · 포토카드 랜덤 1장',
+             ach: [{at:1, n:'함 무 보이소',         d:'사투리 광고 보고 첫 판 주문했어요'},
+                   {at:2, n:'방문 포장 프로',       d:'매장 가는 길을 눈 감고도 가요'},
+                   {at:3, n:'냉장고 속 식은 피자',  d:'어제 피자가 아직 냉장고에 있어요'},
+                   {at:5, n:'도미노 효과',          d:'한 판이 다섯 판을 불렀어요'}]},
+            {k:'buy2', label:'2차 피자 포장 주문', price:29520, random:true, g:'brm', hint:'프리미엄 피자 1판 · 브로마이드 2종 중 1종',
+             ach: [{at:1, n:'선착순 통과',          d:'늦지 않게 브로마이드를 받았어요'},
+                   {at:3, n:'벽이 모자라',          d:'브로마이드 붙일 벽이 모자라요'}]},
+            {k:'trade', label:'교환', price:0,
+             ach: [{at:1, n:'하프 앤 하프',         d:'내 카드 반, 네 카드 반'},
+                   {at:3, n:'한 조각 협상가',       d:'한 조각 주고 한 장 받는 협상의 달인'}]},
+            {k:'used', label:'중고 구매', var:true, price:15000,
+             ach: [{at:1, n:'카드만 포장',          d:'피자는 건너뛰고 카드만 받았어요'},
+                   {at:3, n:'다이어트 중',          d:'피자는 못 먹어도 카드는 모아요'}]}],
     // 패키징: 광고 사진 2장 (사용자 제공). 둘 다 세로인데 비율이 조금 달라 한 줄에 같은 높이로 (자르지 않음)
     pkgRow: true,
     pkg: [{src:'img/dmn2026/model.webp', size:[670,999], cap:'도미노 공식 모델 리센느'},

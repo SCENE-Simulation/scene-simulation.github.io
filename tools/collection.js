@@ -19,6 +19,8 @@
 //   ach : 기본 칭호를 콜라보에 맞게 바꿈 {id:{n:칭호, d:한마디, at:장수}} — 설명은 "<조건> · 한마디", false 면 그 칭호를 뺀다.
 //         id: first(1종) · mem1(한 멤버 전부) · half(절반) · all(컴플리트) · dup3 · dup6(같은 카드 3·6장, at 으로 장수 변경) · avg(평균 비용) · thrifty(알뜰)
 //         멤버마다 카드가 1종이면 mem1 은 first 와 같은 때 받으니 false 로 빼는 게 낫다
+//   achSum : 여러 방식의 횟수를 합쳐 세는 칭호 [{id, modes:[k…], at:횟수, lb:조건 이름, n:칭호, d?:한마디, r?:등급 1~4, c?:색}]
+//            설명은 "<lb> N회 · 한마디". 예: 1·2차 피자 주문을 합쳐 3판 (id 앞에 s_ 가 붙어 저장된다)
 (function(){
   var REG = window.SGCOLS = window.SGCOLS || [];
 
@@ -156,6 +158,10 @@
           list.push({ id:'m_' + m.k + a.at, n:a.n, d:m.label + ' ' + a.at + '회' + (a.d ? ' · ' + a.d : ''), c:m.badge || '#ecd25b',
             r:Math.min(4, i + 1), t:function(x){ return x.mode[m.k] >= a.at; } });
         });
+      });
+      (cfg.achSum || []).forEach(function(a){
+        list.push({ id:'s_' + a.id, n:a.n, d:a.lb + ' ' + a.at + '회' + (a.d ? ' · ' + a.d : ''), c:a.c || '#ecd25b', r:a.r || 4,
+          t:function(x){ return a.modes.reduce(function(s, k){ return s + (x.mode[k] || 0); }, 0) >= a.at; } });
       });
       if (ex && ex.cost) {
         list.push({ id:'avg', n:'평균을 넘어선 자', d:'누적 지출 ' + won(ex.cost) + '원 돌파 · 평균 컴플리트 비용', c:'#e09050', r:3, t:function(x){ return x.money >= ex.cost; } });
