@@ -90,7 +90,7 @@
   };
   function noBuild(k){
     var d = NOBUILD[k], what = d.pc ? '포토카드' : '굿즈', icon = d.pc ? 'i-book' : 'i-gift';
-    var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않습니다';
+    var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않았습니다.';
     var desc = d.d || NB_DESC, im = d.img || NB_IMG;
     var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['goods2026', '2026 굿즈 보기 →'];
     return sec(icon, [d.pc ? '포카 컬렉션 북' : '굿즈 컬렉션 북', d.y + (d.pc ? ' 포카' : ' 굿즈')])
