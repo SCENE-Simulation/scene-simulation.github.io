@@ -1717,8 +1717,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .hf-v em b{font:700 11.5px "JetBrains Mono",monospace;line-height:1;color:var(--ink)}
 .hf-f{grid-area:f;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);font-size:11.5px;color:var(--ink2)}
 .hf-f b{font-weight:800;color:var(--ink)}
-.hf-pg{flex:1 1 90px;position:relative;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-.hf-pg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(240,199,94,.4),#f0c75e)}
 @media (max-width:980px){.hf-list{grid-template-columns:1fr}}
 @media (max-width:520px){.hf-r{grid-template-columns:20px 76px minmax(0,1fr) auto;gap:8px}.hf-v b{font-size:18px}.hf-v{padding-left:8px}
   .vr-tabs{flex-wrap:wrap}.vr-tabs button{padding:7px 10px!important;font-size:12.5px;white-space:nowrap}}   /* 탭 세 개: 글자 중간에서 꺾이지 않게 통째로 다음 줄로 */
@@ -6039,7 +6037,7 @@ goTab(true,true);
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다.</li>'
       + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로 계산합니다.</li>'
-      + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상이고, 막대는 900만 → 1,000만 사이 어디쯤인지입니다.</li>'
+      + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상입니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -6093,12 +6091,12 @@ goTab(true,true);
     var by = function(a, b){ return b.V - a.V; };
     return { top: top.sort(by), next: next.sort(by) };
   }
-  // 한 줄: 순위 · 썸네일 · 제목/게시·추이 · 조회수(24시간 증가) / 아랫줄: 다음 100만 단위 예상 (달성 직전은 900만 → 1,000만 진행 막대)
+  // 한 줄: 순위 · 썸네일 · 제목/게시·추이 · 조회수(24시간 증가) / 아랫줄: 다음 100만 단위 예상 (달성 직전은 남은 조회수 + 1,000만 달성 예상)
   function hofRow(x, i, pre){
     var v = x.v, a = age(v), g = velo(v, 24), tr = trend(v), m = milestone(v);
     var when = m.h == null ? null : etaHM(m.h / 24) + ' 내 · ' + ddayAP(v, m.h) + ' 무렵';
     var foot = pre
-      ? '<span class="hf-pg" role="img" aria-label="1,000만까지 ' + Math.round((x.V - 9e6) / 1e4) + '%"><i style="width:' + ((x.V - 9e6) / 1e4).toFixed(1) + '%"></i></span><span><b>' + fmt(1e7 - x.V) + '</b> 남음</span>'
+      ? '<span><b>' + fmt(1e7 - x.V) + '</b> 남음</span>'
         + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : '달성 예상일은 기록이 더 쌓이면 나옵니다') + '</span>'
       : '<span>' + (m.h == null ? '다음 ' + fmtM(m.M) + '은 지금 추세로는 어렵습니다' : '다음 <b>' + fmtM(m.M) + '</b> 달성 예상 <b>' + when + '</b>') + '</span>';
     return '<button type="button" class="hf-r' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'

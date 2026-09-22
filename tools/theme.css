@@ -1303,8 +1303,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .hf-v em b{font:700 11.5px "JetBrains Mono",monospace;line-height:1;color:var(--ink)}
 .hf-f{grid-area:f;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);font-size:11.5px;color:var(--ink2)}
 .hf-f b{font-weight:800;color:var(--ink)}
-.hf-pg{flex:1 1 90px;position:relative;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-.hf-pg i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,rgba(240,199,94,.4),#f0c75e)}
 @media (max-width:980px){.hf-list{grid-template-columns:1fr}}
 @media (max-width:520px){.hf-r{grid-template-columns:20px 76px minmax(0,1fr) auto;gap:8px}.hf-v b{font-size:18px}.hf-v{padding-left:8px}
   .vr-tabs{flex-wrap:wrap}.vr-tabs button{padding:7px 10px!important;font-size:12.5px;white-space:nowrap}}   /* 탭 세 개: 글자 중간에서 꺾이지 않게 통째로 다음 줄로 */
