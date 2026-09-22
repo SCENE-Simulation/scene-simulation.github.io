@@ -13,6 +13,8 @@
   //   ym     출시 연-월 'YYYY-MM' — 사이드바 메뉴 오른쪽 끝 "N월" 상자(shell.js). 꼭 채울 것
   //   title  메뉴 · 페이지 이름(짧게) / desc 페이지 설명 / card 홈 카드 설명(없으면 desc) / c 홈 카드 색
   //   items  상품 [{ id, name, price, parts(한 줄 설명), date(출시), img(이미지 주소) }] — 상품 id 는 보유 수량 · 위시리스트 저장 키라 바꾸지 않는다
+  //   news   관련 미디어 [{ title, src(언론사 · 채널), date, url, kind? }] — 있으면 페이지 위쪽에 "관련 미디어 보기" 토글(도감 페이지와 같은 모양).
+  //          유튜브 주소면 썸네일이 붙고, 종류 칩은 kind(없으면 영상/기사). 공유 주소의 추적값(?si= 등)은 빼고 넣는다
   var GCOLS = [
     { id: 'goods2026', y: '2026', ym: '2026-09',   // 'Scent Archive (memories of RESCENE)' 2026.9.15~23 더현대 서울 5층 (텐아시아 2026.09.16)
       title: '더현대 팝업 스토어', c: '#ecd25b',
@@ -24,6 +26,8 @@
       desc: '한정판 거래 플랫폼 KREAM에서 단독으로 판매한 리센느 × 김씨네과일 \'야호 티셔츠\' 5종입니다. 멤버들이 고향의 추억과 풍경을 직접 그린 손그림이 들어 있습니다. '
         + '2026년 7월 9일부터 31일까지 판매했고, 구매자에게 멤버 친필 사인 티셔츠를 랜덤으로 주는 이벤트도 있었습니다.',
       card: 'KREAM에서 단독 판매한 리센느 × 김씨네과일 \'야호 티셔츠\' 5종. 멤버들이 직접 그린 고향 손그림 티셔츠를 모아 보세요.',
+      // 사용자가 준 구글 공유 링크(share.google/UXdpCcoWooLJQRlcF, 구글 이미지 결과)가 가리키는 KREAM 공식 쇼츠. 제목의 해시태그는 뺌, 날짜는 한국 시간
+      news: [{ title: '리센느 야-호★ 김씨네과일 야-호★', src: 'KREAM · YouTube', date: '2026.07.16', url: 'https://www.youtube.com/shorts/3SMQxQdPVJk' }],
       items: [
         { id: 'kream2026-geoje',    name: '거제 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림' },
         { id: 'kream2026-gyeongju', name: '경주 야호 티셔츠', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림' },
@@ -154,9 +158,30 @@
   }
 
   // ===== 각 페이지 =====
+  // 굿즈 페이지 위쪽 토글 "관련 미디어 보기" — 컬렉션에 news 가 있을 때만. 도감 페이지(collection.js toggles)와 같은 클래스라 모양이 같다.
+  // 펼침 상태는 GXOPEN 에 두어 보유 수량을 바꿔 페이지를 다시 그려도 유지
+  var GXOPEN = {};
+  function ytId(u){ var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/)([\w-]{11})/.exec(u || ''); return m ? m[1] : null; }
+  function goodsNews(c){
+    if (!c.news) return '';
+    var news = c.news, open = !!GXOPEN[c.id];
+    return '<div class="xt"><div class="xt-bar"><button type="button" class="xt-b" data-gx="' + esc(c.id) + '" aria-expanded="' + open + '">'
+      + '<svg class="xi"><use href="#i-news"/></svg>관련 미디어 보기'
+      + (news.length ? '<span class="xt-c">' + news.length + '</span>' : '<span class="xt-c soon">SOON</span>') + '<svg class="xv"><use href="#i-chev"/></svg></button></div>'
+      + '<div class="xt-p"' + (open ? '' : ' hidden') + '>'
+      + (news.length ? '<div class="nws">' + news.map(function(a){
+            var yt = ytId(a.url), kind = a.kind || (yt ? '영상' : '기사');
+            return '<a class="nw' + (yt ? ' vid' : '') + '" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">'
+              + (yt ? '<span class="nw-th"><img src="https://i.ytimg.com/vi/' + yt + '/mqdefault.jpg" alt="" loading="lazy"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></i></span>' : '')
+              + '<span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
+              + '<span class="nw-m"><i class="nw-k' + (yt ? ' v' : '') + '">' + esc(kind) + '</i>' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span><svg><use href="#i-ext"/></svg></a>';
+          }).join('') + '</div>'
+         : '<div class="pk"><div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg><span>관련 미디어 준비 중</span><span class="chip">SOON</span></div></div>')
+      + '</div></div>';
+  }
   function renderGoodsPage(c){
     elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
-      + goodsStats(c.items) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items);
+      + goodsStats(c.items) + goodsNews(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items);
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
@@ -354,6 +379,14 @@
   document.addEventListener('click', function(e){
     var w = e.target.closest('[data-wish]');
     if (w) { e.preventDefault(); toggleWish(w.getAttribute('data-wish')); return; }
+    var gx = e.target.closest('[data-gx]');                    // 굿즈 페이지 "관련 미디어 보기" 펼치기 · 접기
+    if (gx) {
+      var gid = gx.getAttribute('data-gx'), op = !GXOPEN[gid];
+      GXOPEN[gid] = op;
+      gx.setAttribute('aria-expanded', String(op));
+      gx.closest('.xt').querySelector('.xt-p').hidden = !op;
+      return;
+    }
     var g = e.target.closest('[data-gd]');
     if (g) {
       var card = g.closest('[data-g]'), id = card.getAttribute('data-g'), d = +g.getAttribute('data-gd');
