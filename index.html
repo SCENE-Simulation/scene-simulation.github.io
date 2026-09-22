@@ -975,6 +975,7 @@ body.has-sfloat #totop{bottom:84px}
 /* ===== 굿즈 카드 ===== */
 .gnote2{margin:0 0 14px;font-size:12px;color:var(--ink2)}
 .gdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.gdgrid.gd-port{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}   /* 세로 사진(GCOLS ratio 가 세로) — PC 3~4칸, 휴대폰 1칸 */
 .gd{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--glass);border:1px solid var(--line)}
 .gd.have{border-color:rgba(71,209,154,.5)}
 .gd-img{position:relative;aspect-ratio:4/3;background:var(--cell)}
@@ -5288,6 +5289,7 @@ goTab(true,true);
   //   ym     출시 연-월 'YYYY-MM' — 사이드바 메뉴 오른쪽 끝 "N월" 상자(shell.js). 꼭 채울 것
   //   title  메뉴 · 페이지 이름(짧게) / desc 페이지 설명 / card 홈 카드 설명(없으면 desc) / c 홈 카드 색
   //   items  상품 [{ id, name, price, parts(한 줄 설명), date(출시), img(이미지 주소) }] — 상품 id 는 보유 수량 · 위시리스트 저장 키라 바꾸지 않는다
+  //   ratio  상품 그림 칸 비율 [가로, 세로] — 없으면 4:3. 사진 비율을 넣으면 잘리지 않는다(크림 티셔츠 셀카 399×501)
   //   news   관련 미디어 [{ title, src(언론사 · 채널), date, url, kind? }] — 있으면 페이지 위쪽에 "관련 미디어 보기" 토글(도감 페이지와 같은 모양).
   //          유튜브 주소면 썸네일이 붙고, 종류 칩은 kind(없으면 영상/기사). 공유 주소의 추적값(?si= 등)은 빼고 넣는다
   var GCOLS = [
@@ -5303,12 +5305,14 @@ goTab(true,true);
       card: 'KREAM에서 단독 판매한 리센느 × 김씨네과일 \'야호 티셔츠\' 5종. 멤버들이 직접 그린 고향 손그림 티셔츠를 모아 보세요.',
       // 사용자가 준 구글 공유 링크(share.google/UXdpCcoWooLJQRlcF, 구글 이미지 결과)가 가리키는 KREAM 공식 쇼츠. 제목의 해시태그는 뺌, 날짜는 한국 시간
       news: [{ title: '리센느 야-호★ 김씨네과일 야-호★', src: 'KREAM · YouTube', date: '2026.07.16', url: 'https://www.youtube.com/shorts/3SMQxQdPVJk' }],
+      // 사진: 사용자 제공 멤버 셀카(각자 고향 티셔츠, 399×501). 티셔츠 글자로 짝을 확인함
+      ratio: [399, 501],
       items: [
-        { id: 'kream2026-geoje',    name: '거제 야호', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림' },
-        { id: 'kream2026-gyeongju', name: '경주 야호', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림' },
-        { id: 'kream2026-suwon',    name: '수원 야호', price: 32000, date: '2026.07.09', parts: '리브의 고향 수원 · 수원 치킨 손그림' },
-        { id: 'kream2026-chiba',    name: '치바 야호', price: 32000, date: '2026.07.09', parts: '미나미의 고향 치바 · 비행기와 나리타 공항 손그림' },
-        { id: 'kream2026-goyang',   name: '고양 야호', price: 32000, date: '2026.07.09', parts: '메이의 고향 고양 · 고양시 마스코트와 물고기 손그림' }
+        { id: 'kream2026-geoje',    name: '거제 야호', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림', img: 'img/kream2026/geoje.jpg' },
+        { id: 'kream2026-gyeongju', name: '경주 야호', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림', img: 'img/kream2026/gyeongju.jpg' },
+        { id: 'kream2026-suwon',    name: '수원 야호', price: 32000, date: '2026.07.09', parts: '리브의 고향 수원 · 수원 치킨 손그림', img: 'img/kream2026/suwon.jpg' },
+        { id: 'kream2026-chiba',    name: '치바 야호', price: 32000, date: '2026.07.09', parts: '미나미의 고향 치바 · 비행기와 나리타 공항 손그림', img: 'img/kream2026/chiba.jpg' },
+        { id: 'kream2026-goyang',   name: '고양 야호', price: 32000, date: '2026.07.09', parts: '메이의 고향 고양 · 고양시 마스코트와 물고기 손그림', img: 'img/kream2026/goyang.jpg' }
       ] }
   ];
   function gcol(id){ return GCOLS.filter(function(c){ return c.id === id; })[0]; }
@@ -5407,10 +5411,10 @@ goTab(true,true);
   Object.keys(NOBUILD).forEach(function(k){ elNoBuild[k] = page('v-' + k); elNoBuild[k].innerHTML = noBuild(k); });
 
   // ===== 굿즈 카드 =====
-  function goodsCard(g){
-    var n = GOWN[g.id] || 0;
+  function goodsCard(g, c){
+    var n = GOWN[g.id] || 0, r = c && c.ratio;                 // r: 컬렉션 그림 칸 비율 (없으면 CSS 기본 4:3)
     return '<article class="gd' + (n ? ' have' : '') + '" data-g="' + esc(g.id) + '">'
-      + '<div class="gd-img">' + heart('gd:' + g.id)
+      + '<div class="gd-img"' + (r ? ' style="aspect-ratio:' + r[0] + '/' + r[1] + '"' : '') + '>' + heart('gd:' + g.id)
       + (g.img ? '<img src="' + esc(g.img) + '" alt="' + esc(g.name) + '" loading="lazy">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
       + '</div>'
       + '<div class="gd-b"><h4>' + esc(g.name) + '</h4>'
@@ -5420,8 +5424,9 @@ goTab(true,true);
       + '<b>' + n + '</b><button type="button" class="p" data-gd="1">+</button></div>'
       + '</div></article>';
   }
-  function goodsGrid(list){
-    return list.length ? '<div class="gdgrid">' + list.map(goodsCard).join('') + '</div>'
+  function goodsGrid(list, c){
+    var port = c && c.ratio && c.ratio[0] < c.ratio[1];          // 세로 사진 컬렉션은 칸을 좁게(PC 3~4칸) — theme.css .gdgrid.gd-port
+    return list.length ? '<div class="gdgrid' + (port ? ' gd-port' : '') + '">' + list.map(function(g){ return goodsCard(g, c); }).join('') + '</div>'
       : empty('i-gift', '등록된 굿즈가 없습니다', '굿즈 정보를 준비하고 있습니다');
   }
   function goodsStats(list){
@@ -5456,13 +5461,13 @@ goTab(true,true);
   }
   function renderGoodsPage(c){
     elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
-      + goodsStats(c.items) + goodsNews(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items);
+      + goodsStats(c.items) + goodsNews(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items, c);
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
     var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
     GCOLS.forEach(function(c){
-      h += '<div class="sec sec2"><div class="sec-t">' + c.y + '년 · ' + esc(c.title) + '<span class="cnt">' + c.items.length + '종</span></div></div>' + goodsGrid(c.items);
+      h += '<div class="sec sec2"><div class="sec-t">' + c.y + '년 · ' + esc(c.title) + '<span class="cnt">' + c.items.length + '종</span></div></div>' + goodsGrid(c.items, c);
     });
     elAllGoods.innerHTML = h;
   }

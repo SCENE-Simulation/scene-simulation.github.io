@@ -561,6 +561,7 @@ body.has-sfloat #totop{bottom:84px}
 /* ===== 굿즈 카드 ===== */
 .gnote2{margin:0 0 14px;font-size:12px;color:var(--ink2)}
 .gdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.gdgrid.gd-port{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}   /* 세로 사진(GCOLS ratio 가 세로) — PC 3~4칸, 휴대폰 1칸 */
 .gd{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--glass);border:1px solid var(--line)}
 .gd.have{border-color:rgba(71,209,154,.5)}
 .gd-img{position:relative;aspect-ratio:4/3;background:var(--cell)}
