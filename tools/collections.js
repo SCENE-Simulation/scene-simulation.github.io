@@ -41,5 +41,21 @@
            {title:'원이🌸 숲속에서 만난 호랑이의 정체는? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/0_1dV02TA3Y'},
            {title:'임자를 찾아 헤매는 리브🌳 과연 진짜 임자를 찾았을까? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/-Y8mgIOHOVo'},
            {title:'용궁에 간 토끼 메이🐰🌊 용궁공주 제나를 만나다! | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/Ku9gpeky_UU'}]
+  },
+  {
+    // 한정판 패키지는 9월 출시 예정(뉴시스 2026.08.27). 가격은 아직 모름 → price 0 = "가격 미정", 정해지면 buy.price 만 채운다
+    id: 'nrd2026', title: '나랑드 콜라보', year: '2026', ym: '2026-09', diff: 3,
+    desc: '동아오츠카의 제로 칼로리 사이다 브랜드 나랑드사이다는 2026년 7월 새로운 광고 모델로 신인 걸그룹 리센느(RESCENE)를 발탁했습니다. 콜라보 제품을 별도 2,000세트 한정으로 출시했으며, 브로마이드와 함께 포토카드 5종 중 1장이 랜덤으로 들어 있습니다.',
+    parts: '멤버 5종',
+    members: [{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}],
+    cards: [{n:'나랑드 원이', m:0}, {n:'나랑드 제나', m:1}, {n:'나랑드 리브', m:2}, {n:'나랑드 미나미', m:3}, {n:'나랑드 메이', m:4}],
+    modes: [{k:'buy', label:'한정판 패키지 구매', price:0, random:true, hint:'브로마이드 + 랜덤 1장 · 2,000세트 한정'},
+            {k:'trade', label:'교환', price:0},
+            {k:'used', label:'중고 구매', var:true, price:15000}],
+    pkg: [],
+    // 관련 미디어: 유튜브 주소는 공유 추적값(?si=)을 뺐다
+    news: [{title:"\"리센느 효과에 야호\" 나랑드사이다, 모델 발탁 후 매출 48% '껑충'", src:'뉴시스 · 네이트 뉴스', date:'2026.08.27', url:'https://m.news.nate.com/view/20260827n06577'},
+           {title:'2026 나랑드사이다 X 리센느 [나랑드로 와] full ver.', src:'동아오츠카 · YouTube', date:'2026.08.07', url:'https://youtu.be/z49A40CwgwM'},
+           {title:'2026 나랑드사이다X리센느 [나랑드로와] 메이킹필름', src:'동아오츠카 · YouTube', date:'2026.09.01', url:'https://youtu.be/HKlm_f-qXdk'}]
   }
 ].forEach(function(cfg){ window.SGCollection(cfg); });

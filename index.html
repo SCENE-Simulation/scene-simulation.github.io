@@ -1969,7 +1969,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
     <details class="yr" open>
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 포카</summary>
       <a class="nv sub" href="?tab=cu405" data-tab="cu405">CU 리센느 405빵 콜라보</a>
-      <span class="nv sub off" aria-disabled="true">나랑드 콜라보<span class="bd">SOON</span></span>
       <span class="nv sub off" aria-disabled="true">도미노 콜라보<span class="bd">SOON</span></span>
     </details>
     <details class="yr">
@@ -2032,11 +2031,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
       <div class="st2"><span><b data-mirror="c-own">0/27</b>보유</span><span><b data-mirror="c-cnt">0회</b>구매</span></div>
       <span class="go">도감 열기 →</span>
     </a>
-    <div class="hc soon" style="--c:#6e6e73">
-      <div class="k">2026 포카</div>
-      <h2>나랑드 콜라보</h2>
-      <span class="chip">SOON</span>
-    </div>
     <div class="hc soon" style="--c:#6e6e73">
       <div class="k">2026 포카</div>
       <h2>도미노 콜라보</h2>
@@ -3266,6 +3260,8 @@ goTab(true,true);
 
     // 컴플리트 평균: 뽑기형 방식의 가격 기준
     var rnd = cfg.modes.filter(function(m){ return m.random; })[0];
+    // 뽑기형인데 가격이 아직 없으면(price 0·없음) "가격 미정" — 0원으로 보이지 않게. 시뮬레이터(gacha.js)도 price > 0 일 때만 넣는다
+    function tbd(m){ return !!(m && m.random && !m.price); }
     function expect(){
       if (!rnd) return null;
       var h = 0, k; for (k = 1; k <= N; k++) h += 1 / k;
@@ -3374,7 +3370,8 @@ goTab(true,true);
       var h = '<div class="cmeta">';
       if (cfg.ym) h += '<div class="mt"><span class="mk">출시</span><b>' + p[0] + '.' + p[1] + '</b><small>' + p[0] + '년 ' + (+p[1]) + '월</small></div>';
       h += '<div class="mt"><span class="mk">구성</span><b>' + N + '종</b><small>' + esc(cfg.parts || ((cfg.members || []).length ? '멤버 ' + cardsOf(0).length * cfg.members.length + '종 + 스페셜 ' + specials().length + '종' : '')) + '</small></div>';
-      if (ex) h += '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + ex.packs + '개</b><small>약 ' + won(ex.cost) + '원 · 1개 ' + won(rnd.price) + '원</small></div>';
+      if (ex) h += '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + ex.packs + '개</b><small>'
+        + (tbd(rnd) ? '가격 미정 · 정해지면 비용도 계산' : '약 ' + won(ex.cost) + '원 · 1개 ' + won(rnd.price) + '원') + '</small></div>';
       h += '<div class="mt"><span class="mk">수집 난이도</span>' + bars + '<small>비용 · 구하기 종합 · 5단계 중 ' + lv + '</small></div>';
       return h + '</div>';
     }
@@ -3407,7 +3404,7 @@ goTab(true,true);
       cfg.modes.forEach(function(m){
         h += '<div class="lg"><div class="t">' + esc(m.label) + (m['var']
             ? ' · 장당 <input data-price="' + m.k + '" type="text" inputmode="numeric" autocomplete="off" value="' + won(state.price[m.k] || 0) + '">원'
-            : (m.price ? ' · ' + won(m.price) + '원' : ' · 0원')) + '</div>'
+            : (m.price ? ' · ' + won(m.price) + '원' : tbd(m) ? ' · 가격 미정' : ' · 0원')) + '</div>'
           + '<div class="ctr"><button data-mode="' + m.k + '" data-d="-1"' + (ledger(m.k) ? '' : ' disabled') + '>−</button>'
           + '<span class="n">' + won(ledger(m.k)) + '</span>'
           + '<button class="m" data-mode="' + m.k + '" data-d="1">+</button></div>'
@@ -3590,7 +3587,7 @@ goTab(true,true);
         + '<span class="upw"><input type="text" inputmode="numeric" data-vprice value="' + won(state.price[vmode.k] || 0) + '"><span>원</span></span>'
         + '<span class="uh">' + esc(vmode.label) + '을 고를 때만 적용됩니다.</span></div>';
       h += '<div class="msrc">' + cfg.modes.map(function(m){
-          var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : '추가 비용 없음');
+          var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : tbd(m) ? '가격 미정' : '추가 비용 없음');
           return '<button type="button" data-pickmode="' + m.k + '">' + esc(m.label) + (dir > 0 ? '' : ' 취소') + '<small>' + sub + '</small></button>';
         }).join('') + '<button type="button" data-pickmode="adj">수량만 조정<small>구매·금액 기록 없이 수량만</small></button></div>';
       body.innerHTML = h;
@@ -3773,6 +3770,22 @@ goTab(true,true);
            {title:'원이🌸 숲속에서 만난 호랑이의 정체는? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/0_1dV02TA3Y'},
            {title:'임자를 찾아 헤매는 리브🌳 과연 진짜 임자를 찾았을까? | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/-Y8mgIOHOVo'},
            {title:'용궁에 간 토끼 메이🐰🌊 용궁공주 제나를 만나다! | HOLLYS × RESCENE', src:'할리스 · YouTube', date:'2026.08.26', url:'https://youtu.be/Ku9gpeky_UU'}]
+  },
+  {
+    // 한정판 패키지는 9월 출시 예정(뉴시스 2026.08.27). 가격은 아직 모름 → price 0 = "가격 미정", 정해지면 buy.price 만 채운다
+    id: 'nrd2026', title: '나랑드 콜라보', year: '2026', ym: '2026-09', diff: 3,
+    desc: '동아오츠카의 제로 칼로리 사이다 브랜드 나랑드사이다는 2026년 7월 새로운 광고 모델로 신인 걸그룹 리센느(RESCENE)를 발탁했습니다. 콜라보 제품을 별도 2,000세트 한정으로 출시했으며, 브로마이드와 함께 포토카드 5종 중 1장이 랜덤으로 들어 있습니다.',
+    parts: '멤버 5종',
+    members: [{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}],
+    cards: [{n:'나랑드 원이', m:0}, {n:'나랑드 제나', m:1}, {n:'나랑드 리브', m:2}, {n:'나랑드 미나미', m:3}, {n:'나랑드 메이', m:4}],
+    modes: [{k:'buy', label:'한정판 패키지 구매', price:0, random:true, hint:'브로마이드 + 랜덤 1장 · 2,000세트 한정'},
+            {k:'trade', label:'교환', price:0},
+            {k:'used', label:'중고 구매', var:true, price:15000}],
+    pkg: [],
+    // 관련 미디어: 유튜브 주소는 공유 추적값(?si=)을 뺐다
+    news: [{title:"\"리센느 효과에 야호\" 나랑드사이다, 모델 발탁 후 매출 48% '껑충'", src:'뉴시스 · 네이트 뉴스', date:'2026.08.27', url:'https://m.news.nate.com/view/20260827n06577'},
+           {title:'2026 나랑드사이다 X 리센느 [나랑드로 와] full ver.', src:'동아오츠카 · YouTube', date:'2026.08.07', url:'https://youtu.be/z49A40CwgwM'},
+           {title:'2026 나랑드사이다X리센느 [나랑드로와] 메이킹필름', src:'동아오츠카 · YouTube', date:'2026.09.01', url:'https://youtu.be/HKlm_f-qXdk'}]
   }
 ].forEach(function(cfg){ window.SGCollection(cfg); });
 

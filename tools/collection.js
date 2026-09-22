@@ -59,6 +59,8 @@
 
     // 컴플리트 평균: 뽑기형 방식의 가격 기준
     var rnd = cfg.modes.filter(function(m){ return m.random; })[0];
+    // 뽑기형인데 가격이 아직 없으면(price 0·없음) "가격 미정" — 0원으로 보이지 않게. 시뮬레이터(gacha.js)도 price > 0 일 때만 넣는다
+    function tbd(m){ return !!(m && m.random && !m.price); }
     function expect(){
       if (!rnd) return null;
       var h = 0, k; for (k = 1; k <= N; k++) h += 1 / k;
@@ -167,7 +169,8 @@
       var h = '<div class="cmeta">';
       if (cfg.ym) h += '<div class="mt"><span class="mk">출시</span><b>' + p[0] + '.' + p[1] + '</b><small>' + p[0] + '년 ' + (+p[1]) + '월</small></div>';
       h += '<div class="mt"><span class="mk">구성</span><b>' + N + '종</b><small>' + esc(cfg.parts || ((cfg.members || []).length ? '멤버 ' + cardsOf(0).length * cfg.members.length + '종 + 스페셜 ' + specials().length + '종' : '')) + '</small></div>';
-      if (ex) h += '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + ex.packs + '개</b><small>약 ' + won(ex.cost) + '원 · 1개 ' + won(rnd.price) + '원</small></div>';
+      if (ex) h += '<div class="mt"><span class="mk">컴플리트 평균</span><b>약 ' + ex.packs + '개</b><small>'
+        + (tbd(rnd) ? '가격 미정 · 정해지면 비용도 계산' : '약 ' + won(ex.cost) + '원 · 1개 ' + won(rnd.price) + '원') + '</small></div>';
       h += '<div class="mt"><span class="mk">수집 난이도</span>' + bars + '<small>비용 · 구하기 종합 · 5단계 중 ' + lv + '</small></div>';
       return h + '</div>';
     }
@@ -200,7 +203,7 @@
       cfg.modes.forEach(function(m){
         h += '<div class="lg"><div class="t">' + esc(m.label) + (m['var']
             ? ' · 장당 <input data-price="' + m.k + '" type="text" inputmode="numeric" autocomplete="off" value="' + won(state.price[m.k] || 0) + '">원'
-            : (m.price ? ' · ' + won(m.price) + '원' : ' · 0원')) + '</div>'
+            : (m.price ? ' · ' + won(m.price) + '원' : tbd(m) ? ' · 가격 미정' : ' · 0원')) + '</div>'
           + '<div class="ctr"><button data-mode="' + m.k + '" data-d="-1"' + (ledger(m.k) ? '' : ' disabled') + '>−</button>'
           + '<span class="n">' + won(ledger(m.k)) + '</span>'
           + '<button class="m" data-mode="' + m.k + '" data-d="1">+</button></div>'
@@ -383,7 +386,7 @@
         + '<span class="upw"><input type="text" inputmode="numeric" data-vprice value="' + won(state.price[vmode.k] || 0) + '"><span>원</span></span>'
         + '<span class="uh">' + esc(vmode.label) + '을 고를 때만 적용됩니다.</span></div>';
       h += '<div class="msrc">' + cfg.modes.map(function(m){
-          var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : '추가 비용 없음');
+          var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : tbd(m) ? '가격 미정' : '추가 비용 없음');
           return '<button type="button" data-pickmode="' + m.k + '">' + esc(m.label) + (dir > 0 ? '' : ' 취소') + '<small>' + sub + '</small></button>';
         }).join('') + '<button type="button" data-pickmode="adj">수량만 조정<small>구매·금액 기록 없이 수량만</small></button></div>';
       body.innerHTML = h;
