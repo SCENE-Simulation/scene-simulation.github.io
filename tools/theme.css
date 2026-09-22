@@ -1686,9 +1686,11 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   .mb-eta i{margin:0 3px 0 1px}
   #v-views .mb-r .mb-e{min-width:78px}
 }
-/* 칩 줄은 썸네일 아래부터 가운데까지 한 줄, 오른쪽 달성까지 칸은 두 줄 높이 가운데 */
-#v-views .mb-r{grid-template-areas:"th b e" "cp cp e";row-gap:8px!important}
+/* 썸네일은 두 줄을 다 쓰며 크게(칩을 왼쪽에 두지 않는다), 칩 줄은 썸네일 오른쪽 아래, 달성까지 칸은 오른쪽 위 */
+#v-views .mb-r{grid-template-areas:"th b e" "th cp cp";row-gap:7px!important}
 #v-views .mb-r > .mb-cps{grid-area:cp}
 #v-views .mb-r .mb-now b{font-size:13px}
 /* PC 두 칸 목록(카드 약 370px): 썸네일 84px · 남은 시간 18px → 가운데 "1196만 → 1,200만" 이 한 줄에 */
-@media (min-width:641px){#v-views .mb-r{grid-template-columns:84px minmax(0,1fr) auto}.mb-eta{font-size:18px}}
+@media (min-width:641px){#v-views .mb-r{grid-template-columns:118px minmax(0,1fr) auto}.mb-eta{font-size:18px}}
+@media (max-width:640px){#v-views .mb-r{grid-template-columns:100px minmax(0,1fr) auto}}
+#v-views .mb-r .mb-cps{align-self:end}
