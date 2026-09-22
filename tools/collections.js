@@ -52,7 +52,12 @@
     modes: [{k:'buy', label:'한정판 패키지 구매', price:0, random:true, hint:'브로마이드 + 랜덤 1장 · 2,000세트 한정'},
             {k:'trade', label:'교환', price:0},
             {k:'used', label:'중고 구매', var:true, price:15000}],
-    pkg: [],
+    // 패키징: 한 줄에 같은 높이로. 정규 모델 포스터와 유리병은 같은 크기(유리병 정사각 사진을 포스터 비율 틀에 맞춰 양옆을 자름),
+    //   브로마이드 사진만 원래 가로 비율
+    pkgRow: true,
+    pkg: [{src:'img/nrd2026/model.webp', size:[1200,1689], cap:'나랑드 리센느 정규 모델'},
+          {src:'img/nrd2026/bromide.webp', size:[1118,838], cap:'나랑드 리센느 브로마이드'},
+          {src:'img/nrd2026/bottle.png', ratio:[1200,1689], cap:'나랑드 리센느 콜라보 유리병', sub:'유리병 · 코팅이 아닌 비닐 패키징 · 1세트 6병입 · 2,000세트 한정'}],
     // 관련 미디어: 유튜브 주소는 공유 추적값(?si=)을 뺐다
     news: [{title:"\"리센느 효과에 야호\" 나랑드사이다, 모델 발탁 후 매출 48% '껑충'", src:'뉴시스 · 네이트 뉴스', date:'2026.08.27', url:'https://m.news.nate.com/view/20260827n06577'},
            {title:'2026 나랑드사이다 X 리센느 [나랑드로 와] full ver.', src:'동아오츠카 · YouTube', date:'2026.08.07', url:'https://youtu.be/z49A40CwgwM'},

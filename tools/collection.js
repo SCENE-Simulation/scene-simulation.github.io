@@ -5,6 +5,9 @@
 //   news[] : 관련 미디어. 유튜브 주소면 썸네일이 붙는다. kind 는 종류 칩 글자(없으면 영상/기사)
 //   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기.
 //           crop:[x,y,w,h] + size:[원본 폭,높이] 면 한 장짜리 이미지의 그 영역만 보여 준다 (여러 칸이 같은 파일을 나눠 씀)
+//           size 만 있으면 그 비율로, ratio:[w,h] 면 그 비율 틀에 맞춰 가운데를 잘라 보여 준다 (크기가 다른 사진을 같은 크기로)
+//   pkgRow:true : 패키징을 한 줄에 같은 높이로 나란히 (칸 폭은 각 이미지 비율대로, 좁은 화면에서는 세로로 쌓임).
+//                 모든 항목에 size·ratio·crop 중 하나가 있어야 한다
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
@@ -242,6 +245,8 @@
       return '<div class="pk-crop" role="img" aria-label="' + esc(p.cap || '패키징') + '" style="aspect-ratio:' + c[2] + '/' + c[3]
         + ';background-image:url(\'' + esc(p.src) + '\');background-size:' + bw.toFixed(3) + '% auto;background-position:' + bx.toFixed(3) + '% ' + by.toFixed(3) + '%"></div>';
     }
+    // 패키징 한 칸의 가로/세로 비율 (ratio 틀 > crop 영역 > 원본 size). 모르면 0
+    function pkRatio(p){ var r = p.ratio || (p.crop ? [p.crop[2], p.crop[3]] : p.size); return r ? r[0] / r[1] : 0; }
     function toggles(){
       var pkg = cfg.pkg || [], news = cfg.news || [], n = ENTRIES.length + PEND.length;
       function btn(k, label, cnt){
@@ -250,11 +255,15 @@
       }
       var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 미디어 보기', news.length)
         + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
-      h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '><div class="pk">'
+      h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '>'
+        + (cfg.pkgRow && pkg.length > 1 && pkg.every(pkRatio)
+           ? '<div class="pk row" style="--pkc:' + pkg.map(function(p){ return pkRatio(p).toFixed(4) + 'fr'; }).join(' ') + '">'
+           : '<div class="pk">')
         + (pkg.length ? pkg.map(function(p){
               return '<figure' + (p.wide ? ' class="wide"' : '') + '>'
                 + (p.src && p.crop ? cropBox(p)
-                  : p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+                  : p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy"'
+                    + ((p.ratio || p.size) ? ' class="fit" style="aspect-ratio:' + (p.ratio || p.size)[0] + '/' + (p.ratio || p.size)[1] + '"' : '') + '>'
                   : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>이미지 준비 중</span></div>')
                 + (p.cap || p.sub ? '<figcaption>' + (p.cap ? '<b>' + esc(p.cap) + '</b>' : '') + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</figcaption>' : '') + '</figure>';
             }).join('')

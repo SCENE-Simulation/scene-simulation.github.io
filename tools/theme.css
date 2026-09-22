@@ -271,7 +271,7 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .xt-b[aria-expanded="true"] .xv{transform:rotate(-90deg);color:var(--mint-t)}
 .xt-p{margin-top:10px;padding:12px;border-radius:14px;background:var(--glass);border:1px solid var(--line);animation:shUp .15s ease-out}
 .pk figure{margin:0}
-.pk figcaption{margin-top:6px;font-size:12px;color:var(--ink2);text-align:center}
+.pk figcaption{margin-top:6px;font-size:12px;color:var(--ink2);text-align:center;word-break:keep-all}
 .pk figcaption b{display:block;font-size:13px;font-weight:700;color:var(--ink)}           /* 제목(cap) · 설명(sub) 두 줄 */
 .pk figcaption small{display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink2)}
 .nws{display:grid;gap:8px}
@@ -299,6 +299,11 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 /* 한 장짜리 이미지의 일부(crop) — collection.js cropBox */
 .pk-crop{width:100%;border-radius:12px;border:1px solid var(--line);background-color:#fbf7f2;background-repeat:no-repeat}
 .pk figure.wide img{width:auto;max-width:100%;height:auto;margin:0 auto}
+/* 비율 틀(size·ratio): 그 비율로 그리고, 비율이 다른 사진은 가운데를 잘라 맞춘다 */
+.pk img.fit{box-sizing:border-box;height:auto;object-fit:cover}
+/* 한 줄 나란히(pkgRow): 칸 폭을 이미지 비율대로 나눠(--pkc, collection.js) 높이를 맞춘다. 좁은 화면에서는 세로로 쌓는다 */
+.pk.row{grid-template-columns:var(--pkc);align-items:start}
+@media (max-width:700px){.pk.row{grid-template-columns:1fr}}
 .pk-ph{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;
   border:1.5px dashed var(--line2);background:var(--glass);color:var(--dim)}
 .pk-ph svg{width:30px;height:30px}
