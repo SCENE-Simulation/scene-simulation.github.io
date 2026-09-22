@@ -910,11 +910,14 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-spark{display:block;width:100%;height:24px}
 .vd-spark .a{fill:rgba(255,77,79,.16)}
 .vd-spark .l{fill:none;stroke:var(--vg);stroke-width:2;stroke-linejoin:round}
-.vd-strip{position:relative;display:block;height:24px;margin:0 6px}
-.vd-strip::before{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:rgba(255,255,255,.08)}
-.vd-strip i{position:absolute;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.2)}
-.vd-strip i.md{width:2px;height:16px;margin:-8px 0 0 -1px;border-radius:1px;background:rgba(255,255,255,.6)}
-.vd-strip b{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--vg);box-shadow:0 0 0 2.5px #232325,0 0 12px rgba(255,77,79,.8)}
+/* 좋아요·댓글 비율 분포: 곡선(다른 영상) · 점선(보통) · 바늘(이 영상), 바늘 왼쪽은 빨강으로 채움 */
+.vd-strip{position:relative;display:block;height:24px;margin:0}
+.vd-strip svg{display:block;width:100%;height:100%;overflow:visible}
+.vd-strip .a{fill:rgba(255,255,255,.06)}
+.vd-strip .l{fill:none;stroke:rgba(255,255,255,.3);stroke-width:1.2;stroke-linejoin:round}
+.vd-strip i.md{position:absolute;top:1px;bottom:0;width:1px;margin-left:-.5px;background:repeating-linear-gradient(180deg,rgba(255,255,255,.55) 0 2px,transparent 2px 4px)}
+.vd-strip b{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;border-radius:2px;background:#ff6b6d;box-shadow:0 0 7px rgba(255,77,79,.95)}
+.vd-strip b::before{content:"";position:absolute;top:0;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px var(--vg),0 0 8px rgba(255,77,79,.9)}
 .vd-bars{display:flex;align-items:flex-end;gap:2px;height:24px}
 .vd-bars i{flex:1;min-width:0;border-radius:2px 2px 0 0;background:rgba(255,77,79,.3)}
 .vd-bars i:last-child{background:var(--vg);box-shadow:0 0 8px rgba(255,77,79,.6)}

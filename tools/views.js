@@ -938,14 +938,25 @@
     return up / n <= 0.5 ? '<em class="up">상위 ' + Math.max(1, Math.round(up / n * 100)) + '%</em>'
       : '<em>하위 ' + Math.max(1, Math.round(dn / n * 100)) + '%</em>';
   }
-  // 다른 영상들의 비율을 점으로 늘어놓고(세로선은 보통값) 이 영상을 분홍 점으로
+  // 다른 영상들의 비율 분포를 부드러운 곡선(밀도)으로 깔고, 이 영상 자리에 바늘. 세로 점선은 보통(중앙값).
+  //   바늘 왼쪽(이 영상보다 비율이 낮은 영상들)만 빨강으로 채워 "상위 N%" 가 눈에 보이게 한다. 높이는 24px 그대로
+  var SID = 0;
   function strip(x, arr){
     if (arr.length < 3) return '';
     var all = arr.concat([x]), mn = Math.min.apply(null, all), w = Math.max.apply(null, all) - mn || 1;
-    function P(y){ return ((y - mn) / w * 100).toFixed(1) + '%'; }
-    return '<span class="vd-strip" title="점: 채널의 다른 영상 · 세로선: 보통 · 분홍: 이 영상">'
-      + arr.map(function(y){ return '<i style="left:' + P(y) + '"></i>'; }).join('')
-      + '<i class="md" style="left:' + P(q(arr, 0.5)) + '"></i><b style="left:' + P(x) + '"></b></span>';
+    mn -= w * 0.06; w *= 1.12;                                                   // 양 끝 여유 (곡선이 잘리지 않게)
+    function P(y){ return (y - mn) / w; }
+    var W = 200, H = 24, n = 60, bw = 0.07, ys = [], top = 0;
+    for (var i = 0; i <= n; i++){ var u = i / n, d = 0; arr.forEach(function(y){ var z = (u - P(y)) / bw; d += Math.exp(-z * z / 2); }); ys.push(d); top = Math.max(top, d); }
+    var line = ys.map(function(d, i){ return (i ? 'L' : 'M') + (W * i / n).toFixed(1) + ' ' + (H - 1 - d / top * (H - 5)).toFixed(1); }).join(' ');
+    var area = line + ' L' + W + ' ' + H + ' L0 ' + H + ' Z', px = P(x), id = 'vsg' + (++SID);
+    return '<span class="vd-strip" title="곡선: 채널 다른 영상들의 분포 · 점선: 보통 · 바늘: 이 영상 (빨간 부분 = 이 영상보다 낮은 영상들)">'
+      + '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><defs>'
+      + '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff4d4f" stop-opacity=".7"/><stop offset="1" stop-color="#ff4d4f" stop-opacity=".12"/></linearGradient>'
+      + '<clipPath id="' + id + 'c"><rect x="0" y="0" width="' + (px * W).toFixed(1) + '" height="' + H + '"/></clipPath></defs>'
+      + '<path class="a" d="' + area + '"/><path d="' + area + '" fill="url(#' + id + ')" clip-path="url(#' + id + 'c)"/>'
+      + '<path class="l" d="' + line + '" vector-effect="non-scaling-stroke"/></svg>'
+      + '<i class="md" style="left:' + (P(q(arr, 0.5)) * 100).toFixed(1) + '%"></i><b style="left:' + (px * 100).toFixed(1) + '%"></b></span>';
   }
   // 누적 조회수 곡선 (게시 직후부터 기록이 없으면 기록 시작부터)
   function spark(v, a){
