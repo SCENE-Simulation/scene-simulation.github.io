@@ -9,6 +9,10 @@
 //   pkgRow:true : 패키징을 한 줄에 같은 높이로 나란히 (칸 폭은 각 이미지 비율대로, 좁은 화면에서는 세로로 쌓임).
 //                 모든 항목에 size·ratio·crop 중 하나가 있어야 한다
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
+//   groups[{k, n, c, note?, soon?[{n, sub?}]}] : 포토카드와 따로 모으는 묶음(브로마이드 · 스페셜 굿즈 등). 멤버 칸 아래에 묶음마다 새 줄.
+//     cards[].g 에 묶음 k 를 적으면 그 줄에 나온다. soon 은 아직 공개 전인 굿즈 — SOON 칸만 보이고 개수·완성에는 안 들어간다
+//     (공개되면 soon 에서 빼고 cards 맨 뒤에 g 를 붙여 추가. 기록은 카드 번호로 저장되므로 cards 순서는 바꾸지 않는다)
+//   modes[].g : 뽑기형 방식이 뽑는 묶음(없으면 포토카드). 뽑기형·g 가 있는 방식은 그 묶음 카드에만, 나머지(교환·중고 등)는 모든 카드에 쓴다
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
 //   modes[].ach : 그 방식의 칭호를 직접 정함 [{at:횟수, n:칭호, d:한마디}] — 설명은 "<방식> N회 · 한마디". 없으면 첫걸음(1회)·단골(10회)
@@ -46,6 +50,12 @@
     var N = cfg.cards.length;
     var KEY = 'col:' + cfg.id, COLKEY = 'col:' + cfg.id + ':cols';
     var MODE = {}; cfg.modes.forEach(function(m){ MODE[m.k] = m; });
+    // 묶음(groups): 뽑기형 방식은 자기 묶음 안에서만 뽑는다 — 포토카드 확률 · 컴플리트 평균 · 시뮬레이터에 굿즈가 섞이지 않게
+    var GROUPS = cfg.groups || [];
+    function gOf(c){ return (c && c.g) || ''; }
+    function poolOf(m){ var out = []; cfg.cards.forEach(function(c, i){ if (gOf(c) === ((m && m.g) || '')) out.push(i); }); return out; }
+    function groupIds(k){ var out = []; cfg.cards.forEach(function(c, i){ if (c.g === k) out.push(i); }); return out; }
+    function modeFits(m, i){ return (m.random || m.g) ? gOf(cfg.cards[i]) === (m.g || '') : true; }
     var ENTRIES = [], PEND = [], ACH = {}, EDITING = null, EDITS = 0, savedAt = null;
     var el = document.createElement('section');
     el.id = 'v-' + cfg.id; el.className = 'wrap page colpg'; el.hidden = true;           // colpg: 카드 크기 규칙(theme.css)을 405빵 페이지와 같이 씀
@@ -74,9 +84,14 @@
     function tbd(m){ return !!(m && m.random && !m.price); }
     function expect(){
       if (!rnd) return null;
-      var h = 0, k; for (k = 1; k <= N; k++) h += 1 / k;
-      var packs = Math.round(N * h);
-      return { packs: packs, cost: packs * (rnd.price || 0) };
+      var packs = 0, cost = 0;
+      cfg.modes.forEach(function(m){
+        if (!m.random) return;
+        var n = poolOf(m).length, h = 0, k; if (!n) return;
+        for (k = 1; k <= n; k++) h += 1 / k;
+        var p = Math.round(n * h); packs += p; cost += p * (m.price || 0);
+      });
+      return { packs: packs, cost: cost };
     }
 
     // ---------- 저장 ----------
@@ -182,7 +197,7 @@
     }
     function specials(){
       var out = [];
-      cfg.cards.forEach(function(c, i){ if (c.m == null) out.push(i); });
+      cfg.cards.forEach(function(c, i){ if (c.m == null && !c.g) out.push(i); });
       return out;
     }
 
@@ -332,7 +347,20 @@
       }
       (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
-      return '<div class="cbody' + (compact() ? ' compact' : '') + '">' + h + '</div>';
+      // 묶음(브로마이드 · 스페셜 굿즈): 묶음마다 새 줄. 컴팩트면 칸 수(--span)만큼 가로로 차지해 카드 크기가 멤버 칸과 같다
+      function soonTile(x){
+        return '<div class="ctile soon"><div class="frame"><div class="pic"><div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span class="chip">SOON</span></div></div></div>'
+          + '<div class="nm" title="' + esc(x.n) + '">' + esc(x.n) + '</div><div class="sn">' + esc(x.sub || '실물 공개 전') + '</div></div>';
+      }
+      function groupRow(g){
+        var ids = groupIds(g.k), soon = g.soon || [], n = ids.length + soon.length;
+        if (!n) return '';
+        var own = ids.filter(function(i){ return c[i] > 0; }).length;
+        return '<div class="cbody grp' + (compact() ? ' compact' : '') + '"><div class="set" style="--span:' + n + '"><div class="shead"><span class="chip" style="background:' + (g.c || '#f6b93c') + '"></span><b>' + esc(g.n) + '</b>'
+          + '<span class="vs">' + esc(g.note || '') + '</span>' + (ids.length ? '<span class="pr num">' + own + '/' + ids.length + '</span>' : '') + '</div>'   // 공개 전 굿즈만 있으면 개수 없이 (칸 안에 SOON)
+          + '<div class="cgrid">' + ids.map(tile).join('') + soon.map(soonTile).join('') + '</div></div></div>';
+      }
+      return '<div class="cbody' + (compact() ? ' compact' : '') + '">' + h + '</div>' + GROUPS.map(groupRow).join('');
     }
     // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종).
     // 이때 칸마다 카드가 1~2장이라 한 줄 카드 수(슬라이더)가 의미 없어서 슬라이더는 숨기고 기본 크기로 둔다
@@ -342,7 +370,8 @@
     }
     function sumRow(){
       // 칸 수(멤버 + 스페셜)가 6보다 적으면 한 줄을 그 수로 나눠 꽉 채운다 (--csn, theme.css). 405빵처럼 6칸이면 예전 그대로
-      var nu = (cfg.members || []).length + (specials().length ? 1 : 0);
+      var gu = GROUPS.filter(function(g){ return groupIds(g.k).length; });
+      var nu = (cfg.members || []).length + (specials().length ? 1 : 0) + gu.length;
       var c = counts(), h = '<div class="csum"' + (nu && nu < 6 ? ' style="--csn:' + nu + '"' : '') + '>';
       (cfg.members || []).forEach(function(m, mi){
         var ids = cardsOf(mi), own = ids.filter(function(i){ return c[i] > 0; }).length, tot = ids.reduce(function(a, i){ return a + c[i]; }, 0);
@@ -350,6 +379,10 @@
       });
       var sp = specials(), spOwn = sp.filter(function(i){ return c[i] > 0; }).length;
       if (sp.length) h += '<div class="u' + (spOwn === sp.length ? ' full' : '') + '" style="--c:#f6b93c"><div class="t">스페셜</div><div class="v">' + spOwn + '/' + sp.length + '</div><div class="s">' + sp.reduce(function(a, i){ return a + c[i]; }, 0) + '장</div></div>';
+      gu.forEach(function(g){
+        var ids = groupIds(g.k), own = ids.filter(function(i){ return c[i] > 0; }).length;
+        h += '<div class="u' + (own === ids.length ? ' full' : '') + '" style="--c:' + (g.c || '#f6b93c') + '"><div class="t">' + esc(g.n) + '</div><div class="v">' + own + '/' + ids.length + '</div><div class="s">' + ids.reduce(function(a, i){ return a + c[i]; }, 0) + '장</div></div>';
+      });
       return h + '</div>';
     }
     function noteBar(){
@@ -426,11 +459,12 @@
       var h = '<div class="mqty"><span class="lb">' + (dir > 0 ? '추가' : '차감') + ' 수량</span><div class="st">'
         + '<button type="button" data-q="-1">−</button><span class="n">1</span><button type="button" class="p" data-q="1">+</button></div>'
         + '<div class="ps">' + [1, 3, 5, 10].map(function(v){ return '<button type="button" data-qset="' + v + '">' + v + '장</button>'; }).join('') + '</div></div>';
-      var vmode = cfg.modes.filter(function(m){ return m['var']; })[0];
+      var fit = cfg.modes.filter(function(m){ return modeFits(m, i); });
+      var vmode = fit.filter(function(m){ return m['var']; })[0];
       if (vmode && dir > 0) h += '<div class="mqty mup"><span class="lb">' + esc(vmode.label) + ' 금액 (장당)</span>'
         + '<span class="upw"><input type="text" inputmode="numeric" data-vprice value="' + won(state.price[vmode.k] || 0) + '"><span>원</span></span>'
         + '<span class="uh">' + esc(vmode.label) + '을 고를 때만 적용됩니다.</span></div>';
-      h += '<div class="msrc">' + cfg.modes.map(function(m){
+      h += '<div class="msrc">' + fit.map(function(m){
           var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : tbd(m) ? '가격 미정' : '추가 비용 없음');
           return '<button type="button" data-pickmode="' + m.k + '">' + esc(m.label) + (dir > 0 ? '' : ' 취소') + '<small>' + sub + '</small></button>';
         }).join('') + '<button type="button" data-pickmode="adj">수량만 조정<small>구매·금액 기록 없이 수량만</small></button></div>';
@@ -528,6 +562,7 @@
       document.getElementById('m-sub').textContent = '어떤 카드를 얻으셨습니까?';
       var c = counts();
       body.innerHTML = '<div class="mgrid">' + cfg.cards.map(function(card, i){
+        if (MODE[k] && !modeFits(MODE[k], i)) return '';
         return '<button type="button" class="mcard' + (card.land ? ' land' : '') + '" data-pickcard="' + i + '">'
           + (card.img ? '<img src="' + esc(card.img) + '" alt="">' : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
           + '<div class="cn">' + (i + 1) + '. ' + esc(card.n) + '</div><div class="cq">x' + c[i] + '</div></button>';
@@ -556,7 +591,9 @@
       modes: cfg.modes || [],
       vper: (cfg.members && cfg.members.length) ? cardsOf(0).length : 0,
       mcount: (cfg.members || []).length,
-      mtotal: N - specials().length,
+      mtotal: N - specials().length - cfg.cards.filter(function(c){ return c.g; }).length,
+      // 시뮬레이터(gacha.js)가 뽑는 카드 번호: 첫 뽑기형 방식(가격 있는 것)의 묶음. 묶음이 없는 도감은 null(전부)
+      pool: (function(){ var r = cfg.modes.filter(function(m){ return m.random && m.price > 0; })[0]; return r && GROUPS.length ? poolOf(r) : null; })(),
       counts: counts,
       buys: function(){ return ledger(cfg.modes[0].k); },   // 주 구매 방식 횟수 (홈 카드 "N회 구매", 405빵 카드와 같은 자리)
       tileEl: function(i){ return el.querySelectorAll('.ctile')[i]; },

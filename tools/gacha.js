@@ -121,8 +121,11 @@
   function fromCol(c){
     var ms = c.modes || [], rnd = ms.filter(function(m){ return m.random && m.price > 0; })[0];
     if (!rnd) return null;                                   // 뽑기형 구매가 없는 컬렉션은 시뮬레이션하지 않는다
-    var used = ms.filter(function(m){ return m.k === 'used'; })[0], mem = c.mem || [];
-    function ids(f){ var a = []; for (var i = 0; i < c.N; i++) if (f(mem[i])) a.push(i); return a; }
+    // 도감에 브로마이드 같은 묶음이 있으면 c.pool(포토카드 번호)만 뽑는다. 없으면 전부
+    var P = c.pool || null;
+    function sub(a){ return P ? P.map(function(i){ return a[i]; }) : a; }
+    var used = ms.filter(function(m){ return m.k === 'used'; })[0], mem = sub(c.mem || []), n = P ? P.length : c.N;
+    function ids(f){ var a = []; for (var i = 0; i < n; i++) if (f(mem[i])) a.push(i); return a; }
     var groups = (c.members || []).map(function(m, mi){
       return { name: m.n, color: m.c, ids: ids(function(x){ return x === mi; }) };
     }).filter(function(g){ return g.ids.length; });
@@ -131,8 +134,8 @@
     if (!groups.length) groups.push({ name: '전체', color: '#f5b23a', ids: ids(function(){ return true; }), all: true });
     return { id: c.id, title: c.title, buy: rnd.label, ready: '카드를 뽑아 보십시오',
       price: rnd.price, used: used && used.price > 0 ? used.price : 0, trade: ms.some(function(m){ return m.k === 'trade'; }),
-      names: c.names, src: c.src, cover: '', coverCls: '',
-      land: c.isLand, pix: function(){ return false; }, groups: groups };
+      names: sub(c.names), src: sub(c.src), cover: '', coverCls: '',
+      land: P ? function(i){ return c.isLand(P[i]); } : c.isLand, pix: function(){ return false; }, groups: groups };
   }
   function prep(G){
     G.N = G.names.length;
