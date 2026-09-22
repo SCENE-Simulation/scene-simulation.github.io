@@ -899,6 +899,10 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msl{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 10.5px "JetBrains Mono",monospace;color:var(--dim)}
 .vd-msl b{font:700 11px "Pretendard Variable",sans-serif;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
+/* 누적 그래프: 두 번째부터의 100만 단위 점은 글자를 숨기고 마우스를 올리면(누르면) 보여 준다 */
+.ms-pt{cursor:default}
+.ms-pt text{opacity:0;transition:opacity .15s}
+.ms-pt:hover text,.ms-pt:active text{opacity:1}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .vd-sh{display:flex;align-items:center;justify-content:space-between;gap:6px}

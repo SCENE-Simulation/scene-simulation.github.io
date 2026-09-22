@@ -1231,13 +1231,16 @@
       var x = X(p.h);
       s += '<circle cx="' + x.toFixed(1) + '" cy="' + Y(p.act).toFixed(1) + '" r="5" fill="#fff" stroke="#ff4d4f" stroke-width="2.2"/>';
     });
-    // 다음 100만 단위 돌파 예상 (④): 단위마다 돌파선 + 점 + 날짜. 첫 점만 진하게
+    // 다음 100만 단위 돌파 예상: 단위마다 돌파선 + 점 + 날짜. 첫 점(가장 가까운 단위)만 글자를 늘 보여 주고,
+    //   나머지는 점만 두고 글자는 마우스를 올리면(휴대폰은 누르면) 보인다 (.ms-pt)
     mss.forEach(function(o, i){
       var mx = X(o.h), my = Y(o.M), mr = mx > W - 130, op = i ? .75 : 1;
       s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + my.toFixed(1) + '" y2="' + my.toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .22 : .45) + '" stroke-dasharray="6 5"/>'
         + '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + my.toFixed(1) + '" y2="' + (H - B) + '" stroke="' + LT.color + '" stroke-opacity="' + (i ? .18 : .3) + '" stroke-dasharray="2 4"/>'
+        + (i ? '<g class="ms-pt"><circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="13" fill="transparent"/>' : '')
         + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + LT.color + '" fill-opacity="' + op + '" stroke="#1c1c1e" stroke-width="2"/>'
-        + '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="' + (i ? 11 : 12) + '" font-weight="800" fill="' + LT.color + '" fill-opacity="' + op + '">' + fmtM(o.M) + ' 돌파 · ' + ddayAP(v, o.d * 24) + '</text>';
+        + '<text x="' + (mx + (mr ? -10 : 10)).toFixed(1) + '" y="' + (my + 4).toFixed(1) + '" text-anchor="' + (mr ? 'end' : 'start') + '" font-size="' + (i ? 11 : 12) + '" font-weight="800" fill="' + LT.color + '">' + fmtM(o.M) + ' 돌파 · ' + ddayAP(v, o.d * 24) + '</text>'
+        + (i ? '</g>' : '');
     });
     if (!mss.length && ms.how === 'lt')
       s += '<text x="' + (W - R - 4) + '" y="' + (Tp - 12) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춤' : fmtM(ms.M) + ' 돌파는 60일 밖 (' + ddayAP(v, ms.h) + ')') + '</text>';
