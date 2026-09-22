@@ -898,22 +898,21 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-ms.na{border-color:var(--line)!important;background:rgba(255,255,255,.04)!important}
 .vd-s.vd-ms.na .vd-sh span{color:var(--ink2)}
 .vd-s.vd-ms.na b{font:800 17px/1.4 "Pretendard Variable",sans-serif;color:var(--ink2)}
-/* 막대 줄: 양 끝 100만 단위 숫자는 굵은 황금, 가운데는 10칸의 키 큰 통. 칸마다 황금 액체가 아래에서 차오른다 (진행 중인 칸은 그만큼만) */
+/* 막대 줄: 양 끝 100만 단위 숫자는 굵은 황금, 가운데는 키 큰 가로 막대 하나.
+   황금 액체(위 밝음 → 아래 짙음)가 왼쪽에서 채운 만큼 차오르고(msFill), 안쪽에 빛이 흐르며(msShine), 앞머리는 수면처럼 일렁인다(msWave) */
 .vd-msb{display:flex;align-items:center;gap:8px}
 .vd-msb > span{flex:none;font:800 12.5px "JetBrains Mono",monospace;color:var(--au);text-shadow:0 0 10px rgba(240,199,94,.35)}
-.vd-msg{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:4px;height:26px}
-.vd-msg i{position:relative;display:block;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
-.vd-msg i::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--p,0%);border-radius:0 0 5px 5px;
-  background:linear-gradient(180deg,var(--au) 0%,var(--au2) 45%,var(--au3) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);animation:msFill .9s cubic-bezier(.2,.8,.2,1) both}
-.vd-msg i.on::before{height:100%;border-radius:5px}
-.vd-msg i.on{box-shadow:inset 0 0 0 1px rgba(240,199,94,.35),0 0 8px rgba(217,164,65,.35)}
-/* 수면: 액체 위쪽에 빛이 좌우로 흐른다 */
-.vd-msg i.on::after,.vd-msg i.part::after{content:"";position:absolute;left:0;right:0;height:3px;bottom:calc(var(--p,0%) - 2px);
-  background:linear-gradient(90deg,transparent 0%,rgba(255,244,214,.95) 50%,transparent 100%);background-size:220% 100%;animation:msWave 2s ease-in-out infinite}
-.vd-msg i.on::after{bottom:auto;top:0}
-@keyframes msFill{from{height:0}}
-@keyframes msWave{0%{background-position:120% 0}100%{background-position:-120% 0}}
-@media (prefers-reduced-motion:reduce){.vd-msg i::before,.vd-msg i::after{animation:none}}
+.vd-msg{flex:1;position:relative;height:26px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.vd-msg i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);border-radius:7px;overflow:hidden;
+  background:linear-gradient(180deg,var(--au) 0%,var(--au2) 50%,var(--au3) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 12px rgba(217,164,65,.4);animation:msFill 1s cubic-bezier(.2,.8,.2,1) both}
+.vd-msg i::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.22) 50%,transparent 100%);background-size:200% 100%;animation:msShine 2.6s linear infinite}
+.vd-msg i::after{content:"";position:absolute;top:-2px;bottom:-2px;right:-7px;width:14px;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(255,244,214,.95),rgba(255,244,214,0) 70%);animation:msWave 1.6s ease-in-out infinite}
+.vd-msg em{position:absolute;right:8px;top:0;bottom:0;display:flex;align-items:center;font:700 10.5px "JetBrains Mono",monospace;font-style:normal;color:rgba(240,199,94,.75)}
+@keyframes msFill{from{width:0}}
+@keyframes msShine{from{background-position:150% 0}to{background-position:-150% 0}}
+@keyframes msWave{0%,100%{opacity:.45;transform:scaleY(.8)}50%{opacity:1;transform:scaleY(1.06)}}
+@media (prefers-reduced-motion:reduce){.vd-msg i,.vd-msg i::before,.vd-msg i::after{animation:none}}
 .vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
 .vd-s{display:flex;flex-direction:column;gap:2px;min-width:0;padding:9px 12px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}

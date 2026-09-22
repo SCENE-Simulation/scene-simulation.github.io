@@ -1006,11 +1006,10 @@
   function msTile(v){
     var a = age(v), V = av(v, a), m = milestone(v), p = m.p, M0 = m.M - VE.MSTEP, f = Math.max(0, Math.min(1, (V - M0) / VE.MSTEP));
     var hd = '<div class="vd-sh"><span>다음 ' + fmtM(m.M) + '까지</span></div>';
-    // 맨 아래: 지난 100만 단위 → 다음 100만 단위 사이를 10칸으로 나눠 채운 만큼 황금색으로 켠다 (진행 중인 칸은 그만큼만)
-    var lit = f * 10, segs = '';
-    for (var k = 0; k < 10; k++){ var pk = Math.max(0, Math.min(1, lit - k)); segs += '<i class="' + (pk >= 1 ? 'on' : pk > 0 ? 'part' : '') + '" style="--p:' + (pk * 100).toFixed(0) + '%"></i>'; }
-    var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + Math.round(f * 100) + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
-      + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + Math.round(f * 100) + '%">' + segs + '</div><span>' + fmtM(m.M) + '</span></div>';
+    // 맨 아래: 지난 100만 단위 → 다음 100만 단위 사이를 가로 막대 하나로. 채운 만큼 황금 액체가 왼쪽에서 차오른다 (CSS .vd-msg)
+    var pc = Math.round(f * 100);
+    var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
+      + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%"><i style="--p:' + (f * 100).toFixed(1) + '%"></i><em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
     var leftTxt = '<em>' + fmt(m.M - V) + '</em> 남음';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
