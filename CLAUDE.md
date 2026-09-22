@@ -62,6 +62,8 @@ node tools/build.js tools/source.html index.html
   - **규칙: 포토카드 · 굿즈 컬렉션 북의 모든 메뉴 오른쪽 끝에 출시 달 상자("9월")를 붙인다.** 새 컬렉션 북 페이지를 만들 때도 똑같이 적용한다.
     `shell.js` 가 출시 연-월(`'YYYY-MM'`)로 자동으로 붙이므로 **ym 을 꼭 채울 것** — 405빵 `COLS.cu405.ym` · 엔진 도감 `collections.js` cfg `ym` ·
     굿즈 `shell.js` 의 `GOODS_YM`(탭 id → ym). ym 이 없으면 상자가 안 나온다(모르면 기사·공지로 확인). 메뉴 이름이 길면 끝이 "…"로 줄어드니 짧게 짓는다
+- `tools/pages.js` — 굿즈 · 전체보기 · 위시리스트 페이지. **2024·2025년 포카 · 굿즈 컬렉션 북은 만들지 않는다** →
+  사이드바의 그 연도 줄은 펼치는 메뉴가 아니라 안내 페이지(`?tab=pc2025` · `pc2024` · `goods2025` · `goods2024`) 링크. 안내 문구는 `pages.js` 의 `NOBUILD`
 - `tools/collection.js` — 포토카드 도감 엔진 (설정 형식은 이 파일 맨 위 주석)
 - `tools/collections.js` — 도감 설정 모음. 뽑기형(random) 구매 방식이 있는 콜라보는 시뮬레이터에도 자동으로 나온다
 - `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 (뽑기 · 분석) + **뽑기 미니게임** 별도 페이지(`?tab=minigame`, `window.SGMINI` 를 pages.js 가 등록).

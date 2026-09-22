@@ -75,6 +75,29 @@
       + (sub ? '<small>' + sub + '</small>' : '') + '<span class="chip">SOON</span></div>';
   }
 
+  // ===== 만들지 않는 연도 안내 페이지 (사이드바 2025·2024 포카 · 굿즈) =====
+  // 2024·2025년 포토카드 · 굿즈 컬렉션 북은 만들지 않는다. 사이드바 연도 줄(아래 메뉴 없음)을 누르면 이 페이지로 온다.
+  // 안내 문구는 여기만 고치면 된다 — 페이지마다 t(제목) · d(설명, HTML 가능)를 넣으면 아래 기본 문구 대신 쓴다
+  var NOBUILD = {
+    pc2025:    { pc: true,  y: '2025' },
+    pc2024:    { pc: true,  y: '2024' },
+    goods2025: { pc: false, y: '2025' },
+    goods2024: { pc: false, y: '2024' }
+  };
+  function noBuild(k){
+    var d = NOBUILD[k], what = d.pc ? '포토카드' : '굿즈', icon = d.pc ? 'i-book' : 'i-gift';
+    var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않습니다';
+    var desc = d.d || '센둥이 시뮬레이터의 ' + what + ' 컬렉션 북은 2026년부터 기록합니다. ' + d.y + '년에 나온 ' + what + '는 따로 페이지를 만들 계획이 없습니다.';
+    var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['goods2026', '2026 굿즈 보기 →'];
+    return sec(icon, [d.pc ? '포카 컬렉션 북' : '굿즈 컬렉션 북', d.y + (d.pc ? ' 포카' : ' 굿즈')])
+      + '<div class="pk-ph tall nbx"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>'
+      + '<b>' + esc(t) + '</b><p>' + desc + '</p>'
+      + '<div class="nbx-go"><a href="?tab=' + go[0] + '" data-tab="' + go[0] + '">' + go[1] + '</a>'
+      + '<a href="?tab=home" data-tab="home">홈으로</a></div></div>';
+  }
+  var elNoBuild = {};
+  Object.keys(NOBUILD).forEach(function(k){ elNoBuild[k] = page('v-' + k); elNoBuild[k].innerHTML = noBuild(k); });
+
   // ===== 굿즈 카드 =====
   function goodsCard(g){
     var n = GOWN[g.id] || 0;
@@ -375,6 +398,7 @@
       var m = { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
       (window.SGCOLS || []).forEach(function(c){ m[c.id] = c.el; });
       if (window.SGMINI) m.minigame = window.SGMINI.el;        // 뽑기 미니게임 (gacha.js)
+      Object.keys(elNoBuild).forEach(function(k){ m[k] = elNoBuild[k]; });   // 만들지 않는 연도 안내 (pc2025 · pc2024 · goods2025 · goods2024)
       return m;
     })(),
     onShow: function(tab){

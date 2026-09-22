@@ -495,6 +495,12 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable","No
 .yr[open] summary .cv{transform:rotate(90deg)}
 .yr summary .bd{font-family:"Pretendard Variable",sans-serif}
 .yr .nv.sub{padding-left:36px}
+/* 만들지 않는 연도(2025·2024) 줄: 펼치는 연도 줄(.yr summary)과 똑같이 보이는 링크 — 누르면 안내 페이지(pages.js NOBUILD).
+   .nv 의 테두리 1px 만큼 안쪽 여백을 1px 씩 줄여 글자 자리 · 줄 높이를 연도 줄과 맞춘다 */
+.nv.yl{gap:9px;padding:7px 11px 7px 12px;font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.nv.yl .cv{width:14px;height:14px;flex:0 0 14px;color:var(--ink2)}
+.nv.yl.on .cv{color:var(--ink)}
+.bsheet .nv.yl{padding-top:9px;padding-bottom:9px}
 /* 컬렉션 북 메뉴 오른쪽 끝 "N월" 상자(출시 달) — shell.js 가 ym 으로 붙인다. 모든 포토카드 · 굿즈 컬렉션 북 메뉴의 규칙.
    글자와 상자 사이 6px · 오른쪽 여백 6px · 상자 안쪽 4px → 가장 긴 이름(CU 리센느 405빵 콜라보, 133.5px)도 사이드바에 스크롤 막대가 있을 때(칸 165px) 한 줄.
    더 길면 이름 끝이 "…"(두 줄로 꺾이지 않게) — 메뉴 이름은 짧게 짓는다 */
@@ -985,6 +991,14 @@ body.has-sfloat #totop{bottom:84px}
 .gd-c button{width:34px;padding:6px 0;font-size:16px;line-height:1;text-align:center}
 .gd-c b{min-width:26px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink)}
 .pk-ph.tall{aspect-ratio:auto;padding:40px 20px;gap:6px}
+/* 만들지 않는 연도 안내 페이지 (pages.js NOBUILD): 빈 자리 상자 모양에 제목 · 설명 · 바로가기 */
+.pk-ph.nbx{gap:8px;padding:44px 20px;text-align:center}
+.nbx > b{font-size:16px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.nbx > p{margin:0;max-width:46ch;font-size:13px;line-height:1.7;color:var(--ink2)}
+.nbx-go{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
+.nbx-go a{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:10px;font-size:12.5px;font-weight:600;
+  color:var(--ink);text-decoration:none;background:var(--glass-h);border:1px solid var(--line2)}
+.nbx-go a:hover{background:rgba(255,255,255,.14)}
 .pk-ph small{font-size:12px;color:var(--ink3)}
 
 /* ===== 통합 포토카드 ===== */
@@ -2054,12 +2068,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 포카</summary>
       <a class="nv sub" href="?tab=cu405" data-tab="cu405">CU 리센느 405빵 콜라보</a>
     </details>
-    <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2025 포카<span class="bd">SOON</span></summary>
-    </details>
-    <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2024 포카<span class="bd">SOON</span></summary>
-    </details>
+    <!-- 2025·2024 는 컬렉션 북을 만들지 않는다: 펼치는 연도 줄 대신 안내 페이지(pages.js NOBUILD)로 가는 링크 -->
+    <a class="nv yl" href="?tab=pc2025" data-tab="pc2025"><svg class="cv"><use href="#i-chev"/></svg>2025 포카<span class="bd">SOON</span></a>
+    <a class="nv yl" href="?tab=pc2024" data-tab="pc2024"><svg class="cv"><use href="#i-chev"/></svg>2024 포카<span class="bd">SOON</span></a>
   </div>
 
   <div class="grp" id="grp-gd" data-grp="gd">
@@ -2068,12 +2079,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
       <summary><svg class="cv"><use href="#i-chev"/></svg>2026 굿즈</summary>
       <a class="nv sub" href="?tab=goods2026" data-tab="goods2026">더현대 팝업 스토어</a>
     </details>
-    <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈<span class="bd">SOON</span></summary>
-    </details>
-    <details class="yr">
-      <summary><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈<span class="bd">SOON</span></summary>
-    </details>
+    <a class="nv yl" href="?tab=goods2025" data-tab="goods2025"><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈<span class="bd">SOON</span></a>
+    <a class="nv yl" href="?tab=goods2024" data-tab="goods2024"><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈<span class="bd">SOON</span></a>
   </div>
 
   <div class="grp" id="grp-toy" data-grp="toy">
@@ -5312,6 +5319,29 @@ goTab(true,true);
       + (sub ? '<small>' + sub + '</small>' : '') + '<span class="chip">SOON</span></div>';
   }
 
+  // ===== 만들지 않는 연도 안내 페이지 (사이드바 2025·2024 포카 · 굿즈) =====
+  // 2024·2025년 포토카드 · 굿즈 컬렉션 북은 만들지 않는다. 사이드바 연도 줄(아래 메뉴 없음)을 누르면 이 페이지로 온다.
+  // 안내 문구는 여기만 고치면 된다 — 페이지마다 t(제목) · d(설명, HTML 가능)를 넣으면 아래 기본 문구 대신 쓴다
+  var NOBUILD = {
+    pc2025:    { pc: true,  y: '2025' },
+    pc2024:    { pc: true,  y: '2024' },
+    goods2025: { pc: false, y: '2025' },
+    goods2024: { pc: false, y: '2024' }
+  };
+  function noBuild(k){
+    var d = NOBUILD[k], what = d.pc ? '포토카드' : '굿즈', icon = d.pc ? 'i-book' : 'i-gift';
+    var t = d.t || d.y + '년 ' + what + ' 컬렉션 북은 만들지 않습니다';
+    var desc = d.d || '센둥이 시뮬레이터의 ' + what + ' 컬렉션 북은 2026년부터 기록합니다. ' + d.y + '년에 나온 ' + what + '는 따로 페이지를 만들 계획이 없습니다.';
+    var go = d.pc ? ['allcards', '포토카드 전체보기 →'] : ['goods2026', '2026 굿즈 보기 →'];
+    return sec(icon, [d.pc ? '포카 컬렉션 북' : '굿즈 컬렉션 북', d.y + (d.pc ? ' 포카' : ' 굿즈')])
+      + '<div class="pk-ph tall nbx"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>'
+      + '<b>' + esc(t) + '</b><p>' + desc + '</p>'
+      + '<div class="nbx-go"><a href="?tab=' + go[0] + '" data-tab="' + go[0] + '">' + go[1] + '</a>'
+      + '<a href="?tab=home" data-tab="home">홈으로</a></div></div>';
+  }
+  var elNoBuild = {};
+  Object.keys(NOBUILD).forEach(function(k){ elNoBuild[k] = page('v-' + k); elNoBuild[k].innerHTML = noBuild(k); });
+
   // ===== 굿즈 카드 =====
   function goodsCard(g){
     var n = GOWN[g.id] || 0;
@@ -5612,6 +5642,7 @@ goTab(true,true);
       var m = { goods2026: elGoods, allcards: elAllCards, allgoods: elAllGoods, wish: elWish };
       (window.SGCOLS || []).forEach(function(c){ m[c.id] = c.el; });
       if (window.SGMINI) m.minigame = window.SGMINI.el;        // 뽑기 미니게임 (gacha.js)
+      Object.keys(elNoBuild).forEach(function(k){ m[k] = elNoBuild[k]; });   // 만들지 않는 연도 안내 (pc2025 · pc2024 · goods2025 · goods2024)
       return m;
     })(),
     onShow: function(tab){
