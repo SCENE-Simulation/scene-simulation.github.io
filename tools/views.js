@@ -537,10 +537,10 @@
       return;
     }
     var kNow = wkOf(a / 24), kEnd = kNow + WKN - 1;
-    // 시작: 100만 단위 추적은 게시 15일 뒤부터라 그보다 앞으로는 안 간다. 1일은 14일 전까지, 1주는 지금 구간의 100만 단위를 넘은 때(적어도 1주 전)까지.
-    //   그 사이 기록이 없는 구간(수집 시작 전)은 빗금으로 "기록 없음"
-    var st = msStart(v, a), s = Math.max(VE.LATE, mu === 'w' ? Math.min(st.h, a - 168) : a - U.n * U.step), end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
-    var s0 = VE.since(v.vs), endTxt = mu === 'w' ? kEnd + '주 차 끝' : md(v.pub + end * 3600e3);
+    // 가로축: 100만 단위 추적을 시작하는 게시 15일 뒤가 왼쪽 끝(한 번 표시), 오른쪽은 1일 = 14일 뒤 · 1주 = 지금 주차부터 6개 주 끝.
+    //   시간이 갈수록 실제 선이 오른쪽으로 자라는 그래프. 눈금은 12개(실제 날짜). 기록이 없는 구간(수집 시작 전)은 빗금으로 "기록 없음"
+    var s = VE.LATE, end = mu === 'w' ? kEnd * 168 : a + U.n * U.step, fut = [], t0 = v.pub + s * 3600e3;
+    var s0 = VE.since(v.vs), endTxt = mu === 'w' ? kEnd + '주 차 끝(' + md(v.pub + end * 3600e3) + ')' : md(v.pub + end * 3600e3);
     var pts = v.vs.snaps.filter(function(q){ return q[0] > s + 1e-6 && q[0] <= a + 1e-6; }), sv = av(v, s);
     if (sv != null) pts.unshift([s, sv]);
     if (p){
@@ -569,25 +569,15 @@
     for (var y = Math.ceil(y0 / gs) * gs; y <= y1; y += gs)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y).toFixed(1) + '" y2="' + Y(y).toFixed(1) + '" stroke="rgba(255,255,255,.06)"/>'
         + '<text x="' + (L - 7) + '" y="' + (Y(y) + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#8e8e93">' + fmt(y) + '</text>';
-    if (mu === 'w'){
-      // 1주: 게시일 기준 주차 칸. 경계에 세로선, 칸 가운데에 "N주 차" (칸이 좁거나 시작 날짜와 겹치면 생략)
-      for (var kk = wkOf(s / 24); kk <= kEnd; kk++){
-        var h0 = Math.max(s, (kk - 1) * 168), h1 = Math.min(end, kk * 168), cx0 = (X(h0) + X(h1)) / 2;
-        if (kk * 168 < end - 1e-6) svg += '<line x1="' + X(kk * 168).toFixed(1) + '" x2="' + X(kk * 168).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.07)"/>';
-        if (X(h1) - X(h0) < 36 || cx0 < X(s) + 44) continue;
-        svg += '<text x="' + cx0.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (kk >= kNow ? 700 : 500) + '" fill="' + (kk >= kNow ? '#aeaeb2' : '#8e8e93') + '">' + kk + '주 차</text>';
-      }
-    } else {
-      // 1일: 자정마다 실제 날짜(9/23 …). 글자가 겹치지 않게 건너뛰고, 앞으로의 날짜는 굵게
-      var dt = new Date(t0), lastX = -99; dt.setHours(24, 0, 0, 0);
-      for (; dt.getTime() <= v.pub + end * 3600e3 + 1; dt.setDate(dt.getDate() + 1)){
-        var hh = (dt.getTime() - v.pub) / 3600e3, x = X(hh);
-        if (x - lastX < 38 || x > W - R - 14) continue;
-        lastX = x;
-        svg += '<line x1="' + x.toFixed(1) + '" x2="' + x.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.06)"/>'
-          + '<text x="' + x.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="10.5" font-weight="' + (hh > a ? 700 : 500) + '" fill="' + (hh > a ? '#aeaeb2' : '#8e8e93') + '">' + md(dt.getTime()) + '</text>';
-      }
+    // 가로 눈금 12개: 게시 15일 뒤(왼쪽 끝)부터 끝까지 고르게, 실제 날짜. 앞으로의 날짜는 굵게. 왼쪽 끝은 "게시 15일 뒤"라고 한 번 적는다
+    var NT = 12;
+    for (var ti = 0; ti < NT; ti++){
+      var th = s + (end - s) * ti / (NT - 1), tx = X(th), tms = v.pub + th * 3600e3;
+      svg += (ti && ti < NT - 1 ? '<line x1="' + tx.toFixed(1) + '" x2="' + tx.toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.06)"/>' : '')
+        + '<text x="' + tx.toFixed(1) + '" y="' + (H - 9) + '" text-anchor="' + (ti ? ti === NT - 1 ? 'end' : 'middle' : 'start') + '" font-size="10.5" font-weight="' + (th > a ? 700 : ti ? 500 : 700) + '" fill="' + (ti ? th > a ? '#aeaeb2' : '#8e8e93' : '#ff9e9a') + '">' + md(tms) + '</text>';
     }
+    svg += '<line x1="' + L + '" x2="' + L + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff9e9a" stroke-opacity=".5" stroke-dasharray="2 4"/>'
+      + '<text x="' + (L + 4) + '" y="' + (Tp - 8) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">게시 15일 뒤부터</text>';
     for (var M = Math.ceil(y0 / VE.MSTEP) * VE.MSTEP; M <= y1; M += VE.MSTEP)
       svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(M).toFixed(1) + '" y2="' + Y(M).toFixed(1) + '" stroke="' + LT.color + '" stroke-opacity=".55" stroke-dasharray="6 5"/>'
         + '<text x="' + (L + 6) + '" y="' + (Y(M) - 6).toFixed(1) + '" font-size="11" font-weight="800" fill="' + LT.color + '">' + fmtM(M) + ' 돌파선</text>';
@@ -602,17 +592,15 @@
       if (M1 && !showM1) svg += '<text x="' + (W - R - 4) + '" y="' + (Tp - 8) + '" text-anchor="end" font-size="11" font-weight="700" fill="' + LT.color + '">다음 ' + fmtM(M1) + '까지 ' + fmt(M1 - p.V) + ' — ' + endTxt + '까지는 어려움</text>';
     }
     if (pts.length > 1) svg += '<path d="' + pts.map(function(q, i){ return (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(' ') + '" fill="none" stroke="#ff4d4f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
-    // 시작점(1주): 지금 구간의 100만 단위를 넘은 때 (기록 전에 넘었으면 첫 기록). 날짜는 가로축 맨 왼쪽에. 1일은 가로축에 날짜가 있으니 생략
+    // 시작점: 게시 15일 뒤에 기록이 있으면(게시 직후부터 모은 영상) 점으로
     if (sv != null) svg += '<circle cx="' + X(s).toFixed(1) + '" cy="' + Y(sv).toFixed(1) + '" r="4" fill="#1c1c1e" stroke="#ff9e9a" stroke-width="2"/>';
-    if (mu === 'w') svg += '<text x="' + X(s).toFixed(1) + '" y="' + (H - 9) + '" font-size="10.5" font-weight="700" fill="#ff9e9a">' + md(t0) + '</text>';
     var V = av(v, a);
     svg += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<text x="' + X(a).toFixed(1) + '" y="' + (Tp - 8) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff9e9a">지금</text>'
       + '<circle cx="' + X(a).toFixed(1) + '" cy="' + Y(V).toFixed(1) + '" r="5.5" fill="#ff4d4f" stroke="#1c1c1e" stroke-width="2"/>'
       + '<line id="vd-cx" y1="' + Tp + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.45)" stroke-width="1" style="display:none"/>'
       + '<circle id="vd-cd" r="5" stroke="#1c1c1e" stroke-width="2" style="display:none"/></svg>';
-    box.innerHTML = chHead('100만 단위 돌파 예상', (s <= VE.LATE + 1e-6 ? '게시 15일 뒤(' + md(t0) + ')' : mu === 'w' && st.M && !st.before ? fmtM(st.M) + ' 돌파(' + md(t0) + ')' : md(t0)) + ' → ' + endTxt,
-        msTabs())
+    box.innerHTML = chHead('100만 단위 돌파 예상', '게시 15일 뒤(' + md(t0) + ') → ' + endTxt, msTabs())
       + svg + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key" style="--mc:' + LT.color + '"><span><i class="k-a"></i>실제 조회수</span>' + (p ? '<span><i class="k-p"></i>예상</span>' : '')
       + '<span><i class="k-m"></i>100만 단위</span></div>';
