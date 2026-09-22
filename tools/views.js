@@ -216,7 +216,7 @@
     return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span></div></div>'
       + '<div class="vx-hero"><div class="vx-meta" id="vx-meta"></div>'
       + '<h2 class="vx-h">안원잘부 영상들,<br>조회수가 <em>어디까지 오를까?</em></h2>'
-      + '<p class="vx-d">15분마다 조회수를 모아 지금 얼마나 빨리 오르는지 보고, 24시간·7일·30일 뒤 조회수를 예측합니다. 지난 예측이 맞았는지도 채점합니다.</p></div>';
+      + '<p class="vx-d">15분마다 조회수를 모아 지금 얼마나 빨리 오르는지 보고, 24시간·7일·30일 뒤 조회수와 다음 100만 단위 돌파 시점을 예측합니다. 지난 예측이 맞았는지 오차율도 채점해 기록합니다. 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
   }
   function status(v){
     var a = age(v);
