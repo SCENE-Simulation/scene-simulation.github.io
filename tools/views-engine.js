@@ -112,45 +112,59 @@
     return out;                                                // [①, ②, ③, 종합]
   }
 
-  // ---------- ④ 1일 추세 (게시 15일 뒤부터): 다음 100만 단위까지 며칠 ----------
-  // 간단하게 1일 단위로 본다:
-  //   g: 최근 하루(24시간) 증가 (기록이 하루가 안 되면 있는 만큼으로 하루치 환산, 3시간 이상일 때)
-  //   r: 하루 증가가 하루마다 몇 배가 되는지 — 최근 최대 7일을 앞·뒤 반으로 나눠 하루 증가를 비교 (기록 2일 이상일 때, 0.85 ~ 1)
-  //      기록이 모자라면 r = 1 (지금 속도 그대로)
-  //   n일 뒤 누적 = V + g·(r + r² + … + rⁿ)      (r = 1 이면 V + g·n)
+  // ---------- ④ 감쇠 추세 (게시 15일 뒤부터. 현황 칸 카운터는 그 전에도): 다음 100만 단위까지 며칠 ----------
+  // 조회수는 무한히 오르지 않고 한쪽으로 수렴한다 — 영상이 오래될수록 하루 증가가 천천히 줄어드는 곡선으로 본다:
+  //   g:  최근 하루(24시간) 증가 (기록이 하루가 안 되면 있는 만큼으로 하루치 환산, 3시간 이상일 때)
+  //   d0: 지금 영상 나이(일, 0.5 이상). i일 뒤 하루 증가 = g × (d0 ÷ (d0 + i))^k  — 나이에 반비례하는 거듭제곱 감쇠
+  //   k:  감쇠 지수. 최근 최대 7일을 앞·뒤 반으로 나눠 하루 증가 비율과 두 반쪽의 나이 비율에서 잰다 (기록 2일 이상, KMIN ~ KMAX).
+  //       오래된 영상은 두 반쪽의 나이 차이가 작아 잘 안 잡히므로 그만큼 기본값 K0 로 기운다. 기록이 모자라면 K0 (src 'flat')
+  //   n일 뒤 누적 = V + g·d0/(k−1) × (1 − (d0/(d0+n))^(k−1))    (k = 1 이면 V + g·d0·ln((d0+n)/d0))
+  //       k > 1 이면 V + g·d0/(k−1) 로 수렴한다
+  //   r:  화면 표시용 — 내일 하루 증가가 오늘의 몇 배인지, (d0/(d0+1))^k
   var LATE = 360, MSTEP = 1e6, WEEKS = 8;          // LATE: 게시 15일(360시간) 뒤부터 100만 단위로 본다
+  var K0 = 1.3, KMIN = 0.6, KMAX = 2.5;
   // vs: 조회수만 담은 기록 { snaps: [[h, 조회수], ...] }. h0~h1 사이 하루 평균 증가
   function perDay(vs, h0, h1){ var x0 = at(vs, h0, 1), x1 = at(vs, h1, 1); return x0 == null || x1 == null || h1 - h0 < 1 ? null : (x1 - x0) / (h1 - h0) * 24; }
   function daily(vs, a){
-    var s = since(vs), r0 = Math.max(s, a - 24), g = perDay(vs, r0, a), r = 1, src = 'flat';
+    var s = since(vs), r0 = Math.max(s, a - 24), g = perDay(vs, r0, a), k = K0, src = 'flat', d0 = Math.max(0.5, a / 24);
     if (!(g > 0) || a - r0 < 3) return null;                         // 최근 기록이 3시간은 있어야
     var w0 = Math.max(s, a - 168);
     if (a - w0 >= 48){
-      var mid = (w0 + a) / 2, g0 = perDay(vs, w0, mid), g1 = perDay(vs, mid, a);
-      if (g0 > 0 && g1 > 0){ r = Math.max(0.85, Math.min(1, Math.pow(g1 / g0, 24 / (mid - w0)))); src = 'data'; }
+      var mid = (w0 + a) / 2, g0 = perDay(vs, w0, mid), g1 = perDay(vs, mid, a), m0 = (w0 + mid) / 48, m1 = (mid + a) / 48;   // m0·m1: 두 반쪽의 가운데 나이(일)
+      if (g0 > 0 && g1 > 0 && m1 > m0){
+        var lr = Math.log(m1 / m0), ke = Math.max(KMIN, Math.min(KMAX, Math.log(g0 / g1) / lr)), w = Math.min(1, lr / 0.25);
+        k = w * ke + (1 - w) * K0; src = 'data';
+      }
     }
-    return { g: g, r: r, src: src, days: (a - s) / 24 };
+    return { g: g, k: k, d0: d0, r: Math.pow(d0 / (d0 + 1), k), src: src, days: (a - s) / 24 };
   }
-  // 지금부터 n일 뒤 누적
-  function dayProject(V, g, r, n){ return V + (Math.abs(r - 1) < 1e-9 ? g * n : g * r * (1 - Math.pow(r, n)) / (1 - r)); }
-  // M 까지 며칠 (소수). 줄어드는 추세상 영영 못 닿으면 null
-  function daysTo(V, M, g, r){
-    if (V >= M) return 0;
-    if (Math.abs(r - 1) < 1e-9) return (M - V) / g;
-    var x = 1 - (M - V) * (1 - r) / (g * r);                        // rⁿ = x
-    return x <= 0 ? null : Math.log(x) / Math.log(r);
+  // P = { V, g, k, d0 } 로 지금부터 n일 뒤 누적
+  function dayProject(P, n){
+    if (!(n > 0)) return P.V;
+    var q = P.d0 / (P.d0 + n);
+    return P.V + (Math.abs(P.k - 1) < 1e-6 ? P.g * P.d0 * Math.log(1 / q) : P.g * P.d0 / (P.k - 1) * (1 - Math.pow(q, P.k - 1)));
+  }
+  // M 까지 며칠 (소수). 수렴값이 M 에 못 미치면 null. k 를 주면 그 감쇠로 (범위 계산용)
+  function daysTo(P, M, k){
+    if (k == null) k = P.k;
+    if (P.V >= M) return 0;
+    var need = M - P.V;
+    if (Math.abs(k - 1) < 1e-6) return P.d0 * (Math.exp(need / (P.g * P.d0)) - 1);
+    var R = need * (k - 1) / (P.g * P.d0);                          // (d0/(d0+n))^(k−1) = 1 − R
+    if (R >= 1) return null;
+    return P.d0 * (Math.pow(1 - R, -1 / (k - 1)) - 1);
   }
   // 다음 n개 100만 단위: days = 며칠 뒤(null = 못 닿음), week = 몇 주 차(1~, 8주 넘으면 그대로 큰 수)
-  // wk: 1~8주 뒤 예상 누적
+  // wk: 1~8주 뒤 예상 누적. 돌려주는 객체는 dayProject/daysTo 의 P 로 그대로 쓴다
   function msPlan(vs, a, n){
     var V = at(vs, a, 1), T = daily(vs, a); if (V == null || !T) return null;
-    var out = [], M = (Math.floor(V / MSTEP) + 1) * MSTEP, wk = [];
+    var P = { V: V, g: T.g, k: T.k, d0: T.d0, r: T.r, src: T.src, days: T.days, ms: [], wk: [] }, M = (Math.floor(V / MSTEP) + 1) * MSTEP;
     for (var i = 0; i < (n || 3); i++, M += MSTEP){
-      var d = daysTo(V, M, T.g, T.r);
-      out.push({ M: M, days: d, week: d == null ? null : Math.max(1, Math.ceil(d / 7)) });
+      var d = daysTo(P, M);
+      P.ms.push({ M: M, days: d, week: d == null ? null : Math.max(1, Math.ceil(d / 7)) });
     }
-    for (var w = 1; w <= WEEKS; w++) wk.push(dayProject(V, T.g, T.r, w * 7));
-    return { V: V, g: T.g, r: T.r, src: T.src, days: T.days, ms: out, wk: wk };
+    for (var w = 1; w <= WEEKS; w++) P.wk.push(dayProject(P, w * 7));
+    return P;
   }
   // 8주 안에 닿는다고 계산되면 "유력"
   function likely(m){ return m.week != null && m.week <= WEEKS; }
@@ -158,20 +172,20 @@
   // ---------- 100만 단위 구간 채점 ----------
   // 구간 = 100만 단위 하나 (예: 1,300만 → 1,400만). 구간마다 세 지점 — 100만·50만·20만 남았을 때(시작 M0, M0+50만, M0+80만) —
   // 을 넘은 순간 ④ 로 구간 끝(M0+100만) 도달을 예측해 고정하고, 실제로 닿은 때와 비교한다 (수집기가 고정, 사이트가 채점).
-  // 멀리서 한 예측일수록 오차가 큰 게 정상이라 지점별로 따로 본다. 우하향은 영상마다 r(하루 증가가 하루마다 몇 배)로 반영.
-  //   범위: r 을 ±RSPAN 바꿔 본 도달 (빨리 = r + RSPAN, 늦게 = r − RSPAN. 늦게 보면 못 닿으면 hi = null) — 멀리 볼수록 넓어진다
+  // 멀리서 한 예측일수록 오차가 큰 게 정상이라 지점별로 따로 본다. 우하향은 영상마다 k(감쇠 지수)로 반영.
+  //   범위: k 를 ±KSPAN 바꿔 본 도달 (빨리 = k − KSPAN, 늦게 = k + KSPAN. 늦게 보면 못 닿으면 hi = null) — 멀리 볼수록 넓어진다
   //   far: FAR 일(8주)보다 멀거나 못 닿는다고 본 예측 — 참고로만 (평균에서 뺀다)
-  var SEGK = [0, 5e5, 8e5], RSPAN = 0.03, FAR = 56;
+  var SEGK = [0, 5e5, 8e5], KSPAN = 0.15, FAR = 56;
   function segPredict(vs, a, M){
-    var V = at(vs, a, 1), T = daily(vs, a); if (V == null || !T) return null;
-    var d = daysTo(V, M, T.g, T.r);
-    return { d: d, lo: daysTo(V, M, T.g, Math.min(1, T.r + RSPAN)), hi: daysTo(V, M, T.g, Math.max(0.8, T.r - RSPAN)),
-      g: T.g, r: T.r, src: T.src, far: d == null || d > FAR };
+    var P = msPlan(vs, a, 1); if (!P) return null;
+    var d = daysTo(P, M);
+    return { d: d, lo: daysTo(P, M, Math.max(KMIN, P.k - KSPAN)), hi: daysTo(P, M, P.k + KSPAN),
+      g: P.g, k: P.k, r: P.r, src: P.src, far: d == null || d > FAR };
   }
 
   var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
     poolFor: poolFor, METHODS: METHODS, predictAll: predictAll,
-    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely,
-    SEGK: SEGK, RSPAN: RSPAN, FAR: FAR, segPredict: segPredict };
+    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, K0: K0, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely,
+    SEGK: SEGK, KSPAN: KSPAN, FAR: FAR, segPredict: segPredict };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);

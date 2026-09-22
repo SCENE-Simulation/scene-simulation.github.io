@@ -15,13 +15,13 @@
 //                 pred:  { "24" | "168" | "720": { t: 예측 시점(h), n: 비교한 과거 영상 수, made: ISO,
 //                                                  p: [[예측, 범위 아래, 범위 위] | null × 4 (①②③종합)] }
 //                                               | { none: 'pool', n } (그때 어느 방법으로도 예측 못 함) },
-//                 ms:    [ { M: 100만 단위 목표, t: 예측한 때(h), v: 그때 조회수, g: 그때 하루 증가, r: 하루 증가가 하루마다 몇 배,
+//                 ms:    [ { M: 100만 단위 목표, t: 예측한 때(h), v: 그때 조회수, g: 그때 하루 증가, k: 감쇠 지수(views-engine ④), r: 내일 하루 증가가 오늘의 몇 배,
 //                            src: 'data' | 'flat', e: 닿을 것으로 본 때(h, null = 못 닿음), w: 몇 주 차로 봤는지,
 //                            hit?: 실제로 닿은 때(h) } ],
 //                 seg:   [ { M: 구간 끝(100만 단위), hit?: 닿은 때(h), est?: 1(수집이 3시간 넘게 끊겨 닿은 때가 추정),
 //                            c: [ { k: 0 | 1 | 2 (100만·50만·20만 남은 지점), t: 그 지점을 넘은 때(h),
 //                                   e: 닿을 것으로 본 때(h, null = 못 닿음), lo·hi: 범위(h, 빨리 · 늦게. hi null = 늦게 보면 못 닿음),
-//                                   g, r, src: 그때 ④ 1일 추세, far?: 1(8주보다 멀거나 못 닿는다고 봄 → 참고) } ] } ] } ] }
+//                                   g, k, r, src: 그때 ④ 감쇠 추세, far?: 1(8주보다 멀거나 못 닿는다고 봄 → 참고) } ] } ] } ] }
 //   과거 영상이 MINPOOL 개보다 적을 때는 ③ 만 범위 없이 저장된다 (①·②·범위는 null)
 //   좋아요·댓글이 숨겨져 있으면 null. 기록 간격: 게시 48시간까지 1시간, 7일까지 6시간, 그 뒤 1일.
 //   API 사용량: 한 번에 약 3 (영상 50개마다 +1). 15분마다면 하루 96번 × 3 ≈ 290. 무료 한도는 하루 10,000.
@@ -179,11 +179,11 @@ async function main(){
     raw.ms = raw.ms || [];
     raw.ms.forEach(m => { if (m.hit == null && cur >= m.M){ m.hit = r2(crossAt(vs, m.M, m.t, a)); log.hit++; } });
     const M = (Math.floor(cur / VE.MSTEP) + 1) * VE.MSTEP;
-    if (raw.ms.some(m => m.M === M) || a - VE.since(vs) < 48) continue;          // 기록 2일(하루 증가가 줄어드는 비율을 잴 수 있을 만큼)부터
+    if (raw.ms.some(m => m.M === M) || a - VE.since(vs) < 48) continue;          // 기록 2일(하루 증가가 줄어드는 정도(k)를 잴 수 있을 만큼)부터
     const P = VE.msPlan(vs, a, 1);
     if (!P) continue;
     const m0 = P.ms[0];
-    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), g: Math.round(P.g), r: Math.round(P.r * 1000) / 1000, src: P.src,
+    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), g: Math.round(P.g), k: Math.round(P.k * 100) / 100, r: Math.round(P.r * 1000) / 1000, src: P.src,
       e: m0.days == null ? null : r2(a + m0.days * 24), w: m0.week });
     log.ms++;
   }
@@ -211,7 +211,7 @@ async function main(){
         if (!s){ s = { M: M, c: [] }; raw.seg.push(s); }
         const H = d => d == null ? null : r2(a + d * 24);
         s.c.push({ k: ci, t: r2(crossAt(vs, X, pv[0], a)), e: H(P.d), lo: H(P.lo), hi: H(P.hi),
-          g: Math.round(P.g), r: Math.round(P.r * 1000) / 1000, src: P.src, far: P.far ? 1 : undefined });
+          g: Math.round(P.g), k: Math.round(P.k * 100) / 100, r: Math.round(P.r * 1000) / 1000, src: P.src, far: P.far ? 1 : undefined });
         log.seg++;
       });
     }

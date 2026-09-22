@@ -349,11 +349,11 @@
     return (y == null ? -1 : y) - (x == null ? -1 : x);
   }
 
-  // ---------- 게시 15일 뒤: 100만 단위 돌파 (④ 1일 추세, 1주 ~ 8주로 보여 줌, 계산은 views-engine.js) ----------
+  // ---------- 게시 15일 뒤: 100만 단위 돌파 (④ 감쇠 추세 — 오래될수록 하루 증가가 줄어 한쪽으로 수렴, 1주 ~ 8주로 보여 줌, 계산은 views-engine.js) ----------
   var LT = { no: '④', b: '4', name: '1일 추세법', color: '#5bb4ec',
-    short: '게시 15일이 지나면 최근 하루 증가량과, 그 증가량이 하루마다 얼마나 줄어드는지로 다음 100만 단위까지 며칠 걸릴지 계산합니다.',
-    desc: '최근 하루 동안 는 조회수를 기준으로, 최근 일주일 동안 하루 증가량이 하루에 몇 %씩 줄었는지를 이어 붙여 다음 100만 단위에 닿는 날을 셉니다.',
-    uses: ['최근 하루 증가', '1일 단위 추이'],
+    short: '게시 15일이 지나면 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어든다고 보고, 다음 100만 단위까지 며칠 걸릴지 계산합니다.',
+    desc: '최근 하루 동안 는 조회수를 기준으로, 영상이 오래될수록 하루 증가량이 천천히 줄어드는 곡선을 이어 붙여 다음 100만 단위에 닿는 날을 셉니다. 조회수는 한쪽으로 수렴합니다.',
+    uses: ['최근 하루 증가', '영상 나이', '1주일 추이'],
     pro: '단순하고 오래된 영상의 느린 증가에 맞음', con: '갑자기 다시 뜨는 영상(역주행)은 늦게 따라감' };
   function late(v){ return age(v) >= VE.LATE; }
   // ④ 1일 추세. 게시 15일 전이라도 최근 기록이 3시간 이상이면 계산한다 (현황 칸 카운터가 쓴다).
@@ -395,7 +395,7 @@
   function msWeek(v, m){ return m.days == null ? null : wkOf(age(v) / 24 + m.days); }        // 이 100만 단위를 넘는 주차
   function pubWeeks(v, p){                                                                  // [{ k: 주차, d: 그 주 끝까지 며칠, x: 그때 예상 조회수 }]
     var ad = age(v) / 24, out = [];
-    for (var k = wkOf(ad); out.length < WKN; k++){ var d = 7 * k - ad; out.push({ k: k, d: d, x: VE.dayProject(p.V, p.g, p.r, d) }); }
+    for (var k = wkOf(ad); out.length < WKN; k++){ var d = 7 * k - ad; out.push({ k: k, d: d, x: VE.dayProject(p, d) }); }
     return out;
   }
   // 주차 막대: 그 주가 끝날 때까지 다음 100만까지 남은 조회수를 얼마나 채우는지 (100% = 돌파). 넘는 주를 강조
@@ -416,7 +416,7 @@
     var v = sel, p = plan(v);
     $('vd-md').innerHTML = '<i style="background:' + LT.color + '"></i><span>' + LT.short + '</span>'
       + (p ? '<em>최근 하루 +' + fmt(p.g) + '회 · ' + dropTxt(p.r)
-        + (p.src === 'data' ? ' (최근 ' + Math.min(7, Math.floor(p.days)) + '일 기록)' : ' (기록 2일이 쌓이기 전이라 지금 속도 그대로)') + '</em>' : '');
+        + (p.src === 'data' ? ' (최근 ' + Math.min(7, Math.floor(p.days)) + '일 기록)' : ' (기록 2일이 쌓이기 전이라 기본 곡선)') + '</em>' : '');
     $('vd-hs').innerHTML = p ? p.ms.map(function(m){ return msCard(v, p, m); }).join('')
       : '<div class="vh na" style="grid-column:1/-1"><div class="vh-h"><div><b>100만 단위 돌파</b></div><span class="vh-tag">예측 준비 중</span></div>'
         + '<small class="vh-n">최근 기록이 3시간 이상 쌓이면 예측합니다.</small></div>';
@@ -532,8 +532,8 @@
     if (sv != null) pts.unshift([s, sv]);
     if (p){
       var span = (end - a) / 24;
-      for (var dd = 0; dd < span; dd += mu === 'd' ? 0.25 : 1) fut.push([a + dd * 24, VE.dayProject(p.V, p.g, p.r, dd)]);
-      fut.push([end, VE.dayProject(p.V, p.g, p.r, span)]);
+      for (var dd = 0; dd < span; dd += mu === 'd' ? 0.25 : 1) fut.push([a + dd * 24, VE.dayProject(p, dd)]);
+      fut.push([end, VE.dayProject(p, span)]);
     }
     var ys = pts.map(function(q){ return q[1]; }).concat(fut.map(function(q){ return q[1]; }));
     var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), M1 = p && p.ms[0].M, showM1 = M1 && M1 <= y1 + (y1 - y0) * 0.35;
@@ -595,7 +595,7 @@
       + '<span><i class="k-m"></i>100만 단위</span></div>';
     // 말풍선: 지금까지는 실제, 그 뒤는 ④ 1일 추세 예상
     lineTip(box, W, H, L, R, function(x){
-      var h = Hx(x), act = h <= a + 1e-6, y = act ? av(v, h) : p ? VE.dayProject(p.V, p.g, p.r, (h - a) / 24) : null;
+      var h = Hx(x), act = h <= a + 1e-6, y = act ? av(v, h) : p ? VE.dayProject(p, (h - a) / 24) : null;
       if (y == null) return null;
       var t = v.pub + h * 3600e3, nx = (Math.floor(y / VE.MSTEP) + 1) * VE.MSTEP;
       return { x: X(h), y: Y(y), color: act ? '#ff4d4f' : LT.color,
@@ -691,8 +691,8 @@
       + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
       + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 게시 15일 전 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 15일 뒤 영상은 1일 추세법으로 계산합니다. 예측이 아직 없으면 최근 24시간 증가 × 7 로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
       + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 하루마다 몇 %씩 줄어드는지를 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다.</li>'
-      + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 비율을 아직 몰라 지금 속도 그대로 계산합니다.</li>'
+      + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다.</li>'
+      + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로 계산합니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
