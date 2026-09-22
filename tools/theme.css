@@ -296,6 +296,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .pk img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
 /* 큰 가로 이미지(wide): 작은 칸 대신 한 줄 전체, 원본 크기 그대로 (칸보다 크면 칸 폭까지만) */
 .pk figure.wide{grid-column:1/-1}
+/* 한 장짜리 이미지의 일부(crop) — collection.js cropBox */
+.pk-crop{width:100%;border-radius:12px;border:1px solid var(--line);background-color:#fbf7f2;background-repeat:no-repeat}
 .pk figure.wide img{width:auto;max-width:100%;height:auto;margin:0 auto}
 .pk-ph{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:12px;
   border:1.5px dashed var(--line2);background:var(--glass);color:var(--dim)}

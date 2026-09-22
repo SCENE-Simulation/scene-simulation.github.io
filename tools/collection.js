@@ -3,7 +3,8 @@
 // cfg = { id, title, year, ym, diff, desc, members[{n,c}], cards[{n,img,m,land}],
 //         modes[{k,label,price,random,var,hint}], pkg[{src?,cap,sub?,wide?}], news[{title,src,date,url,kind?}] }
 //   news[] : 관련 미디어. 유튜브 주소면 썸네일이 붙는다. kind 는 종류 칩 글자(없으면 영상/기사)
-//   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기
+//   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기.
+//           crop:[x,y,w,h] + size:[원본 폭,높이] 면 한 장짜리 이미지의 그 영역만 보여 준다 (여러 칸이 같은 파일을 나눠 씀)
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
@@ -230,6 +231,14 @@
       return '<div class="clog"' + (state.open === 'log' ? '' : ' hidden') + ' data-panel="log"><div class="list">'
         + (rows || '<div class="em">기록이 없습니다.</div>') + '</div></div>';
     }
+    // 한 장짜리 이미지에서 일부만 보여 주기: crop = [x, y, w, h] (원본 픽셀), size = [원본 폭, 원본 높이].
+    //   칸 폭을 w 에 맞추도록 배경 크기를 키우고, 위치(%)로 그 영역을 맞춘다 — 파일은 하나, 자르기는 CSS
+    function cropBox(p){
+      var c = p.crop, S = p.size, bw = S[0] / c[2] * 100;
+      var bx = S[0] > c[2] ? c[0] / (S[0] - c[2]) * 100 : 0, by = S[1] > c[3] ? c[1] / (S[1] - c[3]) * 100 : 0;
+      return '<div class="pk-crop" role="img" aria-label="' + esc(p.cap || '패키징') + '" style="aspect-ratio:' + c[2] + '/' + c[3]
+        + ';background-image:url(\'' + esc(p.src) + '\');background-size:' + bw.toFixed(3) + '% auto;background-position:' + bx.toFixed(3) + '% ' + by.toFixed(3) + '%"></div>';
+    }
     function toggles(){
       var pkg = cfg.pkg || [], news = cfg.news || [], n = ENTRIES.length + PEND.length;
       function btn(k, label, cnt){
@@ -241,7 +250,8 @@
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '><div class="pk">'
         + (pkg.length ? pkg.map(function(p){
               return '<figure' + (p.wide ? ' class="wide"' : '') + '>'
-                + (p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+                + (p.src && p.crop ? cropBox(p)
+                  : p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
                   : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>이미지 준비 중</span></div>')
                 + (p.cap || p.sub ? '<figcaption>' + (p.cap ? '<b>' + esc(p.cap) + '</b>' : '') + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</figcaption>' : '') + '</figure>';
             }).join('')
