@@ -1347,7 +1347,10 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-strip .l{fill:none;stroke:rgba(255,255,255,.3);stroke-width:1.2;stroke-linejoin:round}
 .vd-strip i.md{position:absolute;top:1px;bottom:0;width:1px;margin-left:-.5px;background:repeating-linear-gradient(180deg,rgba(255,255,255,.55) 0 2px,transparent 2px 4px)}
 .vd-strip b{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;border-radius:2px;background:#ff6b6d;box-shadow:0 0 7px rgba(255,77,79,.95)}
-.vd-strip b::before{content:"";position:absolute;top:0;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px var(--vg),0 0 8px rgba(255,77,79,.9)}
+/* 바늘 머리: 반투명 빨간 점이 천천히 깜빡인다 */
+.vd-strip b::before{content:"";position:absolute;top:0;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(255,77,79,.7);box-shadow:0 0 8px rgba(255,77,79,.9),0 0 2px rgba(255,120,120,.8);animation:stripBlink 1.6s ease-in-out infinite}
+@keyframes stripBlink{0%,100%{opacity:.55;box-shadow:0 0 5px rgba(255,77,79,.6)}50%{opacity:1;box-shadow:0 0 12px rgba(255,77,79,1),0 0 3px rgba(255,150,150,.9)}}
+@media (prefers-reduced-motion:reduce){.vd-strip b::before{animation:none}}
 .vd-bars{display:flex;align-items:flex-end;gap:2px;height:24px}
 .vd-bars i{flex:1;min-width:0;border-radius:2px 2px 0 0;background:rgba(255,77,79,.3)}
 .vd-bars i:last-child{background:var(--vg);box-shadow:0 0 8px rgba(255,77,79,.6)}
