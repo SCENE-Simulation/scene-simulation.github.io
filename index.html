@@ -1019,6 +1019,27 @@ body.has-sfloat #totop{bottom:84px}
 .wgrp-h .w-go:hover{color:var(--ink)}
 .wgrp .pcard.have .pc-img{border-color:var(--pink)}
 .wgrp .gd-ph{aspect-ratio:3/4}
+/* 포토카드 전체보기(pages.js renderAllCards): 열 수는 위 '카드 크기' 막대(--accols), 컬렉션 줄은 접고 펴는 details */
+#v-allcards .pcgrid{grid-template-columns:repeat(var(--accols,5),minmax(0,1fr))}
+@media (max-width:640px){#v-allcards .pcgrid{grid-template-columns:repeat(var(--accols,3),minmax(0,1fr))}}
+#v-allcards .ac-bar{margin-top:4px}
+.ac-col{margin:18px 0 0;scroll-margin-top:12px}
+.ac-col > .wgrp-h{cursor:pointer;list-style:none}
+.ac-col .sec.sec2:first-of-type{margin-top:14px}
+.ac-col .pcgrid + .sec.sec2{margin-top:20px}
+.pc-t .pc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+/* 전체 칸 = 바로가기 토글 */
+.cmeta .ac-tog{cursor:pointer;user-select:none;transition:background .15s ease,border-color .15s ease}
+.cmeta .ac-tog:hover{background:var(--glass-h);border-color:var(--line2)}
+.cmeta .ac-tog:focus-visible{outline:2px solid var(--lav-t);outline-offset:2px}
+.ac-tog .ac-hint{display:inline-flex;align-items:center;gap:2px;margin-left:8px;color:var(--mint-t);font-weight:600;white-space:nowrap}
+.ac-tog .ac-hint svg{width:12px;height:12px;transform:rotate(90deg);transition:transform .15s ease}          /* #i-chev 는 오른쪽 → 닫힘 아래 · 열림 위 */
+.ac-tog[aria-expanded="true"] .ac-hint svg{transform:rotate(-90deg)}
+.ac-jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.ac-jump[hidden]{display:none}
+.ac-jump button{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:12.5px;cursor:pointer}
+.ac-jump button:hover{background:var(--glass);border-color:var(--pink)!important}
+.ac-jump .cnt{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:var(--ink2)}
 
 /* 칭호 전체 목록 */
 .cach-btn{margin-left:10px;padding:4px 10px!important;font-size:11.5px;border-radius:8px!important}
@@ -3861,6 +3882,8 @@ goTab(true,true);
       members: (cfg.members || []).map(function(m){ return { n: m.n, c: m.c }; }),
       // 포토카드 뽑기 시뮬레이터(gacha.js)가 쓴다: 카드별 멤버 번호, 구매 방식(random 인 방식이 있으면 뽑기 목록에 나온다)
       mem: cfg.cards.map(function(c){ return c.m == null ? null : c.m; }),
+      grp: cfg.cards.map(function(c){ return c.g || null; }),                                  // 카드별 묶음 k (포토카드는 null)
+      groups: GROUPS.map(function(g){ return { k: g.k, n: g.n, c: g.c || '#f6b93c' }; }),     // 포토카드 전체보기(pages.js)가 묶음 줄을 따로 그린다
       modes: cfg.modes || [],
       vper: (cfg.members && cfg.members.length) ? cardsOf(0).length : 0,
       mcount: (cfg.members || []).length,
@@ -5329,44 +5352,125 @@ goTab(true,true);
     });
     elAllGoods.innerHTML = h;
   }
-  function cardTile(c, i, count, key){
+  function cardTile(c, i, count, key, dot){
     return '<div class="pcard' + (count ? ' have' : '') + (c.isLand(i) ? ' land' : '') + '">'
       + '<div class="pc-img">' + heart(key)
       + (c.src[i] ? '<img src="' + esc(c.src[i]) + '" alt="' + esc(c.names[i]) + '"' + (c.isPix(i) ? ' class="pix"' : '') + ' loading="lazy">'
                   : '<div class="gd-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg></div>')
       + (count > 1 ? '<span class="pc-n">×' + count + '</span>' : '') + '</div>'
-      + '<div class="pc-t">' + (i + 1) + '. ' + esc(c.names[i]) + '</div></div>';
+      + '<div class="pc-t" title="' + esc(c.names[i]) + '">' + (dot ? '<i class="pc-dot" style="background:' + dot + '"></i>' : '') + (i + 1) + '. ' + esc(c.names[i]) + '</div></div>';
+  }
+  // ===== 포토카드 전체보기 =====
+  // 컬렉션마다 접었다 펴는 줄(<details>) · 위쪽 카드 크기(열 수) 조절 · "전체" 칸을 누르면 컬렉션 바로가기 버튼
+  //   멤버마다 카드가 2장 이하인 도감(HOLLYS · 나랑드 · 도미노 …)은 멤버별 줄 대신 한 줄에 모은다 (카드 이름 앞 점 = 멤버 색).
+  //   405빵처럼 멤버마다 여러 장이면 예전처럼 멤버별 줄. 브로마이드 같은 묶음(엔진 groups)은 그 아래 따로 한 줄씩
+  var AC = { closed: load('sendungi:acClosed', {}), jump: false, cols: null };
+  function acNarrow(){ return window.innerWidth <= 640; }
+  function acMax(){ return acNarrow() ? 5 : 8; }                    // 휴대폰은 5열까지 (그보다 작으면 카드 이름 · 하트가 안 보임)
+  function acCols(){
+    if (AC.cols == null) { var s = +load('sendungi:acCols', 0); AC.cols = s >= 2 ? s : (acNarrow() ? 3 : 5); }
+    return Math.max(2, Math.min(acMax(), AC.cols));
+  }
+  function acRows(c){
+    var out = [], n = c.N, i, mi;
+    if (!c.mem) {                                                   // 405빵: 멤버마다 vper 장, 그 뒤 스페셜
+      (c.members || []).forEach(function(m, k){
+        var ids = []; for (i = 0; i < c.vper; i++) ids.push(k * c.vper + i);
+        out.push({ t: m.n, c: m.c, ids: ids });
+      });
+      var sp0 = []; for (i = c.mtotal; i < n; i++) sp0.push(i);
+      if (sp0.length) out.push({ t: '스페셜', c: '#f6b93c', ids: sp0 });
+      return out;
+    }
+    var grp = c.grp || [], byM = (c.members || []).map(function(){ return []; }), sp = [];
+    for (i = 0; i < n; i++) {
+      if (grp[i]) continue;
+      mi = c.mem[i];
+      if (mi != null && byM[mi]) byM[mi].push(i); else sp.push(i);
+    }
+    var per = byM.map(function(a){ return a.length; }).filter(Boolean);
+    if (per.length && Math.max.apply(null, per) <= 2) {
+      var all = [], dot = {};
+      byM.forEach(function(a, k){ a.forEach(function(x){ all.push(x); dot[x] = c.members[k].c; }); });
+      out.push({ ids: all, dot: dot });                             // 제목 없이 한 줄 (컬렉션 줄 제목 바로 아래)
+    } else {
+      byM.forEach(function(a, k){ if (a.length) out.push({ t: c.members[k].n, c: c.members[k].c, ids: a }); });
+    }
+    if (sp.length) out.push({ t: '스페셜', c: '#f6b93c', ids: sp });
+    (c.groups || []).forEach(function(g){
+      var ids = []; for (i = 0; i < n; i++) if (grp[i] === g.k) ids.push(i);
+      if (ids.length) out.push({ t: g.n, c: g.c, ids: ids });
+    });
+    return out;
   }
   function renderAllCards(){
     var cols = pcCols();
     if (!cols.length) { elAllCards.innerHTML = sec('i-grid', ['포카 컬렉션 북', '포토카드 전체보기'], '') + empty('i-book', '포토카드 자료를 불러오는 중입니다'); return; }
+    var nc = acCols();
     var h = sec('i-grid', ['포카 컬렉션 북', '포토카드 전체보기'],
-      '지금까지 나온 포토카드를 멤버별로 모아서 봅니다. 가지고 있는 카드는 색이 살아나고, 하트를 누르면 위시리스트에 담깁니다.');
-    h += '<div class="cmeta"><div class="mt"><span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + cols.length + '개</small></div>'
+      '지금까지 나온 포토카드를 컬렉션별로 모아서 봅니다. 컬렉션 제목을 누르면 접고 펼 수 있고, 가지고 있는 카드는 색이 살아나며, 하트를 누르면 위시리스트에 담깁니다.');
+    h += '<div class="cmeta"><div class="mt ac-tog" role="button" tabindex="0" aria-expanded="' + AC.jump + '" aria-controls="ac-jump" title="컬렉션 바로가기">'
+      + '<span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + cols.length + '개<span class="ac-hint">바로가기<svg><use href="#i-chev"/></svg></span></small></div>'
       + '<div class="mt"><span class="mk">보유</span><b>' + pcOwned() + '/' + pcTotal() + '</b><small>모은 종류</small></div>'
       + '<div class="mt"><span class="mk">위시리스트</span><b>' + Object.keys(WISH).filter(function(k){ return k.indexOf('pc:') === 0; }).length + '장</b><small>담아 둔 카드</small></div></div>';
+    h += '<div class="ac-jump" id="ac-jump"' + (AC.jump ? '' : ' hidden') + '>' + cols.map(function(c){
+        var own = c.counts().filter(function(v){ return v > 0; }).length;
+        return '<button type="button" data-jump="' + esc(c.id) + '">' + esc(c.title) + '<span class="cnt">' + own + '/' + c.N + '</span></button>';
+      }).join('') + '</div>';
+    h += '<div class="colbar ac-bar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
+      + '<input type="range" min="2" max="' + acMax() + '" step="1" value="' + nc + '" data-accols aria-label="한 줄에 보여 줄 카드 수">'
+      + '<span class="cb-s">작게</span><b>' + nc + '열</b></div>';
     cols.forEach(function(c){
       var counts = c.counts();
-      if (cols.length > 1) h += '<div class="wgrp-h" style="margin-top:22px"><b>' + esc(c.title) + '</b><span class="cnt">'
-        + counts.filter(function(v){ return v > 0; }).length + '/' + c.N + '</span>'
-        + '<a class="w-go" href="?tab=' + c.id + '" data-tab="' + c.id + '">페이지 열기 →</a></div>';
-      (c.members || []).forEach(function(m, mi){
-        var ids = [], v;
-        for (v = 0; v < c.vper; v++) ids.push(mi * c.vper + v);
-        var own = ids.filter(function(i){ return counts[i] > 0; }).length;
-        h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:' + m.c + '"></span>' + esc(m.n)
-          + '<span class="cnt">' + own + '/' + ids.length + '</span></div></div>'
-          + '<div class="pcgrid">' + ids.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+      h += '<details class="wgrp ac-col" id="ac-' + esc(c.id) + '" data-col="' + esc(c.id) + '"' + (AC.closed[c.id] ? '' : ' open') + '>'
+        + '<summary class="wgrp-h"><b>' + esc(c.title) + '</b><span class="cnt">' + counts.filter(function(v){ return v > 0; }).length + '/' + c.N + '</span>'
+        + '<a class="w-go" href="?tab=' + c.id + '" data-tab="' + c.id + '">페이지 열기 →</a></summary>';
+      acRows(c).forEach(function(r){
+        if (r.t) h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:' + r.c + '"></span>' + esc(r.t)
+          + '<span class="cnt">' + r.ids.filter(function(i){ return counts[i] > 0; }).length + '/' + r.ids.length + '</span></div></div>';
+        h += '<div class="pcgrid">' + r.ids.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i, r.dot && r.dot[i]); }).join('') + '</div>';
       });
-      var sp = [], k;
-      for (k = c.mtotal; k < c.N; k++) sp.push(k);
-      if (!sp.length) return;
-      var spOwn = sp.filter(function(i){ return counts[i] > 0; }).length;
-      h += '<div class="sec sec2"><div class="sec-t"><span class="dot" style="background:#f6b93c"></span>스페셜<span class="cnt">' + spOwn + '/' + sp.length + '</span></div></div>'
-        + '<div class="pcgrid">' + sp.map(function(i){ return cardTile(c, i, counts[i], 'pc:' + c.id + ':' + i); }).join('') + '</div>';
+      h += '</details>';
     });
     elAllCards.innerHTML = h;
+    elAllCards.style.setProperty('--accols', nc);
   }
+  function acJump(on){
+    AC.jump = on;
+    var t = elAllCards.querySelector('.ac-tog'), j = elAllCards.querySelector('#ac-jump');
+    if (t) t.setAttribute('aria-expanded', String(on));
+    if (j) j.hidden = !on;
+  }
+  elAllCards.addEventListener('click', function(e){
+    if (e.target.closest('.ac-tog')) { acJump(!AC.jump); return; }
+    var j = e.target.closest('[data-jump]');
+    if (j) {
+      var d = document.getElementById('ac-' + j.getAttribute('data-jump'));
+      if (d) {
+        d.open = true;
+        // 부드럽게 내려가되, 움직임 줄이기 설정이거나 부드러운 스크롤이 안 도는 환경(창이 뒤에 있을 때 등)이면 바로 이동
+        var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, y0 = window.scrollY;
+        d.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+        if (!calm) setTimeout(function(){ if (window.scrollY === y0) d.scrollIntoView({ block: 'start' }); }, 450);
+      }
+    }
+  });
+  elAllCards.addEventListener('keydown', function(e){
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.ac-tog')) { e.preventDefault(); acJump(!AC.jump); }
+  });
+  elAllCards.addEventListener('input', function(e){
+    var r = e.target.closest('[data-accols]'); if (!r) return;
+    AC.cols = +r.value; save('sendungi:acCols', AC.cols);
+    elAllCards.style.setProperty('--accols', AC.cols);
+    var lab = r.parentNode.querySelector('b'); if (lab) lab.textContent = AC.cols + '열';
+  });
+  // 접고 편 상태는 이 브라우저에 기억 (다시 그려도 · 다음에 와도 그대로)
+  elAllCards.addEventListener('toggle', function(e){
+    var d = e.target; if (!d.classList || !d.classList.contains('ac-col')) return;
+    var id = d.getAttribute('data-col');
+    if (d.open) delete AC.closed[id]; else AC.closed[id] = 1;
+    save('sendungi:acClosed', AC.closed);
+  }, true);
   function wishItems(){
     var c = cu(), out = [];
     Object.keys(WISH).sort(function(a, b){ return WISH[a] - WISH[b]; }).forEach(function(key){

@@ -594,6 +594,8 @@
       members: (cfg.members || []).map(function(m){ return { n: m.n, c: m.c }; }),
       // 포토카드 뽑기 시뮬레이터(gacha.js)가 쓴다: 카드별 멤버 번호, 구매 방식(random 인 방식이 있으면 뽑기 목록에 나온다)
       mem: cfg.cards.map(function(c){ return c.m == null ? null : c.m; }),
+      grp: cfg.cards.map(function(c){ return c.g || null; }),                                  // 카드별 묶음 k (포토카드는 null)
+      groups: GROUPS.map(function(g){ return { k: g.k, n: g.n, c: g.c || '#f6b93c' }; }),     // 포토카드 전체보기(pages.js)가 묶음 줄을 따로 그린다
       modes: cfg.modes || [],
       vper: (cfg.members && cfg.members.length) ? cardsOf(0).length : 0,
       mcount: (cfg.members || []).length,

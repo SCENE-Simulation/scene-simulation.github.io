@@ -605,6 +605,27 @@ body.has-sfloat #totop{bottom:84px}
 .wgrp-h .w-go:hover{color:var(--ink)}
 .wgrp .pcard.have .pc-img{border-color:var(--pink)}
 .wgrp .gd-ph{aspect-ratio:3/4}
+/* 포토카드 전체보기(pages.js renderAllCards): 열 수는 위 '카드 크기' 막대(--accols), 컬렉션 줄은 접고 펴는 details */
+#v-allcards .pcgrid{grid-template-columns:repeat(var(--accols,5),minmax(0,1fr))}
+@media (max-width:640px){#v-allcards .pcgrid{grid-template-columns:repeat(var(--accols,3),minmax(0,1fr))}}
+#v-allcards .ac-bar{margin-top:4px}
+.ac-col{margin:18px 0 0;scroll-margin-top:12px}
+.ac-col > .wgrp-h{cursor:pointer;list-style:none}
+.ac-col .sec.sec2:first-of-type{margin-top:14px}
+.ac-col .pcgrid + .sec.sec2{margin-top:20px}
+.pc-t .pc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+/* 전체 칸 = 바로가기 토글 */
+.cmeta .ac-tog{cursor:pointer;user-select:none;transition:background .15s ease,border-color .15s ease}
+.cmeta .ac-tog:hover{background:var(--glass-h);border-color:var(--line2)}
+.cmeta .ac-tog:focus-visible{outline:2px solid var(--lav-t);outline-offset:2px}
+.ac-tog .ac-hint{display:inline-flex;align-items:center;gap:2px;margin-left:8px;color:var(--mint-t);font-weight:600;white-space:nowrap}
+.ac-tog .ac-hint svg{width:12px;height:12px;transform:rotate(90deg);transition:transform .15s ease}          /* #i-chev 는 오른쪽 → 닫힘 아래 · 열림 위 */
+.ac-tog[aria-expanded="true"] .ac-hint svg{transform:rotate(-90deg)}
+.ac-jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.ac-jump[hidden]{display:none}
+.ac-jump button{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:12.5px;cursor:pointer}
+.ac-jump button:hover{background:var(--glass);border-color:var(--pink)!important}
+.ac-jump .cnt{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:var(--ink2)}
 
 /* 칭호 전체 목록 */
 .cach-btn{margin-left:10px;padding:4px 10px!important;font-size:11.5px;border-radius:8px!important}
