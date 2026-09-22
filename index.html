@@ -6356,7 +6356,7 @@ goTab(true,true);
     var W = Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), H = 300, L = 62, R = 16, Tp = 24, B = 30;
     if (mu === 'h'){
       var HU = UNITS.h;
-      box.innerHTML = chHead('조회수 증가', HU.tab + ' 단위 · ' + HU.range, msTabs())
+      box.innerHTML = chHead('조회수 증가', HU.tab + ' 단위 · ' + barRange(v, 'h', HU.span), msTabs())
         + '<div class="vt-hc">' + barChart(v, 'h', HU.span, W, 240) + '</div>'
         + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
       return;
@@ -6698,7 +6698,7 @@ goTab(true,true);
       + UORDER.map(function(k){ return '<button type="button" data-hu="' + k + '" data-hv="' + esc(v.id) + '" class="' + (k === u ? 'on' : '') + '" aria-selected="' + (k === u) + '">' + UNITS[k].tab + '</button>'; }).join('')
       + '</div>' + (u === 'q' ? '<div class="seg" role="tablist" aria-label="기간">'
       + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
-      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : UNITS[u].range) + ' · 막대에 마우스를 올리면 수치가 보입니다</span></div>'
+      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : barRange(v, u, sp)) + ' · 막대에 마우스를 올리면 수치가 보입니다</span></div>'
       + '<div class="vt-hc">' + barChart(v, u, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
       + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
   }
@@ -6727,10 +6727,18 @@ goTab(true,true);
   }
   function hm(ms){ var d = new Date(ms); return two(d.getHours()) + ':' + two(d.getMinutes()); }
   function md(ms){ var d = new Date(ms); return (d.getMonth() + 1) + '/' + d.getDate(); }
+  // 막대 그래프 시작 칸. 15분은 고른 기간 그대로(24·72시간), 1시간·1일·1주일은 기간(최근 7일·30일·12주) 안에서 기록이 있는 첫 칸부터
+  //   → 게시 전·수집 전 빈 날짜를 그리지 않는다. 칸이 적어도 막대가 뚱뚱해지지 않게 막대 폭은 barChart 에서 제한
+  function barStart(v, u, span){
+    var U = UNITS[u], nowMs = v.pub + age(v) * 3600e3, N = Math.round((span || U.span) / U.step), st0 = floorSlot(nowMs - (N - 1) * U.step * 3600e3, u);
+    var f = u === 'q' ? st0 : floorSlot(v.pub + Math.max(0, v.vs.snaps[0][0]) * 3600e3, u);
+    return f > st0 ? { t: f, clip: true } : { t: st0, clip: false };
+  }
+  // 그래프 설명의 기간: 기록이 기간보다 짧으면 "9/21부터"
+  function barRange(v, u, span){ var b = barStart(v, u, span); return b.clip ? md(b.t) + '부터' : UNITS[u].range; }
   function barChart(v, u, span, W, H){
     var U = UNITS[u], a = age(v), nowMs = v.pub + a * 3600e3, L = 46, R = 10, Tp = 24, B = 22, slots = [];
-    // 칸 수는 고른 기간 그대로 (15분 24시간 96칸 · 1시간 168칸 · 1일 30칸 · 1주일 12칸). 새 영상도 막대가 뚱뚱해지지 않게 게시 전 칸은 비워 둔다
-    var N = Math.round((span || U.span) / U.step), st0 = floorSlot(nowMs - (N - 1) * U.step * 3600e3, u);
+    var st0 = barStart(v, u, span).t;
     var s0 = v.vs.snaps[0][0];                                                       // 기록이 시작된 때(게시 후 시간)
     for (var t = st0; t < nowMs; t = nextSlot(t, u)){
       var e = nextSlot(t, u), pre = e <= v.pub, ta = Math.max(0, (t - v.pub) / 3600e3), tb = (Math.min(e, nowMs) - v.pub) / 3600e3, cut = false;
@@ -6788,7 +6796,7 @@ goTab(true,true);
     }
     inc.forEach(function(x, i){
       if (x == null) return;
-      var y0 = Y(x), w = Math.max(1, bw * 0.78);
+      var y0 = Y(x), w = Math.max(1, Math.min(bw * 0.78, 44));
       s += '<rect class="hb' + (slots[i].open ? ' now' : '') + '" data-bi="' + i + '" x="' + (X(i) + (bw - w) / 2).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + Math.max(0.5, Y(0) - y0).toFixed(1) + '" rx="' + Math.min(2, w / 3).toFixed(1) + '"/>';
     });
     // 수치 말풍선용 감지 영역: 막대가 가늘어도 짚기 쉽게 칸 전체 높이로 (views.js 아래쪽 말풍선 처리)
@@ -7042,7 +7050,7 @@ goTab(true,true);
     if (late(sel)){ msChart(); return; }
     if (!UNITS[cm]){ cumChart(); return; }
     var U = UNITS[cm];
-    box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + U.range)
+    box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + barRange(sel, cm, U.span))
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
       + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 선이 가끔 튈 수 있습니다.</p>';
   }
