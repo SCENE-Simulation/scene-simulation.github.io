@@ -258,19 +258,20 @@
         if (soon) soon.parentNode.removeChild(soon);
         var a = document.createElement('a');
         a.className = 'nv sub'; a.href = '?tab=' + c.id; a.setAttribute('data-tab', c.id); a.textContent = c.title;
-        yr.appendChild(a);
+        yr.insertBefore(a, yr.querySelector('.nv.sub.off'));                 // 준비 중(SOON) 항목보다 앞에
         if (!yr.open) yr.open = true;
       }
       var grid = document.getElementById('col-grid');
       if (grid) {
         var card = document.createElement('a');
         card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', '#55a1e7');
+        card.setAttribute('data-ym', c.ym || ''); card.setAttribute('data-lv', c.diff || 3);   // 홈 정렬(shell.js)용
         var counts = c.counts(), own = counts.filter(function(v){ return v > 0; }).length;
         card.innerHTML = '<div class="k">' + esc(c.year) + ' 포카</div><h2>' + esc(c.title) + '</h2>'
           + '<p class="cdesc">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
           + '<div class="st2"><span><b>' + own + '/' + c.N + '</b>보유</span></div>'
           + '<span class="go">도감 열기 →</span>';
-        grid.appendChild(card);
+        grid.insertBefore(card, grid.querySelector('.hc.soon'));                  // 준비 중 카드보다 앞에
       }
     });
   }

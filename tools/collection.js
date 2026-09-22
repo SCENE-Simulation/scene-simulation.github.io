@@ -1,7 +1,8 @@
 // 포토카드 컬렉션 페이지 엔진
 // 설정(cfg) 하나로 도감 페이지 한 장을 통째로 만든다. CU 405빵 페이지(source.html)의 구성을 따른다.
 // cfg = { id, title, year, ym, diff, desc, members[{n,c}], cards[{n,img,m,land}],
-//         modes[{k,label,price,random,var,hint}], pkg[], news[] }
+//         modes[{k,label,price,random,var,hint}], pkg[{src?,cap,sub?,wide?}], news[{title,src,date,url}] }
+//   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
@@ -36,7 +37,7 @@
     var MODE = {}; cfg.modes.forEach(function(m){ MODE[m.k] = m; });
     var ENTRIES = [], PEND = [], ACH = {}, EDITING = null, EDITS = 0, savedAt = null;
     var el = document.createElement('section');
-    el.id = 'v-' + cfg.id; el.className = 'wrap page'; el.hidden = true;
+    el.id = 'v-' + cfg.id; el.className = 'wrap page colpg'; el.hidden = true;           // colpg: 카드 크기 규칙(theme.css)을 405빵 페이지와 같이 씀
     document.querySelector('main.mn').appendChild(el);
 
     // ---------- 기록에서 현재 상태를 계산 ----------
@@ -235,7 +236,12 @@
       var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 기사 보기', news.length)
         + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '><div class="pk">'
-        + (pkg.length ? pkg.map(function(p){ return '<figure><img src="' + esc(p.src) + '" alt="" loading="lazy">' + (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>'; }).join('')
+        + (pkg.length ? pkg.map(function(p){
+              return '<figure' + (p.wide ? ' class="wide"' : '') + '>'
+                + (p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+                  : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>이미지 준비 중</span></div>')
+                + (p.cap || p.sub ? '<figcaption>' + (p.cap ? '<b>' + esc(p.cap) + '</b>' : '') + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</figcaption>' : '') + '</figure>';
+            }).join('')
            : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div>') + '</div></div>';
       h += '<div class="xt-p" data-panel="news"' + (state.open === 'news' ? '' : ' hidden') + '>'
         + (news.length ? '<div class="nws">' + news.map(function(a){
@@ -268,7 +274,9 @@
       }
       (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
-      return '<div class="cbody">' + h + '</div>';
+      // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종)
+      var per = (cfg.members || []).map(function(m, mi){ return cardsOf(mi).length; }).concat([specials().length]).filter(Boolean);
+      return '<div class="cbody' + (per.length > 1 && Math.max.apply(null, per) <= 2 ? ' compact' : '') + '">' + h + '</div>';
     }
     function sumRow(){
       var c = counts(), h = '<div class="csum">';
@@ -463,6 +471,7 @@
 
     var api = {
       id: cfg.id, year: cfg.year, title: cfg.title, tab: cfg.id,
+      desc: cfg.desc || '', ym: cfg.ym || '', diff: Math.max(1, Math.min(5, cfg.diff || 3)),   // 홈 카드 설명 · 정렬(최신순·난이도순)
       N: N,
       names: cfg.cards.map(function(c){ return c.n; }),
       src: cfg.cards.map(function(c){ return c.img || ''; }),

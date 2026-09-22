@@ -686,6 +686,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .xt-p{margin-top:10px;padding:12px;border-radius:14px;background:var(--glass);border:1px solid var(--line);animation:shUp .15s ease-out}
 .pk figure{margin:0}
 .pk figcaption{margin-top:6px;font-size:12px;color:var(--ink2);text-align:center}
+.pk figcaption b{display:block;font-size:13px;font-weight:700;color:var(--ink)}           /* 제목(cap) · 설명(sub) 두 줄 */
+.pk figcaption small{display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink2)}
 .nws{display:grid;gap:8px}
 .nw{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--slot2);border:1px solid var(--line);
   color:inherit;text-decoration:none;transition:background .15s ease,border-color .15s ease}
@@ -998,32 +1000,41 @@ body.has-sfloat #totop{bottom:84px}
 .colbar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-8px;border-radius:50%;
   background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .colbar input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
-#page-col .cgrid{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
-#page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+:is(#page-col,.colpg) .cgrid{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
+:is(#page-col,.colpg) .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
 @media (max-width:640px){
-  #page-col .cgrid{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
-  #page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+  :is(#page-col,.colpg) .cgrid{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
+  :is(#page-col,.colpg) .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
   .colbar{gap:9px;padding:9px 12px}
   .colbar .cb-k{font-size:12px}
 }
 
+/* 엔진 컬렉션: 멤버당 카드가 2장 이하면 멤버 칸을 나란히 (한 칸에 한 장씩 세로로 길게 쌓이지 않게) */
+.cbody.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--setw,168px),1fr));gap:12px}
+.cbody.compact .set{margin:0}
+.cbody.compact .shead{flex-wrap:nowrap;min-width:0}                                   /* 좁은 칸: "같은 멤버 1종" 은 빼고 이름 · 개수 한 줄 */
+.cbody.compact .shead .vs{display:none}
+.cbody.compact .shead b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbody.compact .shead .pr{margin-left:auto;flex:none}
+@media (max-width:640px){.cbody.compact{--setw:104px;gap:8px}.cbody.compact .set{padding:8px}}
+
 /* 카드가 작아지면 조작부도 작게 */
-#page-col[data-cols="5"] .ctile,#page-col[data-cols="6"] .ctile,#page-col[data-cols="7"] .ctile,#page-col[data-cols="8"] .ctile{padding:5px}
-#page-col[data-cols="5"] .ctile .ctr button,#page-col[data-cols="6"] .ctile .ctr button,
-#page-col[data-cols="7"] .ctile .ctr button,#page-col[data-cols="8"] .ctile .ctr button{width:26px;font-size:14px;padding:4px 0}
-#page-col[data-cols="5"] .ctile .nm,#page-col[data-cols="6"] .ctile .nm,
-#page-col[data-cols="7"] .ctile .nm,#page-col[data-cols="8"] .ctile .nm{font-size:10.5px;padding:2px 4px}
-#page-col[data-cols="5"] .ctile .wish,#page-col[data-cols="6"] .ctile .wish,
-#page-col[data-cols="7"] .ctile .wish,#page-col[data-cols="8"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
-#page-col[data-cols="5"] .ctile .wish svg,#page-col[data-cols="6"] .ctile .wish svg,
-#page-col[data-cols="7"] .ctile .wish svg,#page-col[data-cols="8"] .ctile .wish svg{width:15px;height:15px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile,:is(#page-col,.colpg)[data-cols="6"] .ctile,:is(#page-col,.colpg)[data-cols="7"] .ctile,:is(#page-col,.colpg)[data-cols="8"] .ctile{padding:5px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .ctr button,:is(#page-col,.colpg)[data-cols="6"] .ctile .ctr button,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .ctr button,:is(#page-col,.colpg)[data-cols="8"] .ctile .ctr button{width:26px;font-size:14px;padding:4px 0}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .nm,:is(#page-col,.colpg)[data-cols="6"] .ctile .nm,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .nm,:is(#page-col,.colpg)[data-cols="8"] .ctile .nm{font-size:10.5px;padding:2px 4px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .wish,:is(#page-col,.colpg)[data-cols="6"] .ctile .wish,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .wish,:is(#page-col,.colpg)[data-cols="8"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .wish svg,:is(#page-col,.colpg)[data-cols="6"] .ctile .wish svg,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .wish svg,:is(#page-col,.colpg)[data-cols="8"] .ctile .wish svg{width:15px;height:15px}
 @media (max-width:640px){
-  #page-col[data-cols="4"] .ctile{padding:5px}
-  #page-col[data-cols="4"] .ctile .ctr button{width:24px;font-size:14px;padding:4px 0}
-  #page-col[data-cols="4"] .ctile .ctr .n{font-size:12px}
-  #page-col[data-cols="4"] .ctile .nm{font-size:10px;padding:2px 3px}
-  #page-col[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
-  #page-col[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile{padding:5px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .ctr button{width:24px;font-size:14px;padding:4px 0}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .ctr .n{font-size:12px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .nm{font-size:10px;padding:2px 3px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
 }
 
 /* ===== 포토카드 뽑기 시뮬레이터: 뽑기 종류 선택 · 화면 전환 · 분석 (gacha.js) ===== */
@@ -3186,7 +3197,8 @@ goTab(true,true);
 // 포토카드 컬렉션 페이지 엔진
 // 설정(cfg) 하나로 도감 페이지 한 장을 통째로 만든다. CU 405빵 페이지(source.html)의 구성을 따른다.
 // cfg = { id, title, year, ym, diff, desc, members[{n,c}], cards[{n,img,m,land}],
-//         modes[{k,label,price,random,var,hint}], pkg[], news[] }
+//         modes[{k,label,price,random,var,hint}], pkg[{src?,cap,sub?,wide?}], news[{title,src,date,url}] }
+//   pkg[] : src 가 없으면 자리표시자 + 제목(cap)·설명(sub). wide:true 는 한 줄 전체·원본 크기
 //   cards[].m : 멤버 번호(0부터), 없으면 스페셜
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
@@ -3221,7 +3233,7 @@ goTab(true,true);
     var MODE = {}; cfg.modes.forEach(function(m){ MODE[m.k] = m; });
     var ENTRIES = [], PEND = [], ACH = {}, EDITING = null, EDITS = 0, savedAt = null;
     var el = document.createElement('section');
-    el.id = 'v-' + cfg.id; el.className = 'wrap page'; el.hidden = true;
+    el.id = 'v-' + cfg.id; el.className = 'wrap page colpg'; el.hidden = true;           // colpg: 카드 크기 규칙(theme.css)을 405빵 페이지와 같이 씀
     document.querySelector('main.mn').appendChild(el);
 
     // ---------- 기록에서 현재 상태를 계산 ----------
@@ -3420,7 +3432,12 @@ goTab(true,true);
       var h = '<div class="xt"><div class="xt-bar">' + btn('pkg', '패키징 보기', pkg.length) + btn('news', '관련 기사 보기', news.length)
         + '<button type="button" class="xt-b" data-panel-btn="log" aria-expanded="' + (state.open === 'log') + '">기록 로그<span class="xt-c">' + n + '</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button></div>';
       h += '<div class="xt-p" data-panel="pkg"' + (state.open === 'pkg' ? '' : ' hidden') + '><div class="pk">'
-        + (pkg.length ? pkg.map(function(p){ return '<figure><img src="' + esc(p.src) + '" alt="" loading="lazy">' + (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>'; }).join('')
+        + (pkg.length ? pkg.map(function(p){
+              return '<figure' + (p.wide ? ' class="wide"' : '') + '>'
+                + (p.src ? '<img src="' + esc(p.src) + '" alt="' + esc(p.cap || '패키징') + '" loading="lazy">'
+                  : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>이미지 준비 중</span></div>')
+                + (p.cap || p.sub ? '<figcaption>' + (p.cap ? '<b>' + esc(p.cap) + '</b>' : '') + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</figcaption>' : '') + '</figure>';
+            }).join('')
            : '<div class="pk-ph"><svg viewBox="0 0 24 24"><use href="#i-img"/></svg><span>패키징 이미지 준비 중</span><span class="chip">SOON</span></div>') + '</div></div>';
       h += '<div class="xt-p" data-panel="news"' + (state.open === 'news' ? '' : ' hidden') + '>'
         + (news.length ? '<div class="nws">' + news.map(function(a){
@@ -3453,7 +3470,9 @@ goTab(true,true);
       }
       (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
-      return '<div class="cbody">' + h + '</div>';
+      // 멤버마다 카드가 2장 이하면 멤버 칸을 나란히 놓는다 (예: 멤버 5명 × 1종)
+      var per = (cfg.members || []).map(function(m, mi){ return cardsOf(mi).length; }).concat([specials().length]).filter(Boolean);
+      return '<div class="cbody' + (per.length > 1 && Math.max.apply(null, per) <= 2 ? ' compact' : '') + '">' + h + '</div>';
     }
     function sumRow(){
       var c = counts(), h = '<div class="csum">';
@@ -3648,6 +3667,7 @@ goTab(true,true);
 
     var api = {
       id: cfg.id, year: cfg.year, title: cfg.title, tab: cfg.id,
+      desc: cfg.desc || '', ym: cfg.ym || '', diff: Math.max(1, Math.min(5, cfg.diff || 3)),   // 홈 카드 설명 · 정렬(최신순·난이도순)
       N: N,
       names: cfg.cards.map(function(c){ return c.n; }),
       src: cfg.cards.map(function(c){ return c.img || ''; }),
@@ -3699,6 +3719,23 @@ goTab(true,true);
   //           {k:'used', label:'중고 구매', var:true, price:15000}],
   //   pkg: [], news: []
   // }
+  {
+    id: 'hollys2026', title: 'HOLLYS 콜라보', year: '2026', diff: 3,
+    desc: '커피 브랜드 할리스(HOLLYS)가 1998년 창사 이래 28년 만의 첫 브랜드 모델로 5인조 걸그룹 리센느(RESCENE)를 발탁하고 다양한 콜라보 프로모션을 진행하고 있습니다. 세트를 사면 포토카드 5종 중 1장이 랜덤으로 들어 있습니다.',
+    parts: '멤버 5종',
+    members: [{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}],
+    cards: [{n:'원이', m:0}, {n:'제나', m:1}, {n:'리브', m:2}, {n:'미나미', m:3}, {n:'메이', m:4}],
+    modes: [{k:'buy', label:'세트 구매', price:13500, random:true, hint:'세트 1개 · 랜덤 1장'},
+            {k:'trade', label:'교환', price:0},
+            {k:'used', label:'중고 구매', var:true, price:15000}],
+    // 세트 메뉴 (사진이 오면 src 를 채운다 — 그 전에는 자리표시자 + 제목)
+    pkg: [{cap:'원이의 호감 가득 세트', sub:'호감 스무디 + 뉴욕 치즈 케이크 · 13,500원'},
+          {cap:'제나의 언제나 제나 세트', sub:'모과배차 + 쿠앤크 쏘스윗박스 · 13,500원'},
+          {cap:'미나미의 냐미 냐미 세트', sub:'흑임자 라이스 할리치노 + 모과배차 · 13,500원 · 유일한 음료 2잔 구성'},
+          {cap:'메이의 어메이징 세트', sub:'바닐라 딜라이트 + 흑임자 초코 롤케이크 · 13,500원'},
+          {cap:'리브의 아이 리브 유 세트', sub:'흑임자 버터크림 라떼 + 티라미수 쏘스윗박스 · 13,500원'}],
+    news: []
+  }
 ].forEach(function(cfg){ window.SGCollection(cfg); });
 
 </script>
@@ -5097,19 +5134,20 @@ goTab(true,true);
         if (soon) soon.parentNode.removeChild(soon);
         var a = document.createElement('a');
         a.className = 'nv sub'; a.href = '?tab=' + c.id; a.setAttribute('data-tab', c.id); a.textContent = c.title;
-        yr.appendChild(a);
+        yr.insertBefore(a, yr.querySelector('.nv.sub.off'));                 // 준비 중(SOON) 항목보다 앞에
         if (!yr.open) yr.open = true;
       }
       var grid = document.getElementById('col-grid');
       if (grid) {
         var card = document.createElement('a');
         card.className = 'hc'; card.href = '?tab=' + c.id; card.setAttribute('data-tab', c.id); card.style.setProperty('--c', '#55a1e7');
+        card.setAttribute('data-ym', c.ym || ''); card.setAttribute('data-lv', c.diff || 3);   // 홈 정렬(shell.js)용
         var counts = c.counts(), own = counts.filter(function(v){ return v > 0; }).length;
         card.innerHTML = '<div class="k">' + esc(c.year) + ' 포카</div><h2>' + esc(c.title) + '</h2>'
           + '<p class="cdesc">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
           + '<div class="st2"><span><b>' + own + '/' + c.N + '</b>보유</span></div>'
           + '<span class="go">도감 열기 →</span>';
-        grid.appendChild(card);
+        grid.insertBefore(card, grid.querySelector('.hc.soon'));                  // 준비 중 카드보다 앞에
       }
     });
   }

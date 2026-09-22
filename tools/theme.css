@@ -272,6 +272,8 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 .xt-p{margin-top:10px;padding:12px;border-radius:14px;background:var(--glass);border:1px solid var(--line);animation:shUp .15s ease-out}
 .pk figure{margin:0}
 .pk figcaption{margin-top:6px;font-size:12px;color:var(--ink2);text-align:center}
+.pk figcaption b{display:block;font-size:13px;font-weight:700;color:var(--ink)}           /* 제목(cap) · 설명(sub) 두 줄 */
+.pk figcaption small{display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink2)}
 .nws{display:grid;gap:8px}
 .nw{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--slot2);border:1px solid var(--line);
   color:inherit;text-decoration:none;transition:background .15s ease,border-color .15s ease}
@@ -584,32 +586,41 @@ body.has-sfloat #totop{bottom:84px}
 .colbar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-8px;border-radius:50%;
   background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .colbar input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--pink-d);box-shadow:0 2px 8px rgba(0,0,0,.45)}
-#page-col .cgrid{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
-#page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+:is(#page-col,.colpg) .cgrid{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}
+:is(#page-col,.colpg) .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
 @media (max-width:640px){
-  #page-col .cgrid{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
-  #page-col .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
+  :is(#page-col,.colpg) .cgrid{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
+  :is(#page-col,.colpg) .cgrid.wide{grid-template-columns:repeat(var(--colsw,2),minmax(0,1fr))}
   .colbar{gap:9px;padding:9px 12px}
   .colbar .cb-k{font-size:12px}
 }
 
+/* 엔진 컬렉션: 멤버당 카드가 2장 이하면 멤버 칸을 나란히 (한 칸에 한 장씩 세로로 길게 쌓이지 않게) */
+.cbody.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--setw,168px),1fr));gap:12px}
+.cbody.compact .set{margin:0}
+.cbody.compact .shead{flex-wrap:nowrap;min-width:0}                                   /* 좁은 칸: "같은 멤버 1종" 은 빼고 이름 · 개수 한 줄 */
+.cbody.compact .shead .vs{display:none}
+.cbody.compact .shead b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbody.compact .shead .pr{margin-left:auto;flex:none}
+@media (max-width:640px){.cbody.compact{--setw:104px;gap:8px}.cbody.compact .set{padding:8px}}
+
 /* 카드가 작아지면 조작부도 작게 */
-#page-col[data-cols="5"] .ctile,#page-col[data-cols="6"] .ctile,#page-col[data-cols="7"] .ctile,#page-col[data-cols="8"] .ctile{padding:5px}
-#page-col[data-cols="5"] .ctile .ctr button,#page-col[data-cols="6"] .ctile .ctr button,
-#page-col[data-cols="7"] .ctile .ctr button,#page-col[data-cols="8"] .ctile .ctr button{width:26px;font-size:14px;padding:4px 0}
-#page-col[data-cols="5"] .ctile .nm,#page-col[data-cols="6"] .ctile .nm,
-#page-col[data-cols="7"] .ctile .nm,#page-col[data-cols="8"] .ctile .nm{font-size:10.5px;padding:2px 4px}
-#page-col[data-cols="5"] .ctile .wish,#page-col[data-cols="6"] .ctile .wish,
-#page-col[data-cols="7"] .ctile .wish,#page-col[data-cols="8"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
-#page-col[data-cols="5"] .ctile .wish svg,#page-col[data-cols="6"] .ctile .wish svg,
-#page-col[data-cols="7"] .ctile .wish svg,#page-col[data-cols="8"] .ctile .wish svg{width:15px;height:15px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile,:is(#page-col,.colpg)[data-cols="6"] .ctile,:is(#page-col,.colpg)[data-cols="7"] .ctile,:is(#page-col,.colpg)[data-cols="8"] .ctile{padding:5px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .ctr button,:is(#page-col,.colpg)[data-cols="6"] .ctile .ctr button,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .ctr button,:is(#page-col,.colpg)[data-cols="8"] .ctile .ctr button{width:26px;font-size:14px;padding:4px 0}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .nm,:is(#page-col,.colpg)[data-cols="6"] .ctile .nm,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .nm,:is(#page-col,.colpg)[data-cols="8"] .ctile .nm{font-size:10.5px;padding:2px 4px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .wish,:is(#page-col,.colpg)[data-cols="6"] .ctile .wish,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .wish,:is(#page-col,.colpg)[data-cols="8"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+:is(#page-col,.colpg)[data-cols="5"] .ctile .wish svg,:is(#page-col,.colpg)[data-cols="6"] .ctile .wish svg,
+:is(#page-col,.colpg)[data-cols="7"] .ctile .wish svg,:is(#page-col,.colpg)[data-cols="8"] .ctile .wish svg{width:15px;height:15px}
 @media (max-width:640px){
-  #page-col[data-cols="4"] .ctile{padding:5px}
-  #page-col[data-cols="4"] .ctile .ctr button{width:24px;font-size:14px;padding:4px 0}
-  #page-col[data-cols="4"] .ctile .ctr .n{font-size:12px}
-  #page-col[data-cols="4"] .ctile .nm{font-size:10px;padding:2px 3px}
-  #page-col[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
-  #page-col[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile{padding:5px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .ctr button{width:24px;font-size:14px;padding:4px 0}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .ctr .n{font-size:12px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .nm{font-size:10px;padding:2px 3px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .wish{width:26px;height:26px;right:5px;bottom:5px}
+  :is(#page-col,.colpg)[data-cols="4"] .ctile .wish svg{width:15px;height:15px}
 }
 
 /* ===== 포토카드 뽑기 시뮬레이터: 뽑기 종류 선택 · 화면 전환 · 분석 (gacha.js) ===== */
