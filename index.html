@@ -3296,7 +3296,11 @@ goTab(true,true);
     document.querySelector('main.mn').appendChild(el);
 
     // ---------- 기록에서 현재 상태를 계산 ----------
-    function all(){ return ENTRIES.concat(PEND); }
+    // 전체 초기화는 기록에 k:'reset' 한 줄로 남는다(405빵과 같게). 그 줄 앞의 기록(저장 전 변경 포함)은 세지 않고 로그에도 안 보이며,
+    // 저장하면 지워진다(save). 계산은 마지막 초기화 줄 다음부터(all), 로그는 초기화 줄부터(shown)
+    function lastReset(a){ for (var j = a.length - 1; j >= 0; j--) if (a[j].k === 'reset') return j; return -1; }
+    function all(){ var a = ENTRIES.concat(PEND); return a.slice(lastReset(a) + 1); }
+    function shown(){ var a = ENTRIES.concat(PEND); return a.slice(Math.max(0, lastReset(a))); }
     function counts(){
       var c = new Array(N).fill(0);
       all().forEach(function(e){ if (e.i != null) c[e.i] += e.d; });
@@ -3322,7 +3326,9 @@ goTab(true,true);
     // ---------- 저장 ----------
     function snap(){ return { entries: ENTRIES, ach: ACH, updated: new Date().toISOString() }; }
     function save(){
-      ENTRIES = ENTRIES.concat(netPend()); PEND = []; EDITS = 0; EDITING = null;
+      ENTRIES = ENTRIES.concat(netPend());
+      var r = lastReset(ENTRIES); if (r > 0) ENTRIES = ENTRIES.slice(r);        // 초기화 줄 앞의 기록은 버리고 초기화 줄은 로그에 남긴다
+      PEND = []; EDITS = 0; EDITING = null;
       try { localStorage.setItem(KEY, JSON.stringify(snap())); } catch(e){}
       savedAt = Date.now();
       render();
@@ -3344,12 +3350,14 @@ goTab(true,true);
     function netPend(){
       var out = [], at = {};
       PEND.forEach(function(e){
+        // 전체 초기화: 그 앞의 저장 전 변경은 버리고 초기화 줄 하나만 (405빵 netPend 와 같게)
+        if (e.k === 'reset') { out = [{ id: e.id, t: e.t, k: 'reset', i: null, d: 0, w: 0 }]; at = {}; return; }
         var unit = e.d ? Math.round(Math.abs(e.w || 0) / Math.abs(e.d)) : 0;
         var key = e.k + '|' + e.i + '|' + unit;
         if (at[key] == null) { at[key] = out.length; out.push({ id: e.id, t: e.t, k: e.k, i: e.i, d: 0, w: 0 }); }
         var o = out[at[key]]; o.d += e.d; o.w += e.w; o.t = e.t;
       });
-      return out.filter(function(o){ return o.d !== 0; });
+      return out.filter(function(o){ return o.k === 'reset' || o.d !== 0; });
     }
 
     // ---------- 칭호 ----------
@@ -3476,6 +3484,8 @@ goTab(true,true);
       return h + '</div>';
     }
     function logRow(e, pend){
+      // 전체 초기화 줄: 수정 버튼 없이 한 줄 (405빵과 같게)
+      if (e.k === 'reset') return '<div class="lrow' + (pend ? ' pend' : '') + '"><span class="tg">' + (pend ? '저장 전' : when(e.t)) + '</span><span class="lt">전체 초기화</span></div>';
       var c = counts();
       var mode = MODE[e.k], what = e.i == null ? '' : ' <b>' + (e.i + 1) + '. ' + esc(cfg.cards[e.i].n) + '</b>';
       var w = e.w ? ' <span class="wn">' + (e.w < 0 ? '−' : '') + won(Math.abs(e.w)) + '원</span>' : '';
@@ -3493,8 +3503,7 @@ goTab(true,true);
         + '<p class="le-note">적용하면 카드 수량과 금액도 함께 바뀝니다. 저장을 눌러야 확정됩니다.</p></div>';
     }
     function logBox(){
-      var rows = PEND.slice().reverse().map(function(e){ return logRow(e, true); }).join('')
-        + ENTRIES.slice().reverse().map(function(e){ return logRow(e, false); }).join('');
+      var rows = shown().slice().reverse().map(function(e){ return logRow(e, PEND.indexOf(e) >= 0); }).join('');   // 최신이 위, 초기화 줄 앞은 안 보임
       return '<div class="clog"' + (state.open === 'log' ? '' : ' hidden') + ' data-panel="log"><div class="list">'
         + (rows || '<div class="em">기록이 없습니다.</div>') + '</div></div>';
     }
@@ -3509,7 +3518,7 @@ goTab(true,true);
     // 패키징 한 칸의 가로/세로 비율 (ratio 틀 > crop 영역 > 원본 size). 모르면 0
     function pkRatio(p){ var r = p.ratio || (p.crop ? [p.crop[2], p.crop[3]] : p.size); return r ? r[0] / r[1] : 0; }
     function toggles(){
-      var pkg = cfg.pkg || [], news = cfg.news || [], n = ENTRIES.length + PEND.length;
+      var pkg = cfg.pkg || [], news = cfg.news || [], n = shown().length;
       // 왼쪽 아이콘은 405빵 페이지(shell.js)와 같은 것
       function btn(k, icon, label, cnt){
         return '<button type="button" class="xt-b" data-panel-btn="' + k + '" aria-expanded="' + (state.open === k) + '"><svg class="xi"><use href="#' + icon + '"/></svg>' + label
@@ -3698,10 +3707,12 @@ goTab(true,true);
         else if (a === 'revert') revert();
         else if (a === 'achall') { state.achAll = !state.achAll; render(); }
         else if (a === 'reset') {
-          PEND = PEND.concat(ENTRIES.map(function(e){ return { id: newId(), t: Date.now(), k: e.k, i: e.i, d: -e.d, w: -(e.w || 0) }; }));
-          // 칭호도 비운다 (405빵과 같게. 예전엔 초기화하고 저장해도 받은 칭호가 그대로 남았음). 저장해야 확정되고, 되돌리기를 누르면 저장된 칭호로 돌아간다.
-          // 기록은 이미 0인데 칭호만 남은 경우(예전에 초기화한 기록)도 저장할 수 있게 변경 1건으로 센다
-          if (Object.keys(ACH).length) { ACH = {}; EDITS++; }
+          // 전체 초기화 (405빵과 같게): 초기화 줄 하나를 저장 전 변경으로 넣는다 → 저장된 기록 · 저장 전에 넣은 카드 모두 계산에서 빠지고(all),
+          // 저장하면 그 앞 기록은 지워지고 로그엔 "전체 초기화" 한 줄만 남는다. 칭호도 비운다. 되돌리기를 누르면 저장된 상태로 돌아간다.
+          // 예전 방식(음수 기록을 줄줄이 추가)은 저장 전 카드가 남고 로그가 쌓였으며, 그 전엔 칭호도 안 지워졌다
+          if (!all().length && !PEND.length && !Object.keys(ACH).length) return;   // 지울 것이 없으면 그대로
+          PEND = [{ id: newId(), t: Date.now(), k: 'reset', i: null, d: 0, w: 0 }];
+          ACH = {}; EDITS = 0; EDITING = null;
           render();
         }
         return;
