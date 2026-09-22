@@ -1010,14 +1010,14 @@
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%"><i style="--p:' + (f * 100).toFixed(1) + '%"></i><em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
-    var leftTxt = '<em>' + fmt(m.M - V) + '</em> 남음';
+    var leftTxt = '<small class="vd-msn"><em>' + fmt(m.M - V) + '</em> 남음</small>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
-      + '<b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>'
-      + '<small>' + leftTxt + ' · ' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small>'
-      + '<div class="vd-sv">' + bar + '</div></div>';
+      // 줄 순서: [남은 시간 · 날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [N만 남음]
+      + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b><small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
+      + '<div class="vd-sv">' + bar + leftTxt + '</div></div>';
   }
   function cntTxt(atMs){
     var d = (atMs - Date.now()) / 864e5;
