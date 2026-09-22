@@ -12,6 +12,9 @@
 //   modes[].price : 고정 금액 / var:true 면 살 때마다 금액 입력(중고 거래 등) / price 0 이면 금액 없음(교환 등)
 //   modes[].random : 무엇이 나올지 모르는 뽑기형(컴플리트 평균 계산에 사용)
 //   modes[].ach : 그 방식의 칭호를 직접 정함 [{at:횟수, n:칭호, d:한마디}] — 설명은 "<방식> N회 · 한마디". 없으면 첫걸음(1회)·단골(10회)
+//   ach : 기본 칭호를 콜라보에 맞게 바꿈 {id:{n:칭호, d:한마디, at:장수}} — 설명은 "<조건> · 한마디", false 면 그 칭호를 뺀다.
+//         id: first(1종) · mem1(한 멤버 전부) · half(절반) · all(컴플리트) · dup3 · dup6(같은 카드 3·6장, at 으로 장수 변경) · avg(평균 비용) · thrifty(알뜰)
+//         멤버마다 카드가 1종이면 mem1 은 first 와 같은 때 받으니 false 로 빼는 게 낫다
 (function(){
   var REG = window.SGCOLS = window.SGCOLS || [];
 
@@ -108,12 +111,16 @@
     // ---------- 칭호 ----------
     function achDefs(){
       var ex = expect(), half = Math.max(1, Math.round(N / 2));
+      // cfg.ach 로 기본 칭호를 콜라보에 맞게 바꿀 수 있다 (맨 위 설명). 중복 칭호는 장수(at)도 바꿀 수 있고, id 는 그대로라 받은 칭호가 이어진다
+      var O = cfg.ach || {};
+      function at(id, def){ return (O[id] && O[id].at) || def; }
+      var dupA = at('dup3', 3), dupB = at('dup6', 6);
       var list = [
         { id:'first', n:'첫 장의 설렘', d:'카드 1종 보유', c:'#55a1e7', r:1, t:function(x){ return x.own >= 1; } },
         { id:'half',  n:'절반의 수집가', d:half + '종 보유', c:'#55a1e7', r:2, t:function(x){ return x.own >= half; } },
         { id:'all',   n:'컴플리터', d:N + '종 전부 수집', c:'#55a1e7', r:4, t:function(x){ return x.own >= N; } },
-        { id:'dup3',  n:'중복 시작', d:'같은 카드 3장 보유', c:'#a080d0', r:1, t:function(x){ return x.maxDup >= 3; } },
-        { id:'dup6',  n:'중복 지옥', d:'같은 카드 6장 보유', c:'#a080d0', r:2, t:function(x){ return x.maxDup >= 6; } }
+        { id:'dup3',  n:'중복 시작', d:'같은 카드 ' + dupA + '장 보유', c:'#a080d0', r:1, t:function(x){ return x.maxDup >= dupA; } },
+        { id:'dup6',  n:'중복 지옥', d:'같은 카드 ' + dupB + '장 보유', c:'#a080d0', r:2, t:function(x){ return x.maxDup >= dupB; } }
       ];
       if (cfg.members && cfg.members.length) {
         list.splice(1, 0, { id:'mem1', n:'최애 한 세트', d:'한 멤버의 카드 모두 수집', c:'#55a1e7', r:2, t:function(x){ return x.memberDone >= 1; } });
@@ -132,7 +139,12 @@
         list.push({ id:'thrifty', n:'알뜰 컴플리터', d:won(Math.round(ex.cost * 0.75)) + '원 이하로 ' + N + '종 완성', c:'#f6b93c', r:4,
           t:function(x){ return x.own >= N && x.money <= Math.round(ex.cost * 0.75); } });
       }
-      return list;
+      // 기본 칭호 바꾸기: 이름(n)은 바꾸고, 한마디(d)는 조건 설명 뒤에 " · 한마디"로 붙인다. false 면 뺀다
+      return list.filter(function(a){ return O[a.id] !== false; }).map(function(a){
+        var o = O[a.id];
+        if (o && a.id.indexOf('m_') !== 0) { if (o.n) a.n = o.n; if (o.d) a.d += ' · ' + o.d; }
+        return a;
+      });
     }
     var ACHDEF = achDefs();
     function achCtx(){

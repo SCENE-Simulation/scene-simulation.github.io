@@ -403,6 +403,9 @@ body.has-sfloat #totop{bottom:84px}
 .bdg .bt{display:flex;flex-direction:column;line-height:1.3;min-width:0}
 .bdg .bt b{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
 .bdg .bt small{font-size:11px;color:var(--ink2);white-space:nowrap}
+/* 긴 칭호 설명이 좁은 화면 밖으로 밀리지 않게: 칸 폭을 넘을 때만 설명 줄을 바꾼다 (넓은 화면·짧은 설명은 그대로 한 줄) */
+.bdg{box-sizing:border-box;max-width:100%}
+.bdg .bt small{white-space:normal;word-break:keep-all}
 .bdg[data-r="2"]{border-width:1.5px}
 .bdg[data-r="3"]{border-width:1.5px;box-shadow:0 0 14px color-mix(in srgb,var(--bc) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.14)}
 .bdg[data-r="4"]{border-width:1.5px;background:linear-gradient(110deg,color-mix(in srgb,var(--bc) 18%,transparent) 20%,color-mix(in srgb,var(--bc) 42%,transparent) 45%,color-mix(in srgb,var(--bc) 18%,transparent) 70%);
