@@ -900,9 +900,8 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msn{display:flex;align-items:baseline;gap:10px;margin-top:5px;font-size:11.5px;color:var(--ink2)}
 .vd-msn em{font-size:13px}
 .vd-msl{margin-left:auto;white-space:nowrap}
-/* 최근 1시간 · 1일 증가 (남은 조회수 왼쪽) */
-.vd-msv{display:inline-flex;align-items:baseline;gap:9px;white-space:nowrap;font:700 11px "JetBrains Mono",monospace;color:var(--ink)}
-.vd-msv i{font:600 10px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin-right:3px}
+/* 최근 1시간 · 1일 증가 (남은 조회수 왼쪽) — "N만 남음"과 같은 글꼴·크기·색, 숫자만 em */
+.vd-msv{white-space:nowrap}
 .vd-ms.soon{border-color:rgba(240,199,94,.75)!important;box-shadow:0 0 0 1px rgba(217,164,65,.14),0 0 22px rgba(217,164,65,.16)}
 .vd-ms.na{border-color:var(--line)!important;background:rgba(255,255,255,.04)!important}
 .vd-s.vd-ms.na .vd-sh span{color:var(--ink2)}

@@ -1022,7 +1022,7 @@
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
     // 맨 아랫줄: 왼쪽에 최근 1시간 · 1일 증가, 오른쪽에 남은 조회수. 1시간 전 기록이 없으면 하루 증가 ÷ 24
-    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 하루 동안 는 조회수"><i>1시간</i>+' + fmt(g1 != null ? g1 : p.g / 24) + '<i>1일</i>+' + fmt(p.g) + '</span>';
+    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 하루 동안 는 조회수">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em> · 1일 <em>+' + fmt(p.g) + '</em></span>';
     var leftTxt = '<small class="vd-msn">' + rate + '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span></small>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
