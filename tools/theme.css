@@ -903,15 +903,16 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msb{display:flex;align-items:center;gap:8px}
 .vd-msb > span{flex:none;font:800 12.5px "JetBrains Mono",monospace;color:var(--au);text-shadow:0 0 10px rgba(240,199,94,.35)}
 .vd-msg{flex:1;position:relative;height:26px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.vd-msg i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);border-radius:7px;overflow:hidden;
+.vd-msg i{position:absolute;left:0;top:0;bottom:0;width:var(--p,0%);border-radius:7px 0 0 7px;
   background:linear-gradient(180deg,var(--au) 0%,var(--au2) 50%,var(--au3) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 12px rgba(217,164,65,.4);animation:msFill 1s cubic-bezier(.2,.8,.2,1) both}
 .vd-msg i::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.22) 50%,transparent 100%);background-size:200% 100%;animation:msShine 2.6s linear infinite}
-.vd-msg i::after{content:"";position:absolute;top:-2px;bottom:-2px;right:-7px;width:14px;border-radius:50%;
-  background:radial-gradient(ellipse at center,rgba(255,244,214,.95),rgba(255,244,214,0) 70%);animation:msWave 1.6s ease-in-out infinite}
-.vd-msg em{position:absolute;right:8px;top:0;bottom:0;display:flex;align-items:center;font:700 10.5px "JetBrains Mono",monospace;font-style:normal;color:rgba(240,199,94,.75)}
+/* 오른쪽 끝 물결: 액체 색의 찌그러진 원이 끝에 걸쳐 돌아간다 → 튀어나온 부분이 위로 올라갔다 아래로 내려오기를 반복. 통(.vd-msg)이 밖을 잘라 준다 */
+.vd-msg i::after{content:"";position:absolute;top:50%;right:-24px;width:48px;height:48px;margin-top:-24px;border-radius:46% 54% 52% 48% / 55% 45% 55% 45%;
+  background:radial-gradient(circle at 50% 50%,var(--au) 0%,var(--au2) 55%,var(--au3) 100%);animation:msWave 2.8s linear infinite}
+.vd-msg em{position:absolute;left:8px;top:0;bottom:0;z-index:1;display:flex;align-items:center;font:800 10.5px "JetBrains Mono",monospace;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 @keyframes msFill{from{width:0}}
 @keyframes msShine{from{background-position:150% 0}to{background-position:-150% 0}}
-@keyframes msWave{0%,100%{opacity:.45;transform:scaleY(.8)}50%{opacity:1;transform:scaleY(1.06)}}
+@keyframes msWave{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.vd-msg i,.vd-msg i::before,.vd-msg i::after{animation:none}}
 .vd-key .vd-kn{margin-left:auto;font-size:11px;color:var(--dim)}
 .vd-key .k-ms{width:10px;height:10px;border-radius:50%;background:var(--mc);border:2px solid #1c1c1e;box-shadow:0 0 0 1px var(--mc)}
@@ -933,9 +934,9 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-strip .l{fill:none;stroke:rgba(255,255,255,.3);stroke-width:1.2;stroke-linejoin:round}
 .vd-strip i.md{position:absolute;top:1px;bottom:0;width:1px;margin-left:-.5px;background:repeating-linear-gradient(180deg,rgba(255,255,255,.55) 0 2px,transparent 2px 4px)}
 .vd-strip b{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;border-radius:2px;background:#ff6b6d;box-shadow:0 0 7px rgba(255,77,79,.95)}
-/* 바늘 머리: 반투명 빨간 점이 천천히 깜빡인다 */
-.vd-strip b::before{content:"";position:absolute;top:0;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(255,77,79,.7);box-shadow:0 0 8px rgba(255,77,79,.9),0 0 2px rgba(255,120,120,.8);animation:stripBlink 1.6s ease-in-out infinite}
-@keyframes stripBlink{0%,100%{opacity:.55;box-shadow:0 0 5px rgba(255,77,79,.6)}50%{opacity:1;box-shadow:0 0 12px rgba(255,77,79,1),0 0 3px rgba(255,150,150,.9)}}
+/* 바늘 머리: 불투명 빨간 점(뒤의 바늘 선을 가린다). 빛만 천천히 세졌다 약해진다 */
+.vd-strip b::before{content:"";position:absolute;top:0;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#ff4d4f;box-shadow:0 0 8px rgba(255,77,79,.9);animation:stripBlink 1.6s ease-in-out infinite}
+@keyframes stripBlink{0%,100%{box-shadow:0 0 4px rgba(255,77,79,.5);filter:brightness(.9)}50%{box-shadow:0 0 13px rgba(255,77,79,1),0 0 3px rgba(255,160,160,.9);filter:brightness(1.25)}}
 @media (prefers-reduced-motion:reduce){.vd-strip b::before{animation:none}}
 .vd-bars{display:flex;align-items:flex-end;gap:2px;height:24px}
 .vd-bars i{flex:1;min-width:0;border-radius:2px 2px 0 0;background:rgba(255,77,79,.3)}
