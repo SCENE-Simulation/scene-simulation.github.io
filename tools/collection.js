@@ -397,6 +397,29 @@
         + '<span>' + (n ? '저장하지 않은 변경이 ' + n + '건 있습니다. 저장하지 않고 페이지를 나가면 사라집니다.'
           : (savedAt ? '모든 기록이 저장되어 있습니다 · 마지막 저장 ' + when(savedAt) : '저장하지 않고 페이지를 나가면 바꾼 내용이 사라집니다.')) + '</span></div></div>';
     }
+    // ---------- 공유 카드 (tools/share.js SGShare.collection, 형식은 그 파일 drawCollection 위 주석) ----------
+    // 지금 화면 기록(저장 전 변경 포함). 멤버 카드는 멤버마다 한 묶음, 스페셜 한 묶음, 묶음(브로마이드 등)은 다음 줄. 공개 전(soon)은 뺀다
+    var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+    function shareCard(){
+      var c = counts(), o = owned(), main = cfg.modes[0], p = (cfg.ym || '').split('-');
+      function cd(i){ return { src: cfg.cards[i].img || '', n: c[i], land: !!cfg.cards[i].land }; }
+      function grp(name, color, ids){ return { name: name, color: color, cols: Math.min(ids.length, (cfg.members || []).length && cardsOf(0).length > 2 ? 2 : 8), cards: ids.map(cd) }; }
+      var row1 = (cfg.members || []).map(function(m, mi){ return grp(m.n, m.c, cardsOf(mi)); });
+      if (specials().length) row1.push(grp('스페셜', '#f6b93c', specials()));
+      row1 = row1.filter(function(g){ return g.cards.length; });
+      var gr = GROUPS.filter(function(g){ return groupIds(g.k).length; }).map(function(g){ return grp(g.n, g.c || '#f6b93c', groupIds(g.k)); });
+      // 카드가 적으면(10장 이하) 묶음도 같은 줄에 — 빈 자리 없이. 많으면 다음 줄
+      var nc = function(r){ return r.reduce(function(s, g){ return s + g.cards.length; }, 0); };
+      var rows = !gr.length ? [row1] : nc(row1) + nc(gr) <= 10 ? [row1.concat(gr)] : [row1, gr];
+      var pcN = cfg.cards.filter(function(x){ return !x.g; }).length;
+      var parts = ['포토카드 ' + pcN + '종'].concat(GROUPS.filter(function(g){ return groupIds(g.k).length; }).map(function(g){ return g.n + ' ' + groupIds(g.k).length + '종'; }));
+      var others = cfg.modes.slice(1).filter(function(m){ return m.k !== 'adj'; }).map(function(m){ return m.label + ' ' + ledger(m.k); }).join(' · ');
+      return { kind: '포카 컬렉션 북', title: cfg.title, sub: (p[1] ? p[0] + '년 ' + (+p[1]) + '월 출시 · ' : '') + parts.join(' · '), at: Date.now(), file: 'sendungi-' + cfg.id, hmax: 280,
+        stats: [{ k: '보유 종수', v: o + ' / ' + N, bar: o / N }, { k: main.label, v: won(ledger(main.k)) + '회', s: others },
+          { k: '누적 금액', v: won(money()) + '원', s: '모든 구매 합계' }, { k: '중복', v: Math.max(0, c.reduce(function(a, b){ return a + b; }, 0) - o) + '장', s: '여분 카드' }],
+        rows: rows,
+        ach: { got: ACHDEF.filter(function(a){ return ACH[a.id]; }).sort(function(a, b){ return (b.r || 1) - (a.r || 1); }).map(function(a){ return { n: a.n, c: a.c }; }), total: ACHDEF.length } };
+    }
     var state = { open: null, achAll: false, cols: null, price: {} };
     cfg.modes.forEach(function(m){ if (m['var']) state.price[m.k] = m.price || 0; });
 
@@ -405,7 +428,7 @@
       var crumbs = ['포카 컬렉션 북', cfg.year + ' 포카', cfg.title];
       el.innerHTML = '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>'
         + crumbs.map(function(c, i){ return (i ? '<span class="cr">›</span>' : '') + (i === crumbs.length - 1 ? '<span class="lt">' + esc(c) + '</span>' : esc(c)); }).join('')
-        + '</div></div>'
+        + '</div><button type="button" class="gs shr-btn" data-act="share" title="지금 수집 기록으로 이미지 카드 만들기">' + SHRI + '공유하기</button></div>'
         + (cfg.desc ? '<p class="sec-d">' + esc(cfg.desc) + '</p>' : '')
         + metaTiles() + toggles() + noteBar() + statTiles() + ledgerRow() + sumRow()
         + (compact() ? '' : '<div class="colbar"><span class="cb-k">카드 크기</span><span class="cb-s">크게</span>'
@@ -504,6 +527,7 @@
         if (a === 'save') save();
         else if (a === 'revert') revert();
         else if (a === 'achall') { state.achAll = !state.achAll; render(); }
+        else if (a === 'share') { if (window.SGShare) SGShare.collection(shareCard()); }
         else if (a === 'reset') {
           // 전체 초기화 (405빵과 같게): 초기화 줄 하나를 저장 전 변경으로 넣는다 → 저장된 기록 · 저장 전에 넣은 카드 모두 계산에서 빠지고(all),
           // 저장하면 그 앞 기록은 지워지고 로그엔 "전체 초기화" 한 줄만 남는다. 칭호도 비운다. 되돌리기를 누르면 저장된 상태로 돌아간다.

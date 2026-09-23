@@ -168,12 +168,12 @@
   // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
   // d = { kind: '포카 컬렉션 북', title, sub, at, file,
   //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
-  //       ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
+  //       hmax: 카드 최대 높이(기본 150 — 카드가 적은 도감은 크게), ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
   // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
   var PK = { pink: '#e96387', pinkT: '#f28aa7' };
   function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
-  function rowLayout(row, avail){
-    var CG = 8, GG = 22, HMAX = 150;
+  function rowLayout(row, avail, HMAX){
+    var CG = 8, GG = 22;
     var gs = row.map(function(g){
       var lines = [];
       for (var i = 0; i < g.cards.length; i += g.cols) lines.push(g.cards.slice(i, i + g.cols));
@@ -188,7 +188,7 @@
   }
   function drawCollection(d, imgs){
     var P = 48, AW = W - P * 2;
-    var rows = d.rows.map(function(r){ return rowLayout(r, AW); });
+    var rows = d.rows.map(function(r){ return rowLayout(r, AW, d.hmax || 150); });
     var CH0 = 380;                                                      // 머리 · 제목 · 숫자 칸 (카드 줄이 시작하는 높이)
     var HH = CH0 + rows.reduce(function(s, r){ return s + r.H + 26; }, 0) + (d.ach ? 60 : 0) + 76;
     var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
@@ -218,7 +218,9 @@
       rr(x, sx, SY, w, SH, 16); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill();
       x.strokeStyle = i ? C.line : 'rgba(233,99,135,.45)'; x.lineWidth = 1.5; x.stroke();
       font(x, 700, 19); x.fillStyle = C.ink3; x.fillText(s.k, sx + 22, SY + 36);
-      font(x, 700, i ? 40 : 48, MONO); x.fillStyle = C.ink; x.fillText(fit(x, s.v, w - 44), sx + 22, SY + (i ? 86 : 90));
+      var fs = i ? 40 : 48; font(x, 700, fs, MONO);                       // 칸에 안 들어가면 글자를 줄인다(자르지 않음)
+      while (fs > 24 && x.measureText(s.v).width > w - 44){ fs -= 2; font(x, 700, fs, MONO); }
+      x.fillStyle = C.ink; x.fillText(fit(x, s.v, w - 44), sx + 22, SY + (i ? 86 : 90));
       if (s.bar != null){
         var bx = sx + 22, by = SY + SH - 26, bw2 = w - 44;
         rr(x, bx, by, bw2, 10, 5); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill();
