@@ -46,6 +46,8 @@ rep('</body>',
   '<script>\n' + fs.readFileSync(__dirname + '/gacha.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/pages.js', 'utf8') + '\n</script>\n' +
   // 조회수 예측기: pages.js 가 만든 window.SG 에 페이지를 붙이므로 그 뒤, shell.js 앞에 온다
+  // share.js 는 공유 카드(그 순간 기준으로 고정된 PNG 이미지). views.js 가 그릴 때 window.SGShare 를 보므로 먼저
+  '<script>\n' + fs.readFileSync(__dirname + '/share.js', 'utf8') + '\n</script>\n' +
   // views-engine.js 는 예측 계산(수집기 collect-views.js 와 같이 씀), views.js 는 화면
   '<script>\n' + fs.readFileSync(__dirname + '/views-engine.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/views.js', 'utf8') + '\n</script>\n' +

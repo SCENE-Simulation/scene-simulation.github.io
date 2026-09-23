@@ -2031,3 +2031,30 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-oracle .og-cf button{padding:4px 9px;font-size:12px}
 #v-oracle .og-cf .og-yes{color:#fff;background:#d9434f;border-color:transparent!important}
 #v-oracle .og-cf .og-yes:hover:not(:disabled){background:#e85561}
+
+
+/* 공유 카드 (share.js): 영상 머리글의 [공유 카드] 버튼 · 이미지 미리보기 창 */
+.vd-ha{display:flex;align-items:center;gap:8px;flex:none}
+.vd-shr{background:var(--vg-soft);border-color:rgba(255,77,79,.4)!important;color:var(--vg-t)}
+.vd-shr:hover:not(:disabled){background:rgba(255,77,79,.24);color:#ffd2cf}
+.shr{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;padding:16px}
+.shr[hidden]{display:none}
+.shr-bg{position:absolute;inset:0;background:rgba(8,4,5,.72);backdrop-filter:blur(4px)}
+.shr-p{position:relative;width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:16px 18px 18px;border-radius:18px;
+  background:#1a1012;border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.shr-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.shr-h b{font-size:16px;color:var(--ink)}
+.shr-x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink2);cursor:pointer;font-size:14px}
+.shr-x:hover{color:var(--ink);background:rgba(255,255,255,.1)}
+.shr-im{position:relative;aspect-ratio:1200/720;border-radius:12px;overflow:hidden;background:#140b0d;border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center}
+.shr-im img{display:block;width:100%;height:100%}
+.shr-ld{font-size:13px;color:var(--ink2)}
+.shr-d{margin:12px 2px 0;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.shr-b{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.shr-b .gs{padding:9px 14px;font-size:13px}
+.shr-b .gs:disabled{opacity:.45;cursor:default}
+.shr-b .shr-go{background:#ff4d4f;border-color:#ff4d4f!important;color:#fff}
+.shr-b .shr-go:hover:not(:disabled){background:#ff6466;color:#fff}
+.shr-m{font-size:12.5px;color:#6fe0b3}
+html.shr-on{overflow:hidden}

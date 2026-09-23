@@ -1196,7 +1196,8 @@
     var link = DATA.demo ? '' : 'https://www.youtube.com/watch?v=' + encodeURIComponent(v.id);
     $('vd').innerHTML = '<div class="vd-hd"><div class="vd-ht"><div class="vd-hm"><span class="vp-st' + (s.live ? ' live' : '') + '">' + s.t + '</span>' + (TYPE[v.type] ? '<span class="vp-st">' + TYPE[v.type] + '</span>' : '') + msPill(v)
       + '<small class="vd-when">게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전</small></div><h3>' + esc(v.title) + '</h3></div>'
-      + (link ? '<a class="gs vd-yt" href="' + link + '" target="_blank" rel="noopener">YouTube에서 보기 ↗</a>' : '') + '</div>'
+      + '<div class="vd-ha">' + (window.SGShare ? '<button type="button" class="gs vd-shr" data-shr title="지금 기준으로 고정된 이미지 카드 만들기">' + SHRI + '공유 카드</button>' : '')
+      + (link ? '<a class="gs vd-yt" href="' + link + '" target="_blank" rel="noopener">YouTube에서 보기 ↗</a>' : '') + '</div></div>'
       + '<div class="vd-top">'
       + (link ? '<a class="vd-th" href="' + link + '" target="_blank" rel="noopener" aria-label="YouTube에서 보기">' : '<div class="vd-th">')
       + thumb(v) + '<span class="vd-play">' + PLAY + '</span>' + (link ? '</a>' : '</div>')
@@ -1230,6 +1231,36 @@
     if (late(v)) return m.far ? '' : '<span class="vp-ms" title="' + daysTxt(m.h / 24) + ' 안">' + fmtM(m.M) + ' 돌파 유력 · ' + msWeek(v, m.p.ms[0]) + '주 차</span>';
     return '<span class="vp-ms" title="' + (m.how === 'lt' ? '최근 추세 기준' : '종합 예측 곡선 기준') + '">' + fmtM(m.M) + ' 돌파 예상 · '
       + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</span>';
+  }
+
+  // ----- 공유 카드 (share.js 가 이미지로 그린다): 마지막 기록 기준으로 글자까지 만들어 넘긴다 -----
+  var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  function shareCard(v){
+    var a = age(v), V = av(v, a), L = at(v, a, 2), C = at(v, a, 3), m = milestone(v), ml = mlgRows(v), ms = nowMs(v);
+    var F = function(n){ return n >= 1e6 && n < 1e8 ? fmtM(n) : fmt(n); };           // 1105만 → 1,105만
+    var src = DATA.demo ? [] : ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', thumbSrc(v)];
+    return {
+      id: v.id, title: v.title, thumbs: src, hue: v.hue || 350, demo: !!DATA.demo, at: ms,
+      chips: [status(v).t].concat(TYPE[v.type] ? [TYPE[v.type]] : []),
+      when: '게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전',
+      views: full(V) + '회', sub: [L == null ? '좋아요 숨김' : '좋아요 ' + full(L), C == null ? '댓글 꺼짐' : '댓글 ' + full(C)].join('  ·  '),
+      boxes: TARGETS.map(function(tg, k){
+        var o = hz(v, k), r = o.pr ? o.pr[3] : null, b = { name: '게시 후 ' + tg.name, at: when(v.pub + tg.T * 3600e3) };
+        if (o.done && o.act == null) return Object.assign(b, { tag: '기록 없음', big: '—', note: '수집 전에 지난 시점' });
+        if (o.done){
+          var err = r ? (r.p - o.act) / o.act : null, hit = r && r.lo != null ? o.act >= r.lo && o.act <= r.hi : null;
+          return Object.assign(b, { tag: hit ? '✓ 예측 적중' : hit === false ? '범위 밖' : '지남', tone: hit ? 'hit' : hit === false ? 'miss' : '',
+            big: F(o.act), unit: '실제', note: r ? tg.from + ' 때 예측 ' + F(r.p) + ' · 오차 ' + signPct(err) : '예측 없음' });
+        }
+        if (!r) return Object.assign(b, { tag: '예측 불가', big: '—', note: o.err || '' });
+        return Object.assign(b, { tag: '예측', tone: 'pred', big: F(r.p), unit: '예상', note: r.lo != null ? '80% 범위 ' + (F(r.lo) === F(r.hi) ? fmtR(r.lo, r.hi) : F(r.lo) + ' ~ ' + F(r.hi)) : '범위는 과거 영상이 더 모이면' });
+      }),
+      ms: m.h == null ? { head: '다음 ' + fmtM(m.M), txt: '아직 돌파 시점을 예측할 수 없음' }
+        : { head: fmtM(m.M) + ' 돌파 ' + (m.far ? '멀었음' : '예상'),
+            txt: m.far ? '지금 추세로는 8주 넘게 걸릴 듯' : ddayAP(v, m.h) + ' · 약 ' + etaHM(m.h / 24) + ' 뒤',
+            how: m.how === 'lt' ? '③ 추세 곡선 기준' : '종합 예측 기준' },
+      last: ml && ml.rows[0] ? '최근 ' + fmtM(ml.rows[0].M) + ' 돌파 · ' + mlgWhen(v, ml.rows[0]) : ''
+    };
   }
 
   // ----- 100만 단위 달성 기록 (예측 현황 상자 맨 아래 토글) -----
@@ -1622,6 +1653,7 @@
   el.addEventListener('click', function(e){
     var mlg = e.target.closest('[data-mlg]');                 // 100만 단위 달성 기록 펼치기 · 접기 (영상을 바꿔도 유지)
     if (mlg){ MLGOPEN = !MLGOPEN; mlg.setAttribute('aria-expanded', String(MLGOPEN)); mlg.nextElementSibling.hidden = !MLGOPEN; return; }
+    if (e.target.closest('[data-shr]')){ if (sel && window.SGShare) SGShare.video(shareCard(sel)); return; }
     var fv = e.target.closest('[data-fav]');
     if (fv){ toggleFav(fv.getAttribute('data-fav')); return; }
     var jp = e.target.closest('[data-jump]');
