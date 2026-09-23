@@ -415,7 +415,7 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
 <div class="wrap">
 <p class="credit">MADE BY <b>비효율주의자</b> OF <b>여자 아이돌 컨텐츠 마이너갤러리</b></p>
 <h1><span class="sub">PHOTOCARD GACHA</span>포토카드 뽑기 시뮬레이터</h1>
-<p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종이, 5명 × 4종 = 20종, 여기에 스페셜 카드 7종을 더해 27종입니다.</p>
+<p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종씩 5명 × 4종 = 20종에, 스페셜 카드 7종을 더해 27종입니다.</p>
 
 <div class="tabs">
   <button id="tab-col" class="on">실물 컬렉션 북</button>
@@ -827,7 +827,7 @@ var ACHDEF=[
   {id:'money10', n:'어 형은 부자야',     d:'누적 지출 10만 원',              c:'#ecd25b', r:1, t:function(c){return c.money>=100000;}},
   {id:'nodup7',  n:'확률의 사도',        d:'빵 7개 연속 구매 중 중복 없음',   c:'#ecd25b', r:2, t:function(c){return c.nodup>=7;}},
   {id:'buy20',   n:'빵최몇',            d:'빵 20개 구매',                  c:'#ecd25b', r:3, t:function(c){return c.buy>=20;}},
-  {id:'moneyAvg',n:'가성비의 영역',      d:'누적 지출 262,500원',            c:'#ecd25b', r:3, t:function(c){return c.money>=262500;}},
+  {id:'moneyAvg',n:'가성비의 영역',      d:'누적 지출 262,500원(27종 평균 기대 비용)',            c:'#ecd25b', r:3, t:function(c){return c.money>=262500;}},
   {id:'buy30',   n:'당뇨병 주의',        d:'빵 30개 구매',                  c:'#ecd25b', r:4, t:function(c){return c.buy>=30;}},
   // 거래 및 커뮤니티
   {id:'us1',     n:'혹시... 당근?',      d:'중고 구매 첫 거래',              c:'#47d19a', r:1, t:function(c){return c.used>=1;}},
@@ -836,8 +836,8 @@ var ACHDEF=[
   {id:'tr5',     n:'교환의 고수',        d:'교환 5회',                      c:'#47d19a', r:2, t:function(c){return c.trade>=5;}},
   {id:'tr10',    n:'이 구역의 보부상',    d:'교환 10회',                     c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
   // 'us15' 는 예전 버전이 쓰던 키라 겹치지 않게 새 id를 쓴다
-  {id:'used15',  n:'평화로운 중고나라',   d:'중고 거래 누적 15회',            c:'#47d19a', r:4, t:function(c){return c.used>=15;}},
-  {id:'tr15',    n:'지역 환전 NPC',      d:'교환 누적 15회',                 c:'#47d19a', r:4, t:function(c){return c.trade>=15;}},
+  {id:'used15',  n:'평화로운 중고나라',   d:'중고 구매 15회',            c:'#47d19a', r:4, t:function(c){return c.used>=15;}},
+  {id:'tr15',    n:'지역 환전 NPC',      d:'교환 15회',                 c:'#47d19a', r:4, t:function(c){return c.trade>=15;}},
   // 히든 및 기믹 — 얻기 전에는 조건을 가린다
   {id:'dup6',    n:'또 너야?',           d:'같은 카드 6장',                  c:'#a080d0', r:5, t:function(c){return c.maxDup>=6;}},
   {id:'dup10',   n:'아 복사버그 ㅡㅡ',    d:'같은 카드 10장',                 c:'#a080d0', r:5, t:function(c){return c.maxDup>=10;}},
@@ -901,7 +901,7 @@ function holoPreview(){
   if(previewOn)return;
   previewOn=true;
   for(var i=0;i<N;i++) if(colTiles[i]) colTiles[i].el.classList.add('pv');
-  toast('홀로그램 미리보기', '10초 동안 전 카드가 5성으로 보입니다 · 기록은 변하지 않습니다');
+  toast('홀로그램 미리보기', '10초 동안 모든 카드가 홀로그램(5장 모은 모습)으로 보입니다 · 기록은 변하지 않습니다');
   setTimeout(function(){
     for(var i=0;i<N;i++) if(colTiles[i]) colTiles[i].el.classList.remove('pv');
     previewOn=false;
@@ -994,7 +994,7 @@ function cardBtn(i){
   var b=document.createElement('button'); b.type='button'; b.className='mcard'+(isLand(i)?' land':'');
   var im=document.createElement('img'); im.src=SRC[i]; im.alt=''; if(isPix(i))im.className='pix';
   var nm=document.createElement('div'); nm.className='cn'; nm.textContent=cardName(i);
-  var q=document.createElement('div'); q.className='cq'; q.textContent='x'+COL[i];
+  var q=document.createElement('div'); q.className='cq'; q.textContent='×'+COL[i];
   b.appendChild(im); b.appendChild(nm); b.appendChild(q);
   return b;
 }
@@ -1018,7 +1018,7 @@ function tradeFlow(getIdx,qty){
   qty=qty||1;
   function page1(){
     mTitle.textContent='교환 · 1단계 내준 카드';
-    mSub.textContent=fromTile?('받은 카드: '+cardName(getIdx)+(qty>1?' ×'+qty:'')+' · 내준 카드를 고르십시오.'):'교환으로 내준 카드를 고르십시오.';
+    mSub.textContent=fromTile?('받은 카드: '+cardName(getIdx)+(qty>1?' ×'+qty:'')+' · 내준 카드를 골라 주세요.'):'교환으로 내준 카드를 골라 주세요.';
     var act=modalAct([{cls:'m',fn:function(){ if(fromTile) done(); else page2(); }}])[0];
     mBody.innerHTML='';
     var dupK=0,dupC=0; for(var k=0;k<N;k++) if(COL[k]>1){ dupK++; dupC+=COL[k]-1; }
@@ -1029,7 +1029,7 @@ function tradeFlow(getIdx,qty){
     function upd(){
       bar.querySelector('.sel b').textContent=give.length;
       if(fromTile){ act.textContent='교환 완료'+(give.length?' ('+give.length+'/'+qty+')':''); act.disabled=false; }
-      else { act.textContent='교환 포카'+(give.length?' ('+give.length+')':'')+' →'; act.disabled=!give.length; }
+      else { act.textContent='다음: 받은 카드'+(give.length?' ('+give.length+')':'')+' →'; act.disabled=!give.length; }
     }
     var g=document.createElement('div'); g.className='mgrid tgrid';
     for(var i=0;i<N;i++)(function(i){
@@ -1110,14 +1110,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!mask.hidde
 
 function pickCard(kind,cb){
   mTitle.textContent=KNAME[kind]+' — 카드 선택';
-  mSub.textContent='어떤 카드를 얻으셨습니까?';
+  mSub.textContent='어떤 카드가 나왔나요?';
   var g=document.createElement('div'); g.className='mgrid';
   for(var i=0;i<N;i++){
     (function(i){
       var b=document.createElement('button'); b.className='mcard'+(isLand(i)?' land':'');
       var im=document.createElement('img'); im.src=SRC[i]; im.alt=''; if(isPix(i))im.className='pix';
       var nm=document.createElement('div'); nm.className='cn'; nm.textContent=(i+1)+'. '+CNAME[i];
-      var q=document.createElement('div'); q.className='cq'; q.textContent='x'+COL[i];
+      var q=document.createElement('div'); q.className='cq'; q.textContent='×'+COL[i];
       b.appendChild(im); b.appendChild(nm); b.appendChild(q);
       b.onclick=function(){modalClose();cb(i);};
       g.appendChild(b);
@@ -1129,7 +1129,7 @@ function pickCard(kind,cb){
 function pickSource(idx,mode,cb){
   var loss=(mode==='loss'), cap=loss?Math.max(1,COL[idx]):99, qty=1;
   mTitle.textContent=(idx+1)+'. '+CNAME[idx];
-  mSub.textContent=loss?'차감할 수량과 경로를 선택하십시오.':'수량을 정하고 경로를 선택하십시오.';
+  mSub.textContent=loss?'뺄 수량과 방법을 골라 주세요.':'수량을 정하고 얻은 방법을 골라 주세요.';
   mBody.innerHTML='';
 
   var q=document.createElement('div'); q.className='mqty';
@@ -1165,15 +1165,15 @@ function pickSource(idx,mode,cb){
 
   var wrap=document.createElement('div'); wrap.className='msrc';
   var opts=loss?[
-    {k:'buy',  t:'빵 구매 취소', s:'구매 횟수 −N · 금액도 차감', c:'p'},
-    {k:'trade',t:'교환 취소',    s:'교환 −N', c:'m'},
-    {k:'used', t:'중고 구매 취소', s:'중고 −N · 금액도 차감', c:'m'},
-    {k:'adj',  t:'수량만 조정',  s:'구매·금액 기록은 그대로, 카드 수량만 −N', c:''}
+    {k:'buy',  t:'빵 구매 취소', s:'구매 횟수 · 금액도 수량만큼 차감', c:'p'},
+    {k:'trade',t:'교환 취소',    s:'교환 기록도 수량만큼 차감', c:'m'},
+    {k:'used', t:'중고 구매 취소', s:'중고 기록 · 금액도 수량만큼 차감', c:'m'},
+    {k:'adj',  t:'수량만 조정',  s:'구매·금액 기록은 그대로, 카드 수량만 줄임', c:''}
   ]:[
-    {k:'buy',  t:'빵 구매',     s:'구매 횟수 +N · 장당 '+won(PRICE)+'원', c:'p'},
-    {k:'trade',t:'교환',        s:'교환 +N · 추가 비용 없음', c:'m'},
-    {k:'used', t:'중고 구매',   s:'중고 +N · 장당 <span class="upv">'+won(LG.uprice)+'</span>원', c:'m'},
-    {k:'adj',  t:'수량만 조정', s:'구매·금액 기록 없이 카드 수량만 +N', c:''}
+    {k:'buy',  t:'빵 구매',     s:'구매 횟수도 수량만큼 · 장당 '+won(PRICE)+'원', c:'p'},
+    {k:'trade',t:'교환',        s:'교환 기록도 수량만큼 · 추가 비용 없음', c:'m'},
+    {k:'used', t:'중고 구매',   s:'중고 기록도 수량만큼 · 장당 <span class="upv">'+won(LG.uprice)+'</span>원', c:'m'},
+    {k:'adj',  t:'수량만 조정', s:'구매·금액 기록 없이 카드 수량만 늘림', c:''}
   ];
   opts.forEach(function(o){
     var b=document.createElement('button'); if(o.c)b.className=o.c;

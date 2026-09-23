@@ -238,7 +238,7 @@
     if (ap && v && d){
       var t = aiAt(v, d.M), now = Date.now();
       ap.innerHTML = '<span class="og-aik"><i></i>예측기 예상</span>'
-        + (t == null ? '<small>기록이 더 쌓이면 계산합니다</small>' : t === 0 ? '<small>지금 추세로는 ' + V.fmtM(d.M) + '에 못 닿는다고 봅니다</small>'
+        + (t == null ? '<small>기록이 더 쌓이면 계산합니다</small>' : t === 0 ? '<small>지금 추세로는 ' + V.fmtM(d.M) + '에 닿기 어렵다고 봅니다</small>'
           : '<b>' + whenTxt(t) + '</b><small>' + (t > now ? '지금부터 ' + durTxt(t - now) + ' 뒤' : '곧') + '</small>');
     }
     var inp = c.querySelector('[data-og-in]'); if (!inp) return;
@@ -380,7 +380,7 @@
     if (j.st === 'wait' || j.st === 'done'){
       h += '<div class="og-aip"><span class="og-aik"><i></i>예측기 예상</span>'
         + (x.ai == null ? '<small>그때는 기록이 모자라 계산 전' + (j.st === 'done' ? ' — 대결 없음' : '') + '</small>'
-          : (x.ai === 0 ? '<b>못 닿는다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
+          : (x.ai === 0 ? '<b>닿기 어렵다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
             + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>'
               // 채점 기다림도 두 줄로 (같은 줄 카드끼리 높이가 같게): 남길 때 본 값 · 그때까지 남은 시간
               : '<small>남길 때 계산 · ' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
@@ -417,7 +417,7 @@
   function shareCard(x){
     var j = judge(x), v = j.v, now = Date.now();
     var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
-    var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '못 닿는다고 봄' : whenTxt(x.ai);
+    var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '닿기 어렵다고 봄' : whenTxt(x.ai);
     var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
       mine: [['등록 일시', whenTxt(x.at)], ['등록 시 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
     if (j.st === 'done'){

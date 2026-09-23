@@ -40,9 +40,9 @@
       ach: [
         { at: 1, n: '첫 야호',         d: '산 정상에서 외치는 첫 한마디', r: 2, c: '#c3ccd8' },
         { at: 2, n: '야호 메아리',     d: '한 번 외치면 두 번 돌아온다', r: 2, c: '#c3ccd8' },
-        { at: 3, n: '야호 중독자',    d: '반은 넘게 돌았다', r: 3, c: '#ecd25b' },
+        { at: 3, n: '야호 중독자',    d: '반 넘게 돌았다', r: 3, c: '#ecd25b' },
         { at: 4, n: '거제야-허',   d: '이제 한 곳만 남았다', r: 3, c: '#ecd25b' },
-        { at: 5, n: '야호야호야호야호야호', d: '거제 · 경주 · 수원 · 치바 · 고양 완주', r: 4, c: '#e2fff3' }
+        { at: 5, n: '야호야호야호야호야호', d: '거제·경주·수원·치바·고양 완주', r: 4, c: '#e2fff3' }
       ],
       cheer: '야-호!',
       items: [
@@ -175,7 +175,7 @@
     var spent = list.reduce(function(s, g){ return s + (GOWN[g.id] || 0) * (g.price || 0); }, 0);
     return '<div class="cmeta"><div class="mt"><span class="mk">등록 상품</span><b>' + list.length + '종</b><small>이 컬렉션에 나온 굿즈</small></div>'
       + '<div class="mt"><span class="mk">보유</span><b>' + own + '/' + list.length + '</b><small>가지고 있는 종류</small></div>'
-      + '<div class="mt"><span class="mk">쓴 금액</span><b>' + won(spent) + '원</b><small>보유 수량 × 가격</small></div></div>';
+      + '<div class="mt"><span class="mk">누적 금액</span><b>' + won(spent) + '원</b><small>보유 수량 × 가격</small></div></div>';
   }
 
   // ===== 각 페이지 =====
@@ -257,8 +257,8 @@
     var spent = c.items.reduce(function(a, g){ return a + (GOWN[g.id] || 0) * (g.price || 0); }, 0);
     var got = c.ach ? gAchDefs(c).filter(function(a){ return own >= a.at; }).sort(function(a, b){ return b.r - a.r; }) : null;
     return { kind: '굿즈 컬렉션 북', title: c.title, sub: (p[1] ? p[0] + '년 ' + (+p[1]) + '월 출시 · ' : '') + '굿즈 ' + N + '종', at: Date.now(), file: 'sendungi-' + c.id, hmax: 280,
-      stats: [{ k: '보유 종류', v: own + ' / ' + N, bar: N ? own / N : 0 }, { k: '보유 수량', v: cnt + '개', s: '같은 상품 여러 개 포함' },
-        { k: '쓴 금액', v: won(spent) + '원', s: '보유 수량 × 가격' }],
+      stats: [{ k: '보유 종수', v: own + ' / ' + N, bar: N ? own / N : 0 }, { k: '보유 수량', v: cnt + '개', s: '같은 상품 여러 개 포함' },
+        { k: '누적 금액', v: won(spent) + '원', s: '보유 수량 × 가격' }],
       rows: rows, ach: got ? { got: got.map(function(a){ return { n: a.n, c: a.c }; }), total: gAchDefs(c).length } : null };
   }
   function renderGoodsPage(c){
@@ -402,7 +402,7 @@
       } else if (key.indexOf('gd:') === 0) {
         var id = key.slice(3), f = null;
         goodsAll().forEach(function(x){ if (x.g.id === id) f = x; });
-        if (f) out.push({ key: key, type: 'gd', name: f.g.name, from: f.c.y + ' · ' + f.c.title, img: f.g.img, price: f.g.price, own: GOWN[id] || 0, tab: f.c.id });
+        if (f) out.push({ key: key, type: 'gd', name: f.g.name, from: f.c.y + '년 · ' + f.c.title, img: f.g.img, price: f.g.price, own: GOWN[id] || 0, tab: f.c.id });
       }
     });
     return out;
@@ -410,7 +410,7 @@
   function renderWish(){
     var items = wishItems();
     var h = sec('i-heart', ['위시리스트'], '하트를 누른 포토카드와 굿즈가 여기에 모입니다. 기록은 이 브라우저에 저장됩니다.');
-    [['포토카드', 'pc', '포토카드 도감이나 전체보기에서 하트를 누르면 여기에 담깁니다'],
+    [['포토카드', 'pc', '포카 컬렉션 북이나 전체보기에서 하트를 누르면 여기에 담깁니다'],
      ['굿즈', 'gd', '굿즈 페이지에서 하트를 누르면 여기에 담깁니다']].forEach(function(t){
       var list = items.filter(function(x){ return x.type === t[1]; });
       h += '<div class="sec sec2"><div class="sec-t">' + t[0] + '<span class="cnt">' + list.length + '</span></div></div>';
@@ -537,7 +537,7 @@
           + '<div class="meta"></div>'
           + '<p class="cdesc" title="' + esc(c.desc || '') + '">' + esc(c.desc || (c.N + '종 구성')) + '</p>'
           + '<div class="st2"></div>'
-          + '<span class="go">도감 열기 →</span>';
+          + '<span class="go">컬렉션 북 열기 →</span>';
         grid.insertBefore(card, grid.querySelector('.hc.soon'));                  // 준비 중 카드보다 앞에
       }
     });

@@ -207,7 +207,8 @@
         body: news.length ? '<div class="nws">' + news.map(function(a){
             return '<a class="nw" href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">'
               + '<span class="nw-x"><span class="nw-t">' + esc(a.title) + '</span>'
-              + '<span class="nw-m">' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span>'
+              // 종류 칩(기사 · 영상)은 엔진 도감(collection.js)과 같은 모양 — 405빵만 칩이 없던 것
+              + '<span class="nw-m"><i class="nw-k">' + esc(a.kind || '기사') + '</i>' + esc([a.src, a.date].filter(Boolean).join(' · ')) + '</span></span>'
               + '<svg><use href="#i-ext"/></svg></a>';
           }).join('') + '</div>' : '<div class="pk">' + soonBox('i-news', '관련 미디어 준비 중') + '</div>' }
     ];

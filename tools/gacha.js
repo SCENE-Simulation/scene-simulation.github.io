@@ -113,7 +113,7 @@
     });
     var sp = []; for (var i = d.mtotal; i < d.N; i++) sp.push(i);
     groups.push({ name: '스페셜', color: '#f5b23a', ids: sp, sp: true });
-    return { id: 'cu405', title: 'CU 리센느 405빵 콜라보', buy: '빵 1개', ready: '빵을 뜯어 보십시오',
+    return { id: 'cu405', title: 'CU 리센느 405빵 콜라보', buy: '빵 1개', ready: '빵을 뜯어 보세요',
       price: d.price, used: d.used, trade: true,
       names: d.names, src: d.src, cover: d.cover, coverCls: d.pix(d.N) ? 'pix' : '',
       land: d.land, pix: d.pix, groups: groups };
@@ -132,7 +132,7 @@
     var sp = ids(function(x){ return x == null; });
     if (sp.length) groups.push(groups.length ? { name: '스페셜', color: '#f5b23a', ids: sp, sp: true } : { name: '전체', color: '#f5b23a', ids: sp, all: true });
     if (!groups.length) groups.push({ name: '전체', color: '#f5b23a', ids: ids(function(){ return true; }), all: true });
-    return { id: c.id, title: c.title, buy: rnd.label, ready: '카드를 뽑아 보십시오',
+    return { id: c.id, title: c.title, buy: rnd.label, ready: '카드를 뽑아 보세요',
       price: rnd.price, used: used && used.price > 0 ? used.price : 0, trade: ms.some(function(m){ return m.k === 'trade'; }),
       names: sub(c.names), src: sub(c.src), cover: '', coverCls: '',
       land: P ? function(i){ return c.isLand(P[i]); } : c.isLand, pix: function(){ return false; }, groups: groups };
@@ -207,7 +207,7 @@
     +           '<div class="gprog-slots" id="gp-slots"></div>'
     +         '</div>'
     +         '<div class="stats" style="grid-template-columns:1fr 1fr">'
-    +           '<div class="st"><b id="s-e">0</b><span>예상 총비용(원) = 지금까지 + 남은 기대</span></div>'
+    +           '<div class="st"><b id="s-e">0</b><span>예상 총비용(원) = 지금까지 쓴 돈 + 남은 기대 비용</span></div>'
     +           '<div class="st"><b id="s-c">0</b><span id="s-cl">평균 대비(원)</span></div>'
     +         '</div>'
     +       '</div>'
@@ -303,7 +303,7 @@
     setImg(hero, i); heroEmpty(!G.src[i]);
     // 카드 아래 두 줄은 늘 같은 자리 · 같은 모양: 윗줄 상태(READY → 진행 중... → 다 모으면 컴플리트), 아랫줄 안내 그대로 (사용자 지정)
     var all = owned() === G.N;
-    tag.textContent = all ? '컴플리트' : '진행 중...'; tag.style.color = all ? '#4fd8c0' : '#f5b23a';
+    tag.textContent = all ? '컴플리트' : '진행 중…'; tag.style.color = all ? '#4fd8c0' : '#f5b23a';
     tag2.textContent = G.ready;
   }
   function flash(i){ var e = cells[i].el; e.classList.add('flash'); setTimeout(function(){ e.classList.remove('flash'); }, 280); }
@@ -373,7 +373,7 @@
       cells[i].el.classList.toggle('own', S.counts[i] > 0);
       cells[i].wrap.classList.toggle('own', S.counts[i] > 0);
       cells[i].slot.classList.toggle('on', S.counts[i] > 0);
-      if (S.counts[i] > 1){ cells[i].dup.style.display = ''; cells[i].dup.textContent = 'x' + S.counts[i]; }
+      if (S.counts[i] > 1){ cells[i].dup.style.display = ''; cells[i].dup.textContent = '×' + S.counts[i]; }
       else cells[i].dup.style.display = 'none';
     }
     progs.forEach(function(p){
@@ -452,7 +452,7 @@
     if (!m.length || dupCount() < 2){ $('rps').hidden = true; render(); return; }
     var cpu = (Math.random() * 3) | 0, out = $('rpsout'), head = '나 ' + HAND[me] + ' vs 상대 ' + HAND[cpu] + ' — ';
     if (me === cpu){
-      S.rpsD++; out.innerHTML = head + '<b>무승부.</b> 다시 내십시오. (비용 없음)';
+      S.rpsD++; out.innerHTML = head + '<b>무승부.</b> 다시 내세요. (비용 없음)';
       say('교환 가위바위보 — 무승부 (' + HAND[me] + ')');
     } else if ((me + 2) % 3 === cpu){
       S.rpsW++;
@@ -492,7 +492,7 @@
   $('btrade').onclick = function(){
     if (!missing().length || dupCount() < 2) return;
     $('rps').hidden = false;
-    $('rpsout').textContent = '가위·바위·보 중 하나를 내십시오.';
+    $('rpsout').textContent = '가위·바위·보 중 하나를 내세요.';
     rpsScore();
   };
   $('rpsclose').onclick = function(){ $('rps').hidden = true; };
@@ -755,7 +755,7 @@
     g2 += '</svg>';
 
     var txt;
-    if (done && pu) txt = '분홍 영역이 이번 결과보다 빨리 끝나는 경우입니다. 그 면적이 상위 ' + pctTxt(at(G.curve, p)) + '에 해당합니다.';
+    if (done && pu) txt = '분홍 영역이 이번 결과와 같거나 더 빨리 끝나는 경우입니다. 그 면적이 상위 ' + pctTxt(at(G.curve, p)) + '에 해당합니다.';
     else if (done) txt = '두 그래프는 뽑기만 해서 모을 때의 분포입니다. 이번 판은 교환·중고를 써서 뽑은 장수가 줄었습니다.';
     else if (p) txt = '분홍 점선은 지금 가진 ' + o + '종에서 이어서 뽑을 때, 가로축 장수까지 ' + N + '종을 다 모을 확률입니다.';
     else txt = '뽑기만 해서 ' + N + '종을 모을 때의 분포입니다. 평균은 약 ' + mean + '장, 절반은 ' + med + '장 안에 끝납니다.';
@@ -787,7 +787,7 @@
     var h = 230, L = 50, R = 14, T = 14, B = 34;
     function X(c){ return L + Math.min(c, xmax) / xmax * (w - L - R); }
     function Y(q){ return T + (1 - q) * (h - T - B); }
-    var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="전략별 총비용 누적분포">';
+    var s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="전략별 총비용 누적 분포">';
     for (var gg = 0; gg <= 1.001; gg += 0.25)
       s += '<line x1="' + L + '" x2="' + (w - R) + '" y1="' + Y(gg) + '" y2="' + Y(gg) + '" stroke="' + C.line + '"/>' + t(L - 7, Y(gg) + 4, Math.round(gg * 100) + '%', C.ink2, { a: 'end' });
     for (var c = 0; c <= xmax; c += stw){ var q = tickAt(X(c), w, R); s += t(q.x, h - B + 16, manwon(c), C.ink2, { a: q.a }); }
@@ -859,7 +859,7 @@
     }).join('');
     box.innerHTML = '<h3>완성 기록<span>최근 20회 · 표는 최근 10회</span></h3>'
       + '<p class="gnote">완성 ' + r.length + '회 · 평균 ' + Math.round(s / r.length) + '장 · 최소 ' + best + '장(상위 ' + pctTxt(at(G.curve, best)) + ')</p>'
-      + '<div class="atab-w"><table class="atab"><thead><tr><th>회차</th><th>장수</th><th>총비용</th><th>방식</th><th>총비용 기준</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<div class="atab-w"><table class="atab"><thead><tr><th>회차</th><th>장수</th><th>총비용</th><th>방식</th><th>순위(총비용 기준)</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
   // ---------- 뽑기 미니게임 ----------
@@ -1037,7 +1037,7 @@
     return { at: Date.now(), game: G.title, sub: N + '종 중 1장 · 한 번에 나올 확률 ' + pctTxt(1 / N) + ' · 평균 ' + N + '번', grade: { t: gr.t, c: gr.c },
       head: won(n) + '번 만에 나왔다!',
       text: n === 1 ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / N) + '의 행운입니다.'
-        : won(n) + '번 안에 나올 확률은 ' + pctTxt(within(n)) + '. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.',
+        : won(n) + '번 안에 나올 확률은 ' + pctTxt(within(n)) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.min(99, Math.round(within(n - 1) * 100)) + '명이 이보다 빨리 뽑았습니다.',
       target: cd(r.i),
       stats: [{ k: '쓴 돈', v: won(n * G.price) + '원', s: dCost > 0 ? '평균보다 ' + won(dCost) + '원 더' : dCost < 0 ? '평균보다 ' + won(-dCost) + '원 아낌' : '평균과 같음' },
         { k: '평균과 비교', v: diff > 0 ? '▲ ' + won(diff) + '번 빨리' : diff < 0 ? '▼ ' + won(-diff) + '번 늦게' : '딱 평균', s: '평균 ' + N + '번 · 절반은 ' + mgMedian() + '번 안에' },
@@ -1109,7 +1109,7 @@
       : '<span class="mg-grade mg-g0">' + (run ? '뽑는 중' : '도전 전') + '</span><b>' + (run ? '뽑는 중…' : '몇 번 만에 나올까요?') + '</b>';
     var text = r
       ? (n === 1 ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / G.N) + '의 행운입니다.'
-        : won(n) + '번 안에 나올 확률은 ' + pctTxt(q) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.')
+        : won(n) + '번 안에 나올 확률은 ' + pctTxt(q) + '입니다. 같은 카드를 노린 100명 중 약 ' + Math.min(99, Math.round(within(n - 1) * 100)) + '명이 이보다 빨리 뽑았습니다.')
       : run ? '목표 카드가 나오면 결과가 여기에 표시됩니다.'
       : '목표 카드를 고르고 뽑기 시작을 누르면 결과가 여기에 표시됩니다. 한 번에 나올 확률은 1/' + G.N
         + '이고, 평균 ' + G.N + '번 · 절반은 ' + mgMedian() + '번 안에 나옵니다.';
@@ -1122,8 +1122,8 @@
       '<div class="mg-rh">' + head + '</div><p class="mg-rs">' + text + '</p>'
       + '<div class="mg-chart">' + mgChart(n) + '</div>'
       + '<div class="mg-legend">' + legend + '</div>'
-      + '<p class="gnote mg-cap">막대 하나는 정확히 그 번째에 처음 나올 확률입니다. 색은 등급 구간'
-      + (r ? '이고, 진하게 칠한 막대가 이번 결과보다 빨리 나온 경우입니다.' : '입니다.') + '</p>'
+      + '<p class="gnote mg-cap">막대 하나는 딱 그 횟수 만에 처음 나올 확률입니다. 색은 등급 구간'
+      + (r ? '이고, 진하게 칠한 막대가 이번 결과와 같거나 더 빨리 나온 경우입니다.' : '입니다.') + '</p>'
       + '<div class="cmeta">' + mgTiles(r, n, cnt, top, topN) + '</div>'
       + '<div class="mg-strip" id="mg-strip">' + (r ? '' : '<em>목표 카드가 나오기까지 뽑힌 카드가 여기에 순서대로 나옵니다</em>') + '</div>'
       + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'

@@ -361,7 +361,7 @@
           + (por.length ? '<div class="cgrid">' + por.map(tile).join('') + '</div>' : '')
           + (lan.length ? '<div class="cgrid wide">' + lan.map(tile).join('') + '</div>' : '') + '</div>';
       }
-      (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), '같은 멤버 ' + cardsOf(mi).length + '종'); });
+      (cfg.members || []).forEach(function(m, mi){ h += section(m.n, m.c, cardsOf(mi), cardsOf(mi).length > 1 ? '같은 멤버 ' + cardsOf(mi).length + '종' : ''); });   // 멤버당 1장인 도감은 '같은 멤버 1종' 이 어색해 뺌
       h += section('스페셜', '#f6b93c', specials(), specials().length + '종');
       // 묶음(브로마이드 · 스페셜 굿즈): 묶음마다 새 줄. 컴팩트면 칸 수(--span)만큼 가로로 차지해 카드 크기가 멤버 칸과 같다
       function soonTile(x){

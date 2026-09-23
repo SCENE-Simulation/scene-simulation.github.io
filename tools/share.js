@@ -493,7 +493,7 @@
       var cb = box.querySelector('[data-sha="copy"]');
       navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
         cb.textContent = '✓ 복사됨'; msg('클립보드에 복사했습니다 · 게시글에 붙여 넣기(Ctrl+V)');
-      }, function(){ cb.hidden = true; msg('이 브라우저에서는 클립보드에 넣지 못했어요 · 저장해서 올려 주세요', true); });
+      }, function(){ cb.hidden = true; msg('이 브라우저에서는 클립보드에 넣지 못했습니다 · 저장해서 올려 주세요', true); });
     } else if (k === 'save'){
       var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       msg('저장했습니다');
@@ -504,6 +504,8 @@
     var img = box.querySelector('.shr-im img'), ld = box.querySelector('.shr-ld'), cb = box.querySelector('[data-sha="copy"]');
     img.hidden = true; ld.hidden = false; ld.textContent = '이미지를 만드는 중…'; blob = null; msg('');
     cb.hidden = !CAN_COPY; cb.textContent = '클립보드에 복사';
+    // 복사 버튼이 없는 브라우저에서는 붙여 넣기(Ctrl+V) 안내를 빼고 저장만 안내
+    box.querySelector('.shr-d').textContent = '지금 기록 기준으로 고정된 이미지입니다. ' + (CAN_COPY ? '복사해서 게시글에 붙여 넣거나(Ctrl+V), 저장해서 사진으로 첨부해 주세요.' : '저장해서 게시글에 사진으로 첨부해 주세요.');
     Array.prototype.forEach.call(box.querySelectorAll('[data-sha]'), function(b){ b.disabled = true; });
     if (url){ URL.revokeObjectURL(url); url = null; }
     name = fname;
