@@ -762,9 +762,12 @@ body.has-sfloat #totop{bottom:84px}
 #hero[hidden]{display:none}
 /*   자리표시자는 READY 상자(#stage) 폭을 다 쓰고, 아래 READY 글자 위까지 높이를 채운다 (상자가 오른쪽 칸 높이만큼 길어서) */
 #stage{display:flex;flex-direction:column}
-.gph{width:100%;flex:1 1 auto;min-height:176px;box-sizing:border-box;padding:5px;border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
+.gph{width:100%;aspect-ratio:5/8;flex:none;box-sizing:border-box;padding:5px;border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
 .gph[hidden]{display:none}
-@media (max-width:640px){.gph{width:132px;height:176px;flex:none;margin:0 auto}}   /* 휴대폰은 상자가 한 줄 전체라 카드 모양 그대로 가운데 */
+#stage > #hero{width:100%;height:auto;aspect-ratio:5/8}                      /* 뽑은 카드도 자리표시자와 같은 크기 */
+#stage .gtx{margin-top:auto;padding-top:10px}                                 /* READY · 안내 두 줄은 상자 맨 아래에 늘 */
+#stage .gtx .tag{margin-top:0}
+@media (max-width:640px){.gph,#stage > #hero{width:132px;margin:0 auto}}   /* 휴대폰은 상자가 한 줄 전체라 카드 모양 그대로 가운데 */
 .gph-in{height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--line2);background:var(--cell);color:var(--dim)}
 .gph-in svg{width:30px;height:30px}
 #hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}
@@ -1412,7 +1415,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-r{position:relative;isolation:isolate}
 .mb-bg{position:absolute;top:0;bottom:0;left:calc(var(--thw) - 30px);right:0;z-index:-1;pointer-events:none;
   background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) center/cover no-repeat;
-  filter:blur(18px) saturate(1.3) brightness(.6);opacity:.4;transform:scaleY(1.3);
+  filter:blur(3px) saturate(1.2) brightness(.55);opacity:.5;transform:scaleY(1.06);   /* 흐림을 줄여 뒤 썸네일 모양이 살짝 보이게 */
   -webkit-mask-image:linear-gradient(90deg,#000 30px,rgba(0,0,0,.55) 45%,transparent);mask-image:linear-gradient(90deg,#000 30px,rgba(0,0,0,.55) 45%,transparent)}
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
