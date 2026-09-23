@@ -182,7 +182,7 @@ async function main(){
     const P = VE.msPlan(vs, a, 1);
     if (!P) continue;
     const m0 = P.ms[0];
-    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), g: Math.round(P.g), k: Math.round(P.k * 100) / 100, r: Math.round(P.r * 1000) / 1000, src: P.src,
+    raw.ms.push({ M: M, t: r2(a), v: Math.round(cur), g: Math.round(P.g), k: Math.round(P.k * 100) / 100, r: Math.round(P.r * 1000) / 1000, src: P.src, w: P.w == null ? undefined : Math.round(P.w * 100) / 100,
       e: m0.days == null ? null : r2(a + m0.days * 24), w: m0.week });
     log.ms++;
   }

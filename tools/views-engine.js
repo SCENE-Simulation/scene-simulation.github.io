@@ -114,26 +114,29 @@
   //   g:  최근 하루(24시간) 증가 (기록이 하루가 안 되면 있는 만큼으로 하루치 환산, 3시간 이상일 때)
   //   d0: 지금 영상 나이(일, 0.5 이상). i일 뒤 하루 증가 = g × (d0 ÷ (d0 + i))^k  — 나이에 반비례하는 거듭제곱 감쇠
   //   k:  감쇠 지수. 최근 최대 7일을 앞·뒤 반으로 나눠 하루 증가 비율과 두 반쪽의 나이 비율에서 잰다 (기록 2일 이상, KMIN ~ KMAX).
-  //       오래된 영상은 두 반쪽의 나이 차이가 작아 잘 안 잡히므로 그만큼 기본값 K0 로 기운다. 기록이 모자라면 K0 (src 'flat')
+  //       잰 값은 믿을 만한 만큼만 쓰고 나머지는 기본값 K0 로 기운다 — w = (두 반쪽 나이 차이 ÷ 0.25, 1 까지) × (잰 기록 일수 ÷ 7, 1 까지):
+  //         오래된 영상은 두 반쪽의 나이 차이가 작아 잘 안 잡히고, 기록이 짧으면 명절 · 화제 같은 일시적인 흐름이 그대로 k 가 되기 쉽다.
+  //       KMIN = 1: 하루 증가가 1/나이보다 느리게 줄지는 않는다고 본다 (k < 1 이면 곡선이 수렴하지 않고 끝없이 오름). 기록이 모자라면 K0 (src 'flat')
   //   n일 뒤 누적 = V + g·d0/(k−1) × (1 − (d0/(d0+n))^(k−1))    (k = 1 이면 V + g·d0·ln((d0+n)/d0))
   //       k > 1 이면 V + g·d0/(k−1) 로 수렴한다
   //   r:  화면 표시용 — 내일 하루 증가가 오늘의 몇 배인지, (d0/(d0+1))^k
   var LATE = 720, MSTEP = 1e6, WEEKS = 8;          // LATE: 30일 예측이 끝난(게시 720시간) 영상은 상세 화면을 100만 단위 모드로 (목록 · 채점은 나이와 상관없음)
-  var K0 = 1.3, KMIN = 0.6, KMAX = 2.5;
+  var K0 = 1.3, KMIN = 1, KMAX = 2.5, KDAYS = 7;
   // vs: 조회수만 담은 기록 { snaps: [[h, 조회수], ...] }. h0~h1 사이 하루 평균 증가
   function perDay(vs, h0, h1){ var x0 = at(vs, h0, 1), x1 = at(vs, h1, 1); return x0 == null || x1 == null || h1 - h0 < 1 ? null : (x1 - x0) / (h1 - h0) * 24; }
   function daily(vs, a){
-    var s = since(vs), r0 = Math.max(s, a - 24), g = perDay(vs, r0, a), k = K0, src = 'flat', d0 = Math.max(0.5, a / 24);
+    var s = since(vs), r0 = Math.max(s, a - 24), g = perDay(vs, r0, a), k = K0, src = 'flat', w = 0, d0 = Math.max(0.5, a / 24);
     if (!(g > 0) || a - r0 < 3) return null;                         // 최근 기록이 3시간은 있어야
     var w0 = Math.max(s, a - 168);
     if (a - w0 >= 48){
       var mid = (w0 + a) / 2, g0 = perDay(vs, w0, mid), g1 = perDay(vs, mid, a), m0 = (w0 + mid) / 48, m1 = (mid + a) / 48;   // m0·m1: 두 반쪽의 가운데 나이(일)
       if (g0 > 0 && g1 > 0 && m1 > m0){
-        var lr = Math.log(m1 / m0), ke = Math.max(KMIN, Math.min(KMAX, Math.log(g0 / g1) / lr)), w = Math.min(1, lr / 0.25);
+        var lr = Math.log(m1 / m0), ke = Math.max(KMIN, Math.min(KMAX, Math.log(g0 / g1) / lr));
+        w = Math.min(1, lr / 0.25) * Math.min(1, (a - w0) / 24 / KDAYS);
         k = w * ke + (1 - w) * K0; src = 'data';
       }
     }
-    return { g: g, k: k, d0: d0, r: Math.pow(d0 / (d0 + 1), k), src: src, days: (a - s) / 24 };
+    return { g: g, k: k, d0: d0, r: Math.pow(d0 / (d0 + 1), k), src: src, w: w, days: (a - s) / 24 };
   }
   // P = { V, g, k, d0 } 로 지금부터 n일 뒤 누적
   function dayProject(P, n){
@@ -155,7 +158,7 @@
   // wk: 1~8주 뒤 예상 누적. 돌려주는 객체는 dayProject/daysTo 의 P 로 그대로 쓴다
   function msPlan(vs, a, n){
     var V = at(vs, a, 1), T = daily(vs, a); if (V == null || !T) return null;
-    var P = { V: V, g: T.g, k: T.k, d0: T.d0, r: T.r, src: T.src, days: T.days, ms: [], wk: [] }, M = (Math.floor(V / MSTEP) + 1) * MSTEP;
+    var P = { V: V, g: T.g, k: T.k, d0: T.d0, r: T.r, src: T.src, w: T.w, days: T.days, ms: [], wk: [] }, M = (Math.floor(V / MSTEP) + 1) * MSTEP;
     for (var i = 0; i < (n || 3); i++, M += MSTEP){
       var d = daysTo(P, M);
       P.ms.push({ M: M, days: d, week: d == null ? null : Math.max(1, Math.ceil(d / 7)) });
@@ -182,7 +185,7 @@
 
   var E = { TARGETS: TARGETS, MINPOOL: MINPOOL, EARLY: EARLY, q: q, mean: mean, at: at, age: age, since: since, m3From: m3From,
     poolFor: poolFor, METHODS: METHODS, predictAll: predictAll,
-    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, K0: K0, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely,
+    LATE: LATE, MSTEP: MSTEP, WEEKS: WEEKS, K0: K0, KMIN: KMIN, KDAYS: KDAYS, daily: daily, dayProject: dayProject, daysTo: daysTo, msPlan: msPlan, likely: likely,
     SEGK: SEGK, KSPAN: KSPAN, FAR: FAR, segPredict: segPredict };
   if (typeof module === 'object' && module.exports) module.exports = E; else root.VE = E;
 })(this);
