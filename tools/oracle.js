@@ -397,12 +397,33 @@
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
     else if (j.st === 'void') h += '<small>예측을 남기기 전(마지막 기록과 남긴 때 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
     else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
-    h += '</div><div class="og-lf">';
+    h += '</div><div class="og-lf">' + (window.SGShare ? '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>' : '');
     // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
     if (DELK === x.k) h += '<span class="og-cf"><small>이 예측을 지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
       + '<button type="button" class="og-no" data-og-no>취소</button></span>';
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
     return h + '</div></article>';
+  }
+  // 기록 카드 [공유하기] → 공유 카드 이미지 (tools/share.js SGShare.oracle). 누른 때 기준으로 고정
+  var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  var GC = { god: '#f0c75e', seer: '#cdb9ff', hit: '#6fe0b3', ok: '#8cc8f5', meh: '#aeaeb2', miss: '#8e8e93' };   // 등급 색 (theme.css #v-oracle [data-g])
+  function shareCard(x){
+    var j = judge(x), v = j.v, now = Date.now();
+    var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
+    var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '못 닿는다고 봄' : whenTxt(x.ai);
+    var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
+      mine: [['남긴 때', whenTxt(x.at)], ['그때 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
+    if (j.st === 'done'){
+      d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k], actual: actual(j.c),
+        err: Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측' };
+      d.ai = { when: ai, res: x.ai == null ? '대결 없음' : '정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '내가 이김' : j.win < 0 ? '예측기가 이김' : '무승부') };
+    } else if (j.st === 'wait'){
+      var left = x.g - now;
+      d.wait = { now: V.fmtM(j.now), goal: V.fmtM(x.M), f: Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), over: left <= 0,
+        left: left > 0 ? durTxt(left) + ' 남음' : durTxt(-left) + ' 지났는데 아직 못 넘음' };
+      d.ai = { when: ai };
+    } else d.note = j.st === 'void' ? '예측을 남기기 전에 이미 넘어서 채점하지 않습니다 · 실제 ' + actual(j.c) : '이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다';
+    return d;
   }
   // 카운트다운 LED 숫자 (채점 기다림 카드) — 사용자 요청 "점(LED, 노랑) 숫자 시계", 꾸밈(시한폭탄 판 · 전선)은 빼고 숫자만
   //   5×7 점 글자(도트 매트릭스)로 [일] : 시 : 분 : 초. 꺼진 점도 희미하게 보인다
@@ -490,6 +511,11 @@
       V.toggleFav(fid); delete DRAFT[fid];
       if (window.toastSG && fv) window.toastSG('즐겨찾기에서 뺐습니다', esc(fv.title) + ' · 남긴 예측 기록은 그대로입니다');
       renderCards(); return;
+    }
+    if ((t = e.target.closest('[data-og-shr]'))){
+      var sx = LOG.filter(function(y){ return y.k === t.getAttribute('data-og-shr'); })[0];
+      if (sx && window.SGShare) SGShare.oracle(shareCard(sx));
+      return;
     }
     if ((t = e.target.closest('[data-og-del]'))){ DELK = t.getAttribute('data-og-del'); tick(); return; }
     if (e.target.closest('[data-og-no]')){ DELK = null; tick(); return; }

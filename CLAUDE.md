@@ -83,6 +83,7 @@ node tools/build.js tools/source.html index.html
   제목 줄 오른쪽 [공유하기]: 405빵은 `data-shr405`(build.js) → source.html `SG405.share()`, 엔진 도감(HOLLYS · 나랑드 · 도미노 …)은 collection.js `shareCard()`(`data-act="share"`, 새 도감도 자동).
   지금 화면 기록(저장 전 변경 포함)을 넘긴다. 엔진 도감은 카드가 10장 이하면 묶음(브로마이드 등)도 한 줄.
   굿즈는 pages.js `gShareCard(c)`(`data-gshr`, 상품이 있는 컬렉션만 버튼 — 더현대는 상품이 생기면 자동) · 카드 비율은 GCOLS `ratio`(없으면 4:3)
+  예측의 신 "내 예측 기록" 카드마다 왼쪽 아래 [공유하기](`data-og-shr`) → oracle.js `shareCard(x)` → `SGShare.oracle`(보라 + 금색: 내 예측 · 남긴 기록 3칸, 채점 끝 = 정확도 · 등급 · 실제 · 예측기 대결, 기다림 = 조회수 진행 · 남은 시간)
 - `tools/oracle.js` — **예측의 신** 페이지(`?tab=oracle`, 장난감 맨 아래 · 색은 보라 + 금색, 변수 `#v-oracle{--og…}`).
   즐겨찾기한 영상이 다음 세 100만 단위를 넘을 때를 이용자가 골라 남기면, 실제로 넘은 때(100만 단위 달성 기록과 같은 계산)로 채점한다.
   정확도 = 1 − |고른 때 − 실제| ÷ (실제 − 남긴 때), 등급 예측의 신 97% · 예언자 90% · 족집게 75%(= 적중) · 감 좋음 50% · 아슬아슬 25% · 빗나감.

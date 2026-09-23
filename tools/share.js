@@ -294,6 +294,97 @@
   }
   function loadAll(list){ return Promise.all(list.map(function(s){ return s ? loadImg([s]) : Promise.resolve(null); })); }
 
+  // ---------- 예측의 신 카드 (내 예측 기록 하나) ----------
+  // d = { at, title, thumbs, hue, M: '1,100만 돌파', st: 'wait'|'done'|'void'|'gone', guess: 내 예측(글), mine: [[이름, 값] × 3],
+  //       done: { acc, grade, gc: 등급 색, actual, err } | null, wait: { now, goal, f: 0~1, left, over } | null,
+  //       ai: { when, res } | null, note: 채점 못 할 때 글 }
+  var OG = { p: '#a98bff', pt: '#cdb9ff', au: '#f0c75e', mint: '#6fe0b3' };
+  function drawOracle(d, im){
+    var P = 48, AW = W - P * 2, HH = 790;
+    var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
+    var x = cv.getContext('2d'); x.scale(SC, SC);
+    x.fillStyle = '#130f1b'; x.fillRect(0, 0, W, HH);
+    var g = x.createRadialGradient(W * .9, -40, 10, W * .9, -40, 640); g.addColorStop(0, 'rgba(169,139,255,.32)'); g.addColorStop(1, 'rgba(169,139,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);
+    g = x.createRadialGradient(-60, HH + 60, 10, -60, HH + 60, 600); g.addColorStop(0, 'rgba(240,199,94,.14)'); g.addColorStop(1, 'rgba(240,199,94,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);
+    g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, OG.p); g.addColorStop(1, OG.au);
+    x.fillStyle = g; x.fillRect(0, 0, W, 6);
+
+    // 머리
+    font(x, 800, 28); x.fillStyle = C.ink; x.fillText('센둥이 시뮬레이터', P, 70);
+    var bw = x.measureText('센둥이 시뮬레이터').width;
+    font(x, 600, 22); x.fillStyle = OG.pt; x.fillText('·  예측의 신', P + bw + 14, 69);
+    font(x, 500, 20, MONO); x.fillStyle = C.ink2; x.textAlign = 'right'; x.fillText(stamp(d.at) + ' 기준', W - P, 68); x.textAlign = 'left';
+
+    // 썸네일 · 제목 · 결과(정확도 · 등급 또는 상태)
+    var TX = P, TY = 100, TW = 400, TH = 225;
+    x.save(); rr(x, TX, TY, TW, TH, 16); x.clip();
+    if (im) cover(x, im, TX, TY, TW, TH);
+    else { g = x.createLinearGradient(TX, TY, TX + TW, TY + TH); g.addColorStop(0, 'hsl(' + d.hue + ' 55% 34%)'); g.addColorStop(1, 'hsl(' + (d.hue + 50) + ' 60% 16%)'); x.fillStyle = g; x.fillRect(TX, TY, TW, TH); }
+    x.restore();
+    rr(x, TX + .5, TY + .5, TW - 1, TH - 1, 16); x.strokeStyle = 'rgba(255,255,255,.14)'; x.lineWidth = 1; x.stroke();
+    var RX = TX + TW + 34, RW = W - P - RX;
+    pill(x, RX, TY, d.M + ' 예측', OG.au, 'rgba(240,199,94,.12)', 'rgba(240,199,94,.5)', 18);
+    font(x, 800, 32); x.fillStyle = C.ink;
+    var tl = wrap(x, d.title, RW, 2); tl.forEach(function(l, i){ x.fillText(l, RX, TY + 84 + i * 42); });
+    var ry = TY + TH - 6;
+    if (d.done){
+      font(x, 800, 76, MONO); x.fillStyle = d.done.gc; x.fillText(d.done.acc, RX, ry);
+      var aw = x.measureText(d.done.acc).width;
+      font(x, 700, 20); x.fillStyle = C.ink3; x.fillText('정확도', RX + aw + 16, ry - 44);
+      pill(x, RX + aw + 16, ry - 34, d.done.grade, d.done.gc, 'rgba(255,255,255,.05)', d.done.gc, 20);
+    } else {
+      font(x, 800, 30); x.fillStyle = d.st === 'wait' ? OG.pt : C.ink3;
+      x.fillText(d.st === 'wait' ? '채점 기다리는 중' : '채점하지 않음', RX, ry - 8);
+    }
+
+    // 내 예측 (보라 상자): 고른 때를 크게, 아래에 남긴 기록 3칸
+    var MY = TY + TH + 26, MH = 162;
+    rr(x, P, MY, AW, MH, 18); x.fillStyle = 'rgba(169,139,255,.1)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.45)'; x.lineWidth = 1.5; x.stroke();
+    font(x, 800, 21); x.fillStyle = OG.pt; x.fillText('내 예측', P + 26, MY + 42);
+    var kw = x.measureText('내 예측').width;
+    font(x, 800, 38); x.fillStyle = C.ink; x.fillText(fit(x, d.guess, AW - kw - 70), P + 26 + kw + 20, MY + 46);
+    var cw = (AW - 52) / d.mine.length;
+    d.mine.forEach(function(r, i){
+      var cx = P + 26 + i * cw;
+      font(x, 600, 18); x.fillStyle = C.ink3; x.fillText(r[0], cx, MY + 98);
+      font(x, 700, 23); x.fillStyle = C.ink; x.fillText(fit(x, r[1], cw - 20), cx, MY + 132);
+    });
+
+    // 결과 줄: 채점 끝 = 실제 | 예측기 / 기다림 = 조회수 진행 | 남은 시간 · 예측기 / 그 밖 = 안내 한 줄
+    var BY = MY + MH + 18, BH = 172, GAP = 16, BW = (AW - GAP) / 2;
+    function box(bx, col, k, big, s1, s2, f){
+      rr(x, bx, BY, BW, BH, 18); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke();
+      x.fillStyle = col; x.beginPath(); x.arc(bx + 32, BY + 36, 6, 0, Math.PI * 2); x.fill();
+      font(x, 700, 20); x.fillStyle = C.ink2; x.fillText(k, bx + 46, BY + 43);
+      var fs = 30; font(x, 800, fs); while (fs > 20 && x.measureText(big).width > BW - 52){ fs -= 2; font(x, 800, fs); }
+      x.fillStyle = C.ink; x.fillText(fit(x, big, BW - 52), bx + 26, BY + 92);
+      if (f != null){
+        rr(x, bx + 26, BY + 112, BW - 52, 10, 5); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill();
+        if (f > 0){ rr(x, bx + 26, BY + 112, Math.max(10, (BW - 52) * Math.min(1, f)), 10, 5); x.fillStyle = col; x.fill(); }
+      }
+      font(x, 500, 19); x.fillStyle = C.ink2;
+      if (s1) x.fillText(fit(x, s1, BW - 52), bx + 26, BY + (f != null ? 152 : 128));
+      if (s2) x.fillText(fit(x, s2, BW - 52), bx + 26, BY + 156);
+    }
+    if (d.done){
+      box(P, OG.mint, '실제로 넘은 때', d.done.actual, d.done.err);
+      box(P + BW + GAP, OG.mint, '조회수 예측기 예상', d.ai ? d.ai.when : '—', d.ai ? d.ai.res : '');
+    } else if (d.wait){
+      box(P, OG.au, '지금 조회수', d.wait.now + ' → ' + d.wait.goal, Math.round(d.wait.f * 100) + '% 왔어요', null, d.wait.f);
+      box(P + BW + GAP, d.wait.over ? '#ff6b6b' : OG.p, d.wait.over ? '예측한 때가 지났어요' : '예측한 때까지', d.wait.left, d.ai ? '조회수 예측기 예상 · ' + d.ai.when : '');
+    } else {
+      rr(x, P, BY, AW, 90, 18); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke();
+      font(x, 500, 20); x.fillStyle = C.ink2; x.fillText(fit(x, d.note || '', AW - 52), P + 26, BY + 52);
+    }
+
+    // 발
+    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText('정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)', P, HH - 30);
+    font(x, 700, 20, MONO); x.fillStyle = OG.pt; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
+    return cv;
+  }
+
   // ---------- 미리보기 창 ----------
   // 이미지를 다 그리면 고를 수 있게 버튼을 켠다: [클립보드에 복사](되는 브라우저만) · [이미지 저장] · [공유…](되는 곳만 — 휴대폰 공유 시트)
   // 바로 복사하지 않는다 — 디시 앱(모바일)은 클립보드 붙여 넣기를 받지 않아 저장 · 공유가 필요하다
@@ -365,6 +456,14 @@
         .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 ✦';
       open(function(){ return loadAll(cards.map(function(c){ return c.src; })).then(function(ims){ return drawCollection(d, ims); }); },
         (d.file || 'sendungi-collection') + '-' + fileStamp(d.at) + '.png', text);
+    },
+    // 예측의 신 기록 카드 하나 (형식은 drawOracle 위 주석, 글자는 oracle.js shareCard 가 만든다)
+    oracle: function(d){
+      var text = [d.title, d.M, d.guess, d.note || ''].concat(d.mine.map(function(r){ return r.join(''); }))
+        .concat(d.done ? [d.done.acc, d.done.grade, d.done.actual, d.done.err] : []).concat(d.wait ? [d.wait.now, d.wait.goal, d.wait.left] : [])
+        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)';
+      open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
+        'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
     }
   };
 })();
