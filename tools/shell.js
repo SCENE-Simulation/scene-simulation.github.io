@@ -7,7 +7,7 @@
   // 값 = 'hot' 또는 'new'
   var TAGS = {
     cu405: 'hot',
-    views: 'new',
+    views: 'hot',
     oracle: 'new'
   };
   document.querySelectorAll('.sb .nv.sub[data-tab]').forEach(function(a){
