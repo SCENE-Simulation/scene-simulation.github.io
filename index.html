@@ -5936,11 +5936,11 @@ goTab(true,true);
   GCOLS.forEach(function(c){ elGd[c.id] = page('v-' + c.id); });
   var elAllCards = page('v-allcards'), elAllGoods = page('v-allgoods'), elWish = page('v-wish');
 
-  function sec(icon, crumbs, desc){
+  function sec(icon, crumbs, desc, right){
     var t = crumbs.map(function(c, i){
       return (i ? '<span class="cr">›</span>' : '') + (i === crumbs.length - 1 ? '<span class="lt">' + esc(c) + '</span>' : esc(c));
     }).join('');
-    return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>' + t + '</div></div>'
+    return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg>' + t + '</div>' + (right || '') + '</div>'
       + (desc ? '<p class="sec-d">' + desc + '</p>' : '');
   }
   function empty(icon, text, sub){
@@ -6068,8 +6068,27 @@ goTab(true,true);
     document.body.appendChild(box);
     setTimeout(function(){ if (box.parentNode) box.parentNode.removeChild(box); }, 2700);
   }
+  // ===== 공유 카드 (tools/share.js SGShare.collection, 형식은 그 파일 drawCollection 위 주석) =====
+  // 제목 줄 오른쪽 [공유하기] — 상품이 있는 컬렉션만. 지금 보유 수량 기준. 상품이 10종 이하면 상품마다 한 칸(이름 · 가짐 여부), 많으면 한 묶음
+  var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  function gShareBtn(c){
+    return c.items.length ? '<button type="button" class="gs shr-btn" data-gshr="' + esc(c.id) + '" title="지금 보유 기록으로 이미지 카드 만들기">' + SHRI + '공유하기</button>' : '';
+  }
+  function gShareCard(c){
+    var r = c.ratio ? c.ratio[0] / c.ratio[1] : 4 / 3, p = (c.ym || '').split('-'), N = c.items.length, own = gOwnKinds(c);
+    function cd(g){ return { src: g.img || '', n: GOWN[g.id] || 0, r: r }; }
+    var rows = N <= 10 ? [c.items.map(function(g){ return { name: g.name, color: c.c, cols: 1, cards: [cd(g)] }; })]
+      : [[{ name: c.title, color: c.c, cols: 8, cards: c.items.map(cd) }]];
+    var cnt = c.items.reduce(function(a, g){ return a + (GOWN[g.id] || 0); }, 0);
+    var spent = c.items.reduce(function(a, g){ return a + (GOWN[g.id] || 0) * (g.price || 0); }, 0);
+    var got = c.ach ? gAchDefs(c).filter(function(a){ return own >= a.at; }).sort(function(a, b){ return b.r - a.r; }) : null;
+    return { kind: '굿즈 컬렉션 북', title: c.title, sub: (p[1] ? p[0] + '년 ' + (+p[1]) + '월 출시 · ' : '') + '굿즈 ' + N + '종', at: Date.now(), file: 'sendungi-' + c.id, hmax: 280,
+      stats: [{ k: '보유 종류', v: own + ' / ' + N, bar: N ? own / N : 0 }, { k: '보유 수량', v: cnt + '개', s: '같은 상품 여러 개 포함' },
+        { k: '쓴 금액', v: won(spent) + '원', s: '보유 수량 × 가격' }],
+      rows: rows, ach: got ? { got: got.map(function(a){ return { n: a.n, c: a.c }; }), total: gAchDefs(c).length } : null };
+  }
   function renderGoodsPage(c){
-    elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
+    elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''), gShareBtn(c))
       + goodsStats(c.items) + goodsNews(c) + goodsAch(c) + '<p class="gnote2">기록은 이 브라우저에 바로 저장됩니다.</p>' + goodsGrid(c.items, c);
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
@@ -6276,6 +6295,8 @@ goTab(true,true);
       gx.closest('.xt').querySelector('.xt-p').hidden = !op;
       return;
     }
+    var gsh = e.target.closest('[data-gshr]');                 // 굿즈 [공유하기] → 공유 카드
+    if (gsh) { var sc = gcol(gsh.getAttribute('data-gshr')); if (sc && window.SGShare) SGShare.collection(gShareCard(sc)); return; }
     var ga = e.target.closest('[data-gach]');                  // 굿즈 칭호 "전체 보기" 펼치기 · 접기
     if (ga) {
       var aid = ga.getAttribute('data-gach');
@@ -6574,11 +6595,11 @@ goTab(true,true);
 
   // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
   // d = { kind: '포카 컬렉션 북', title, sub, at, file,
-  //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
+  //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix, r? }] }]],
   //       hmax: 카드 최대 높이(기본 150 — 카드가 적은 도감은 크게), ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
   // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
   var PK = { pink: '#e96387', pinkT: '#f28aa7' };
-  function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
+  function asp(c){ return c.r || (c.land ? 4 / 3 : 3 / 4); }            // r: 가로 ÷ 세로 (굿즈 사진 등), 없으면 포카 3:4 · 가로 카드 4:3
   function rowLayout(row, avail, HMAX){
     var CG = 8, GG = 22;
     var gs = row.map(function(g){

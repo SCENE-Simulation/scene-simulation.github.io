@@ -167,11 +167,11 @@
 
   // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
   // d = { kind: '포카 컬렉션 북', title, sub, at, file,
-  //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
+  //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix, r? }] }]],
   //       hmax: 카드 최대 높이(기본 150 — 카드가 적은 도감은 크게), ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
   // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
   var PK = { pink: '#e96387', pinkT: '#f28aa7' };
-  function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
+  function asp(c){ return c.r || (c.land ? 4 / 3 : 3 / 4); }            // r: 가로 ÷ 세로 (굿즈 사진 등), 없으면 포카 3:4 · 가로 카드 4:3
   function rowLayout(row, avail, HMAX){
     var CG = 8, GG = 22;
     var gs = row.map(function(g){
