@@ -1813,11 +1813,15 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-pg{grid-area:pg;height:4px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
 .mb-pg i{position:relative;display:block;height:100%;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.22)}
 #v-views .mb-r.in .mb-pg i{background:rgba(255,77,79,.5)}
-/* 채운 부분을 흰 불빛이 한 번씩 훑고 지나간다 (자료가 갱신되는 느낌). 줄마다 조금씩 늦게 시작해(--sw) 목록이 물결처럼 보인다 */
-.mb-pg i::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34%;min-width:22px;
-  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95),rgba(255,255,255,0));
-  transform:translateX(-130%);animation:mbSweep 2.8s ease-in-out infinite;animation-delay:var(--sw,0s)}
-@keyframes mbSweep{0%{transform:translateX(-130%)}60%,100%{transform:translateX(420%)}}
+/* 채운 부분 위로 옅은 빛이 한 번씩 지나간다 (자료가 갱신되는 느낌).
+   가늘게(최대 30px) · 가장자리는 blur 로 풀고 · 막대 색과 어울리는 따뜻한 빛. 줄마다 조금씩 늦게 시작해(--sw) 목록이 물결처럼.
+   이동 거리는 빛 폭 기준이라 막대가 길든 짧든 빛의 속도는 같다 */
+.mb-pg i::after{content:"";position:absolute;top:-1px;bottom:-1px;left:0;width:11%;min-width:14px;max-width:30px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.3) 48%,rgba(255,255,255,.38) 58%,rgba(255,255,255,0));
+  filter:blur(1.2px);transform:translateX(-170%);
+  animation:mbSweep 3.4s linear infinite;animation-delay:var(--sw,0s)}
+#v-views .mb-r.in .mb-pg i::after{background:linear-gradient(90deg,rgba(255,214,196,0),rgba(255,226,209,.42) 48%,rgba(255,238,226,.52) 58%,rgba(255,214,196,0))}
+@keyframes mbSweep{0%{transform:translateX(-170%)}55%,100%{transform:translateX(1700%)}}
 @media (prefers-reduced-motion:reduce){.mb-pg i::after{display:none}}
 /* 오른쪽 칸: 달성까지 · 남은 시간 · 날짜 (두 줄 높이 가운데) */
 .mb-e{grid-area:e;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;text-align:right;
@@ -1863,7 +1867,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   .vr-tabs{flex-wrap:wrap}.vr-tabs button{padding:7px 10px!important;font-size:12.5px;white-space:nowrap}}   /* 탭 세 개: 글자 중간에서 꺾이지 않게 통째로 다음 줄로 */
 .vt-tab .w{text-align:left;white-space:nowrap}
 .vt-tab td.w b{font-weight:700}
-@media (max-width:980px){.mb-list{grid-template-columns:1fr}}
+/* 두 칸은 창 1160px 부터 — 그보다 좁으면 가운데 칸이 140px 로 줄어 "1,198만 → 1,200만 12.1만 남음" 이 두 줄로 꺾인다 */
+@media (max-width:1199px){.mb-list{grid-template-columns:1fr}}
 @media (max-width:760px){.vt-tab .w{display:none}}
 @media (max-width:640px){.vr-tabs button{padding:7px 12px!important;font-size:13px}}
 #v-views .vr-cap b{color:var(--vg-t)}
