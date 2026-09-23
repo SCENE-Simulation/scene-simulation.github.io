@@ -1954,7 +1954,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 내 예측 기록 */
 .og-seg{margin:0 0 12px}
 .og-seg b{margin-left:3px;font-family:"JetBrains Mono",monospace;font-weight:700}
-.og-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .og-r{display:grid;grid-template-columns:128px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 12px 12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
 .og-r.done{border-color:color-mix(in srgb,var(--gc) 32%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--gc) 6%,transparent),var(--glass) 60%)}
 .og-r.void,.og-r.gone{opacity:.7}
@@ -2089,4 +2088,23 @@ html.shr-on{overflow:hidden}
 .og-pt b{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700}
 .og-pt b em{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(169,139,255,.25);font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:var(--ink);text-align:center}
 .og-pt small{font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}
+@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}/* 예측의 신 기록 카드 (예측하기 카드와 같은 짜임) */
+.og-lc.done{border-color:color-mix(in srgb,var(--gc) 35%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gc) 7%,transparent),var(--glass) 45%)}
+.og-lc.void,.og-lc.gone{opacity:.75}
+.og-lc .og-ct small{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.og-st2{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.og-st2 .og-acc{font-size:24px}
+.og-lc[data-g="god"] .og-acc{text-shadow:0 0 16px rgba(240,199,94,.45)}
+.og-gf{stroke:rgba(255,255,255,.28);stroke-width:1;stroke-dasharray:1 3}
+.og-gc{fill:#fff;stroke:var(--bg);stroke-width:2}
+.og-gct{fill:#fff;font:700 9.5px "Pretendard Variable",sans-serif}
+.og-glg i.c{width:8px;height:8px;border:0;border-radius:50%;background:#fff}
+.og-aip em{font-style:normal;font-weight:700;color:var(--ink2)}
+.og-aip em.w{color:var(--mint-t)}
+.og-aip em.l{color:#ff9a9a}
+.og-mine{gap:5px}
+.og-mine small em{font-style:normal;font-weight:700;color:var(--ink)}
+.og-mine .og-pg{margin-top:3px}
+.og-mine .og-pgt{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink3)}
+.og-lf{display:flex;justify-content:flex-end;margin-top:-4px}
+#v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}

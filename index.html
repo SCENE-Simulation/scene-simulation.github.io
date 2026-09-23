@@ -2368,7 +2368,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 내 예측 기록 */
 .og-seg{margin:0 0 12px}
 .og-seg b{margin-left:3px;font-family:"JetBrains Mono",monospace;font-weight:700}
-.og-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .og-r{display:grid;grid-template-columns:128px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 12px 12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
 .og-r.done{border-color:color-mix(in srgb,var(--gc) 32%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--gc) 6%,transparent),var(--glass) 60%)}
 .og-r.void,.og-r.gone{opacity:.7}
@@ -2503,7 +2502,26 @@ html.shr-on{overflow:hidden}
 .og-pt b{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700}
 .og-pt b em{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(169,139,255,.25);font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:var(--ink);text-align:center}
 .og-pt small{font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}
+@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}/* 예측의 신 기록 카드 (예측하기 카드와 같은 짜임) */
+.og-lc.done{border-color:color-mix(in srgb,var(--gc) 35%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gc) 7%,transparent),var(--glass) 45%)}
+.og-lc.void,.og-lc.gone{opacity:.75}
+.og-lc .og-ct small{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.og-st2{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.og-st2 .og-acc{font-size:24px}
+.og-lc[data-g="god"] .og-acc{text-shadow:0 0 16px rgba(240,199,94,.45)}
+.og-gf{stroke:rgba(255,255,255,.28);stroke-width:1;stroke-dasharray:1 3}
+.og-gc{fill:#fff;stroke:var(--bg);stroke-width:2}
+.og-gct{fill:#fff;font:700 9.5px "Pretendard Variable",sans-serif}
+.og-glg i.c{width:8px;height:8px;border:0;border-radius:50%;background:#fff}
+.og-aip em{font-style:normal;font-weight:700;color:var(--ink2)}
+.og-aip em.w{color:var(--mint-t)}
+.og-aip em.l{color:#ff9a9a}
+.og-mine{gap:5px}
+.og-mine small em{font-style:normal;font-weight:700;color:var(--ink)}
+.og-mine .og-pg{margin-top:3px}
+.og-mine .og-pgt{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink3)}
+.og-lf{display:flex;justify-content:flex-end;margin-top:-4px}
+#v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -8784,24 +8802,33 @@ goTab(true,true);
     var box = c.querySelector('.og-gw'); if (!box || box.hidden) return;
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid]; if (!v || !d) return;
     var have = mine(vid, d.M), inp = c.querySelector('[data-og-in]'), g = have ? have.g : inp ? fromLocal(inp.value) : NaN;
-    box.innerHTML = chart(v, d.M, g > V.lastMs(v) ? g : NaN, !!have, aiAt(v, d.M));
+    box.innerHTML = chart(v, d.M, { g: g > V.lastMs(v) ? g : NaN, fixed: !!have, ai: aiAt(v, d.M) });
   }
-  function chart(v, M, g, fixed, ai){
-    var a = v.vs.snaps.length ? v.vs.snaps[v.vs.snaps.length - 1][0] : 0;
-    var pts = v.vs.snaps.filter(function(p){ return p[0] >= a - 72; }).map(function(p){ return [v.pub + p[0] * H, p[1]]; });
-    if (pts.length < 2) return '<p class="og-gn">기록이 더 쌓이면 그래프가 나옵니다.</p>';
-    var P = V.plan(v), t0 = pts[0][0], tn = pts[pts.length - 1][0], vn = pts[pts.length - 1][1];
-    var perMs = P ? P.g / D : (vn - pts[0][1]) / (tn - t0);                      // 최근 하루 속도 (조회수 / ms)
-    var t1 = !isNaN(g) ? Math.max(tn + D, g + Math.max(6 * H, (g - tn) * 0.12)) : tn + 2 * D, far = false;
-    if (ai > tn) t1 = Math.max(t1, ai + Math.max(6 * H, (ai - tn) * 0.12));      // 예측기 점도 보이게
-    if (t1 > tn + 30 * D){ t1 = tn + 30 * D; far = !isNaN(g) && g > t1; }
-    var y0 = pts[0][1], y1 = M + (M - y0) * 0.14;
-    var W = 320, Hh = 138, L = 8, R = 8, T = 14, B = 20;
+  // o = { g: 내가 고른 때, fixed: 남긴 예측인지, ai: 예측기 예상, act: 실제로 넘은 때(채점 끝), from: 남긴 때 }
+  //   채점 전: 최근 72시간(남긴 때가 더 앞이면 거기부터, 최대 14일) ~ 고른 때 조금 뒤. 채점 끝: 남긴 때 앞 ~ 실제 · 고른 때 · 예측기 중 늦은 때 조금 뒤
+  function chart(v, M, o){
+    var g = o.g > 0 ? o.g : NaN, fixed = o.fixed, ai = o.ai > 0 ? o.ai : NaN, act = o.act;
+    var all = v.vs.snaps.map(function(p){ return [v.pub + p[0] * H, p[1]]; });
+    if (all.length < 2) return '<p class="og-gn">기록이 더 쌓이면 그래프가 나옵니다.</p>';
+    var end = act || all[all.length - 1][0], t0 = end - 72 * H;
+    if (o.from) t0 = Math.min(t0, o.from - 6 * H);
+    t0 = Math.max(t0, all[0][0], end - 14 * D);
+    function pad(t){ return t + Math.max(6 * H, (t - end) * 0.12); }
+    var t1 = act ? end + Math.max(6 * H, (end - t0) * 0.15) : end + (isNaN(g) ? 2 * D : D), far = false;
+    if (!isNaN(g)) t1 = Math.max(t1, pad(g));
+    if (!isNaN(ai)) t1 = Math.max(t1, pad(ai));                                    // 예측기 점도 보이게
+    if (t1 > end + 30 * D){ t1 = end + 30 * D; far = !isNaN(g) && g > t1; }
+    var pts = all.filter(function(p){ return p[0] >= t0 - 1 && p[0] <= t1; });
+    if (pts.length < 2) return '<p class="og-gn">이 구간의 기록이 모자라 그래프를 그릴 수 없습니다.</p>';
+    var P = V.plan(v), tn = pts[pts.length - 1][0], vn = pts[pts.length - 1][1];
+    var perMs = act ? 0 : P ? P.g / D : (vn - pts[0][1]) / (tn - t0);            // 최근 하루 속도 (조회수 / ms), 채점 끝이면 점선 없음
+    var y0 = pts[0][1], y1 = Math.max(M, vn) + (M - y0) * 0.14;
+    var W = 320, Hh = 148, L = 8, R = 8, T = 24, B = 20;   // 위 여백: 내 예측 글자 자리 (목표선 근처 글자와 안 겹치게)
     function X(t){ return L + (t - t0) / (t1 - t0) * (W - L - R); }
     function Y(y){ return Hh - B - (y - y0) / (y1 - y0) * (Hh - T - B); }
     function f(n){ return n.toFixed(1); }
     var line = pts.map(function(p, i){ return (i ? 'L' : 'M') + f(X(p[0])) + ' ' + f(Y(p[1])); }).join('');
-    var area = line + 'L' + f(X(tn)) + ' ' + (Hh - B) + 'L' + f(X(t0)) + ' ' + (Hh - B) + 'Z';
+    var area = line + 'L' + f(X(tn)) + ' ' + (Hh - B) + 'L' + f(X(pts[0][0])) + ' ' + (Hh - B) + 'Z';
     // 점선: 지금부터 같은 속도로 → 그래프 위 끝에 닿으면 거기서 멈춤
     var te = t1, ve = vn + perMs * (t1 - tn);
     if (perMs > 0 && ve > y1){ te = tn + (y1 - vn) / perMs; ve = y1; }
@@ -8818,8 +8845,14 @@ goTab(true,true);
       + '<text class="og-gmt" x="' + (L + 2) + '" y="' + f(Y(M) - 4) + '">' + esc(V.fmtM(M)) + '</text>'
       + '<path class="og-ga" d="' + area + '"/><path class="og-gl2" d="' + line + '"/>'
       + (perMs > 0 ? '<line class="og-ge" x1="' + f(X(tn)) + '" y1="' + f(Y(vn)) + '" x2="' + f(X(te)) + '" y2="' + f(Y(ve)) + '"/>' : '')
-      + '<circle class="og-gd" cx="' + f(X(tn)) + '" cy="' + f(Y(vn)) + '" r="3.4"/>';
-    if (ai > tn && ai <= t1){
+      + (act ? '' : '<circle class="og-gd" cx="' + f(X(tn)) + '" cy="' + f(Y(vn)) + '" r="3.4"/>');
+    if (o.from && o.from > t0) s += '<line class="og-gf" x1="' + f(X(o.from)) + '" y1="' + T + '" x2="' + f(X(o.from)) + '" y2="' + (Hh - B) + '"/>';   // 남긴 때
+    if (act){                                                                        // 실제로 넘은 때: 목표선 위 흰 점
+      var cx = X(act), ca = cx > W - 40 ? 'end' : cx < 40 ? 'start' : 'middle';
+      s += '<circle class="og-gc" cx="' + f(cx) + '" cy="' + f(Y(M)) + '" r="4.2"/>'
+        + '<text class="og-gct" x="' + f(cx) + '" y="' + f(Y(M) - 8) + '" text-anchor="' + ca + '">실제</text>';
+    }
+    if (ai >= t0 && ai <= t1){
       var ax = X(ai), aa = ax > W - 50 ? 'end' : ax < 50 ? 'start' : 'middle';
       s += '<line class="og-gai" x1="' + f(ax) + '" y1="' + f(Y(M)) + '" x2="' + f(ax) + '" y2="' + (Hh - B) + '"/>'
         + '<circle class="og-gaid" cx="' + f(ax) + '" cy="' + f(Y(M)) + '" r="3.6"/>'
@@ -8827,12 +8860,13 @@ goTab(true,true);
     }
     if (!isNaN(g) && !far){
       var gx = X(g), anc = gx > W - 60 ? 'end' : 'start', tx = anc === 'end' ? gx - 4 : gx + 4;
-      s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + T + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
-        + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T + 8) + '" text-anchor="' + anc + '">' + (fixed ? '남긴 예측' : '내 예측') + '</text>';
+      s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + (T - 4) + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
+        + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T - 8) + '" text-anchor="' + anc + '">' + (fixed ? '남긴 예측' : '내 예측') + '</text>';
     }
-    else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T + 8) + '" text-anchor="end">' + (fixed ? '남긴 예측' : '내 예측') + ' ' + dayTxt(g) + ' →</text>';
-    return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span><span><i class="e"></i>최근 하루 속도 그대로</span>'
-      + '<span><i class="m"></i>목표</span>' + (ai > tn && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
+    else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T - 8) + '" text-anchor="end">' + (fixed ? '남긴 예측' : '내 예측') + ' ' + dayTxt(g) + ' →</text>';
+    return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span>' + (perMs > 0 ? '<span><i class="e"></i>최근 하루 속도 그대로</span>' : '')
+      + '<span><i class="m"></i>목표</span>' + (act ? '<span><i class="c"></i>실제로 넘은 때</span>' : '')
+      + (ai >= t0 && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
   }
   function submit(c){
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid], r = check(d && d.val);
@@ -8860,50 +8894,55 @@ goTab(true,true);
       + [['all', '전체', J.length], ['wait', '채점 기다림', W.length], ['done', '채점 끝', Dn.length]].map(function(t){
           return '<button type="button" role="tab" data-og-lt="' + t[0] + '" class="' + (lt === t[0] ? 'on' : '') + '" aria-selected="' + (lt === t[0]) + '">' + t[1] + ' <b>' + t[2] + '</b></button>';
         }).join('') + '</div>'
-      + (show.length ? '<ol class="og-log">' + show.map(row).join('') + '</ol>' : '<p class="og-none">이 칸에 해당하는 예측이 없습니다.</p>');
+      + (show.length ? '<div class="og-cards og-lgrid">' + show.map(row).join('') + '</div>' : '<p class="og-none">이 칸에 해당하는 예측이 없습니다.</p>');
   }
+  // 기록 카드 — 예측하기 카드와 같은 짜임: [썸네일 · 제목 · 상태] / 그래프 / 예측기 예상(민트) / 내 예측(보라) / 지우기
   function row(o){
-    var x = o.x, j = o.j, v = j.v, h = '<li class="og-r ' + j.st + '"' + (j.gr ? ' data-g="' + j.gr.k + '"' : '') + ' data-k="' + esc(x.k) + '">'
-      + '<span class="og-rth">' + (v ? thumbImg(v) : '<span class="og-ph"></span>') + '</span>'
-      + '<div class="og-rb"><div class="og-rh"><b class="og-rt" title="' + esc(x.t) + '">' + esc(x.t) + '</b>'
-      + '<span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></div>';
-    if (j.st === 'done'){
-      var early = j.err < 0;
-      h += '<div class="og-rv"><span><small>내 예측</small><b>' + whenTxt(x.g) + '</b></span>'
-        + '<span><small>실제</small><b>' + actual(j.c) + '</b></span></div>'
-        + '<p class="og-rn">' + (Math.abs(j.err) < 60e3 ? '<em>분 단위까지 정확</em>' : '<em>' + durTxt(j.err) + ' ' + (early ? '이르게' : '늦게') + '</em> 예측')
-        + ' · 남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span>부터 ' + durTxt(j.L) + ' 뒤에 넘음</p>'
-        + '<p class="og-ai">' + aiTxt(x, j) + '</p>';
+    var x = o.x, j = o.j, v = j.v, now = Date.now();
+    var h = '<article class="og-c og-lc ' + j.st + '"' + (j.gr ? ' data-g="' + j.gr.k + '"' : '') + ' data-k="' + esc(x.k) + '">'
+      + '<div class="og-ch"><span class="og-th">' + (v ? thumbImg(v) : '<span class="og-ph"></span>') + '</span>'
+      + '<div class="og-ct"><b title="' + esc(x.t) + '">' + esc(x.t) + '</b>'
+      + '<small><span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></small><small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></div>'
+      + '<div class="og-st2">' + (j.st === 'done' ? '<b class="og-acc">' + pct(j.acc) + '</b><span class="og-gr" data-g="' + j.gr.k + '">' + j.gr.n + '</span>'
+        : '<span class="og-wt">' + (j.st === 'wait' ? '채점 기다림' : '채점 안 함') + '</span>') + '</div></div>';
+    // 그래프 (영상 기록이 없으면 생략)
+    if (v){
+      var hint = j.st === 'wait' ? '<span>지금 <b>' + V.fmt(j.now) + '</b></span><span>남은 <b>' + V.fmt(x.M - j.now) + '</b></span>'
+        : j.st === 'done' ? '<span>걸린 시간 <b>' + durTxt(j.L) + '</b></span>' : '';
+      h += '<div class="og-gb"><div class="og-gt"><span class="og-gl">조회수 추이</span><span class="og-hint">' + hint + '</span></div>'
+        + '<div class="og-gw">' + chart(v, x.M, { g: x.g, fixed: true, ai: x.ai, act: j.st === 'done' || j.st === 'void' ? j.c.ms : null, from: x.at }) + '</div></div>';
     }
-    else if (j.st === 'wait'){
-      var now = Date.now(), left = x.M - j.now, f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0)));
-      h += '<div class="og-rv"><span><small>내 예측</small><b>' + whenTxt(x.g) + '</b></span>'
-        + '<span><small>' + (x.g > now ? '예측한 때까지' : '예측한 때부터') + '</small><b class="og-cd">' + durTxt(x.g - now) + (x.g > now ? ' 남음' : ' 지남') + '</b></span></div>'
+    // 예측기 예상 (남길 때 저장한 값)
+    if (j.st === 'wait' || j.st === 'done'){
+      h += '<div class="og-aip"><span class="og-aik"><i></i>예측기 예상</span>'
+        + (x.ai == null ? '<small>그때는 기록이 모자라 계산 전' + (j.st === 'done' ? ' — 대결 없음' : '') + '</small>'
+          : (x.ai === 0 ? '<b>못 닿는다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
+            + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>' : ''))
+        + '</div>';
+    }
+    // 내 예측
+    h += '<div class="og-have og-mine"><span>내 예측</span><b>' + whenTxt(x.g) + '</b>';
+    if (j.st === 'wait'){
+      var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0)));
+      h += '<small>' + (x.g > now ? '예측한 때까지 <em>' + durTxt(x.g - now) + ' 남음</em>' : '예측한 때가 <em>' + durTxt(now - x.g) + ' 지남</em> · 아직 못 넘음') + '</small>'
         + '<div class="og-pg" aria-hidden="true"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
-        + '<p class="og-rn">지금 ' + V.fmt(j.now) + ' · <em>' + V.fmt(left) + ' 남음</em> · 남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></p>'
-        + '<p class="og-ai">' + (x.ai == null ? '예측기: 그때는 기록이 모자라 계산 전' : x.ai === 0 ? '예측기: 그때 추세로는 못 닿는다고 봄'
-          : '예측기 예상: ' + whenTxt(x.ai)) + '</p>';
+        + '<small class="og-pgt">' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' 중 ' + pct(f) + '</small>';
     }
-    else if (j.st === 'void') h += '<p class="og-rn">예측을 남기기 전(마지막 기록과 남긴 때 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</p>';
-    else h += '<p class="og-rn">이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다. 내 예측 ' + whenTxt(x.g) + '</p>';
-    h += '</div><div class="og-rs">';
-    if (j.st === 'done') h += '<b class="og-acc">' + pct(j.acc) + '</b><span class="og-gr" data-g="' + j.gr.k + '">' + j.gr.n + '</span>';
-    else if (j.st === 'wait') h += '<span class="og-wt">채점 기다림</span>';
-    else h += '<span class="og-wt">채점 안 함</span>';
-    // 지우기: × → 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
-    if (DELK === x.k) return h + '<span class="og-cf"><small>지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
-      + '<button type="button" class="og-no" data-og-no>취소</button></span></div></li>';
-    return h + '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '" title="이 예측 지우기" aria-label="이 예측 지우기">×</button></div></li>';
+    else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
+      + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
+    else if (j.st === 'void') h += '<small>예측을 남기기 전(마지막 기록과 남긴 때 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
+    else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
+    h += '</div><div class="og-lf">';
+    // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
+    if (DELK === x.k) h += '<span class="og-cf"><small>이 예측을 지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
+      + '<button type="button" class="og-no" data-og-no>취소</button></span>';
+    else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
+    return h + '</div></article>';
   }
   // 실제로 넘은 때: 두 기록 간격이 1.5시간 안이면 분까지, 넓으면 두 기록 시각 사이
   function actual(c){
     if (c.ms1 - c.ms0 <= 1.5 * H) return whenTxt(c.ms) + '쯤';
     return whenTxt(c.ms0) + ' ~ ' + (new Date(c.ms0).toDateString() === new Date(c.ms1).toDateString() ? '' : dayTxt(c.ms1) + ' ') + timeTxt(c.ms1) + ' 사이';
-  }
-  function aiTxt(x, j){
-    if (j.ai == null) return '예측기: 그때는 기록이 모자라 계산 전 — 대결 없음';
-    var who = j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>';
-    return (x.ai === 0 ? '예측기: 못 닿는다고 봄 (정확도 0%)' : '예측기 예상: ' + whenTxt(x.ai) + ' · 정확도 ' + pct(j.ai)) + ' → ' + who;
   }
 
   // ----- 채점 방법 -----
