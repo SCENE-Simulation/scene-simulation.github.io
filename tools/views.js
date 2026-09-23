@@ -1212,9 +1212,10 @@
     var pv = peers(v, a, 1), pl = peers(v, a, 2), pc = peers(v, a, 3), tr = trend(v);
     var link = DATA.demo ? '' : 'https://www.youtube.com/watch?v=' + encodeURIComponent(v.id);
     $('vd').innerHTML = '<div class="vd-hd"><div class="vd-ht"><div class="vd-hm"><span class="vp-st' + (s.live ? ' live' : '') + '">' + s.t + '</span>' + (TYPE[v.type] ? '<span class="vp-st">' + TYPE[v.type] + '</span>' : '') + msPill(v)
-      + '<small class="vd-when">게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전</small></div><h3>' + esc(v.title) + '</h3></div>'
-      + '<div class="vd-ha">' + (window.SGShare ? '<button type="button" class="gs vd-shr" data-shr title="지금 기준으로 고정된 이미지 카드 만들기">' + SHRI + '공유하기</button>' : '')
-      + (link ? '<a class="gs vd-yt" href="' + link + '" target="_blank" rel="noopener">YouTube에서 보기 ↗</a>' : '') + '</div></div>'
+      + '<small class="vd-when">게시 ' + when(v.pub) + ' · ' + ageTxt(a) + ' 전</small></div>'
+      // 제목 바로 오른쪽에 YouTube 버튼, 맨 오른쪽 끝에 공유하기
+      + '<div class="vd-tt"><h3>' + esc(v.title) + '</h3>' + (link ? '<a class="gs vd-yt" href="' + link + '" target="_blank" rel="noopener">YouTube에서 보기 ↗</a>' : '') + '</div></div>'
+      + (window.SGShare ? '<div class="vd-ha"><button type="button" class="gs vd-shr" data-shr title="지금 기준으로 고정된 이미지 카드 만들기">' + SHRI + '공유하기</button></div>' : '') + '</div>'
       + '<div class="vd-top">'
       + (link ? '<a class="vd-th" href="' + link + '" target="_blank" rel="noopener" aria-label="YouTube에서 보기">' : '<div class="vd-th">')
       + thumb(v) + '<span class="vd-play">' + PLAY + '</span>' + (link ? '</a>' : '</div>')

@@ -2030,7 +2030,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 
 
 /* 공유 카드 (share.js): 영상 머리글의 [공유 카드] 버튼 · 이미지 미리보기 창 */
-.vd-ha{display:flex;align-items:center;gap:8px;flex:none}
+.vd-ha{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto}
+.vd-tt{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px}
 .vd-shr{background:var(--vg-soft);border-color:rgba(255,77,79,.4)!important;color:var(--vg-t)}
 .vd-shr:hover:not(:disabled){background:rgba(255,77,79,.24);color:#ffd2cf}
 .shr{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;padding:16px}
