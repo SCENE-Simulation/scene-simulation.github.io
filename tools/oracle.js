@@ -390,8 +390,8 @@
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
     return h + '</div></article>';
   }
-  // 카운트다운 시한폭탄 시계 (채점 기다림 카드) — 사용자 요청 "시한폭탄 느낌의 점(LED, 노랑) 시계"
-  //   5×7 점 글자(도트 매트릭스)로 [일] : 시 : 분 : 초. 꺼진 점도 희미하게 보인다. 빨간 ARMED 불빛 · 나사 · 전선은 CSS 장식
+  // 카운트다운 LED 숫자 (채점 기다림 카드) — 사용자 요청 "점(LED, 노랑) 숫자 시계", 꾸밈(시한폭탄 판 · 전선)은 빼고 숫자만
+  //   5×7 점 글자(도트 매트릭스)로 [일] : 시 : 분 : 초. 꺼진 점도 희미하게 보인다
   //   1초마다 ledTick 이 바뀐 글자만 다시 그린다. 고른 때가 지나면 00 에서 멈추고 빨강으로 깜빡임(.over)
   var DOTS = {
     '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'], '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
@@ -411,7 +411,7 @@
   function led(to, over){
     var p = ledParts(to - Date.now()), ks = p.d > 0 ? ['d', 'h', 'm', 's'] : ['h', 'm', 's'], lab = { d: '일', h: '시간', m: '분', s: '초' };
     return '<div class="og-bomb' + (over ? ' over' : '') + '" data-to="' + to + '" aria-label="남은 시간">'
-      + '<span class="og-arm"><i></i>' + (over ? 'TIME' : 'ARMED') + '</span><div class="og-lcd">'
+      + '<div class="og-lcd">'
       + ks.map(function(k, i){
           return (i ? '<span class="og-lcol"><i></i><i></i></span>' : '')
             + '<span class="og-lu"><span class="og-lds" data-u="' + k + '">' + ledVal(p, k).split('').map(ledDigit).join('') + '</span><small>' + lab[k] + '</small></span>';

@@ -2110,22 +2110,11 @@ html.shr-on{overflow:hidden}
 #v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}.og-mine .og-mh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
 .og-mine .og-mh small{font-size:11.5px;font-weight:500;color:var(--ink2)}
 .og-mine .og-mh small span{font-size:inherit;font-weight:600;color:var(--ink)}
-/* 예측의 신: 카운트다운 시한폭탄 시계 (채점 기다림 카드의 내 예측 상자) — 노랑 LED 도트 매트릭스 */
+/* 예측의 신: 카운트다운 LED 숫자 (채점 기다림 카드의 내 예측 상자) — 노랑 도트 매트릭스, 꾸밈 없이 숫자만 */
 .og-flw{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .og-flh{font-size:11.5px;color:var(--ink2)}
-.og-bomb{position:relative;align-self:flex-start;margin-left:10px;padding:18px 14px 9px;border-radius:9px;
-  background:radial-gradient(circle at 7px 7px,#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) 7px,#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),
-    radial-gradient(circle at 7px calc(100% - 7px),#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),
-    linear-gradient(180deg,#1b1c1a,#101110);
-  border:2px solid #3a3b36;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 6px 16px rgba(0,0,0,.5)}
-/* 옆으로 나온 전선 두 가닥 (빨강 · 파랑) */
-.og-bomb::before,.og-bomb::after{content:"";position:absolute;left:-11px;width:12px;border:2.4px solid;border-right:0;border-radius:12px 0 0 12px}
-.og-bomb::before{top:22%;height:26px;border-color:#e0333f}
-.og-bomb::after{top:40%;height:20px;border-color:#2f7fe0;left:-8px}
-.og-arm{position:absolute;top:4px;left:18px;display:flex;align-items:center;gap:5px;font:700 8.5px/1 "JetBrains Mono",monospace;letter-spacing:.14em;color:#ff5a5a}
-.og-arm i{width:6px;height:6px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 6px #ff3b3b;animation:ogArm 1s steps(2) infinite}
-@keyframes ogArm{50%{background:#5a1616;box-shadow:none}}
-.og-lcd{display:flex;align-items:flex-start;gap:5px;padding:7px 9px 5px;border-radius:5px;background:#070806;box-shadow:inset 0 2px 6px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,210,60,.08)}
+.og-bomb{align-self:flex-start;padding:2px 0}
+.og-lcd{display:flex;align-items:flex-start;gap:6px}
 .og-lu{display:flex;flex-direction:column;align-items:center;gap:4px}
 .og-lu small{font-size:9.5px;color:rgba(255,210,60,.55);letter-spacing:.06em}
 .og-lds{display:flex;gap:4px}
@@ -2152,6 +2141,5 @@ html.shr-on{overflow:hidden}
 .og-bomb.over .og-lcd{animation:ogOver 1s steps(2) infinite}
 .og-bomb.over .og-lu small{color:rgba(255,90,90,.6)}
 @keyframes ogOver{50%{opacity:.35}}
-@media (prefers-reduced-motion:reduce){.og-arm i,.og-lcol i,.og-bomb.over .og-lcd{animation:none}}
-@media (max-width:400px){.og-ld{grid-template-columns:repeat(5,2.7px);grid-auto-rows:2.7px;gap:1.1px}.og-lcol{height:25.5px;gap:6px}.og-lds{gap:3px}.og-lcd{gap:4px;padding:6px 7px 5px}}
-.og-mine .og-arm{color:#ff5a5a}   /* 상자 안 span 보라 글자색(.og-have span)보다 우선 */
+@media (prefers-reduced-motion:reduce){.og-lcol i,.og-bomb.over .og-lcd{animation:none}}
+@media (max-width:400px){.og-ld{grid-template-columns:repeat(5,2.7px);grid-auto-rows:2.7px;gap:1.1px}.og-lcol{height:25.5px;gap:6px}.og-lds{gap:3px}.og-lcd{gap:4px}}
