@@ -1464,8 +1464,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   z-index:-1;pointer-events:none;
   background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) left center/cover no-repeat;
   -webkit-mask-image:linear-gradient(90deg,#000 62%,transparent);mask-image:linear-gradient(90deg,#000 62%,transparent)}
-.mb-bg::after{content:"";position:absolute;top:0;bottom:0;right:0;left:calc(var(--thw) + var(--bgx));
-  background:linear-gradient(90deg,rgba(24,24,26,.74),rgba(24,24,26,.9) 60%)}   /* 글자 칸 쪽만 어둡게 — 글자가 묻히지 않게. 썸네일 경계에서 바로 시작(번지는 띠 없음, 9/23 사용자 요청) */
+.mb-bg::after{content:"";position:absolute;top:0;bottom:0;right:0;left:calc(var(--thw) + var(--bgx) - 36px);
+  background:linear-gradient(90deg,rgba(24,24,26,0),rgba(24,24,26,.2) 12px,rgba(24,24,26,.5) 24px,rgba(24,24,26,.74) 36px,rgba(24,24,26,.9) 60%)}
+  /* 글자 칸 쪽만 어둡게 — 글자가 묻히지 않게. 썸네일 끝 36px 에서 부드럽게 번지며 시작(예전 24px 띠보다 완만하게, 9/23 사용자 요청) */
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
 /* 글자 묶음: 제목 · 지금 → 목표 · 막대 · 달성까지 (따로 떼지 않고 한 덩어리로 세로 가운데) */
