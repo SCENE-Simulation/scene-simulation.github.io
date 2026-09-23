@@ -758,6 +758,13 @@ body.has-sfloat #totop{bottom:84px}
 .atab th:first-child,.atab td:first-child,.atab th:nth-child(4),.atab td:nth-child(4){text-align:left}
 .atab td:nth-child(4){font-family:inherit}
 /* 표지나 카드 이미지가 없을 때: 카드 뒷면 무늬 */
+/* 뽑기 시뮬레이터 큰 카드 자리표시자(gacha.js #hero-ph): 도감의 SOON 칸(.ctile.soon)과 같은 모양 — 바깥 칸 · 안쪽 틀 · 그림 아이콘 · SOON */
+#hero[hidden]{display:none}
+.gph{width:132px;height:176px;margin:0 auto;box-sizing:border-box;padding:5px;border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
+.gph[hidden]{display:none}
+.gph-in{height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--line2);background:var(--cell);color:var(--dim)}
+.gph-in svg{width:30px;height:30px}
+.gph-in .chip{align-self:center}
 #hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}
 
 /* 뽑기 버튼: 1장·10장은 눌리는 맛이 있는 주 버튼, 나머지는 작은 보조 버튼 */

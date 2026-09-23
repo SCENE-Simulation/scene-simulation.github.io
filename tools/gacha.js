@@ -175,7 +175,10 @@
     + '<div id="g-draw">'
     +   '<div class="board">'
     +     '<div class="top">'
-    +       '<div class="stage" id="stage"><img id="hero" alt=""><div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div>'
+    +       '<div class="stage" id="stage"><img id="hero" alt="">'
+    // 뽑기 전(READY) · 이미지가 없는 카드: 빈 img(깨진 그림 표시) 대신 도감의 SOON 칸과 같은 자리표시자
+    +         '<div class="gph" id="hero-ph" hidden><div class="gph-in"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-img"/></svg><span class="chip">SOON</span></div></div>'
+    +         '<div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div>'
     +       '<div>'
     +         '<div class="gpull">'
     +           '<button type="button" class="gp gp1" id="b1"><span class="gp-l">' + ICON.one + '1장 뽑기</span><span class="gp-s" id="b1s"></span></button>'
@@ -263,7 +266,7 @@
     +   '<div class="mg-hist" id="mg-hist"></div>'
     + '</div>');
 
-  var hero = $('hero'), tag = $('tag'), tag2 = $('tag2'), stage = $('stage'), setsEl = $('sets'), logEl = $('log');
+  var hero = $('hero'), heroPh = $('hero-ph'), tag = $('tag'), tag2 = $('tag2'), stage = $('stage'), setsEl = $('sets'), logEl = $('log');
   var G = null, S = null, ST = {}, auto = null, view = 'draw', cells = [], progs = [];
 
   function fresh(){
@@ -285,14 +288,16 @@
     if (!G.src[i]){ el.removeAttribute('src'); el.className = 'gback' + land; return; }   // 이미지가 아직 없는 카드는 뒷면 무늬
     el.src = G.src[i]; el.className = (G.pix(i) ? 'pix' : '') + land;
   }
+  // 큰 카드 자리: 그림이 없으면(뽑기 전 · 이미지 없는 카드) img 를 숨기고 자리표시자
+  function heroEmpty(on){ hero.hidden = on; heroPh.hidden = !on; }
+  // 뽑기 전(READY): 네 뽑기 종류 모두 같은 자리표시자 (405빵 표지 그림도 쓰지 않음 — 사용자 지정 "4개 모두 동일")
   function showCover(){
-    if (G.cover){ hero.src = G.cover; hero.className = G.coverCls; }
-    else { hero.removeAttribute('src'); hero.className = 'gback'; }
+    hero.removeAttribute('src'); hero.className = ''; heroEmpty(true);
     tag.textContent = 'READY'; tag.style.color = '#f5b23a'; tag2.textContent = G.ready;
   }
   function show(i, state){
     S.last = [i, state];
-    setImg(hero, i);
+    setImg(hero, i); heroEmpty(!G.src[i]);
     tag.textContent = state;
     tag.style.color = state.indexOf('NEW') === 0 ? '#4fd8c0' : (state.indexOf('DUP') === 0 ? '#a293c9' : '#f5b23a');
     tag2.textContent = G.names[i] + (S.counts[i] > 1 ? ' x' + S.counts[i] : '');
