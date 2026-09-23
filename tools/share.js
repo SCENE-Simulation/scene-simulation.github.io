@@ -165,6 +165,133 @@
     return cv;
   }
 
+  // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
+  // d = { kind: '포카 컬렉션 북', title, sub, at, file,
+  //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
+  //       ach: { got: [{ n, c }], total } | null, note }
+  // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
+  var PK = { pink: '#e96387', pinkT: '#f28aa7' };
+  function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
+  function rowLayout(row, avail){
+    var CG = 8, GG = 22, HMAX = 150;
+    var gs = row.map(function(g){
+      var lines = [];
+      for (var i = 0; i < g.cards.length; i += g.cols) lines.push(g.cards.slice(i, i + g.cols));
+      var A = Math.max.apply(null, lines.map(function(l){ return l.reduce(function(s, c){ return s + asp(c); }, 0); }));
+      var G = Math.max.apply(null, lines.map(function(l){ return (l.length - 1) * CG; }));
+      return { g: g, lines: lines, A: A, G: G };
+    });
+    var A = gs.reduce(function(s, x){ return s + x.A; }, 0), G = gs.reduce(function(s, x){ return s + x.G; }, 0) + (gs.length - 1) * GG;
+    var h = Math.min(HMAX, (avail - G) / A);
+    var nl = Math.max.apply(null, gs.map(function(x){ return x.lines.length; }));
+    return { gs: gs, h: h, CG: CG, GG: GG, H: 34 + nl * h + (nl - 1) * CG };
+  }
+  function drawCollection(d, imgs){
+    var P = 48, AW = W - P * 2;
+    var rows = d.rows.map(function(r){ return rowLayout(r, AW); });
+    var CH0 = 380;                                                      // 머리 · 제목 · 숫자 칸 (카드 줄이 시작하는 높이)
+    var HH = CH0 + rows.reduce(function(s, r){ return s + r.H + 26; }, 0) + (d.ach ? 60 : 0) + 76;
+    var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
+    var x = cv.getContext('2d'); x.scale(SC, SC);
+    x.fillStyle = '#17121a'; x.fillRect(0, 0, W, HH);
+    var g = x.createRadialGradient(W * .9, -40, 10, W * .9, -40, 640); g.addColorStop(0, 'rgba(233,99,135,.30)'); g.addColorStop(1, 'rgba(233,99,135,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);
+    g = x.createRadialGradient(-60, HH + 60, 10, -60, HH + 60, 620); g.addColorStop(0, 'rgba(160,128,208,.16)'); g.addColorStop(1, 'rgba(160,128,208,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);
+    g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#f6a6c1'); g.addColorStop(.55, PK.pink); g.addColorStop(1, '#a080d0');
+    x.fillStyle = g; x.fillRect(0, 0, W, 6);
+
+    // 머리
+    font(x, 800, 28); x.fillStyle = C.ink; x.fillText('센둥이 시뮬레이터', P, 70);
+    var bw = x.measureText('센둥이 시뮬레이터').width;
+    font(x, 600, 22); x.fillStyle = PK.pinkT; x.fillText('·  ' + d.kind, P + bw + 14, 69);
+    font(x, 500, 20, MONO); x.fillStyle = C.ink2; x.textAlign = 'right'; x.fillText(stamp(d.at) + ' 기준', W - P, 68); x.textAlign = 'left';
+
+    // 제목
+    font(x, 800, 40); x.fillStyle = C.ink; x.fillText(fit(x, d.title, AW), P, 150);
+    font(x, 500, 21); x.fillStyle = C.ink2; x.fillText(fit(x, d.sub, AW), P, 186);
+
+    // 숫자 칸: 첫 칸(보유)이 넓고 진행 막대
+    var SY = 214, SH = 132, GAP = 16, n = d.stats.length, w0 = AW * .34, wr = (AW - w0 - GAP * (n - 1)) / (n - 1), sx = P;
+    d.stats.forEach(function(s, i){
+      var w = i ? wr : w0;
+      rr(x, sx, SY, w, SH, 16); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill();
+      x.strokeStyle = i ? C.line : 'rgba(233,99,135,.45)'; x.lineWidth = 1.5; x.stroke();
+      font(x, 700, 19); x.fillStyle = C.ink3; x.fillText(s.k, sx + 22, SY + 36);
+      font(x, 700, i ? 40 : 48, MONO); x.fillStyle = C.ink; x.fillText(fit(x, s.v, w - 44), sx + 22, SY + (i ? 86 : 90));
+      if (s.bar != null){
+        var bx = sx + 22, by = SY + SH - 26, bw2 = w - 44;
+        rr(x, bx, by, bw2, 10, 5); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill();
+        if (s.bar > 0){ rr(x, bx, by, Math.max(10, bw2 * Math.min(1, s.bar)), 10, 5); var gb = x.createLinearGradient(bx, 0, bx + bw2, 0); gb.addColorStop(0, '#f6a6c1'); gb.addColorStop(1, PK.pink); x.fillStyle = gb; x.fill(); }
+        font(x, 700, 19, MONO); x.fillStyle = PK.pinkT; x.textAlign = 'right'; x.fillText(Math.round(s.bar * 100) + '%', sx + w - 22, SY + 36); x.textAlign = 'left';
+      } else if (s.s){ font(x, 500, 18); x.fillStyle = C.ink2; x.fillText(fit(x, s.s, w - 44), sx + 22, SY + SH - 22); }
+      sx += w + GAP;
+    });
+
+    // 카드 줄
+    var y = SY + SH + 34, k = 0;
+    rows.forEach(function(r){
+      var gx = P;
+      r.gs.forEach(function(q){
+        var gw = q.A * r.h + q.G, have = q.g.cards.filter(function(c){ return c.n > 0; }).length;
+        // 묶음 이름 · 모은 수
+        x.textBaseline = 'middle';
+        x.fillStyle = q.g.color || PK.pink; x.beginPath(); x.arc(gx + 7, y + 12, 6, 0, Math.PI * 2); x.fill();
+        font(x, 800, 20); x.fillStyle = C.ink; x.fillText(fit(x, q.g.name, gw - 70), gx + 20, y + 13);
+        font(x, 700, 18, MONO); x.fillStyle = have === q.g.cards.length ? '#6fe0b3' : C.ink2; x.textAlign = 'right';
+        x.fillText(have + '/' + q.g.cards.length, gx + gw, y + 13); x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+        q.lines.forEach(function(line, li){
+          var cx = gx, cy = y + 34 + li * (r.h + r.CG);
+          line.forEach(function(c){
+            var cw = asp(c) * r.h, im = imgs[k++];
+            x.save(); rr(x, cx, cy, cw, r.h, 8); x.clip();
+            x.fillStyle = '#241c26'; x.fillRect(cx, cy, cw, r.h);
+            if (im){ x.imageSmoothingEnabled = !c.pix; x.globalAlpha = c.n > 0 ? 1 : .13; cover(x, im, cx, cy, cw, r.h); x.globalAlpha = 1; x.imageSmoothingEnabled = true; }
+            x.restore();
+            rr(x, cx + .75, cy + .75, cw - 1.5, r.h - 1.5, 8);
+            if (c.n > 0){ x.strokeStyle = 'rgba(255,255,255,.22)'; x.lineWidth = 1.5; x.setLineDash([]); }
+            else { x.strokeStyle = 'rgba(255,255,255,.2)'; x.lineWidth = 1.5; x.setLineDash([6, 5]); }
+            x.stroke(); x.setLineDash([]);
+            if (c.n > 1){ font(x, 800, 16, MONO); var t = '×' + c.n, tw = x.measureText(t).width + 14;
+              rr(x, cx + cw - tw - 6, cy + 6, tw, 24, 12); x.fillStyle = PK.pink; x.fill();
+              x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.fillText(t, cx + cw - tw - 6 + 7, cy + 19); x.textBaseline = 'alphabetic'; }
+            cx += cw + r.CG;
+          });
+        });
+        gx += gw + r.GG;
+      });
+      y += r.H + 26;
+    });
+
+    // 칭호: 얻은 것 이름을 자리만큼, 나머지는 +N
+    if (d.ach){
+      var AY = y - 4, AH = 60;
+      rr(x, P, AY, AW, AH, 16); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke();
+      x.textBaseline = 'middle';
+      font(x, 800, 21); x.fillStyle = '#ffd36b'; x.fillText('✦ 칭호', P + 22, AY + AH / 2 + 1);
+      var ax = P + 22 + x.measureText('✦ 칭호').width + 12;
+      font(x, 700, 19, MONO); x.fillStyle = C.ink2; var at = d.ach.got.length + ' / ' + d.ach.total; x.fillText(at, ax, AY + AH / 2 + 1);
+      ax += x.measureText(at).width + 20; x.textBaseline = 'alphabetic';
+      var right = P + AW - 18, shown = 0;
+      if (!d.ach.got.length){ font(x, 500, 18); x.fillStyle = C.ink3; x.textBaseline = 'middle'; x.fillText('아직 얻은 칭호가 없어요', ax, AY + AH / 2 + 1); x.textBaseline = 'alphabetic'; }
+      d.ach.got.some(function(a, i){
+        font(x, 700, 17); var pw = x.measureText(a.n).width + 17 * 1.3, rest = d.ach.got.length - i - 1;
+        var need = pw + (rest ? 70 : 0);
+        if (ax + need > right) return true;
+        pill(x, ax, AY + (AH - 32) / 2, a.n, a.c, 'rgba(255,255,255,.05)', a.c, 17); ax += pw + 8; shown++;
+        return false;
+      });
+      if (shown < d.ach.got.length){ font(x, 700, 18, MONO); x.fillStyle = C.ink2; x.textBaseline = 'middle'; x.fillText('+' + (d.ach.got.length - shown), ax + 4, AY + AH / 2 + 1); x.textBaseline = 'alphabetic'; }
+      y = AY + AH + 20;
+    }
+
+    // 발
+    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText(fit(x, d.note || '이 브라우저에 기록한 실물 수집 기록입니다', AW - 330), P, HH - 30);
+    font(x, 700, 20, MONO); x.fillStyle = PK.pinkT; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
+    return cv;
+  }
+  function loadAll(list){ return Promise.all(list.map(function(s){ return s ? loadImg([s]) : Promise.resolve(null); })); }
+
   // ---------- 미리보기 창 ----------
   // 이미지를 다 그리면 고를 수 있게 버튼을 켠다: [클립보드에 복사](되는 브라우저만) · [이미지 저장] · [공유…](되는 곳만 — 휴대폰 공유 시트)
   // 바로 복사하지 않는다 — 디시 앱(모바일)은 클립보드 붙여 넣기를 받지 않아 저장 · 공유가 필요하다
@@ -227,6 +354,15 @@
         .concat(d.boxes.map(function(b){ return b.name + b.tag + (b.unit || '') + b.note; })).join('') + '센둥이 시뮬레이터 조회수 예측기 기록 기준 예시 데이터 15분마다 모은 기록으로 계산 비전문가가 만든 계산식이니 재미로만 참고해 주세요';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawVideo(d, im); }); },
         'sendungi-views-' + (d.id || 'demo') + '-' + fileStamp(d.at) + '.png', text);
+    },
+    // 컬렉션 카드 (형식은 drawCollection 위 주석). 카드 그림은 같은 사이트 주소 · data: 라 캔버스가 오염되지 않는다
+    collection: function(d){
+      var cards = []; d.rows.forEach(function(r){ r.forEach(function(g){ cards = cards.concat(g.cards); }); });
+      var text = [d.kind, d.title, d.sub, d.note || ''].concat(d.stats.map(function(s){ return s.k + s.v + (s.s || ''); }))
+        .concat(d.rows.map(function(r){ return r.map(function(g){ return g.name; }).join(''); }))
+        .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 이 브라우저에 기록한 실물 수집 기록입니다 ✦';
+      open(function(){ return loadAll(cards.map(function(c){ return c.src; })).then(function(ims){ return drawCollection(d, ims); }); },
+        (d.file || 'sendungi-collection') + '-' + fileStamp(d.at) + '.png', text);
     }
   };
 })();

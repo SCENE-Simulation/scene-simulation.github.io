@@ -29,7 +29,9 @@ rep('<div id="page-sim" hidden>',
   '<div id="page-sim" hidden>\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">포토카드 뽑기 시뮬레이션</span></div></div>\n' +
   '<p class="sec-d">콜라보 포토카드를 한 장씩 뽑아 모든 종류를 모을 때까지 드는 비용을 시뮬레이션합니다. 뽑기 화면에서 직접 뽑고, 분석 화면에서 그래프로 내 운과 기대 비용을 확인할 수 있습니다.</p>');
 rep('<div id="page-col">',
-  '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북<span class="cr">›</span>2026 포카<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div></div>\n' +
+  '<div id="page-col">\n<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북<span class="cr">›</span>2026 포카<span class="cr">›</span><span class="lt">CU 리센느 405빵 콜라보</span></div>' +
+  // [공유하기]: 지금 수집 기록으로 이미지 카드 (source.html 의 SG405.share → share.js)
+  '<button type="button" class="gs shr-btn" data-shr405 title="지금 수집 기록으로 이미지 카드 만들기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>공유하기</button></div>\n' +
   '<p class="sec-d" data-desc="cu405"></p>\n' +
   '<div class="cmeta" data-col="cu405"></div>\n' +
   '<div class="xt" data-col="cu405"></div>');

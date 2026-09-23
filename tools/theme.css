@@ -2044,9 +2044,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .shr-x{display:grid;place-items:center;flex:none;width:34px;height:34px;padding:0;border-radius:50%!important;border:1px solid var(--line)!important;background:rgba(255,255,255,.05);color:var(--ink2);cursor:pointer}
 .shr-x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .shr-x:hover{color:var(--ink);background:rgba(255,255,255,.1)}
-.shr-im{position:relative;aspect-ratio:1200/780;border-radius:12px;overflow:hidden;background:#140b0d;border:1px solid rgba(255,255,255,.08);
+.shr-im{position:relative;min-height:220px;border-radius:12px;overflow:hidden;background:#140b0d;border:1px solid rgba(255,255,255,.08);
   display:flex;align-items:center;justify-content:center}
-.shr-im img{display:block;width:100%;height:100%}
+.shr-im img{display:block;width:100%;height:auto}
 .shr-ld{font-size:13px;color:var(--ink2)}
 .shr-d{margin:12px 2px 0;font-size:12.5px;line-height:1.55;color:var(--ink2)}
 .shr-b{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -2143,4 +2143,6 @@ html.shr-on{overflow:hidden}
 .og-bomb.over .og-lu small{color:rgba(255,90,90,.6)}
 @keyframes ogOver{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.og-lcol i,.og-bomb.over .og-lcd{animation:none}}
-
+/* 컬렉션 북 제목 줄 오른쪽 [공유하기] (사이트 분홍) */
+.shr-btn{flex:none;background:var(--pink-soft);border-color:rgba(233,99,135,.45)!important;color:var(--pink-t)}
+.shr-btn:hover:not(:disabled){background:rgba(233,99,135,.26);color:#ffd0dd}

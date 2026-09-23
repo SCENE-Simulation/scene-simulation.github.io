@@ -1394,6 +1394,20 @@ try{var raw=localStorage.getItem('bread27:collection');
     if(d0.ledger&&d0.ledger.uprice!=null)LG.uprice=d0.ledger.uprice;}
 }catch(e){}
 try{var up0=localStorage.getItem('bread27:uprice'); if(up0!=null&&!isNaN(+up0))LG.uprice=+up0;}catch(e){}
+// 공유 카드(tools/share.js): 지금 화면의 수집 기록(저장 전 변경 포함)을 이미지로. 제목 줄 오른쪽 [공유하기](build.js)
+SG405.share=function(){
+  var t=colTotals(), gs=[], sp=[];
+  function cd(i){return {src:SRC[i],n:COL[i],land:isLand(i),pix:isPix(i)};}
+  for(var m=0;m<MCOUNT;m++){var cs=[];for(var v=0;v<VPER;v++)cs.push(cd(m*VPER+v)); gs.push({name:MEM[m].n,color:MEM[m].c,cols:2,cards:cs});}
+  for(var i=MTOTAL;i<N;i++)sp.push(cd(i));
+  return {kind:'포카 컬렉션 북', title:'CU 리센느 405빵 콜라보', sub:'2026년 9월 출시 · 포토카드 27종 (멤버 20 + 스페셜 7)', at:Date.now(), file:'sendungi-cu405',
+    stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+' · 중고 '+LG.used},
+      {k:'누적 금액',v:won(totalWon())+'원',s:'빵 + 중고 구매'},{k:'중복',v:t.dup+'장',s:'여분 카드'}],
+    rows:[gs,[{name:'스페셜',color:'#f5b23a',cols:7,cards:sp}]],
+    ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length},
+    note:PEND.length?'저장하지 않은 변경 포함 · 이 브라우저에 기록한 실물 수집 기록':'이 브라우저에 기록한 실물 수집 기록입니다'};
+};
+document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-shr405]')&&window.SGShare) SGShare.collection(SG405.share()); });
 function setUprice(v){
   LG.uprice=Math.max(0,v||0);
   var inp=document.getElementById('c-uprice'); if(document.activeElement!==inp) inp.value=won(LG.uprice);
