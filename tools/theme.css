@@ -764,6 +764,7 @@ body.has-sfloat #totop{bottom:84px}
 #stage{display:flex;flex-direction:column}
 .gph{width:100%;flex:1 1 auto;min-height:176px;box-sizing:border-box;padding:5px;border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
 .gph[hidden]{display:none}
+@media (max-width:640px){.gph{width:132px;height:176px;flex:none;margin:0 auto}}   /* 휴대폰은 상자가 한 줄 전체라 카드 모양 그대로 가운데 */
 .gph-in{height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--line2);background:var(--cell);color:var(--dim)}
 .gph-in svg{width:30px;height:30px}
 #hero.gback,.cell img.gback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 10px,rgba(255,255,255,.02) 10px 20px);border:1px dashed var(--line2)}

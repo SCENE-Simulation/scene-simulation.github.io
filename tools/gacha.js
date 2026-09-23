@@ -177,7 +177,7 @@
     +     '<div class="top">'
     +       '<div class="stage" id="stage"><img id="hero" alt="">'
     // 뽑기 전(READY) · 이미지가 없는 카드: 빈 img(깨진 그림 표시) 대신 도감의 SOON 칸과 같은 자리표시자
-    +         '<div class="gph" id="hero-ph" hidden><div class="gph-in"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-img"/></svg><span class="chip">SOON</span></div></div>'
+    +         '<div class="gph" id="hero-ph" hidden><div class="gph-in"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-img"/></svg></div></div>'
     +         '<div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div>'
     +       '<div>'
     +         '<div class="gpull">'
