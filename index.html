@@ -1781,35 +1781,43 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-sum{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 2px 10px;font-size:12.5px;color:var(--ink2)}
 .mb-sum b{font:800 15px "JetBrains Mono",monospace;color:var(--ink)}
 #v-views .mb-sum span:last-child b{color:var(--vg)}
+/* 한 줄 = [썸네일] [제목·추이 / 지금 → 목표 · 남은 조회수 / 진행 막대] [달성까지 · 남은 시간 · 날짜]
+   글꼴: 글자는 Pretendard, 숫자만 JetBrains Mono (큰 숫자 옆 한글 단위는 크기 차를 줄여 한 덩어리로 읽히게).
+   색 강조는 8주 안에 넘을 줄(.in)의 남은 시간·진행 막대에만 — 줄 배경·알약 테두리는 쓰지 않는다 */
 .mb-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.mb-r{display:grid;grid-template-columns:92px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px!important;border-radius:12px!important;text-align:left;
-  background:rgba(255,255,255,.03);border:1px solid var(--line)!important;color:inherit;opacity:.72}
-.mb-r.in{opacity:1;background:rgba(255,77,79,.06);border-color:rgba(255,77,79,.35)!important}
-.mb-r:hover{opacity:1}
+.mb-r{display:grid;grid-template-columns:112px minmax(0,1fr) auto;grid-template-areas:"th hd e" "th n e" "th pg e";
+  align-items:center;column-gap:13px;row-gap:6px;padding:11px 13px!important;border-radius:12px!important;text-align:left;
+  background:rgba(255,255,255,.03);border:1px solid var(--line)!important;color:inherit}
+.mb-r:hover{background:rgba(255,255,255,.06)}
+#v-views .mb-r.in{border-color:rgba(255,77,79,.32)!important}
 #v-views .mb-r.on{border-color:var(--vg)!important;box-shadow:0 0 0 1px var(--vg)}
-.mb-th{position:relative;aspect-ratio:16/9;border-radius:7px;overflow:hidden;background:#111}
+.mb-th{grid-area:th;align-self:center;position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
-.mb-b{display:flex;flex-direction:column;gap:5px;min-width:0}
-.mb-t{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mb-now{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 6px;font-size:12px;color:var(--ink2)}
-.mb-now b{font:700 14px "JetBrains Mono",monospace;color:var(--ink)}
-.mb-now b.to{color:var(--ink2)}
-#v-views .mb-r.in .mb-now b.to{color:var(--vg-t)}
-.mb-now i{font-style:normal;color:var(--dim)}
-.mb-r{grid-template-areas:"th b e" "th f f";row-gap:8px!important}
-.mb-th{grid-area:th;align-self:center}
-.mb-b{grid-area:b}
-.mb-e{grid-area:e;display:flex;flex-direction:column;align-items:flex-end;gap:1px;text-align:right;padding-left:12px;border-left:1px solid var(--line)}
+/* 제목 줄: 제목(길면 …) + 오른쪽 끝 추이 */
+.mb-hd{grid-area:hd;display:flex;align-items:center;gap:8px;min-width:0}
+.mb-t{flex:0 1 auto;min-width:0;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-tg{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink2)}
+.mb-tg svg{width:12px;height:9px;flex:0 0 auto}
+.mb-tg rect{fill:rgba(255,255,255,.18)}
+.mb-tg.hi{color:#ff7478}.mb-tg.hi rect.on{fill:#ff5a5f}
+.mb-tg.mid{color:#ffb547}.mb-tg.mid rect.on{fill:#ffb547}
+.mb-tg.lo{color:var(--ink2)}.mb-tg.lo rect.on{fill:var(--ink2)}
+/* 숫자 줄: 지금 → 목표, 오른쪽 끝에 남은 조회수 */
+.mb-n{grid-area:n;display:flex;align-items:baseline;gap:5px;min-width:0;font-size:11.5px;color:var(--ink2)}
+.mb-n b{font:700 13px "JetBrains Mono",monospace;color:var(--ink2)}
+.mb-n b.to{color:var(--ink)}
+.mb-n i{font-style:normal;color:var(--dim)}
+.mb-n em{margin-left:auto;font-style:normal;white-space:nowrap}
+.mb-n em b{font-size:11.5px;color:var(--ink)}
+/* 진행 막대: 지난 100만 단위 → 다음 100만 단위 */
+.mb-pg{grid-area:pg;height:3px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.mb-pg i{display:block;height:100%;border-radius:999px;background:rgba(255,255,255,.22)}
+#v-views .mb-r.in .mb-pg i{background:rgba(255,77,79,.5)}
+/* 오른쪽 칸: 달성까지 · 남은 시간 · 날짜 (두 줄 높이 가운데) */
+.mb-e{grid-area:e;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;text-align:right;
+  min-width:96px;padding-left:13px;border-left:1px solid var(--line)}
+.mb-lb{font-size:10.5px;font-weight:600;letter-spacing:.02em;color:var(--dim)}
 .mb-e small{font-size:11px;color:var(--ink2);white-space:nowrap}
-.mb-left{display:flex;align-items:baseline;gap:3px;white-space:nowrap}
-.mb-left b{font:800 22px "JetBrains Mono",monospace;line-height:1.15;color:var(--ink)}
-#v-views .mb-r.in .mb-left b{color:var(--vg)}
-.mb-left em{font-style:normal;font-size:12px;font-weight:700;color:var(--ink2)}
-.mb-f{grid-area:f;display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);font-size:11.5px;color:var(--ink2)}
-.mb-f b{font-weight:800;color:var(--ink)}
-#v-views .mb-r.in .mb-f{background:rgba(255,77,79,.1);color:var(--ink)}
-#v-views .mb-r.in .mb-f b{color:var(--vg-t)}
-.mb-far{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.08);color:var(--ink2)}
 /* 1,000만 명예의 전당 탭 버튼: 황금색 + 왼쪽 왕관. 켜지면 황금 그라데이션 */
 #v-views #vr-hof{color:#f0c75e}
 #v-views #vr-hof .hf-crown{width:16px;height:16px;flex:0 0 auto;margin-right:-1px;filter:drop-shadow(0 0 4px rgba(240,199,94,.55))}
@@ -1851,7 +1859,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vt-tab td.w b{font-weight:700}
 @media (max-width:980px){.mb-list{grid-template-columns:1fr}}
 @media (max-width:760px){.vt-tab .w{display:none}}
-@media (max-width:640px){.mb-r{grid-template-columns:64px minmax(0,1fr) auto;gap:9px;padding:9px 10px!important}.mb-e{padding-left:9px}.mb-left b{font-size:19px}.mb-now b{font-size:13px}.vr-tabs button{padding:7px 12px!important;font-size:13px}}
+@media (max-width:640px){.vr-tabs button{padding:7px 12px!important;font-size:13px}}
 #v-views .vr-cap b{color:var(--vg-t)}
 
 /* 펼친 줄: 시간별 증가 머리 (24시간 | 72시간) */
@@ -1968,7 +1976,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vs-px .vs-pv{flex:1;min-width:0;text-align:right;font:inherit;color:inherit}
 @media (max-width:640px){.vs-px{width:100%;max-width:112px}}
 /* 100만 단위 목록: 아래 줄 오른쪽 추이 (강함 · 중간 · 약함, 현황 칸과 같은 색) */
-.mb-f .mb-ft{min-width:0}
 .mb-tr{margin-left:auto;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;color:var(--ink2);font-weight:600}
 .mb-tr svg{width:13px;height:10px;flex:0 0 auto}
 .mb-tr rect{fill:rgba(255,255,255,.16)}
@@ -1991,7 +1998,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vc-tr.hi rect.on{fill:#ff5a5f}
 .vc-tr.mid rect.on{fill:#ffb547}
 .vc-tr.lo rect.on{fill:var(--ink2)}
-.mb-when{white-space:nowrap}                          /* 100만 목록: "9/23 오전 무렵" 은 한 줄로 */
 /* 100만 카드 막대 범례: 숫자는 진행률(%), 밝은 막대는 돌파하는 주 */
 .wk-lg{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:10.5px;color:var(--ink2)}
 .wk-lg i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:#5bb4ec;box-shadow:0 0 6px rgba(91,180,236,.7);vertical-align:-1px}
@@ -2073,41 +2079,21 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vd-stats > .vd-tr{grid-template-columns:auto minmax(0,1fr) auto}
 .vd-stats > .vd-tr .vd-trm{width:clamp(104px,32vw,140px)}       /* 약함|중간|강함 막대: 좁은 화면(320px)에서 가운데 글자 칸을 누르지 않게 */
 
-/* ===== 100만 단위 목록 한 줄 (새 디자인): [썸네일] [제목 / 지금 → 목표 / 칩] | [달성까지 · 남은 시간 · 날짜] — 아래 상자 줄 없음 ===== */
-#v-views .mb-r{grid-template-areas:"th b e";row-gap:0!important}
-#v-views .mb-r .mb-b{gap:6px}
-.mb-cps{display:flex;flex-wrap:wrap;gap:4px 5px}
-.mb-cp{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-  font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap}
-.mb-cp b{font:700 11.5px "JetBrains Mono",monospace;color:var(--ink)}
-.mb-cp.tr b{font-family:"Pretendard Variable","Noto Sans KR",sans-serif;font-weight:800}
-.mb-cp.tr svg{width:12px;height:9px;flex:0 0 auto}
-.mb-cp.tr rect{fill:rgba(255,255,255,.16)}
-.mb-cp.tr.hi{background:rgba(255,90,95,.1);border-color:rgba(255,90,95,.32)}
-.mb-cp.tr.hi b{color:#ff7478}.mb-cp.tr.hi rect.on{fill:#ff5a5f}
-.mb-cp.tr.mid{background:rgba(255,181,71,.09);border-color:rgba(255,181,71,.3)}
-.mb-cp.tr.mid b{color:#ffb547}.mb-cp.tr.mid rect.on{fill:#ffb547}
-.mb-cp.tr.lo b{color:var(--ink2)}.mb-cp.tr.lo rect.on{fill:var(--ink2)}
-.mb-cp.far{color:var(--dim)}
-#v-views .mb-r .mb-e{justify-content:center;min-width:88px}
-.mb-eta{font:800 20px/1.15 "JetBrains Mono",monospace;color:var(--ink);white-space:nowrap}
-.mb-eta i{font:700 11px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin:0 4px 0 1px}
+/* 남은 시간: 숫자만 고정폭, 단위(시간·분·일·주)는 Pretendard. 8주 안에 넘을 줄은 빨강 */
+.mb-eta{font:800 18px/1.2 "JetBrains Mono",monospace;color:var(--ink);white-space:nowrap}
+.mb-eta i{font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2);margin:0 3px 0 1px}
 .mb-eta i:last-child{margin-right:0}
-.mb-eta.na{color:var(--dim)}
+.mb-eta.na{font-size:16px;color:var(--dim)}
 #v-views .mb-r.in .mb-eta{color:var(--vg)}
+/* 휴대폰: 가운데 칸이 120px 밖에 안 남아 "1,197만 → 1,200만" 이 깨진다 → 달성까지 줄을 아래로 내려 한 줄로 */
 @media (max-width:640px){
-  .mb-eta{font-size:17px}
-  .mb-eta i{margin:0 3px 0 1px}
-  #v-views .mb-r .mb-e{min-width:78px}
+  .mb-r{grid-template-columns:96px minmax(0,1fr);grid-template-areas:"th hd" "th n" "pg pg" "e e";column-gap:10px;row-gap:5px;padding:10px 11px!important}
+  .mb-e{flex-direction:row;align-items:baseline;justify-content:flex-start;gap:7px;min-width:0;padding:1px 0 0;border-left:0}
+  .mb-e small{margin-left:auto}
+  .mb-eta{font-size:16px}
+  .mb-eta i{font-size:11px;margin:0 2px 0 1px}
+  .mb-t{font-size:12.5px}
 }
-/* 썸네일은 두 줄을 다 쓰며 크게(칩을 왼쪽에 두지 않는다), 칩 줄은 썸네일 오른쪽 아래, 달성까지 칸은 오른쪽 위 */
-#v-views .mb-r{grid-template-areas:"th b e" "th cp cp";row-gap:7px!important}
-#v-views .mb-r > .mb-cps{grid-area:cp}
-#v-views .mb-r .mb-now b{font-size:13px}
-/* PC 두 칸 목록(카드 약 370px): 썸네일 84px · 남은 시간 18px → 가운데 "1196만 → 1,200만" 이 한 줄에 */
-@media (min-width:641px){#v-views .mb-r{grid-template-columns:118px minmax(0,1fr) auto}.mb-eta{font-size:18px}}
-@media (max-width:640px){#v-views .mb-r{grid-template-columns:100px minmax(0,1fr) auto}}
-#v-views .mb-r .mb-cps{align-self:end}
 
 </style>
 </head>
@@ -6427,7 +6413,8 @@ goTab(true,true);
   }
   function nowMs(v){ return v.pub + age(v) * 3600e3; }
   // 날짜: 올해가 아니면 연도를 붙인다 (27.3/5)
-  function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '.' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
+  // 해가 다르면 연도를 앞에 ("28년 2/24"). 예전 "28.2/24" 는 소수처럼 읽혔다
+  function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '년 ' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
   function dday(v, h){ return dY(nowMs(v) + h * 3600e3, nowMs(v)); }
   // 100만 목록 달성까지 (숫자 먼저): 3일 안은 N시간 N분, 2주 안은 N일 N시간, 그 뒤는 N주 N일 / 그때 날짜 + 오전·오후
   function etaHM(d){
@@ -6831,20 +6818,23 @@ goTab(true,true);
   //   [썸네일] 제목 / 지금 → 목표        | 오른쪽(두 줄 높이): 달성까지 / 남은 시간(크게) / 날짜 오전·오후 무렵
   //   [칩] N 남음 · 추이 ▂▄▆ 강함 · 8주 넘게 (썸네일 아래부터 한 줄)
   //   못 닿거나 기록이 모자라면 오른쪽은 — 와 까닭
+  // 한 줄: [썸네일] [제목·추이 / 지금 → 목표 · 남은 조회수 / 진행 막대] [달성까지 · 남은 시간 · 날짜]
+  //   지금·목표는 둘 다 fmtM 이라 표기가 같다("1,197만 → 1,200만"). 색 강조는 8주 안(in) 줄의 남은 시간·막대에만
   function mbRow(x){
     var v = x.v, ok = in8(x), left = Math.max(0, x.M - x.V), tr = ltTrend(v);
-    var chips = '<span class="mb-cp"><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b>남음</span>'
-      + (tr ? '<span class="mb-cp tr ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
-      + (x.eta != null && !ok ? '<span class="mb-cp far">8주 넘게</span>' : '');
+    var p = Math.max(0, Math.min(1, (x.V - (x.M - VE.MSTEP)) / VE.MSTEP));     // 지난 100만 단위 → 다음 100만 단위 진행률
     var eta = x.eta != null
       ? '<b class="mb-eta">' + etaHM(x.eta).replace(/(시간|분|일|주)/g, '<i>$1</i>') + '</b><small>' + ddayAP(v, x.eta * 24) + ' 무렵</small>'
       : '<b class="mb-eta na">—</b><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
-      + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
-      + '<span class="mb-now"><b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span>'
-      + '</span><span class="mb-cps">' + chips + '</span>'
-      + '<span class="mb-e"><small>달성까지</small>' + eta + '</span></button>';
+      + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
+      + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
+      + '</span>'
+      + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
+      + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
+      + '<span class="mb-pg" aria-hidden="true"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
+      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){

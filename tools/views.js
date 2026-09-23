@@ -365,7 +365,8 @@
   }
   function nowMs(v){ return v.pub + age(v) * 3600e3; }
   // 날짜: 올해가 아니면 연도를 붙인다 (27.3/5)
-  function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '.' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
+  // 해가 다르면 연도를 앞에 ("28년 2/24"). 예전 "28.2/24" 는 소수처럼 읽혔다
+  function dY(ms, ref){ var d = new Date(ms); return (d.getFullYear() !== new Date(ref).getFullYear() ? String(d.getFullYear()).slice(2) + '년 ' : '') + (d.getMonth() + 1) + '/' + d.getDate(); }
   function dday(v, h){ return dY(nowMs(v) + h * 3600e3, nowMs(v)); }
   // 100만 목록 달성까지 (숫자 먼저): 3일 안은 N시간 N분, 2주 안은 N일 N시간, 그 뒤는 N주 N일 / 그때 날짜 + 오전·오후
   function etaHM(d){
@@ -769,20 +770,23 @@
   //   [썸네일] 제목 / 지금 → 목표        | 오른쪽(두 줄 높이): 달성까지 / 남은 시간(크게) / 날짜 오전·오후 무렵
   //   [칩] N 남음 · 추이 ▂▄▆ 강함 · 8주 넘게 (썸네일 아래부터 한 줄)
   //   못 닿거나 기록이 모자라면 오른쪽은 — 와 까닭
+  // 한 줄: [썸네일] [제목·추이 / 지금 → 목표 · 남은 조회수 / 진행 막대] [달성까지 · 남은 시간 · 날짜]
+  //   지금·목표는 둘 다 fmtM 이라 표기가 같다("1,197만 → 1,200만"). 색 강조는 8주 안(in) 줄의 남은 시간·막대에만
   function mbRow(x){
     var v = x.v, ok = in8(x), left = Math.max(0, x.M - x.V), tr = ltTrend(v);
-    var chips = '<span class="mb-cp"><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b>남음</span>'
-      + (tr ? '<span class="mb-cp tr ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">추이' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
-      + (x.eta != null && !ok ? '<span class="mb-cp far">8주 넘게</span>' : '');
+    var p = Math.max(0, Math.min(1, (x.V - (x.M - VE.MSTEP)) / VE.MSTEP));     // 지난 100만 단위 → 다음 100만 단위 진행률
     var eta = x.eta != null
       ? '<b class="mb-eta">' + etaHM(x.eta).replace(/(시간|분|일|주)/g, '<i>$1</i>') + '</b><small>' + ddayAP(v, x.eta * 24) + ' 무렵</small>'
       : '<b class="mb-eta na">—</b><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
-      + '<span class="mb-b"><span class="mb-t">' + esc(v.title) + '</span>'
-      + '<span class="mb-now"><b>' + fmt(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b></span>'
-      + '</span><span class="mb-cps">' + chips + '</span>'
-      + '<span class="mb-e"><small>달성까지</small>' + eta + '</span></button>';
+      + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
+      + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
+      + '</span>'
+      + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
+      + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
+      + '<span class="mb-pg" aria-hidden="true"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
+      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
