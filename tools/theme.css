@@ -765,7 +765,7 @@ body.has-sfloat #totop{bottom:84px}
 .gph{width:100%;aspect-ratio:5/8;flex:none;box-sizing:border-box;padding:5px;border-radius:12px;background:var(--slot2);border:1px solid var(--line)}
 .gph[hidden]{display:none}
 #stage > #hero{width:100%;height:auto;aspect-ratio:5/8}                      /* 뽑은 카드도 자리표시자와 같은 크기 */
-#stage .gtx{margin-top:auto;padding-top:10px}                                 /* READY · 안내 두 줄은 상자 맨 아래에 늘 */
+#stage .gtx{margin:auto 0;padding-top:10px}   /* 카드 아래 남는 공간의 가운데 (맨 아래보다 조금 위, 사용자 지정) */                                 /* READY · 안내 두 줄은 상자 맨 아래에 늘 */
 #stage .gtx .tag{margin-top:0}
 @media (max-width:640px){.gph,#stage > #hero{width:132px;margin:0 auto}}   /* 휴대폰은 상자가 한 줄 전체라 카드 모양 그대로 가운데 */
 .gph-in{height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--line2);background:var(--cell);color:var(--dim)}
