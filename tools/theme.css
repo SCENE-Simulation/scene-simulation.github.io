@@ -2112,31 +2112,32 @@ html.shr-on{overflow:hidden}
 #v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}.og-mine .og-mh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
 .og-mine .og-mh small{font-size:11.5px;font-weight:500;color:var(--ink2)}
 .og-mine .og-mh small span{font-size:inherit;font-weight:600;color:var(--ink)}
-/* 예측의 신: 카운트다운 아날로그 시계 (채점 기다림 카드의 내 예측 상자) */
-.og-clkw{display:flex;align-items:center;gap:14px;margin-top:6px}
-.og-clk{flex:none;width:104px;height:104px;overflow:visible;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
-.og-clkf{fill:#1d1a28;stroke:rgba(205,185,255,.35);stroke-width:1.2}
-.og-clkw2{fill:rgba(169,139,255,.32)}
-.og-clkk{stroke:rgba(255,255,255,.28);stroke-width:.8;stroke-linecap:round}
-.og-clkk.b{stroke:rgba(255,255,255,.7);stroke-width:1.6}
-.og-clkr{fill:none;stroke:rgba(255,255,255,.07);stroke-width:2.6}
-.og-clkp{fill:none;stroke:#6fe0b3;stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(111,224,179,.6))}
-.og-clkh{stroke:var(--og-t);stroke-width:3;stroke-linecap:round}
-.og-clks{transform-origin:50px 50px;animation:ogSec 60s linear infinite reverse}
-.og-clks line{stroke:var(--au);stroke-width:1.1;stroke-linecap:round}
-.og-clks circle{fill:var(--au)}
-.og-clkc{fill:var(--au);stroke:#1d1a28;stroke-width:1.4}
-@keyframes ogSec{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.og-clkt{display:flex;flex-direction:column;gap:2px;min-width:0}
-.og-clkt small{font-size:11.5px;color:var(--ink2)}
-.og-clkt > b{font:800 24px/1.15 "JetBrains Mono",monospace;color:var(--ink);letter-spacing:-.02em;white-space:nowrap}
-.og-clkt > b i{margin:0 1px;font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:var(--ink2)}
-.og-clkv{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
+/* 예측의 신: 카운트다운 플립 시계 (채점 기다림 카드의 내 예측 상자) — 넘기는 카드식 숫자 */
+.og-flw{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.og-flh{font-size:11.5px;color:var(--ink2)}
+.og-fl{display:flex;align-items:flex-start;gap:5px}
+.og-fu{display:flex;flex-direction:column;align-items:center;gap:4px}
+.og-fu.ud{margin-right:9px}   /* 일 칸 뒤는 쌍점 대신 띄움 */
+.og-fu small{font-size:10.5px;color:var(--ink3);letter-spacing:.04em}
+.og-fds{display:flex;gap:3px;perspective:220px}
+.og-fd{position:relative;display:grid;place-items:center;width:30px;height:42px;border-radius:7px;
+  background:linear-gradient(180deg,#34304a 0%,#2a2640 49.5%,#1e1b2c 50.5%,#25213a 100%);
+  box-shadow:0 4px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
+  font:800 26px/1 "JetBrains Mono",monospace;color:#f3eeff;text-shadow:0 1px 0 rgba(0,0,0,.5)}
+.og-fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.06)}   /* 가운데 접힌 선 */
+.og-fd::before{content:"";position:absolute;top:50%;left:-2px;right:-2px;height:6px;margin-top:-3px;border-radius:2px;
+  background:linear-gradient(90deg,#15131e 0 4px,transparent 4px calc(100% - 4px),#15131e calc(100% - 4px))}   /* 양옆 경첩 */
+.og-fd.fl{animation:ogFlip .42s cubic-bezier(.3,.7,.4,1)}
+@keyframes ogFlip{0%{transform:rotateX(-88deg);filter:brightness(1.6)}60%{transform:rotateX(8deg)}100%{transform:none;filter:none}}
+.og-fu.us .og-fd{color:var(--au)}   /* 초는 금색 */
+.og-fc{align-self:flex-start;height:42px;display:grid;place-items:center;font:800 20px/1 "JetBrains Mono",monospace;font-style:normal;color:var(--og-t);opacity:.7;animation:ogBlink 1s steps(2) infinite}
+@keyframes ogBlink{50%{opacity:.2}}
+.og-clkv{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
 .og-clkv i{width:10px;height:3px;border-radius:2px;background:#6fe0b3}
 .og-clkv em{font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:#6fe0b3}
-/* 고른 때가 지남: 빨강 · 멈춤 */
-.og-clkw.over .og-clkf{stroke:rgba(255,110,110,.55)}
-.og-clkw.over .og-clkh{stroke:#ff8a8a}
-.og-clkw.over .og-clkt > b{color:#ff9a9a;font-family:"Pretendard Variable",sans-serif;font-size:20px}
-@media (prefers-reduced-motion:reduce){.og-clks{animation:none}}
-@media (max-width:360px){.og-clk{width:88px;height:88px}.og-clkt > b{font-size:20px}}
+/* 고른 때가 지남: 00 에서 멈추고 빨강 */
+.og-flw.over .og-flh{color:#ff9a9a;font-weight:600}
+.og-flw.over .og-fd{color:#ff8a8a;background:linear-gradient(180deg,#3d2a30 0%,#33232a 49.5%,#261a1f 50.5%,#2e2027 100%)}
+.og-flw.over .og-fc{animation:none;color:#ff8a8a}
+@media (prefers-reduced-motion:reduce){.og-fd.fl,.og-fc{animation:none}}
+@media (max-width:400px){.og-fd{width:25px;height:36px;font-size:22px}.og-fc{height:36px;font-size:17px}.og-fl{gap:3px}.og-fds{gap:2px}}
