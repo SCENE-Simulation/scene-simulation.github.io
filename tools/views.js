@@ -1051,15 +1051,16 @@
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
-    // 맨 아랫줄: 최근 1시간 · 1일 증가 (1시간 전 기록이 없으면 하루 증가 ÷ 24). 남은 조회수는 윗줄 남은 시간 오른쪽에 (좁은 화면에서 잘리지 않게)
-    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 하루 동안 는 조회수">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em> · 1일 <em>+' + fmt(p.g) + '</em></span>';
+    // 맨 아랫줄: 최근 1시간 · 24시간 증가를 작은 상자 두 개로 (1시간 전 기록이 없으면 24시간 증가 ÷ 24). 남은 조회수는 윗줄 남은 시간 오른쪽에 (좁은 화면에서 잘리지 않게)
+    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 24시간 동안 늘어난 조회수">'
+      + '<span class="vd-mc">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em></span><span class="vd-mc">24시간 <em>+' + fmt(p.g) + '</em></span></span>';
     var leftTxt = '<small class="vd-msn">' + rate + '</small>', remain = '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
     if (!WAVE.raf) WAVE.raf = requestAnimationFrame(waveLoop);
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
-      // 줄 순서: [남은 시간 ········ N만 남음] / [날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [1시간 · 1일 증가]
+      // 줄 순서: [남은 시간 ········ N만 남음] / [날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [1시간 · 24시간 증가 상자]
       + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>' + remain + '<small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
       + '<div class="vd-sv">' + bar + leftTxt + '</div></div>';
   }
