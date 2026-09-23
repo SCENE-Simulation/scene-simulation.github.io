@@ -178,7 +178,7 @@
     +       '<div class="stage" id="stage"><img id="hero" alt="">'
     // 뽑기 전(READY) · 이미지가 없는 카드: 빈 img(깨진 그림 표시) 대신 도감의 SOON 칸과 같은 자리표시자
     +         '<div class="gph" id="hero-ph" hidden><div class="gph-in"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-img"/></svg></div></div>'
-    +         '<div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div>'
+    +         '<div class="gtx"><div class="tag" id="tag">READY</div><div class="tag2" id="tag2"></div></div></div>'   // 글자 두 줄은 늘 카드 아래 (뽑은 뒤엔 윗줄만 "진행 중...")
     +       '<div>'
     +         '<div class="gpull">'
     +           '<button type="button" class="gp gp1" id="b1"><span class="gp-l">' + ICON.one + '1장 뽑기</span><span class="gp-s" id="b1s"></span></button>'
@@ -298,9 +298,10 @@
   function show(i, state){
     S.last = [i, state];
     setImg(hero, i); heroEmpty(!G.src[i]);
-    tag.textContent = state;
-    tag.style.color = state.indexOf('NEW') === 0 ? '#4fd8c0' : (state.indexOf('DUP') === 0 ? '#a293c9' : '#f5b23a');
-    tag2.textContent = G.names[i] + (S.counts[i] > 1 ? ' x' + S.counts[i] : '');
+    // 카드 아래 두 줄은 늘 같은 자리 · 같은 모양: 윗줄 상태(READY → 진행 중... → 다 모으면 컴플리트), 아랫줄 안내 그대로 (사용자 지정)
+    var all = owned() === G.N;
+    tag.textContent = all ? '컴플리트' : '진행 중...'; tag.style.color = all ? '#4fd8c0' : '#f5b23a';
+    tag2.textContent = G.ready;
   }
   function flash(i){ var e = cells[i].el; e.classList.add('flash'); setTimeout(function(){ e.classList.remove('flash'); }, 280); }
   function say(t, cls){
