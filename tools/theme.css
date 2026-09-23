@@ -1023,8 +1023,12 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-msn{display:flex;align-items:baseline;gap:10px;margin-top:5px;font-size:11.5px;color:var(--ink2)}
 .vd-msn em{font-size:13px}
 .vd-msl{margin-left:auto;white-space:nowrap}
-/* 최근 1시간 · 1일 증가 (남은 조회수 왼쪽) — "N만 남음"과 같은 글꼴·크기·색, 숫자만 em */
-.vd-msv{white-space:nowrap}
+/* 최근 1시간 · 24시간 증가 (카운터 칸 맨 아랫줄) — 상자 두 개를 나란히 */
+.vd-msv{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+/* 1시간 · 24시간 증가: 칸마다 작은 황금 상자 (라벨은 Pretendard, 숫자는 "N만 남음"과 같은 JetBrains Mono) */
+.vd-mc{display:inline-flex;align-items:baseline;gap:5px;padding:3px 8px;border-radius:7px;line-height:1.25;font-size:11px;color:var(--ink2);
+  border:1px solid rgba(217,164,65,.4);background:linear-gradient(180deg,rgba(240,199,94,.15),rgba(176,125,38,.06));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.vd-ms .vd-mc em{font:800 13px "JetBrains Mono",monospace;font-style:normal;color:var(--au)}
 .vd-ms.soon{border-color:rgba(240,199,94,.75)!important;box-shadow:0 0 0 1px rgba(217,164,65,.14),0 0 22px rgba(217,164,65,.16)}
 .vd-ms.na{border-color:var(--line)!important;background:rgba(255,255,255,.04)!important}
 .vd-s.vd-ms.na .vd-sh span{color:var(--ink2)}
@@ -1407,7 +1411,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-tg.mid{color:#ffb547}.mb-tg.mid rect.on{fill:#ffb547}
 .mb-tg.lo{color:var(--ink2)}.mb-tg.lo rect.on{fill:var(--ink2)}
 /* 진행 막대: 지난 100만 단위 → 다음 100만 단위 */
-.mb-pg{height:5px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.mb-pg{display:block;height:5px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}   /* span 이라 block 이 없으면 높이가 0 이 되어 막대가 사라진다 */
 /* 채운 부분이 은은하게 흐른다 — 흰 띠를 얹지 않고 **막대 색의 밝은 버전**을 그라데이션에 넣고 위치만 움직이는 방식
    (로딩 막대에서 흔히 쓰는 shimmer). 양 끝이 같은 색(c1)인 무늬를 배경 두 장 폭(200%)으로 깔고 **정확히 한 장만큼** 옮기므로
    한 바퀴가 끝나도 이어진다 (예전엔 220% 무늬를 240% 옮겨 매 바퀴 툭 끊겼다). 줄마다 조금씩 늦게 시작(--sw) */
