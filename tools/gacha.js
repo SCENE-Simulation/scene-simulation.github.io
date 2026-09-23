@@ -364,7 +364,7 @@
     var dEl = $('s-c');
     dEl.textContent = (diff > 0 ? '+' : '') + won(diff);
     dEl.style.color = diff > 0 ? 'var(--pink)' : 'var(--mint)';
-    $('s-cl').textContent = '평균 ' + won(meanCost()) + '원 대비(원)';
+    $('s-cl').textContent = '평균(' + won(meanCost()) + '원) 대비';
     $('gp-n').textContent = o + ' / ' + N + '종';
     $('gp-pc').textContent = Math.floor(o / N * 100) + '%';      // 26/27 이 100% 로 보이지 않게 내림
     $('gp-r').textContent = rem ? '남은 ' + rem + '종 · 다음 1장이 새 카드일 확률 ' + Math.round(rem / N * 100) + '%' : '컴플리트!';
@@ -390,7 +390,9 @@
   // ---------- 완성 기록 ----------
   // 405빵은 예전 시뮬레이터가 쓰던 키를 그대로 써서 지난 기록을 잇는다
   function recKey(){ return G.id === 'cu405' ? 'bread27' : 'gacha:rec:' + G.id; }
-  function loadRec(){ try { return JSON.parse(localStorage.getItem(recKey()) || '[]'); } catch (e){ return []; } }
+  // 저장된 기록 목록: 모양이 깨진 줄(null · 숫자 아님)은 버린다 — 예전엔 한 줄 때문에 시뮬레이터 · 미니게임 페이지가 통째로 안 떴다
+  function recList(key, ok){ try { var a = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(a) ? a.filter(function(x){ return x && typeof x === 'object' && ok(x); }) : []; } catch (e){ return []; } }
+  function loadRec(){ return recList(recKey(), function(x){ return isFinite(x.n) && isFinite(x.w); }); }
   function showRec(){
     var r = loadRec(), el = $('rec');
     if (!r.length){ el.textContent = '완성 기록 없음'; return; }
@@ -415,13 +417,15 @@
     var diff = S.spent - meanCost(), qRank = pctTxt(at(G.curve, S.pulls));
     box.hidden = false;
     box.innerHTML = '<div class="r1">상위 <span class="fig">' + rank + '</span>'
-      + '<span class="tagx ' + (pu ? 'pure' : 'mix') + '">[' + (pu ? '순수 운빨' : '교환 및 구매 이용') + ']</span></div>'
-      + '<div class="r2">총 ' + won(S.spent) + '원(' + won(S.pulls) + '장' + (pu ? '' : ' + 교환·중고') + ')으로 완성했습니다. '
+      + '<span class="tagx ' + (pu ? 'pure' : 'mix') + '">[' + (pu ? '순수 운빨' : '교환·중고 이용') + ']</span></div>'
+      // 가위바위보에서 져 벌금만 낸 판(교환 0회)도 카드는 뽑기로만 모은 판이지만, 총액에 벌금이 들어가므로 괄호에 같이 적는다
+      //   (예전엔 '105장' 인데 총 267,500원이라 숫자가 안 맞아 보였음)
+      + '<div class="r2">총 ' + won(S.spent) + '원(' + won(S.pulls) + '장' + (pu ? (S.penalty ? ' + 교환 벌금 ' + won(S.penalty) + '원' : '') : ' + 교환·중고') + ')으로 완성했습니다. '
       + '뽑기만 해서 모을 때의 총비용 분포에서 이 금액 이하로 끝날 확률이 ' + rank + '이므로 상위 ' + rank + '입니다. 적게 쓸수록 수치가 낮아집니다. '
-      + '대괄호는 이번 판의 진행 방식으로, ' + (pu ? '뽑기만 사용했습니다.' : '교환과 중고 구매를 함께 사용해 지출을 줄인 판입니다.') + '</div>'
+      + '대괄호는 이번 판의 진행 방식입니다' + (pu ? '(카드는 뽑기로만 모음).' : '(뽑기 외에 교환·중고 구매도 사용).') + '</div>'
       + '<div class="r3">평균 ' + won(meanCost()) + '원(' + Math.round(G.mean) + '장) 대비 ' + (diff > 0 ? '+' : '') + won(diff) + '원 · 1종당 '
       + won(S.spent / G.N) + '원 · 장수 기준 확률 ' + qRank
-      + (pu ? '' : ' · 교환 성공 ' + S.trades + '회(가위바위보 ' + S.rpsW + '승 ' + S.rpsL + '패 ' + S.rpsD + '무, 벌금 ' + won(S.penalty) + '원), 중고 구매 ' + S.buys + '회')
+      + (pu ? (S.penalty ? ' · 교환 실패 벌금 ' + won(S.penalty) + '원(가위바위보 ' + S.rpsL + '패)' : '') : ' · 교환 성공 ' + S.trades + '회(가위바위보 ' + S.rpsW + '승 ' + S.rpsL + '패 ' + S.rpsD + '무, 벌금 ' + won(S.penalty) + '원), 중고 구매 ' + S.buys + '회')
       + '</div>'
       + '<button type="button" class="g-go" data-go="ana">그래프로 분석 보기 →</button>';
   }
@@ -874,7 +878,7 @@
   // open: 카드 고르기 목록을 펼쳤는지. 처음엔 펼쳐 두고, 카드를 고르면 접는다
   function mini(){ return MINI[G.id] || (MINI[G.id] = { target: null, res: null, open: true }); }
   function mgKey(){ return 'gacha:mini:' + G.id; }
-  function mgLoad(key){ try { return JSON.parse(localStorage.getItem(key || mgKey()) || '[]'); } catch (e){ return []; } }
+  function mgLoad(key){ return recList(key || mgKey(), function(x){ return isFinite(x.n) && x.i === Math.floor(x.i) && x.i >= 0 && x.i < G.N; }); }
   function within(n){ return 1 - Math.pow(1 - 1 / G.N, n); }
   function mgMedian(){ return Math.ceil(Math.log(0.5) / Math.log(1 - 1 / G.N)); }
   function gradeOf(n){

@@ -30,6 +30,7 @@ jobs:
         with:
           path: site
           sparse-checkout: tools
+          persist-credentials: false   # 스크립트만 읽는 checkout — 쓰기 토큰을 남기지 않는다 (push 는 아래 store 에서만)
 
       - name: 기록 (data 브랜치)
         uses: actions/checkout@v4

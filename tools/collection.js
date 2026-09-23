@@ -26,6 +26,8 @@
 
   function won(n){ return (n || 0).toLocaleString('ko-KR'); }
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  // 을/를: 마지막 글자에 받침이 있으면 '을' ("중고 구매를" · "확정 구매를" · "교환을")
+  function eul(w){ var s = String(w), c = s.charCodeAt(s.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? '을' : '를'; }
   function two(n){ return n < 10 ? '0' + n : '' + n; }
   function when(t){ var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
   function newId(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -107,15 +109,23 @@
       render();
       if (window.toastSG) window.toastSG('저장했습니다', '기록이 이 브라우저에 저장되었습니다');
     }
+    // 저장된 기록을 읽을 때 모양을 검사한다 — 깨진 줄(null · 이상한 카드 번호 · 숫자가 아닌 수량)이 하나라도 있으면
+    //   예전엔 도감 페이지 전체가 안 나오거나 HTML 로 들어갔다. 줄 모양은 { id, t, k, i(카드 번호 | null), d(수량), w(금액) }
+    function cleanEntries(a){
+      return (Array.isArray(a) ? a : []).filter(function(e){
+        return e && typeof e === 'object' && typeof e.k === 'string' && isFinite(e.d) && (e.i == null || (e.i === Math.floor(e.i) && e.i >= 0 && e.i < N));
+      }).map(function(e){ return { id: String(e.id), t: +e.t || 0, k: e.k, i: e.i == null ? null : e.i, d: +e.d, w: +e.w || 0 }; });
+    }
+    function cleanAch(o){ return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
     function revert(){
       var d = load(KEY, null);
-      ENTRIES = (d && d.entries) || []; ACH = (d && d.ach) || {};
+      ENTRIES = cleanEntries(d && d.entries); ACH = cleanAch(d && d.ach);
       PEND = []; EDITS = 0; EDITING = null;
       render();
     }
     function init(){
       var d = load(KEY, null);
-      ENTRIES = (d && d.entries) || []; ACH = (d && d.ach) || {};
+      ENTRIES = cleanEntries(d && d.entries); ACH = cleanAch(d && d.ach);
       savedAt = d && d.updated ? Date.parse(d.updated) : null;
     }
 
@@ -190,7 +200,7 @@
       ACHDEF.forEach(function(a){
         if (!ACH[a.id] && a.t(x)) {
           ACH[a.id] = Date.now();
-          if (!silent && window.toastSG) window.toastSG('칭호 획득 — ' + a.n, a.d);
+          if (!silent && window.toastSG) window.toastSG('칭호 획득 — ' + esc(a.n), esc(a.d));
         }
       });
     }
@@ -269,7 +279,7 @@
       var h = '<div class="lrow' + (pend ? ' pend' : '') + (EDITING === e.id ? ' editing' : '') + '">'
         + '<span class="tg">' + (pend ? '저장 전' : when(e.t)) + '</span>'
         + '<span class="lt">' + esc(mode ? mode.label : e.k) + (e.d > 0 ? ' +' : ' −') + Math.abs(e.d) + what + w + '</span>'
-        + '<button type="button" class="led" data-edit="' + e.id + '">' + (EDITING === e.id ? '닫기' : '수정') + '</button></div>';
+        + '<button type="button" class="led" data-edit="' + esc(e.id) + '">' + (EDITING === e.id ? '닫기' : '수정') + '</button></div>';
       if (EDITING !== e.id) return h;
       var unit = e.d ? Math.round(Math.abs(e.w || 0) / Math.abs(e.d)) : 0;
       return h + '<div class="ledit">'
@@ -413,7 +423,7 @@
       var rows = !gr.length ? [row1] : nc(row1) + nc(gr) <= 10 ? [row1.concat(gr)] : [row1, gr];
       var pcN = cfg.cards.filter(function(x){ return !x.g; }).length;
       var parts = ['포토카드 ' + pcN + '종'].concat(GROUPS.filter(function(g){ return groupIds(g.k).length; }).map(function(g){ return g.n + ' ' + groupIds(g.k).length + '종'; }));
-      var others = cfg.modes.slice(1).filter(function(m){ return m.k !== 'adj'; }).map(function(m){ return m.label + ' ' + ledger(m.k); }).join(' · ');
+      var others = cfg.modes.slice(1).filter(function(m){ return m.k !== 'adj'; }).map(function(m){ return m.label + ' ' + ledger(m.k) + '장'; }).join(' · ');   // 기타 방식(교환 · 중고 등)은 수량 합 = 카드 장수
       return { kind: '포카 컬렉션 북', title: cfg.title, sub: (p[1] ? p[0] + '년 ' + (+p[1]) + '월 출시 · ' : '') + parts.join(' · '), at: Date.now(), file: 'sendungi-' + cfg.id, hmax: 280,
         stats: [{ k: '보유 종수', v: o + ' / ' + N, bar: o / N }, { k: main.label, v: won(ledger(main.k)) + '회', s: others },
           { k: '누적 금액', v: won(money()) + '원', s: '모든 구매 합계' }, { k: '중복', v: Math.max(0, c.reduce(function(a, b){ return a + b; }, 0) - o) + '장', s: '여분 카드' }],
@@ -492,7 +502,7 @@
       var vmode = fit.filter(function(m){ return m['var']; })[0];
       if (vmode && dir > 0) h += '<div class="mqty mup"><span class="lb">' + esc(vmode.label) + ' 금액 (장당)</span>'
         + '<span class="upw"><input type="text" inputmode="numeric" data-vprice value="' + won(state.price[vmode.k] || 0) + '"><span>원</span></span>'
-        + '<span class="uh">' + esc(vmode.label) + '을 고를 때만 적용됩니다.</span></div>';
+        + '<span class="uh">' + esc(vmode.label) + eul(vmode.label) + ' 고를 때만 적용됩니다.</span></div>';
       h += '<div class="msrc">' + fit.map(function(m){
           var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : tbd(m) ? '가격 미정' : '추가 비용 없음');
           return '<button type="button" data-pickmode="' + m.k + '">' + esc(m.label) + (dir > 0 ? '' : ' 취소') + '<small>' + sub + '</small></button>';

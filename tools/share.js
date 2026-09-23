@@ -336,7 +336,7 @@
       pill(x, RX + aw + 16, ry - 34, d.done.grade, d.done.gc, 'rgba(255,255,255,.05)', d.done.gc, 20);
     } else {
       font(x, 800, 30); x.fillStyle = d.st === 'wait' ? OG.pt : C.ink3;
-      x.fillText(d.st === 'wait' ? '채점 기다리는 중' : '채점하지 않음', RX, ry - 8);
+      x.fillText(d.st === 'wait' ? '채점 기다림' : '채점 안 함', RX, ry - 8);   // 기록 카드 상태 글자와 같게
     }
 
     // 내 예측 (보라 상자): 고른 때를 크게, 아래에 남긴 기록 3칸
@@ -380,7 +380,7 @@
     }
 
     // 발
-    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText('정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)', P, HH - 30);
+    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText('정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)', P, HH - 30);
     font(x, 700, 20, MONO); x.fillStyle = OG.pt; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
     return cv;
   }
@@ -538,7 +538,7 @@
     oracle: function(d){
       var text = [d.title, d.M, d.guess, d.note || ''].concat(d.mine.map(function(r){ return r.join(''); }))
         .concat(d.done ? [d.done.acc, d.done.grade, d.done.actual, d.done.err] : []).concat(d.wait ? [d.wait.now, d.wait.goal, d.wait.left] : [])
-        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)';
+        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다림 채점 안 함 등록 일시 등록 시 조회수 내다본 시간 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
         'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
     },

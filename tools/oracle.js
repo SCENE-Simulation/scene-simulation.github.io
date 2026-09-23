@@ -56,7 +56,8 @@
   var LOG = (function(){
     try {
       var a = JSON.parse(localStorage.getItem(KEY) || '[]');
-      return Array.isArray(a) ? a.filter(function(x){ return x && x.id && x.M > 0 && x.g > 0 && x.at > 0; }) : [];
+      // 모양이 이상한 줄은 버린다 (시각은 2096년 전 · 목표는 100억 아래 — 너무 큰 값이 LED 숫자 그리기를 깨뜨리지 않게)
+      return Array.isArray(a) ? a.filter(function(x){ return x && typeof x.id === 'string' && x.M > 0 && x.M < 1e10 && x.g > 0 && x.g < 4e12 && x.at > 0 && x.at < 4e12; }) : [];
     } catch (e){ return []; }
   })();
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(LOG)); } catch (e){} }
@@ -112,7 +113,7 @@
   function pages(){
     return '<div class="og-pt" role="tablist">'
       + '<button type="button" role="tab" data-og-pg="new" class="' + (mode === 'new' ? 'on' : '') + '" aria-selected="' + (mode === 'new') + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><span><b>예측하기</b><small>즐겨찾기 영상의 돌파 때 고르기</small></span></button>'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><span><b>예측하기</b><small>즐겨찾기 영상의 돌파 시각 고르기</small></span></button>'
       + '<button type="button" role="tab" data-og-pg="log" class="' + (mode === 'log' ? 'on' : '') + '" aria-selected="' + (mode === 'log') + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-log"/></svg><span><b>내 예측 기록 <em id="og-jn">' + LOG.length + '</em></b><small>남긴 예측 · 채점 결과</small></span></button></div>';
   }
@@ -208,21 +209,21 @@
       + '<div class="og-gw"></div></div>'
       + '<div class="og-aip" data-og-aip></div>';                // 조회수 예측기(③ 추세 곡선)의 예상 — 사용자 요청으로 폼 위에 보여 줌 (live 가 채움)
     if (have) h += '<div class="og-have"><span>이 목표는 이미 예측했습니다</span><b>' + whenTxt(have.g) + '</b>'
-      + '<small>결과는 아래 “내 예측 기록”에서 볼 수 있습니다.</small></div>';
+      + '<small>결과는 위의 [내 예측 기록]에서 볼 수 있습니다.</small></div>';
     else h += '<div class="og-f"><label class="og-lb" for="' + id + '">' + V.fmtM(d.M) + '을 넘을 때</label>'
       + '<input type="datetime-local" id="' + id + '" data-og-in value="' + d.val + '" min="' + toLocal(Date.now()) + '" step="60">'
       + '<div class="og-st">' + [[-D, '−1일'], [-H, '−1시간'], [H, '+1시간'], [D, '+1일']].map(function(s){
           return '<button type="button" data-og-step="' + s[0] + '">' + s[1] + '</button>';
         }).join('') + '</div>'
       + '<p class="og-live" data-og-live></p>'
-      + '<button type="button" class="og-go" data-og-go>이 때로 예측 남기기</button></div>';
+      + '<button type="button" class="og-go" data-og-go>이때로 예측 남기기</button></div>';
     return h + '</article>';
   }
   // 입력한 때 → 안내 줄 · 남기기 버튼
   function check(val){
     var g = fromLocal(val), now = Date.now();
     if (isNaN(g)) return { ok: false, t: '날짜와 시각을 골라 주세요' };
-    if (g <= now + 60e3) return { ok: false, t: '지금보다 뒤의 때를 골라 주세요' };
+    if (g <= now + 60e3) return { ok: false, t: '지금 이후의 시각을 골라 주세요' };
     if (g > now + 730 * D) return { ok: false, t: '2년 안으로 골라 주세요' };
     return { ok: true, g: g, t: '지금부터 <b>' + durTxt(g - now) + '</b> 뒤 · ' + whenTxt(g) };
   }
@@ -357,7 +358,7 @@
       + [['all', '전체', J.length], ['wait', '채점 기다림', W.length], ['done', '채점 끝', Dn.length]].map(function(t){
           return '<button type="button" role="tab" data-og-lt="' + t[0] + '" class="' + (lt === t[0] ? 'on' : '') + '" aria-selected="' + (lt === t[0]) + '">' + t[1] + ' <b>' + t[2] + '</b></button>';
         }).join('') + '</div>'
-      + (show.length ? '<div class="og-cards og-lgrid">' + show.map(row).join('') + '</div>' : '<p class="og-none">이 칸에 해당하는 예측이 없습니다.</p>');
+      + (show.length ? '<div class="og-cards og-lgrid">' + show.map(row).join('') + '</div>' : '<p class="og-none">이 탭에 해당하는 예측이 없습니다.</p>');
   }
   // 기록 카드 — 예측하기 카드와 같은 짜임: [썸네일 · 제목 · 상태] / 그래프 / 예측기 예상(민트) / 내 예측(보라) / 지우기
   function row(o){
@@ -401,7 +402,7 @@
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
-    else if (j.st === 'void') h += '<small>예측을 남기기 전(마지막 기록과 남긴 때 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
+    else if (j.st === 'void') h += '<small>예측을 등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
     else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
     h += '</div><div class="og-lf">' + (window.SGShare ? '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>' : '');
     // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
@@ -418,7 +419,7 @@
     var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
     var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '못 닿는다고 봄' : whenTxt(x.ai);
     var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
-      mine: [['남긴 때', whenTxt(x.at)], ['그때 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
+      mine: [['등록 일시', whenTxt(x.at)], ['등록 시 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
     if (j.st === 'done'){
       d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k], actual: actual(j.c),
         err: Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측' };
@@ -478,7 +479,7 @@
 
   // ----- 채점 방법 -----
   function rules(){
-    return '<div class="og-rule"><p>정확도 = 100% − <b>오차</b> ÷ <b>기간</b>. 오차는 고른 때와 실제로 넘은 때의 차이, 기간은 예측을 남긴 때부터 실제로 넘은 때까지입니다. '
+    return '<div class="og-rule"><p>정확도 = 100% − <b>오차</b> ÷ <b>기간</b>. 오차는 고른 때와 실제로 넘은 때의 차이, 기간은 예측을 등록한 때부터 실제로 넘은 때까지입니다. '
       + '멀리 내다본 예측일수록 같은 오차라도 덜 깎입니다 (예: 10일 전에 남긴 예측이 하루 빗나가면 90%).</p>'
       + '<p>실제로 넘은 때는 15분마다 모은 조회수 기록 두 개 사이를 곧게 이어 추정합니다. 조회수 예측기가 그때 계산한 예상(③ 추세 곡선)도 같은 식으로 채점해 누가 더 가까웠는지 겨룹니다.</p>'
       + '<div class="og-grs">' + GRADES.map(function(g, i){

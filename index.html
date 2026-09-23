@@ -4,11 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>센둥이 시뮬레이터</title>
-<meta name="description" content="리센느 포토카드 뽑기 시뮬레이터와 실물 컬렉션 북">
+<meta name="description" content="리센느 포토카드 · 굿즈 컬렉션 북, 포토카드 뽑기 시뮬레이터, 유튜브 조회수 예측기와 예측 게임을 모은 사이트">
 <meta name="theme-color" content="#1c1c1e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e96387'/%3E%3Ctext x='32' y='45' font-size='34' font-weight='800' text-anchor='middle' fill='%23fff' font-family='sans-serif'%3E%EC%84%BC%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="센둥이 시뮬레이터">
+<meta property="og:title" content="센둥이 시뮬레이터">
+<meta property="og:description" content="리센느 포토카드 · 굿즈 컬렉션 북, 포토카드 뽑기 시뮬레이터, 유튜브 조회수 예측기와 예측 게임을 모은 사이트">
+<meta property="og:url" content="https://scene-simulation.github.io/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" integrity="sha384-2nNKoOPayicGa+aRguOQuiZP+RqQ4G3jalfDeOgftkKD7zBM2gJXTwcFqCZltdv0" crossorigin="anonymous">
 <style>
 :root{
   /* 표면 */
@@ -2612,7 +2620,7 @@ html.shr-on{overflow:hidden}
     <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
     <symbol id="i-orb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="7"/><path d="M9 6.8a3.6 3.6 0 0 1 3-1.6"/><path d="M8.2 15.9 6.5 20.5h11l-1.7-4.6"/></symbol>
-    <symbol id="i-chev"viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
 
@@ -2737,7 +2745,7 @@ html.shr-on{overflow:hidden}
 <p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종이, 5명 × 4종 = 20종, 여기에 스페셜 카드 7종을 더해 27종입니다.</p>
 
 <div class="tabs">
-  <button id="tab-col" class="on">실물 컬랙션 북</button>
+  <button id="tab-col" class="on">실물 컬렉션 북</button>
   <button id="tab-sim">뽑기 시뮬레이터</button>
 </div>
 <div id="page-sim" hidden>
@@ -2849,7 +2857,7 @@ var SRC=[];
 function isPix(k){return !PHOTOS[k];}
 function setImg(el,k){el.src=SRC[k];el.className=(isPix(k)?'pix':'')+(isLand(k)?' land':'');}
 
-function won(v){return v.toLocaleString('ko-KR');}
+function won(v){return (+v||0).toLocaleString('ko-KR');}   // 숫자만 (저장값이 문자열이면 HTML 에 그대로 들어가던 것)
 function H(k){var s=0;for(var i=1;i<=k;i++)s+=1/i;return s;}
 
 // 포토카드 뽑기 시뮬레이터(tools/gacha.js)가 405빵 뽑기를 만들 때 쓰는 카드 데이터.
@@ -2897,7 +2905,7 @@ function logText(e){
   if(e.k==='reset') return '전체 초기화';
   var what=(e.i==null)?'':' <b>'+cardName(e.i)+'</b>';
   var give=(e.give&&e.give.length)?' <span class="gv">↔ 내줌 '+e.give.map(cardName).join(', ')+'</span>':'';
-  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원'+(Math.abs(e.d)>1?' (장당 '+won(unitOf(e))+')':'')+'</span>':'';
+  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원'+(Math.abs(e.d)>1?' (장당 '+won(unitOf(e))+'원)':'')+'</span>':'';
   return kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+give+money+(e.ed?' <span class="edt">수정됨</span>':'');
 }
 function editForm(e){
@@ -3062,7 +3070,7 @@ function colRender(){
     var own=0,tot=0;
     g.ids.forEach(function(i){tot+=COL[i]; if(COL[i]>0)own++;});
     g.v.textContent=own+'/'+g.ids.length;
-    g.s.textContent=won(tot)+'장'+(tot>own?' · 중복 '+won(tot-own):'');
+    g.s.textContent=won(tot)+'장'+(tot>own?' · 중복 '+won(tot-own)+'장':'');
     g.el.classList.toggle('full',own===g.ids.length);
   });
 }
@@ -3166,7 +3174,7 @@ var ACHDEF=[
   {id:'buy30',   n:'당뇨병 주의',        d:'빵 30개 구매',                  c:'#ecd25b', r:4, t:function(c){return c.buy>=30;}},
   // 거래 및 커뮤니티
   {id:'us1',     n:'혹시... 당근?',      d:'중고 구매 첫 거래',              c:'#47d19a', r:1, t:function(c){return c.used>=1;}},
-  {id:'tr1',     n:'나눔인줄 아셨어요?',  d:'첫 교환',                      c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
+  {id:'tr1',     n:'나눔인 줄 아셨어요?',  d:'첫 교환',                      c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
   {id:'us5',     n:'당근이 체질',        d:'중고 구매 5회',                  c:'#47d19a', r:2, t:function(c){return c.used>=5;}},
   {id:'tr5',     n:'교환의 고수',        d:'교환 5회',                      c:'#47d19a', r:2, t:function(c){return c.trade>=5;}},
   {id:'tr10',    n:'이 구역의 보부상',    d:'교환 10회',                     c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
@@ -3176,8 +3184,8 @@ var ACHDEF=[
   // 히든 및 기믹 — 얻기 전에는 조건을 가린다
   {id:'dup6',    n:'또 너야?',           d:'같은 카드 6장',                  c:'#a080d0', r:5, t:function(c){return c.maxDup>=6;}},
   {id:'dup10',   n:'아 복사버그 ㅡㅡ',    d:'같은 카드 10장',                 c:'#a080d0', r:5, t:function(c){return c.maxDup>=10;}},
-  {id:'thrifty', n:'확율의 여신의 사도의 운', d:'20만 원 이하로 27종 완성',     c:'#a080d0', r:5, t:function(c){return c.own>=27&&c.money<=200000;}},
-  {id:'nosp20',  n:'이거 모두 같은 확률인거 아시죠?', d:'연속 20회 스페셜 카드 미출현', c:'#a080d0', r:5, t:function(c){return c.nosp>=20;}}
+  {id:'thrifty', n:'확률의 여신의 사도의 운', d:'20만 원 이하로 27종 완성',     c:'#a080d0', r:5, t:function(c){return c.own>=27&&c.money<=200000;}},
+  {id:'nosp20',  n:'이거 모두 같은 확률인 거 아시죠?', d:'연속 20회 스페셜 카드 미출현', c:'#a080d0', r:5, t:function(c){return c.nosp>=20;}}
 ];
 
 function achCtx(){
@@ -3597,16 +3605,25 @@ function colSnap(){
     strk:{nodup:STRK.nodup,nosp:STRK.nosp,bNodup:STRK.bNodup,bNosp:STRK.bNosp},updated:new Date().toISOString()};
 }
 function colLoad(d){
-  for(var i=0;i<N;i++)COL[i]=(d&&d.counts&&d.counts[i])||0;
-  var g=d&&d.ledger;
+  // 저장값 검사: 숫자 칸은 숫자로, 카드 번호(i · give)는 0~N-1 정수만, 깨진 줄(null 등)은 버림
+  //   — 예전엔 깨진 줄 하나로 기록 화면이 멈추거나(초기화 버튼까지 안 됨) 값이 HTML 에 그대로 들어갔다
+  function num(x,max){ x=Math.floor(+x); return isFinite(x)?Math.max(0,Math.min(max,x)):0; }
+  function okIdx(x){ return x===Math.floor(x)&&x>=0&&x<N; }
+  var cn=d&&Array.isArray(d.counts)?d.counts:[];
+  for(var i=0;i<N;i++)COL[i]=num(cn[i],999);
+  var g=d&&d.ledger&&typeof d.ledger==='object'?d.ledger:null;
   if(g){
-    LG.buy=g.buy||0; LG.trade=g.trade||0;
-    var up=g.uprice==null?15000:g.uprice;
+    LG.buy=num(g.buy,9999); LG.trade=num(g.trade,9999);
+    var up=g.uprice==null?15000:num(g.uprice,1e8);
     // 예전 기록(중고 단가 하나)은 그 단가로 건수만큼 옮김
-    LG.usedList=g.usedList?g.usedList.slice():Array.apply(null,Array(g.used||0)).map(function(){return {i:null,p:up};});
+    LG.usedList=Array.isArray(g.usedList)?g.usedList.filter(function(u){ return u&&typeof u==='object'&&(u.i==null||okIdx(u.i)); }).map(function(u){ return {i:u.i==null?null:u.i,p:num(u.p,1e8),g:u.g}; })
+      :Array.apply(null,Array(num(g.used,9999))).map(function(){return {i:null,p:up};});
   }else{ LG.buy=d&&d.counts?colTotals().cnt:0; LG.trade=0; LG.usedList=[]; }
   LG.used=LG.usedList.length;
-  LOG=(d&&d.log)?d.log.slice(-200):[];
+  LOG=(d&&Array.isArray(d.log))?d.log.filter(function(e){
+    return e&&typeof e==='object'&&typeof e.k==='string'&&(e.i==null||okIdx(e.i))&&(e.give==null||(Array.isArray(e.give)&&e.give.every(okIdx)));
+  }).slice(-200):[];
+  LOG.forEach(function(e){ e.d=+e.d||0; e.w=+e.w||0; e.t=+e.t||0; if(e.id!=null) e.id=String(e.id).replace(/[^\w.\-]/g,''); });
   LOG.forEach(function(e,n){ if(!e.id) e.id='L'+n+'_'+e.t; });
   ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
   var sk=(d&&d.strk)||{};   // 예전 기록에는 없으므로 0부터 센다
@@ -3703,7 +3720,7 @@ function colBuildGrid(){
     var box=document.createElement('div'); box.className='set'+(isSp?' sp':'');
     var hd=document.createElement('div'); hd.className='shead';
     hd.innerHTML='<span class="chip" style="background:'+color+'"></span><b>'+title+'</b>'+
-      '<span class="vs">'+(isSp?'5인 전원 수록 7종':'같은 멤버 4종')+'</span>'+
+      '<span class="vs">'+(isSp?'스페셜 7종':'같은 멤버 4종')+'</span>'+
       '<span class="pr num" data-prog="'+ids.join(',')+'">0/'+ids.length+'</span>';
     box.appendChild(hd);
     var por=[],lan=[];
@@ -3736,7 +3753,7 @@ SG405.share=function(){
   for(var m=0;m<MCOUNT;m++){var cs=[];for(var v=0;v<VPER;v++)cs.push(cd(m*VPER+v)); gs.push({name:MEM[m].n,color:MEM[m].c,cols:2,cards:cs});}
   for(var i=MTOTAL;i<N;i++)sp.push(cd(i));
   return {kind:'포카 컬렉션 북', title:'CU 리센느 405빵 콜라보', sub:'2026년 9월 출시 · 포토카드 27종 (멤버 20 + 스페셜 7)', at:Date.now(), file:'sendungi-cu405',
-    stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+' · 중고 '+LG.used},
+    stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+'장 · 중고 '+LG.used+'장'},
       {k:'누적 금액',v:won(totalWon())+'원',s:'빵 + 중고 구매'},{k:'중복',v:t.dup+'장',s:'여분 카드'}],
     rows:[gs,[{name:'스페셜',color:'#f5b23a',cols:7,cards:sp}]],
     ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length}};
@@ -3896,6 +3913,8 @@ goTab(true,true);
 
   function won(n){ return (n || 0).toLocaleString('ko-KR'); }
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  // 을/를: 마지막 글자에 받침이 있으면 '을' ("중고 구매를" · "확정 구매를" · "교환을")
+  function eul(w){ var s = String(w), c = s.charCodeAt(s.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? '을' : '를'; }
   function two(n){ return n < 10 ? '0' + n : '' + n; }
   function when(t){ var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
   function newId(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -3977,15 +3996,23 @@ goTab(true,true);
       render();
       if (window.toastSG) window.toastSG('저장했습니다', '기록이 이 브라우저에 저장되었습니다');
     }
+    // 저장된 기록을 읽을 때 모양을 검사한다 — 깨진 줄(null · 이상한 카드 번호 · 숫자가 아닌 수량)이 하나라도 있으면
+    //   예전엔 도감 페이지 전체가 안 나오거나 HTML 로 들어갔다. 줄 모양은 { id, t, k, i(카드 번호 | null), d(수량), w(금액) }
+    function cleanEntries(a){
+      return (Array.isArray(a) ? a : []).filter(function(e){
+        return e && typeof e === 'object' && typeof e.k === 'string' && isFinite(e.d) && (e.i == null || (e.i === Math.floor(e.i) && e.i >= 0 && e.i < N));
+      }).map(function(e){ return { id: String(e.id), t: +e.t || 0, k: e.k, i: e.i == null ? null : e.i, d: +e.d, w: +e.w || 0 }; });
+    }
+    function cleanAch(o){ return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
     function revert(){
       var d = load(KEY, null);
-      ENTRIES = (d && d.entries) || []; ACH = (d && d.ach) || {};
+      ENTRIES = cleanEntries(d && d.entries); ACH = cleanAch(d && d.ach);
       PEND = []; EDITS = 0; EDITING = null;
       render();
     }
     function init(){
       var d = load(KEY, null);
-      ENTRIES = (d && d.entries) || []; ACH = (d && d.ach) || {};
+      ENTRIES = cleanEntries(d && d.entries); ACH = cleanAch(d && d.ach);
       savedAt = d && d.updated ? Date.parse(d.updated) : null;
     }
 
@@ -4060,7 +4087,7 @@ goTab(true,true);
       ACHDEF.forEach(function(a){
         if (!ACH[a.id] && a.t(x)) {
           ACH[a.id] = Date.now();
-          if (!silent && window.toastSG) window.toastSG('칭호 획득 — ' + a.n, a.d);
+          if (!silent && window.toastSG) window.toastSG('칭호 획득 — ' + esc(a.n), esc(a.d));
         }
       });
     }
@@ -4139,7 +4166,7 @@ goTab(true,true);
       var h = '<div class="lrow' + (pend ? ' pend' : '') + (EDITING === e.id ? ' editing' : '') + '">'
         + '<span class="tg">' + (pend ? '저장 전' : when(e.t)) + '</span>'
         + '<span class="lt">' + esc(mode ? mode.label : e.k) + (e.d > 0 ? ' +' : ' −') + Math.abs(e.d) + what + w + '</span>'
-        + '<button type="button" class="led" data-edit="' + e.id + '">' + (EDITING === e.id ? '닫기' : '수정') + '</button></div>';
+        + '<button type="button" class="led" data-edit="' + esc(e.id) + '">' + (EDITING === e.id ? '닫기' : '수정') + '</button></div>';
       if (EDITING !== e.id) return h;
       var unit = e.d ? Math.round(Math.abs(e.w || 0) / Math.abs(e.d)) : 0;
       return h + '<div class="ledit">'
@@ -4283,7 +4310,7 @@ goTab(true,true);
       var rows = !gr.length ? [row1] : nc(row1) + nc(gr) <= 10 ? [row1.concat(gr)] : [row1, gr];
       var pcN = cfg.cards.filter(function(x){ return !x.g; }).length;
       var parts = ['포토카드 ' + pcN + '종'].concat(GROUPS.filter(function(g){ return groupIds(g.k).length; }).map(function(g){ return g.n + ' ' + groupIds(g.k).length + '종'; }));
-      var others = cfg.modes.slice(1).filter(function(m){ return m.k !== 'adj'; }).map(function(m){ return m.label + ' ' + ledger(m.k); }).join(' · ');
+      var others = cfg.modes.slice(1).filter(function(m){ return m.k !== 'adj'; }).map(function(m){ return m.label + ' ' + ledger(m.k) + '장'; }).join(' · ');   // 기타 방식(교환 · 중고 등)은 수량 합 = 카드 장수
       return { kind: '포카 컬렉션 북', title: cfg.title, sub: (p[1] ? p[0] + '년 ' + (+p[1]) + '월 출시 · ' : '') + parts.join(' · '), at: Date.now(), file: 'sendungi-' + cfg.id, hmax: 280,
         stats: [{ k: '보유 종수', v: o + ' / ' + N, bar: o / N }, { k: main.label, v: won(ledger(main.k)) + '회', s: others },
           { k: '누적 금액', v: won(money()) + '원', s: '모든 구매 합계' }, { k: '중복', v: Math.max(0, c.reduce(function(a, b){ return a + b; }, 0) - o) + '장', s: '여분 카드' }],
@@ -4362,7 +4389,7 @@ goTab(true,true);
       var vmode = fit.filter(function(m){ return m['var']; })[0];
       if (vmode && dir > 0) h += '<div class="mqty mup"><span class="lb">' + esc(vmode.label) + ' 금액 (장당)</span>'
         + '<span class="upw"><input type="text" inputmode="numeric" data-vprice value="' + won(state.price[vmode.k] || 0) + '"><span>원</span></span>'
-        + '<span class="uh">' + esc(vmode.label) + '을 고를 때만 적용됩니다.</span></div>';
+        + '<span class="uh">' + esc(vmode.label) + eul(vmode.label) + ' 고를 때만 적용됩니다.</span></div>';
       h += '<div class="msrc">' + fit.map(function(m){
           var sub = m['var'] ? '장당 금액 입력' : (m.price ? won(m.price) + '원' : tbd(m) ? '가격 미정' : '추가 비용 없음');
           return '<button type="button" data-pickmode="' + m.k + '">' + esc(m.label) + (dir > 0 ? '' : ' 취소') + '<small>' + sub + '</small></button>';
@@ -4626,23 +4653,23 @@ goTab(true,true);
     desc: '걸그룹 리센느(RESCENE)는 2026년 7월 도미노피자의 브랜드 전속 모델로 발탁되었습니다. 프로모션은 1차 포토카드, 2차 브로마이드로 나뉘어 진행되었습니다. 1차에서는 포토카드 5종 중 1장을 랜덤으로 증정했고, 2차에서는 한정판 브로마이드 2종 중 1종을 무작위로 증정하면서 사인 CD도 함께 증정했습니다.',
     parts: '포토카드 5종 + 브로마이드 2종',
     members: [{n:'원이',c:'#f286a8'},{n:'제나',c:'#fca2c4'},{n:'리브',c:'#76d4c8'},{n:'미나미',c:'#eec06a'},{n:'메이',c:'#9ec2f0'}],
-    // 묶음: 포토카드(1차)와 따로 모으는 브로마이드 2종(2차) · 스페셜 굿즈. 친필 싸인 CD 는 실물 공개 전이라 SOON 칸만(개수·완성에 안 들어감)
+    // 묶음: 포토카드(1차)와 따로 모으는 브로마이드 2종(2차) · 스페셜 굿즈. 친필 사인 CD 는 실물 공개 전이라 SOON 칸만(개수·완성에 안 들어감)
     //   브로마이드 이미지는 사용자가 준 한 장(750×506)을 흰 틈(x 360~386)에서 둘로 잘라 저장: 왼쪽 0~359, 오른쪽 388~749
     groups: [{k:'brm', n:'브로마이드', c:'#b48cff', note:'2차 프로모션 · 2종 중 1종'},
-             {k:'sp',  n:'스페셜 굿즈', c:'#f6b93c', soon:[{n:'친필 싸인 CD', sub:'실물 공개 전'}]}],
+             {k:'sp',  n:'스페셜 굿즈', c:'#f6b93c', soon:[{n:'친필 사인 CD', sub:'실물 공개 전'}]}],
     // 카드 번호는 기록에 저장되므로 순서를 바꾸지 않는다 (0~4 포토카드, 5~6 브로마이드, CD 가 공개되면 7)
     cards: [{n:'도미노 원이', img:'img/dmn2026/wonee.png', m:0},
             {n:'도미노 제나', img:'img/dmn2026/zena.png', m:1},
             {n:'도미노 리브', img:'img/dmn2026/liv.png', m:2},
             {n:'도미노 미나미', img:'img/dmn2026/minami.png', m:3},
             {n:'도미노 메이', img:'img/dmn2026/may.png', m:4},
-            {n:'도미노 단체 싸인 프린팅 브로마이드', img:'img/dmn2026/bromide-sign.png', g:'brm'},
-            {n:'도미노 리센느 꼴라주 브로마이드', img:'img/dmn2026/bromide-collage.png', g:'brm'}],
+            {n:'도미노 단체 사인 프린팅 브로마이드', img:'img/dmn2026/bromide-sign.png', g:'brm'},
+            {n:'도미노 리센느 콜라주 브로마이드', img:'img/dmn2026/bromide-collage.png', g:'brm'}],
     // 칭호: 피자 5판 안팎 기준. 카드 모으기는 피자 조각(첫 조각 → 반 판 → 한 판), 구매는 사투리 광고("함 무 보이소")·도미노 효과.
     //   멤버당 1종이라 mem1 은 첫 조각과 같은 때 받으므로 뺐다. 평균 비용(avg)은 엔진이 컴플리트 평균(약 14판)으로 계산해 조건은 그대로
     ach: {first:{n:'첫 조각', d:'피자도 카드도 첫 조각이 제일 맛있죠'},
           mem1: false,
-          half:{n:'반 판', d:'딱 반 판 모았어요'},
+          half:{n:'반 판', d:'반 판 넘게 모았어요'},
           all:{n:'한 판 완성', d:'빈 조각 하나 없이 다 모았어요'},
           dup3:{at:2, n:'어제 그 맛', d:'새 판인데 카드는 어제 그 카드'},
           dup6:{at:3, n:'고정 메뉴', d:'고민 없이 늘 같은 카드가 와요'},
@@ -4650,7 +4677,7 @@ goTab(true,true);
           thrifty:{n:'쿠폰 마스터', d:'쿠폰 한 장도 허투루 안 썼어요'}},
     // 1·2차를 합쳐 센다 — 둘 다 플래티넘(r 4, 405빵 TIER 와 같은 등급). "피최몇"은 405빵 "빵최몇"에서
     achSum: [{id:'pz3', modes:['buy','buy2'], at:3, lb:'1·2차 피자 포장 주문 합쳐', n:'님 피최몇?'},
-             {id:'pz5', modes:['buy','buy2'], at:5, lb:'1·2차 피자 포장 주문 합쳐', n:'몸 속에 흐르는 치즈가 흐르는'}],
+             {id:'pz5', modes:['buy','buy2'], at:5, lb:'1·2차 피자 포장 주문 합쳐', n:'몸속에 치즈가 흐르는'}],
     modes: [{k:'buy', label:'1차 피자 포장 주문', price:29520, random:true, hint:'프리미엄 피자(L) 1판 · 포토카드 랜덤 1장',
              ach: [{at:1, n:'함 무 보이소',         d:'사투리 광고 보고 첫 판 주문했어요'},
                    {at:2, n:'방문 포장 프로',       d:'매장 가는 길을 눈 감고도 가요'},
@@ -5045,7 +5072,7 @@ goTab(true,true);
     var dEl = $('s-c');
     dEl.textContent = (diff > 0 ? '+' : '') + won(diff);
     dEl.style.color = diff > 0 ? 'var(--pink)' : 'var(--mint)';
-    $('s-cl').textContent = '평균 ' + won(meanCost()) + '원 대비(원)';
+    $('s-cl').textContent = '평균(' + won(meanCost()) + '원) 대비';
     $('gp-n').textContent = o + ' / ' + N + '종';
     $('gp-pc').textContent = Math.floor(o / N * 100) + '%';      // 26/27 이 100% 로 보이지 않게 내림
     $('gp-r').textContent = rem ? '남은 ' + rem + '종 · 다음 1장이 새 카드일 확률 ' + Math.round(rem / N * 100) + '%' : '컴플리트!';
@@ -5071,7 +5098,9 @@ goTab(true,true);
   // ---------- 완성 기록 ----------
   // 405빵은 예전 시뮬레이터가 쓰던 키를 그대로 써서 지난 기록을 잇는다
   function recKey(){ return G.id === 'cu405' ? 'bread27' : 'gacha:rec:' + G.id; }
-  function loadRec(){ try { return JSON.parse(localStorage.getItem(recKey()) || '[]'); } catch (e){ return []; } }
+  // 저장된 기록 목록: 모양이 깨진 줄(null · 숫자 아님)은 버린다 — 예전엔 한 줄 때문에 시뮬레이터 · 미니게임 페이지가 통째로 안 떴다
+  function recList(key, ok){ try { var a = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(a) ? a.filter(function(x){ return x && typeof x === 'object' && ok(x); }) : []; } catch (e){ return []; } }
+  function loadRec(){ return recList(recKey(), function(x){ return isFinite(x.n) && isFinite(x.w); }); }
   function showRec(){
     var r = loadRec(), el = $('rec');
     if (!r.length){ el.textContent = '완성 기록 없음'; return; }
@@ -5096,13 +5125,15 @@ goTab(true,true);
     var diff = S.spent - meanCost(), qRank = pctTxt(at(G.curve, S.pulls));
     box.hidden = false;
     box.innerHTML = '<div class="r1">상위 <span class="fig">' + rank + '</span>'
-      + '<span class="tagx ' + (pu ? 'pure' : 'mix') + '">[' + (pu ? '순수 운빨' : '교환 및 구매 이용') + ']</span></div>'
-      + '<div class="r2">총 ' + won(S.spent) + '원(' + won(S.pulls) + '장' + (pu ? '' : ' + 교환·중고') + ')으로 완성했습니다. '
+      + '<span class="tagx ' + (pu ? 'pure' : 'mix') + '">[' + (pu ? '순수 운빨' : '교환·중고 이용') + ']</span></div>'
+      // 가위바위보에서 져 벌금만 낸 판(교환 0회)도 카드는 뽑기로만 모은 판이지만, 총액에 벌금이 들어가므로 괄호에 같이 적는다
+      //   (예전엔 '105장' 인데 총 267,500원이라 숫자가 안 맞아 보였음)
+      + '<div class="r2">총 ' + won(S.spent) + '원(' + won(S.pulls) + '장' + (pu ? (S.penalty ? ' + 교환 벌금 ' + won(S.penalty) + '원' : '') : ' + 교환·중고') + ')으로 완성했습니다. '
       + '뽑기만 해서 모을 때의 총비용 분포에서 이 금액 이하로 끝날 확률이 ' + rank + '이므로 상위 ' + rank + '입니다. 적게 쓸수록 수치가 낮아집니다. '
-      + '대괄호는 이번 판의 진행 방식으로, ' + (pu ? '뽑기만 사용했습니다.' : '교환과 중고 구매를 함께 사용해 지출을 줄인 판입니다.') + '</div>'
+      + '대괄호는 이번 판의 진행 방식입니다' + (pu ? '(카드는 뽑기로만 모음).' : '(뽑기 외에 교환·중고 구매도 사용).') + '</div>'
       + '<div class="r3">평균 ' + won(meanCost()) + '원(' + Math.round(G.mean) + '장) 대비 ' + (diff > 0 ? '+' : '') + won(diff) + '원 · 1종당 '
       + won(S.spent / G.N) + '원 · 장수 기준 확률 ' + qRank
-      + (pu ? '' : ' · 교환 성공 ' + S.trades + '회(가위바위보 ' + S.rpsW + '승 ' + S.rpsL + '패 ' + S.rpsD + '무, 벌금 ' + won(S.penalty) + '원), 중고 구매 ' + S.buys + '회')
+      + (pu ? (S.penalty ? ' · 교환 실패 벌금 ' + won(S.penalty) + '원(가위바위보 ' + S.rpsL + '패)' : '') : ' · 교환 성공 ' + S.trades + '회(가위바위보 ' + S.rpsW + '승 ' + S.rpsL + '패 ' + S.rpsD + '무, 벌금 ' + won(S.penalty) + '원), 중고 구매 ' + S.buys + '회')
       + '</div>'
       + '<button type="button" class="g-go" data-go="ana">그래프로 분석 보기 →</button>';
   }
@@ -5555,7 +5586,7 @@ goTab(true,true);
   // open: 카드 고르기 목록을 펼쳤는지. 처음엔 펼쳐 두고, 카드를 고르면 접는다
   function mini(){ return MINI[G.id] || (MINI[G.id] = { target: null, res: null, open: true }); }
   function mgKey(){ return 'gacha:mini:' + G.id; }
-  function mgLoad(key){ try { return JSON.parse(localStorage.getItem(key || mgKey()) || '[]'); } catch (e){ return []; } }
+  function mgLoad(key){ return recList(key || mgKey(), function(x){ return isFinite(x.n) && x.i === Math.floor(x.i) && x.i >= 0 && x.i < G.N; }); }
   function within(n){ return 1 - Math.pow(1 - 1 / G.N, n); }
   function mgMedian(){ return Math.ceil(Math.log(0.5) / Math.log(1 - 1 / G.N)); }
   function gradeOf(n){
@@ -5953,6 +5984,9 @@ goTab(true,true);
   function gdOwned(){ return goodsAll().filter(function(x){ return GOWN[x.g.id] > 0; }).length; }
 
   var WISH = load(LS.wish, {}), GOWN = load(LS.goods, {});
+  // 보유 수량은 0~99 정수만 (저장값이 깨졌거나 숫자가 아니면 버림 — 화면에 그대로 들어가므로)
+  GOWN = (function(o){ var r = {}; if (o && typeof o === 'object' && !Array.isArray(o)) Object.keys(o).forEach(function(k){ var n = Math.floor(+o[k]); if (n > 0) r[k] = Math.min(99, n); }); return r; })(GOWN);
+  if (!WISH || typeof WISH !== 'object' || Array.isArray(WISH)) WISH = {};
 
   // ===== 위시리스트 하트 =====
   function heart(key, big){
@@ -6145,7 +6179,7 @@ goTab(true,true);
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
-    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
+    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 전체보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
     GCOLS.forEach(function(c){
       h += '<div class="sec sec2"><div class="sec-t">' + c.y + '년 · ' + esc(c.title) + '<span class="cnt">' + c.items.length + '종</span></div></div>' + goodsGrid(c.items, c);
     });
@@ -6330,7 +6364,9 @@ goTab(true,true);
         + '<div class="s">' + sub + '</div>'
         + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">전체보기 →</a>';
     }
-    pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개 · 2024~2026년', 'allcards', '#e96387');
+    // 연도는 컬렉션 출시 연월(ym)에서 (405빵은 2026) — 예전 고정 문구 '2024~2026년' 은 만들지 않는 연도까지 적혀 있었다
+    var ys = pcCols().map(function(c){ return (c.ym || (c === cu() ? '2026' : '')).slice(0, 4); }).filter(Boolean).sort(), yr = ys.length ? ys[0] + (ys[ys.length - 1] !== ys[0] ? '~' + ys[ys.length - 1] : '') + '년' : '';
+    pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개' + (yr ? ' · ' + yr : ''), 'allcards', '#e96387');
     gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 컬렉션 ' + GCOLS.length + '개') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
     syncHearts();
   }
@@ -6816,7 +6852,7 @@ goTab(true,true);
       pill(x, RX + aw + 16, ry - 34, d.done.grade, d.done.gc, 'rgba(255,255,255,.05)', d.done.gc, 20);
     } else {
       font(x, 800, 30); x.fillStyle = d.st === 'wait' ? OG.pt : C.ink3;
-      x.fillText(d.st === 'wait' ? '채점 기다리는 중' : '채점하지 않음', RX, ry - 8);
+      x.fillText(d.st === 'wait' ? '채점 기다림' : '채점 안 함', RX, ry - 8);   // 기록 카드 상태 글자와 같게
     }
 
     // 내 예측 (보라 상자): 고른 때를 크게, 아래에 남긴 기록 3칸
@@ -6860,7 +6896,7 @@ goTab(true,true);
     }
 
     // 발
-    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText('정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)', P, HH - 30);
+    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText('정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)', P, HH - 30);
     font(x, 700, 20, MONO); x.fillStyle = OG.pt; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
     return cv;
   }
@@ -7018,7 +7054,7 @@ goTab(true,true);
     oracle: function(d){
       var text = [d.title, d.M, d.guess, d.note || ''].concat(d.mine.map(function(r){ return r.join(''); }))
         .concat(d.done ? [d.done.acc, d.done.grade, d.done.actual, d.done.err] : []).concat(d.wait ? [d.wait.now, d.wait.goal, d.wait.left] : [])
-        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)';
+        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다림 채점 안 함 등록 일시 등록 시 조회수 내다본 시간 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
         'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
     },
@@ -7253,8 +7289,10 @@ goTab(true,true);
   // 12,345 → 1.2만, 1,234,567 → 123만
   function fmt(n){
     n = Math.round(n);
-    if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
-    if (n >= 1e4) return (n / 1e4).toFixed(n >= 1e6 ? 0 : 1).replace(/\.0$/, '') + '만';
+    // 내림으로 줄인다 — 반올림하면 13,996,000 이 '1,400만'으로 보여 아직 안 넘은 100만 단위를 넘은 것처럼 보였다. 1,000만부터 쉼표(fmtM 과 같게)
+    if (n >= 1e8) return (Math.floor(n / 1e7) / 10).toFixed(1).replace(/\.0$/, '') + '억';
+    if (n >= 1e6) return Math.floor(n / 1e4).toLocaleString('ko-KR') + '만';
+    if (n >= 1e4) return (Math.floor(n / 1e3) / 10).toFixed(1).replace(/\.0$/, '') + '만';
     return n.toLocaleString('ko-KR');
   }
   function pct(x, d){ return (x * 100).toFixed(d == null ? 0 : d) + '%'; }
@@ -7305,7 +7343,7 @@ goTab(true,true);
     VIDEOS.forEach(function(v){
       if (age(v) < tg.c || VE.since(v) > tg.c) return;               // 예측 시점 기록이 없는 영상(수집 전 영상)은 빼고
       var f = frozen(v, tg), pr, n;
-      if (f !== undefined){ if (!f.pr) return; pr = f.pr; n = f.n; }   // 수집기가 저장한 예측이 있으면 그대로
+      if (f !== undefined){ if (!f.pr) return; pr = f.pr; n = +f.n || 0; }   // 수집기가 저장한 예측이 있으면 그대로
       else {
         var pool = poolFor(v, tg.T, v.pub + tg.c * 3600e3, tg.c);
         pr = predictAll(v, tg.c, tg.T, pool); n = pool.length;
@@ -7397,7 +7435,8 @@ goTab(true,true);
   // 기록을 한 번만 읽는다 — 조회수 예측기와 예측의 신(oracle.js, window.SGV)이 같이 쓴다
   var READY = null;
   function ready(){
-    return READY || (READY = load(0).then(function(d){ apply(d); if (!timer) timer = setInterval(tick, 30e3); }));
+    // 기록 모양이 이상해 apply 가 멈추면 예시 데이터로 (예전엔 '불러오는 중…' 에서 영영 멈춤)
+    return READY || (READY = load(0).then(function(d){ try { apply(d); } catch (e){ apply(demo()); } if (!timer) timer = setInterval(tick, 30e3); }));
   }
   // 기록을 화면용으로 바꾼다. 다시 불러와도 고른 영상은 그대로
   function apply(d){
@@ -7410,7 +7449,8 @@ goTab(true,true);
       // 조회수만: snaps + 최근 74시간의 15분 간격 값(hr) → 15분별 증가를 촘촘하게
       var vs = s.map(function(p){ return [p[0], p[1]]; }).concat((v.hr || []).map(function(p){ return [p[0], p[1]]; }))
         .sort(function(a, b){ return a[0] - b[0]; }).filter(function(p, i, arr){ return !i || p[0] - arr[i - 1][0] > 0.05; });
-      return { id: v.id, title: v.title, thumb: v.thumb || '', pub: Date.parse(v.published), hue: (n * 47) % 360,
+      // 썸네일은 유튜브 그림 주소만 받는다 (그 밖이면 영상 id 로 만든 기본 주소 — thumbSrc). id · 제목은 문자열로
+      return { id: String(v.id), title: String(v.title == null ? '' : v.title), thumb: /^https:\/\/i\.ytimg\.com\//.test(v.thumb || '') ? v.thumb : '', pub: Date.parse(v.published), hue: (n * 47) % 360,
         type: v.type || 'long', dur: v.dur || 0, pred: v.pred || null, ms: v.ms || [], seg: v.seg || [], snaps: s, vs: { snaps: vs } };
     }).filter(function(v){ return v.snaps.length; }).sort(function(a, b){ return b.pub - a.pub; });
     sel = VIDEOS.filter(function(v){ return v.id === keep; })[0] || VIDEOS[0] || null;
@@ -7484,7 +7524,7 @@ goTab(true,true);
         : '<svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span>') + '</div></div>'
       + '<div class="vx-hero"><div class="vx-meta" id="vx-meta"></div>'
       + '<h2 class="vx-h">' + (rv === 'fav' ? '즐겨찾기한 영상들,' : '안원잘부 영상들,') + '<br>조회수가 <em>어디까지 오를까?</em></h2>'
-      + '<p class="vx-d">15분마다 조회수를 수집하여, 24시간·7일·30일 뒤 조회수와 다음 100만 단위 돌파 시점을 예측하는 계산기입니다.<br>지난 예측이 맞았는지 오차율도 채점해 기록합니다.<br>예측기의 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
+      + '<p class="vx-d">15분마다 조회수를 수집하여, 게시 후 24시간·7일·30일 조회수와 다음 100만 단위 돌파 시점을 예측하는 계산기입니다.<br>지난 예측이 맞았는지 오차율도 채점해 기록합니다.<br>예측기의 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
   }
   function status(v){
     var a = age(v);
@@ -7525,8 +7565,8 @@ goTab(true,true);
     var f = v.pred && v.pred[tg.T];
     if (!f) return undefined;
     if (!f.p) return { err: f.none === 'early' ? '수집을 시작하기 전에 ' + tg.from + '이 지나 예측하지 않았습니다'
-      : '그때는 게시 직후부터 기록한 과거 영상이 부족해 예측하지 않았습니다 (' + (f.n || 0) + '개)' };
-    return { pr: f.p.map(function(r){ return r ? { p: r[0], lo: r[1], hi: r[2] } : null; }), n: f.n };
+      : '그때는 게시 직후부터 기록한 과거 영상이 부족해 예측하지 않았습니다 (' + (+f.n || 0) + '개)' };
+    return { pr: f.p.map(function(r){ return r ? { p: r[0], lo: r[1], hi: r[2] } : null; }), n: +f.n || 0 };
   }
 
   // ---------- 상승 속도 ----------
@@ -7582,7 +7622,7 @@ goTab(true,true);
   var KIND = { est: '추정', pred: '예측', sofar: '진행 중', wait: '수집 중' };
   function kindTag(o){ return KIND[o.kind] ? '<i class="vk vk-' + o.kind + '">' + KIND[o.kind] + '</i>' : ''; }
 
-  function fmtM(M){ return M >= 1e8 ? fmt(M) : Math.round(M / 1e4).toLocaleString('ko-KR') + '만'; }
+  function fmtM(M){ return M >= 1e8 ? fmt(M) : Math.floor(M / 1e4).toLocaleString('ko-KR') + '만'; }   // 내림 (fmt 와 같은 까닭)
   // 다음 100만 단위에 닿는 때 { M, h: 마지막 기록부터 몇 시간 뒤 | null(못 닿음), how, far: 8주보다 멂, p: ③ }
   //   ③ 추세 곡선(plan)으로 본다 → 현황 칸 카운터 · 위쪽 알약 · 그래프의 돌파 점 · 표 펼친 줄 · 100만 목록이 같은 값.
   //   ③ 을 아직 못 구하면(최근 기록 3시간 전) 예측 곡선(지금 → 24시간·7일·30일 종합 예측, 로그 시간으로 잇기) 위에서 찾는다
@@ -7723,8 +7763,8 @@ goTab(true,true);
     var ok = VE.likely(m);
     return '<div class="vh ms" style="--mc:' + MSC + '">'
       + '<div class="vh-h"><div><b>' + fmtM(m.M) + ' 돌파</b><small>' + fmt(m.M - p.V) + ' <i class="ko">남음</i></small></div>'
-      + '<span class="vh-tag ' + (ok ? 'hit' : '') + '">' + (ok ? msWeek(v, m) + '주 차' : m.days == null ? '지금 추세로는 못 닿음' : '8주 넘게') + '</span></div>'
-      + '<div class="vh-v">' + (m.days == null ? '—' : Math.ceil(m.days) + '<small>일 뒤 · ' + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
+      + '<span class="vh-tag ' + (ok ? 'hit' : '') + '">' + (ok ? msWeek(v, m) + '주 차' : m.days == null ? '지금 추세로는 못 닿음' : '8주 넘게 걸림') + '</span></div>'
+      + '<div class="vh-v">' + (m.days == null ? '—' : (m.days < 1 ? Math.max(1, Math.ceil(m.days * 24)) + '<small>시간 뒤 · ' : Math.ceil(m.days) + '<small>일 뒤 · ') + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
       + '<div class="vh-up">하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + '</div>'
       + wkBars(v, p, m, true) + '</div>';
   }
@@ -7940,7 +7980,7 @@ goTab(true,true);
       + '영상 ' + VIDEOS.length + '개 · 기록 ' + full(nSnap) + '개</small></div>'
       + (DATA.demo ? '<span class="vp-dpill">예시 데이터</span>' : '')
       + '<a class="gs vp-yt" href="' + CHANNEL.url + '" target="_blank" rel="noopener">채널 ↗</a></div>'
-      + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 15분마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
+      + (DATA.demo ? '<p class="vp-demo">조회수 기록을 불러오지 못해, 화면 구성을 보여 주는 예시 영상과 수치로 표시하고 있습니다(실제 채널 수치가 아님). 잠시 뒤 다시 열어 주세요.</p>'
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) / 1,000만 명예의 전당 / 즐겨찾기(별표한 영상, 가로 카드) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
@@ -7971,14 +8011,14 @@ goTab(true,true);
   }
   function about(){
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
-      + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
-      + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
+      + '<li><b>24시간 증가</b> 최근 24시간 동안 늘어난 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다. 게시 24시간이 안 된 영상은 24시간째 예측값에 <i class="vk vk-pred">예측</i>, 예측이 아직 없으면 지금까지의 조회수에 <i class="vk vk-sofar">진행 중</i>을 붙입니다.</li>'
+      + '<li><b>추이</b> 최근 24시간 동안 늘어난 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
       + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 30일 예측 중인 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 그 뒤 영상은 ③ 추세 곡선으로 계산합니다. 예측이 아직 없으면 최근 하루 증가가 줄어드는 곡선으로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
-      + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>100만 단위 돌파 예측</b> 다음 100만 단위(예: 1,000만)를 언제 넘을지 ③ 추세 곡선으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다. 30일 예측이 끝난 영상은 영상 상세도 이 모드로 보여 줍니다.</li>'
-      + '<li><b>100만 단위 돌파</b> 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 ③ 추세 곡선으로 본 1주 증가가 채널 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로, 7일이 안 된 영상은 잰 값과 기본 곡선을 기록 길이만큼 섞어 계산합니다. 어떤 영상도 하루 증가가 영상 나이에 반비례하는 것보다 느리게 줄지는 않는다고 봅니다.</li>'
+      + '<li><b>곧 N만</b> 다음 100만 단위에 48시간 안에 닿을 것으로 보이는 영상입니다. ③ 추세 곡선으로 계산하고, 기록이 3시간이 안 된 새 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로 계산합니다.</li>'
+      + '<li><b>100만 단위 돌파 예측</b> 다음 100만 단위(예: 1,000만)를 언제 넘을지 ③ 추세 곡선으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 게시일 기준 몇 주 차에 넘을지로 보여 줍니다(8주 안이면 유력). 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다. 30일 예측이 끝난 영상은 영상 상세도 이 모드로 보여 줍니다.</li>'
+      + '<li><b>100만 단위 돌파</b> 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 ③ 추세 곡선으로 본 1주 증가가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로, 7일이 안 된 영상은 잰 값과 기본 곡선을 기록 길이만큼 섞어 계산합니다. 오래된 영상도 최근 7일의 앞뒤 반쪽 나이 차이가 작아 줄어드는 정도가 잘 안 잡히므로 그만큼 기본 곡선 쪽으로 기웁니다. 어떤 영상도 하루 증가가 영상 나이에 반비례하는 것보다 느리게 줄지는 않는다고 봅니다.</li>'
       + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상입니다.</li>'
-      + '<li><b>즐겨찾기</b> 예측 조회수 카드와 전체 영상 표의 별표를 누른 영상만 모아 보는 페이지입니다(순위 줄 맨 오른쪽 버튼 · 왼쪽 메뉴 "영상 즐겨찾기"). 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
+      + '<li><b>즐겨찾기</b> 예측 조회수 카드 · 전체 영상 표 · 100만 단위 돌파 목록의 별표를 누른 영상만 모아 보는 페이지입니다(순위 줄 맨 오른쪽 버튼 · 메뉴의 "영상 즐겨찾기"). 예측의 신에서 예측할 영상도 이 즐겨찾기에서 고릅니다. 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -8076,7 +8116,7 @@ goTab(true,true);
     var when = m.h == null ? null : etaHM(m.h / 24) + ' 내 · ' + ddayAP(v, m.h) + ' 무렵';
     var foot = pre
       ? '<span><b>' + fmt(1e7 - x.V) + '</b> 남음</span>'
-        + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : '달성 예상일은 기록이 더 쌓이면 나옵니다') + '</span>'
+        + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : m.how === 'none' ? '달성 예상일은 기록이 더 쌓이면 나옵니다' : '지금 추세로는 1,000만에 닿기 어렵습니다') + '</span>'
       : '<span>' + (m.h == null ? '다음 ' + fmtM(m.M) + '은 지금 추세로는 어렵습니다' : '다음 <b>' + fmtM(m.M) + '</b> 달성 예상 <b>' + when + '</b>') + '</span>';
     return '<button type="button" class="hf-r' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="hf-n' + (!pre && i < 3 ? ' r' + (i + 1) : '') + '">' + (i + 1) + '</span>'
@@ -8090,7 +8130,7 @@ goTab(true,true);
     $('hof').innerHTML = '<div class="hf-sec"><h4>1,000만 달성 <b>' + HF.top.length + '</b>편</h4>'
       + (HF.top.length ? '<div class="hf-list">' + HF.top.map(function(x, i){ return hofRow(x, i, false); }).join('') + '</div>' : '<p class="anote">아직 1,000만을 넘은 영상이 없습니다.</p>') + '</div>'
       + '<div class="hf-sec next"><h4>달성 직전 <small>900만 이상</small> <b>' + HF.next.length + '</b>편</h4>'
-      + (HF.next.length ? '<div class="hf-list">' + HF.next.map(function(x, i){ return hofRow(x, i, true); }).join('') + '</div>' : '<p class="anote">900만을 넘은 영상이 없습니다.</p>') + '</div>';
+      + (HF.next.length ? '<div class="hf-list">' + HF.next.map(function(x, i){ return hofRow(x, i, true); }).join('') + '</div>' : '<p class="anote">1,000만을 앞둔(900만 이상) 영상이 없습니다.</p>') + '</div>';
   }
   // 100만 단위 돌파 목록: 지난 100만 → 다음 100만 진행 막대, 넘는 때. 8주 안에 넘는 영상은 강조
   function renderBoard(B){
@@ -8172,8 +8212,8 @@ goTab(true,true);
     var box = $('vt-d-' + v.id); if (!box) return;
     var a = age(v), V = av(v, a), g1 = velo(v, 24), w1 = week1(v), tr = trend(v), m = milestone(v), u = HUNIT[v.id] || 'q', sp = u === 'q' ? HSPAN[v.id] || 24 : UNITS[u].span;
     // 상자: 24시간 · 7일 후 예측 · 추이 · 다음 기념 조회수 돌파
-    var tiles = ['<div class="vt-c"><span>24시간</span><b>' + (g1.x == null ? '—' : full(g1.x)) + '</b><small>최근 24시간 동안 는 조회수</small>' + kindTag(g1) + '</div>',
-      '<div class="vt-c"><span>7일 후 예측</span><b>' + (w1.x == null ? '—' : full(w1.x)) + '</b><small>' + (w1.gain == null ? '기록이 쌓이면 나옵니다' : '지금보다 +' + fmt(w1.gain)) + '</small></div>',
+    var tiles = ['<div class="vt-c"><span>24시간</span><b>' + (g1.x == null ? '—' : full(g1.x)) + '</b><small>최근 24시간 동안 늘어난 조회수</small>' + kindTag(g1) + '</div>',
+      '<div class="vt-c"><span>1주 뒤 예상</span><b>' + (w1.x == null ? '—' : full(w1.x)) + '</b><small>' + (w1.gain == null ? '기록이 쌓이면 나옵니다' : '지금보다 +' + fmt(w1.gain)) + '</small></div>',
       tr ? '<div class="vt-c vt-tr ' + tr.lv.c + '"><span>추이</span><b>' + tr.lv.t + '</b><small>24시간 증가 채널 ' + tr.rank + '위 / ' + tr.n + '편</small>'
          + '<div class="vd-trm" aria-hidden="true">' + TREND.slice().reverse().map(function(t){ return '<i class="' + t.c + (t === tr.lv ? ' on' : '') + '">' + t.t + '</i>'; }).join('') + '</div></div>'
          : '<div class="vt-c"><span>추이</span><b>—</b><small>기록이 쌓이면 나옵니다</small></div>'];
@@ -8185,7 +8225,7 @@ goTab(true,true);
       + UORDER.map(function(k){ return '<button type="button" data-hu="' + k + '" data-hv="' + esc(v.id) + '" class="' + (k === u ? 'on' : '') + '" aria-selected="' + (k === u) + '">' + UNITS[k].tab + '</button>'; }).join('')
       + '</div>' + (u === 'q' ? '<div class="seg" role="tablist" aria-label="기간">'
       + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
-      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : barRange(v, u, sp)) + ' · 막대에 마우스를 올리면 수치가 보입니다</span></div>'
+      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : barRange(v, u, sp)) + ' · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span></div>'
       + '<div class="vt-hc">' + barChart(v, u, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
       + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
   }
@@ -8291,7 +8331,7 @@ goTab(true,true);
       if (x == null) return;
       var o = slots[i], lab = u === 'q' || u === 'h' ? md(o.t) + ' ' + hm(o.t) + ' ~ ' + hm(o.e) : u === 'd' ? md(o.t) : md(o.t) + ' ~ ' + md(o.e - 1);
       s += '<rect class="hit" data-bi="' + i + '" x="' + X(i).toFixed(1) + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="transparent"'
-        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 는 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : o.pub ? ' · 게시 ' + hm(v.pub) + ' 뒤' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
+        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 늘어난 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : o.pub ? ' · 게시 ' + hm(v.pub) + ' 뒤' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
     });
     return s + '</svg>';
   }
@@ -8497,12 +8537,12 @@ goTab(true,true);
         if (o.done){
           var err = r ? (r.p - o.act) / o.act : null, hit = r && r.lo != null ? o.act >= r.lo && o.act <= r.hi : null;
           return Object.assign(b, { tag: hit ? '✓ 예측 적중' : hit === false ? '범위 밖' : '지남', tone: hit ? 'hit' : hit === false ? 'miss' : '',
-            big: F(o.act), unit: '실제', note: r ? tg.from + ' 때 예측 ' + F(r.p) + ' · 오차 ' + signPct(err) : '예측 없음' });
+            big: F(o.act), unit: '실제', note: r ? tg.from + '째 예측 ' + F(r.p) + ' · 오차 ' + signPct(err) : '예측 없음' });
         }
         if (!r) return Object.assign(b, { tag: '예측 불가', big: '—', note: o.err || '' });
-        return Object.assign(b, { tag: '예측', tone: 'pred', big: F(r.p), unit: '예상', note: r.lo != null ? '80% 범위 ' + (F(r.lo) === F(r.hi) ? fmtR(r.lo, r.hi) : F(r.lo) + ' ~ ' + F(r.hi)) : '범위는 과거 영상이 더 모이면' });
+        return Object.assign(b, { tag: '예측', tone: 'pred', big: F(r.p), unit: '예상', note: r.lo != null ? '80% 범위 ' + (F(r.lo) === F(r.hi) ? fmtR(r.lo, r.hi) : F(r.lo) + ' ~ ' + F(r.hi)) : '범위는 과거 영상이 더 모이면 나옵니다' });
       }),
-      ms: m.h == null ? { head: '다음 ' + fmtM(m.M), txt: '아직 돌파 시점을 예측할 수 없음' }
+      ms: m.h == null ? { head: '다음 ' + fmtM(m.M), txt: m.how === 'none' ? '기록이 더 쌓이면 예측' : '지금 추세로는 닿기 어려움' }
         : { head: fmtM(m.M) + ' 돌파 ' + (m.far ? '멀었음' : '예상'),
             txt: m.far ? '지금 추세로는 8주 넘게 걸릴 듯' : ddayAP(v, m.h) + ' · 약 ' + etaHM(m.h / 24) + ' 뒤',
             how: m.how === 'lt' ? '③ 추세 곡선 기준' : '종합 예측 기준' },
@@ -8539,7 +8579,7 @@ goTab(true,true);
     var box = $('vd-mlg'); if (!box) return;
     var L = mlgRows(v); if (!L){ box.innerHTML = ''; return; }
     var rows = L.rows, last = rows[0];
-    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 뒤로는 아직 없음' : '아직 없음';
+    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 시작 뒤로는 아직 없음' : '아직 없음';
     var h = '<button type="button" class="vd-mlgb" data-mlg aria-expanded="' + MLGOPEN + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>'
       + '<b>100만 단위 달성 기록</b><span class="vd-mlgc">' + rows.length + '</span>'
@@ -8594,7 +8634,7 @@ goTab(true,true);
       return '<div class="vh-h"><div><b>게시 후 ' + tg.name + '</b><small>' + when(v.pub + tg.T * 3600e3) + '</small></div>'
         + '<span class="vh-tag ' + (cls || '') + '">' + tag + '</span></div>';
     };
-    var range = function(lab){ return r && r.lo != null ? '<span class="r">' + lab + ' <b>' + fmtR(r.lo, r.hi) + '</b></span>' : '<span>범위는 과거 영상이 더 모이면</span>'; };
+    var range = function(lab){ return r && r.lo != null ? '<span class="r">' + lab + ' <b>' + fmtR(r.lo, r.hi) + '</b></span>' : '<span>범위는 과거 영상이 더 모이면 나옵니다</span>'; };
     if (o.done && o.act == null) return '<div class="vh na">' + head('기록 없음') + '<small class="vh-n">' + o.err + '</small></div>';
     if (o.done){
       var res = r ? { err: (r.p - o.act) / o.act, hit: r.lo != null && o.act >= r.lo && o.act <= r.hi } : null;
@@ -8604,7 +8644,7 @@ goTab(true,true);
         + '<div class="vh-v">' + fmt(o.act) + '<small>실제</small></div>'
         + (r ? '<div class="vh-up" title="' + (Math.abs(res.err) < 0.005 ? '실제와 거의 같게 예측했습니다'
                : '예측이 실제보다 ' + Math.round(Math.abs(res.err) * 100) + '% ' + (res.err > 0 ? '높았습니다' : '낮았습니다')) + '">'
-             + tg.from + ' 때 예측 <b>' + fmt(r.p) + '</b> · 오차 <b>' + signPct(res.err) + '</b></div>'
+             + tg.from + '째 예측 <b>' + fmt(r.p) + '</b> · 오차 <b>' + signPct(res.err) + '</b></div>'
              + gauge(o.act, r, true) + '<div class="vh-gl"><span>실제 <b>' + fmt(o.act) + '</b></span>' + range('예측 범위') + '</div>'
            : '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>')
         + mchips(o) + '</div>';
@@ -8612,7 +8652,7 @@ goTab(true,true);
     if (!r) return '<div class="vh na">' + head('예측 불가') + '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>' + mchips(o) + '</div>';
     return '<div class="vh" style="--mc:' + m.color + '">' + head(ageTxt(tg.T - a) + ' 남음', 'live')
       + '<div class="vh-v">' + fmt(r.p) + '<small>예상</small></div>'
-      + '<div class="vh-up">지금보다 <b>+' + fmt(Math.max(0, r.p - V)) + '</b> · ' + (r.p / V >= 2 ? '약 ' + (r.p / V).toFixed(1) + '배' : '+' + Math.round((r.p / V - 1) * 100) + '%') + '</div>'
+      + '<div class="vh-up">지금보다 <b>+' + fmt(Math.max(0, r.p - V)) + '</b> · ' + (r.p / V >= 2 ? '약 ' + (r.p / V).toFixed(1) + '배' : signPct(r.p / V - 1)) + '</div>'
       + gauge(V, r, false) + '<div class="vh-gl"><span class="n">지금 <b>' + fmt(V) + '</b></span>' + range('범위') + '</div>'
       + mchips(o) + '</div>';
   }
@@ -8626,7 +8666,7 @@ goTab(true,true);
     var U = UNITS[cm];
     box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + barRange(sel, cm, U.span))
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
-      + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 선이 가끔 튈 수 있습니다.</p>';
+      + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
   }
   function chHead(t, sub, tabs){
     return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="' + (tabs ? '가로축 단위' : '그래프 종류') + '">'
@@ -8749,7 +8789,7 @@ goTab(true,true);
         + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + MSC + '" fill-opacity="' + (i ? .75 : 1) + '" stroke="#1c1c1e" stroke-width="2"/>';
     });
     var msPill = mss.length ? '<span class="vd-msp"><i></i>' + fmtM(mss[0].M) + ' 돌파 예상 <b>' + ddayAP(v, mss[0].d * 24) + '</b></span>'
-      : ms.how === 'lt' ? '<span class="vd-msp na"><i></i>' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춥니다' : fmtM(ms.M) + ' 돌파는 60일 뒤 <b>' + ddayAP(v, ms.h) + '</b>') + '</span>' : '';
+      : ms.how === 'lt' ? '<span class="vd-msp na"><i></i>' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + '에 닿기 어렵습니다' : fmtM(ms.M) + ' 돌파 예상 <b>' + ddayAP(v, ms.h) + '</b> · 그래프(게시 60일까지) 밖') + '</span>' : '';
     // 지금
     s += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<text x="' + X(a).toFixed(1) + '" y="' + (Tp - 24) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff9e9a">지금</text>'
@@ -8795,7 +8835,7 @@ goTab(true,true);
       return { x: X(h), y: Y(yv), color: val.act != null ? '#ff4d4f' : m.color,
         html: '<b>게시 후 ' + ageTxt(h) + '</b>' + (val.act != null
           ? '<span>실제 조회수 <em>' + full(val.act) + '</em></span>'
-          : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span><small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>') };
+          : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span>' + (val.lo != null && val.hi > val.lo ? '<small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>' : '')) };   // 범위 없는 예측은 줄을 뺀다 (예전엔 '12만 ~ 12만')
     });
   }
 
@@ -8860,7 +8900,7 @@ goTab(true,true);
           var r = row.pr[k], x = row.res[k], m = ALLM[k];
           return '<div class="vs-c' + (k === best ? ' best' : '') + '" style="--mc:' + m.color + '">'
             + '<div class="vs-ch"><span class="vp-no">' + m.b + '</span>' + m.tab + (k === best ? '<em>가장 정확</em>' : '') + '</div>'
-            + (!r ? '<small>' + (k === 3 ? '예측이 없습니다' : k < 2 ? '비교할 과거 영상이 ' + MINPOOL + '개 모이면 예측합니다' : '기록이 모자라 예측하지 못했습니다') + '</small>'
+            + (!r ? '<small>' + (k === 3 ? '예측이 없습니다' : k < 2 ? '그때는 비교할 과거 영상이 ' + MINPOOL + '개보다 적어 예측하지 않았습니다' : '기록이 모자라 예측하지 못했습니다') + '</small>'
               : '<div class="vs-row"><span>예측</span><b>' + fmt(r.p) + '</b></div>'
                 + '<div class="vs-row"><span>범위</span><em>' + (r.lo != null ? fmt(r.lo) + ' ~ ' + fmt(r.hi) : '—') + '</em></div>'
                 + '<div class="vs-row"><span>오차</span>' + (x ? '<b class="sc-e' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '">' + signPct(x.err) + (x.hit == null ? '' : x.hit ? ' ✓' : ' ✗') + '</b>'
@@ -8875,7 +8915,7 @@ goTab(true,true);
     var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
     // 기록이 없을 때 안내: 어느 영상이든 같은 설명 한 문장 + 아직 지점을 안 지났다는 것
     if (!L.length) return '<p class="anote">100만 단위 구간마다 100만·50만·20만이 남은 지점을 지날 때 다음 100만 도달 예측을 고정하고, 실제로 닿으면 채점합니다. '
-        + '이 영상은 아직 이 지점들을 지나지 않았습니다.</p>';
+        + '이 영상은 수집을 시작한 뒤로 아직 이 지점들을 지나지 않았습니다.</p>';
     return '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
       + '<p class="gnote">100만·50만·20만이 남은 지점을 지날 때 한 도달 예측을 실제로 닿은 때와 비교합니다. 오차가 + 이면 실제보다 늦게, − 이면 빨리 닿는다고 본 것이고, 8주보다 먼 예측은 <i class="sg-far">참고</i>입니다.</p>';
   }
@@ -9069,7 +9109,8 @@ goTab(true,true);
   var LOG = (function(){
     try {
       var a = JSON.parse(localStorage.getItem(KEY) || '[]');
-      return Array.isArray(a) ? a.filter(function(x){ return x && x.id && x.M > 0 && x.g > 0 && x.at > 0; }) : [];
+      // 모양이 이상한 줄은 버린다 (시각은 2096년 전 · 목표는 100억 아래 — 너무 큰 값이 LED 숫자 그리기를 깨뜨리지 않게)
+      return Array.isArray(a) ? a.filter(function(x){ return x && typeof x.id === 'string' && x.M > 0 && x.M < 1e10 && x.g > 0 && x.g < 4e12 && x.at > 0 && x.at < 4e12; }) : [];
     } catch (e){ return []; }
   })();
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(LOG)); } catch (e){} }
@@ -9125,7 +9166,7 @@ goTab(true,true);
   function pages(){
     return '<div class="og-pt" role="tablist">'
       + '<button type="button" role="tab" data-og-pg="new" class="' + (mode === 'new' ? 'on' : '') + '" aria-selected="' + (mode === 'new') + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><span><b>예측하기</b><small>즐겨찾기 영상의 돌파 때 고르기</small></span></button>'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><span><b>예측하기</b><small>즐겨찾기 영상의 돌파 시각 고르기</small></span></button>'
       + '<button type="button" role="tab" data-og-pg="log" class="' + (mode === 'log' ? 'on' : '') + '" aria-selected="' + (mode === 'log') + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-log"/></svg><span><b>내 예측 기록 <em id="og-jn">' + LOG.length + '</em></b><small>남긴 예측 · 채점 결과</small></span></button></div>';
   }
@@ -9221,21 +9262,21 @@ goTab(true,true);
       + '<div class="og-gw"></div></div>'
       + '<div class="og-aip" data-og-aip></div>';                // 조회수 예측기(③ 추세 곡선)의 예상 — 사용자 요청으로 폼 위에 보여 줌 (live 가 채움)
     if (have) h += '<div class="og-have"><span>이 목표는 이미 예측했습니다</span><b>' + whenTxt(have.g) + '</b>'
-      + '<small>결과는 아래 “내 예측 기록”에서 볼 수 있습니다.</small></div>';
+      + '<small>결과는 위의 [내 예측 기록]에서 볼 수 있습니다.</small></div>';
     else h += '<div class="og-f"><label class="og-lb" for="' + id + '">' + V.fmtM(d.M) + '을 넘을 때</label>'
       + '<input type="datetime-local" id="' + id + '" data-og-in value="' + d.val + '" min="' + toLocal(Date.now()) + '" step="60">'
       + '<div class="og-st">' + [[-D, '−1일'], [-H, '−1시간'], [H, '+1시간'], [D, '+1일']].map(function(s){
           return '<button type="button" data-og-step="' + s[0] + '">' + s[1] + '</button>';
         }).join('') + '</div>'
       + '<p class="og-live" data-og-live></p>'
-      + '<button type="button" class="og-go" data-og-go>이 때로 예측 남기기</button></div>';
+      + '<button type="button" class="og-go" data-og-go>이때로 예측 남기기</button></div>';
     return h + '</article>';
   }
   // 입력한 때 → 안내 줄 · 남기기 버튼
   function check(val){
     var g = fromLocal(val), now = Date.now();
     if (isNaN(g)) return { ok: false, t: '날짜와 시각을 골라 주세요' };
-    if (g <= now + 60e3) return { ok: false, t: '지금보다 뒤의 때를 골라 주세요' };
+    if (g <= now + 60e3) return { ok: false, t: '지금 이후의 시각을 골라 주세요' };
     if (g > now + 730 * D) return { ok: false, t: '2년 안으로 골라 주세요' };
     return { ok: true, g: g, t: '지금부터 <b>' + durTxt(g - now) + '</b> 뒤 · ' + whenTxt(g) };
   }
@@ -9370,7 +9411,7 @@ goTab(true,true);
       + [['all', '전체', J.length], ['wait', '채점 기다림', W.length], ['done', '채점 끝', Dn.length]].map(function(t){
           return '<button type="button" role="tab" data-og-lt="' + t[0] + '" class="' + (lt === t[0] ? 'on' : '') + '" aria-selected="' + (lt === t[0]) + '">' + t[1] + ' <b>' + t[2] + '</b></button>';
         }).join('') + '</div>'
-      + (show.length ? '<div class="og-cards og-lgrid">' + show.map(row).join('') + '</div>' : '<p class="og-none">이 칸에 해당하는 예측이 없습니다.</p>');
+      + (show.length ? '<div class="og-cards og-lgrid">' + show.map(row).join('') + '</div>' : '<p class="og-none">이 탭에 해당하는 예측이 없습니다.</p>');
   }
   // 기록 카드 — 예측하기 카드와 같은 짜임: [썸네일 · 제목 · 상태] / 그래프 / 예측기 예상(민트) / 내 예측(보라) / 지우기
   function row(o){
@@ -9414,7 +9455,7 @@ goTab(true,true);
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
-    else if (j.st === 'void') h += '<small>예측을 남기기 전(마지막 기록과 남긴 때 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
+    else if (j.st === 'void') h += '<small>예측을 등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
     else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
     h += '</div><div class="og-lf">' + (window.SGShare ? '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>' : '');
     // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
@@ -9431,7 +9472,7 @@ goTab(true,true);
     var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
     var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '못 닿는다고 봄' : whenTxt(x.ai);
     var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
-      mine: [['남긴 때', whenTxt(x.at)], ['그때 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
+      mine: [['등록 일시', whenTxt(x.at)], ['등록 시 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
     if (j.st === 'done'){
       d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k], actual: actual(j.c),
         err: Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측' };
@@ -9491,7 +9532,7 @@ goTab(true,true);
 
   // ----- 채점 방법 -----
   function rules(){
-    return '<div class="og-rule"><p>정확도 = 100% − <b>오차</b> ÷ <b>기간</b>. 오차는 고른 때와 실제로 넘은 때의 차이, 기간은 예측을 남긴 때부터 실제로 넘은 때까지입니다. '
+    return '<div class="og-rule"><p>정확도 = 100% − <b>오차</b> ÷ <b>기간</b>. 오차는 고른 때와 실제로 넘은 때의 차이, 기간은 예측을 등록한 때부터 실제로 넘은 때까지입니다. '
       + '멀리 내다본 예측일수록 같은 오차라도 덜 깎입니다 (예: 10일 전에 남긴 예측이 하루 빗나가면 90%).</p>'
       + '<p>실제로 넘은 때는 15분마다 모은 조회수 기록 두 개 사이를 곧게 이어 추정합니다. 조회수 예측기가 그때 계산한 예상(③ 추세 곡선)도 같은 식으로 채점해 누가 더 가까웠는지 겨룹니다.</p>'
       + '<div class="og-grs">' + GRADES.map(function(g, i){
@@ -9581,7 +9622,7 @@ goTab(true,true);
   function cur(){
     var t = new URLSearchParams(location.search).get('tab');
     t = ALIAS[t] || t;
-    return t in TABS ? t : 'home';
+    return Object.prototype.hasOwnProperty.call(TABS, t) ? t : 'home';   // 'constructor' 같은 이름으로 빈 화면이 되지 않게
   }
   function show(t){
     if (!TABS[t]) t = 'home';   // 페이지를 못 만든 경우(데이터를 못 읽음 등) 메뉴를 눌러도 멈추지 않게

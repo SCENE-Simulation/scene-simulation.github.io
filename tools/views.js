@@ -24,8 +24,10 @@
   // 12,345 → 1.2만, 1,234,567 → 123만
   function fmt(n){
     n = Math.round(n);
-    if (n >= 1e8) return (n / 1e8).toFixed(1).replace(/\.0$/, '') + '억';
-    if (n >= 1e4) return (n / 1e4).toFixed(n >= 1e6 ? 0 : 1).replace(/\.0$/, '') + '만';
+    // 내림으로 줄인다 — 반올림하면 13,996,000 이 '1,400만'으로 보여 아직 안 넘은 100만 단위를 넘은 것처럼 보였다. 1,000만부터 쉼표(fmtM 과 같게)
+    if (n >= 1e8) return (Math.floor(n / 1e7) / 10).toFixed(1).replace(/\.0$/, '') + '억';
+    if (n >= 1e6) return Math.floor(n / 1e4).toLocaleString('ko-KR') + '만';
+    if (n >= 1e4) return (Math.floor(n / 1e3) / 10).toFixed(1).replace(/\.0$/, '') + '만';
     return n.toLocaleString('ko-KR');
   }
   function pct(x, d){ return (x * 100).toFixed(d == null ? 0 : d) + '%'; }
@@ -76,7 +78,7 @@
     VIDEOS.forEach(function(v){
       if (age(v) < tg.c || VE.since(v) > tg.c) return;               // 예측 시점 기록이 없는 영상(수집 전 영상)은 빼고
       var f = frozen(v, tg), pr, n;
-      if (f !== undefined){ if (!f.pr) return; pr = f.pr; n = f.n; }   // 수집기가 저장한 예측이 있으면 그대로
+      if (f !== undefined){ if (!f.pr) return; pr = f.pr; n = +f.n || 0; }   // 수집기가 저장한 예측이 있으면 그대로
       else {
         var pool = poolFor(v, tg.T, v.pub + tg.c * 3600e3, tg.c);
         pr = predictAll(v, tg.c, tg.T, pool); n = pool.length;
@@ -168,7 +170,8 @@
   // 기록을 한 번만 읽는다 — 조회수 예측기와 예측의 신(oracle.js, window.SGV)이 같이 쓴다
   var READY = null;
   function ready(){
-    return READY || (READY = load(0).then(function(d){ apply(d); if (!timer) timer = setInterval(tick, 30e3); }));
+    // 기록 모양이 이상해 apply 가 멈추면 예시 데이터로 (예전엔 '불러오는 중…' 에서 영영 멈춤)
+    return READY || (READY = load(0).then(function(d){ try { apply(d); } catch (e){ apply(demo()); } if (!timer) timer = setInterval(tick, 30e3); }));
   }
   // 기록을 화면용으로 바꾼다. 다시 불러와도 고른 영상은 그대로
   function apply(d){
@@ -181,7 +184,8 @@
       // 조회수만: snaps + 최근 74시간의 15분 간격 값(hr) → 15분별 증가를 촘촘하게
       var vs = s.map(function(p){ return [p[0], p[1]]; }).concat((v.hr || []).map(function(p){ return [p[0], p[1]]; }))
         .sort(function(a, b){ return a[0] - b[0]; }).filter(function(p, i, arr){ return !i || p[0] - arr[i - 1][0] > 0.05; });
-      return { id: v.id, title: v.title, thumb: v.thumb || '', pub: Date.parse(v.published), hue: (n * 47) % 360,
+      // 썸네일은 유튜브 그림 주소만 받는다 (그 밖이면 영상 id 로 만든 기본 주소 — thumbSrc). id · 제목은 문자열로
+      return { id: String(v.id), title: String(v.title == null ? '' : v.title), thumb: /^https:\/\/i\.ytimg\.com\//.test(v.thumb || '') ? v.thumb : '', pub: Date.parse(v.published), hue: (n * 47) % 360,
         type: v.type || 'long', dur: v.dur || 0, pred: v.pred || null, ms: v.ms || [], seg: v.seg || [], snaps: s, vs: { snaps: vs } };
     }).filter(function(v){ return v.snaps.length; }).sort(function(a, b){ return b.pub - a.pub; });
     sel = VIDEOS.filter(function(v){ return v.id === keep; })[0] || VIDEOS[0] || null;
@@ -255,7 +259,7 @@
         : '<svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span>') + '</div></div>'
       + '<div class="vx-hero"><div class="vx-meta" id="vx-meta"></div>'
       + '<h2 class="vx-h">' + (rv === 'fav' ? '즐겨찾기한 영상들,' : '안원잘부 영상들,') + '<br>조회수가 <em>어디까지 오를까?</em></h2>'
-      + '<p class="vx-d">15분마다 조회수를 수집하여, 24시간·7일·30일 뒤 조회수와 다음 100만 단위 돌파 시점을 예측하는 계산기입니다.<br>지난 예측이 맞았는지 오차율도 채점해 기록합니다.<br>예측기의 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
+      + '<p class="vx-d">15분마다 조회수를 수집하여, 게시 후 24시간·7일·30일 조회수와 다음 100만 단위 돌파 시점을 예측하는 계산기입니다.<br>지난 예측이 맞았는지 오차율도 채점해 기록합니다.<br>예측기의 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
   }
   function status(v){
     var a = age(v);
@@ -296,8 +300,8 @@
     var f = v.pred && v.pred[tg.T];
     if (!f) return undefined;
     if (!f.p) return { err: f.none === 'early' ? '수집을 시작하기 전에 ' + tg.from + '이 지나 예측하지 않았습니다'
-      : '그때는 게시 직후부터 기록한 과거 영상이 부족해 예측하지 않았습니다 (' + (f.n || 0) + '개)' };
-    return { pr: f.p.map(function(r){ return r ? { p: r[0], lo: r[1], hi: r[2] } : null; }), n: f.n };
+      : '그때는 게시 직후부터 기록한 과거 영상이 부족해 예측하지 않았습니다 (' + (+f.n || 0) + '개)' };
+    return { pr: f.p.map(function(r){ return r ? { p: r[0], lo: r[1], hi: r[2] } : null; }), n: +f.n || 0 };
   }
 
   // ---------- 상승 속도 ----------
@@ -353,7 +357,7 @@
   var KIND = { est: '추정', pred: '예측', sofar: '진행 중', wait: '수집 중' };
   function kindTag(o){ return KIND[o.kind] ? '<i class="vk vk-' + o.kind + '">' + KIND[o.kind] + '</i>' : ''; }
 
-  function fmtM(M){ return M >= 1e8 ? fmt(M) : Math.round(M / 1e4).toLocaleString('ko-KR') + '만'; }
+  function fmtM(M){ return M >= 1e8 ? fmt(M) : Math.floor(M / 1e4).toLocaleString('ko-KR') + '만'; }   // 내림 (fmt 와 같은 까닭)
   // 다음 100만 단위에 닿는 때 { M, h: 마지막 기록부터 몇 시간 뒤 | null(못 닿음), how, far: 8주보다 멂, p: ③ }
   //   ③ 추세 곡선(plan)으로 본다 → 현황 칸 카운터 · 위쪽 알약 · 그래프의 돌파 점 · 표 펼친 줄 · 100만 목록이 같은 값.
   //   ③ 을 아직 못 구하면(최근 기록 3시간 전) 예측 곡선(지금 → 24시간·7일·30일 종합 예측, 로그 시간으로 잇기) 위에서 찾는다
@@ -494,8 +498,8 @@
     var ok = VE.likely(m);
     return '<div class="vh ms" style="--mc:' + MSC + '">'
       + '<div class="vh-h"><div><b>' + fmtM(m.M) + ' 돌파</b><small>' + fmt(m.M - p.V) + ' <i class="ko">남음</i></small></div>'
-      + '<span class="vh-tag ' + (ok ? 'hit' : '') + '">' + (ok ? msWeek(v, m) + '주 차' : m.days == null ? '지금 추세로는 못 닿음' : '8주 넘게') + '</span></div>'
-      + '<div class="vh-v">' + (m.days == null ? '—' : Math.ceil(m.days) + '<small>일 뒤 · ' + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
+      + '<span class="vh-tag ' + (ok ? 'hit' : '') + '">' + (ok ? msWeek(v, m) + '주 차' : m.days == null ? '지금 추세로는 못 닿음' : '8주 넘게 걸림') + '</span></div>'
+      + '<div class="vh-v">' + (m.days == null ? '—' : (m.days < 1 ? Math.max(1, Math.ceil(m.days * 24)) + '<small>시간 뒤 · ' : Math.ceil(m.days) + '<small>일 뒤 · ') + dday(v, m.days * 24) + ' 무렵</small>') + '</div>'
       + '<div class="vh-up">하루 +' + fmt(p.g) + ' · ' + dropTxt(p.r) + '</div>'
       + wkBars(v, p, m, true) + '</div>';
   }
@@ -711,7 +715,7 @@
       + '영상 ' + VIDEOS.length + '개 · 기록 ' + full(nSnap) + '개</small></div>'
       + (DATA.demo ? '<span class="vp-dpill">예시 데이터</span>' : '')
       + '<a class="gs vp-yt" href="' + CHANNEL.url + '" target="_blank" rel="noopener">채널 ↗</a></div>'
-      + (DATA.demo ? '<p class="vp-demo">지금 보이는 영상과 수치는 화면 구성을 보여 주려고 만든 예시이며 실제 채널 수치가 아닙니다. 15분마다 실제 수치를 모으는 수집기를 연결하면 자동으로 바뀝니다.</p>'
+      + (DATA.demo ? '<p class="vp-demo">조회수 기록을 불러오지 못해, 화면 구성을 보여 주는 예시 영상과 수치로 표시하고 있습니다(실제 채널 수치가 아님). 잠시 뒤 다시 열어 주세요.</p>'
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) / 1,000만 명예의 전당 / 즐겨찾기(별표한 영상, 가로 카드) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
@@ -742,14 +746,14 @@
   }
   function about(){
     return '<details class="vx-about"><summary>용어와 계산 방법</summary><ul>'
-      + '<li><b>24시간 증가</b> 최근 24시간 동안 는 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
-      + '<li><b>추이</b> 최근 24시간 동안 는 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
+      + '<li><b>24시간 증가</b> 최근 24시간 동안 늘어난 조회수입니다. 기록이 아직 24시간이 안 되면 지금까지의 속도로 늘려 잡고 <i class="vk vk-est">추정</i>으로 표시합니다. 게시 24시간이 안 된 영상은 24시간째 예측값에 <i class="vk vk-pred">예측</i>, 예측이 아직 없으면 지금까지의 조회수에 <i class="vk vk-sofar">진행 중</i>을 붙입니다.</li>'
+      + '<li><b>추이</b> 최근 24시간 동안 늘어난 조회수가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 예측 조회수 탭의 카드와 영상 현황 칸에 나옵니다.</li>'
       + '<li><b>1주 뒤 예상</b> (전체 영상 표) 영상마다 1주 뒤 예상 조회수입니다. 30일 예측 중인 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로, 그 뒤 영상은 ③ 추세 곡선으로 계산합니다. 예측이 아직 없으면 최근 하루 증가가 줄어드는 곡선으로 잡고 <i class="vk vk-est">추정</i>으로 표시합니다.</li>'
-      + '<li><b>곧 N만</b> 다음 기념 조회수(1만·10만·100만 단위)에 48시간 안에 닿을 것으로 보이는 영상입니다. 예측 곡선으로 계산하고, 예측이 없는 영상은 최근 24시간 속도로 계산합니다.</li>'
-      + '<li><b>100만 단위 돌파 예측</b> 다음 100만 단위(예: 1,000만)를 언제 넘을지 ③ 추세 곡선으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다. 30일 예측이 끝난 영상은 영상 상세도 이 모드로 보여 줍니다.</li>'
-      + '<li><b>100만 단위 돌파</b> 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 ③ 추세 곡선으로 본 1주 증가가 채널 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로, 7일이 안 된 영상은 잰 값과 기본 곡선을 기록 길이만큼 섞어 계산합니다. 어떤 영상도 하루 증가가 영상 나이에 반비례하는 것보다 느리게 줄지는 않는다고 봅니다.</li>'
+      + '<li><b>곧 N만</b> 다음 100만 단위에 48시간 안에 닿을 것으로 보이는 영상입니다. ③ 추세 곡선으로 계산하고, 기록이 3시간이 안 된 새 영상은 24시간·7일·30일 종합 예측을 이은 곡선으로 계산합니다.</li>'
+      + '<li><b>100만 단위 돌파 예측</b> 다음 100만 단위(예: 1,000만)를 언제 넘을지 ③ 추세 곡선으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 게시일 기준 몇 주 차에 넘을지로 보여 줍니다(8주 안이면 유력). 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다. 30일 예측이 끝난 영상은 영상 상세도 이 모드로 보여 줍니다.</li>'
+      + '<li><b>100만 단위 돌파</b> 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 ③ 추세 곡선으로 본 1주 증가가 채널 영상 중 상위 20%면 강함, 50%까지면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로, 7일이 안 된 영상은 잰 값과 기본 곡선을 기록 길이만큼 섞어 계산합니다. 오래된 영상도 최근 7일의 앞뒤 반쪽 나이 차이가 작아 줄어드는 정도가 잘 안 잡히므로 그만큼 기본 곡선 쪽으로 기웁니다. 어떤 영상도 하루 증가가 영상 나이에 반비례하는 것보다 느리게 줄지는 않는다고 봅니다.</li>'
       + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상입니다.</li>'
-      + '<li><b>즐겨찾기</b> 예측 조회수 카드와 전체 영상 표의 별표를 누른 영상만 모아 보는 페이지입니다(순위 줄 맨 오른쪽 버튼 · 왼쪽 메뉴 "영상 즐겨찾기"). 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
+      + '<li><b>즐겨찾기</b> 예측 조회수 카드 · 전체 영상 표 · 100만 단위 돌파 목록의 별표를 누른 영상만 모아 보는 페이지입니다(순위 줄 맨 오른쪽 버튼 · 메뉴의 "영상 즐겨찾기"). 예측의 신에서 예측할 영상도 이 즐겨찾기에서 고릅니다. 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -847,7 +851,7 @@
     var when = m.h == null ? null : etaHM(m.h / 24) + ' 내 · ' + ddayAP(v, m.h) + ' 무렵';
     var foot = pre
       ? '<span><b>' + fmt(1e7 - x.V) + '</b> 남음</span>'
-        + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : '달성 예상일은 기록이 더 쌓이면 나옵니다') + '</span>'
+        + '<span>' + (when ? '1,000만 달성 예상 <b>' + when + '</b>' : m.how === 'none' ? '달성 예상일은 기록이 더 쌓이면 나옵니다' : '지금 추세로는 1,000만에 닿기 어렵습니다') + '</span>'
       : '<span>' + (m.h == null ? '다음 ' + fmtM(m.M) + '은 지금 추세로는 어렵습니다' : '다음 <b>' + fmtM(m.M) + '</b> 달성 예상 <b>' + when + '</b>') + '</span>';
     return '<button type="button" class="hf-r' + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="hf-n' + (!pre && i < 3 ? ' r' + (i + 1) : '') + '">' + (i + 1) + '</span>'
@@ -861,7 +865,7 @@
     $('hof').innerHTML = '<div class="hf-sec"><h4>1,000만 달성 <b>' + HF.top.length + '</b>편</h4>'
       + (HF.top.length ? '<div class="hf-list">' + HF.top.map(function(x, i){ return hofRow(x, i, false); }).join('') + '</div>' : '<p class="anote">아직 1,000만을 넘은 영상이 없습니다.</p>') + '</div>'
       + '<div class="hf-sec next"><h4>달성 직전 <small>900만 이상</small> <b>' + HF.next.length + '</b>편</h4>'
-      + (HF.next.length ? '<div class="hf-list">' + HF.next.map(function(x, i){ return hofRow(x, i, true); }).join('') + '</div>' : '<p class="anote">900만을 넘은 영상이 없습니다.</p>') + '</div>';
+      + (HF.next.length ? '<div class="hf-list">' + HF.next.map(function(x, i){ return hofRow(x, i, true); }).join('') + '</div>' : '<p class="anote">1,000만을 앞둔(900만 이상) 영상이 없습니다.</p>') + '</div>';
   }
   // 100만 단위 돌파 목록: 지난 100만 → 다음 100만 진행 막대, 넘는 때. 8주 안에 넘는 영상은 강조
   function renderBoard(B){
@@ -943,8 +947,8 @@
     var box = $('vt-d-' + v.id); if (!box) return;
     var a = age(v), V = av(v, a), g1 = velo(v, 24), w1 = week1(v), tr = trend(v), m = milestone(v), u = HUNIT[v.id] || 'q', sp = u === 'q' ? HSPAN[v.id] || 24 : UNITS[u].span;
     // 상자: 24시간 · 7일 후 예측 · 추이 · 다음 기념 조회수 돌파
-    var tiles = ['<div class="vt-c"><span>24시간</span><b>' + (g1.x == null ? '—' : full(g1.x)) + '</b><small>최근 24시간 동안 는 조회수</small>' + kindTag(g1) + '</div>',
-      '<div class="vt-c"><span>7일 후 예측</span><b>' + (w1.x == null ? '—' : full(w1.x)) + '</b><small>' + (w1.gain == null ? '기록이 쌓이면 나옵니다' : '지금보다 +' + fmt(w1.gain)) + '</small></div>',
+    var tiles = ['<div class="vt-c"><span>24시간</span><b>' + (g1.x == null ? '—' : full(g1.x)) + '</b><small>최근 24시간 동안 늘어난 조회수</small>' + kindTag(g1) + '</div>',
+      '<div class="vt-c"><span>1주 뒤 예상</span><b>' + (w1.x == null ? '—' : full(w1.x)) + '</b><small>' + (w1.gain == null ? '기록이 쌓이면 나옵니다' : '지금보다 +' + fmt(w1.gain)) + '</small></div>',
       tr ? '<div class="vt-c vt-tr ' + tr.lv.c + '"><span>추이</span><b>' + tr.lv.t + '</b><small>24시간 증가 채널 ' + tr.rank + '위 / ' + tr.n + '편</small>'
          + '<div class="vd-trm" aria-hidden="true">' + TREND.slice().reverse().map(function(t){ return '<i class="' + t.c + (t === tr.lv ? ' on' : '') + '">' + t.t + '</i>'; }).join('') + '</div></div>'
          : '<div class="vt-c"><span>추이</span><b>—</b><small>기록이 쌓이면 나옵니다</small></div>'];
@@ -956,7 +960,7 @@
       + UORDER.map(function(k){ return '<button type="button" data-hu="' + k + '" data-hv="' + esc(v.id) + '" class="' + (k === u ? 'on' : '') + '" aria-selected="' + (k === u) + '">' + UNITS[k].tab + '</button>'; }).join('')
       + '</div>' + (u === 'q' ? '<div class="seg" role="tablist" aria-label="기간">'
       + [24, 72].map(function(h){ return '<button type="button" data-hs="' + h + '" data-hv="' + esc(v.id) + '" class="' + (h === sp ? 'on' : '') + '" aria-selected="' + (h === sp) + '">' + h + '시간</button>'; }).join('')
-      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : barRange(v, u, sp)) + ' · 막대에 마우스를 올리면 수치가 보입니다</span></div>'
+      + '</div>' : '') + '<span>' + (u === 'q' ? '최근 ' + sp + '시간' : barRange(v, u, sp)) + ' · 막대에 마우스를 올리거나 꾹 누르면 수치가 보입니다</span></div>'
       + '<div class="vt-hc">' + barChart(v, u, sp, Math.max(320, Math.min(900, box.clientWidth || 700)), 160) + '</div>'
       + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
   }
@@ -1062,7 +1066,7 @@
       if (x == null) return;
       var o = slots[i], lab = u === 'q' || u === 'h' ? md(o.t) + ' ' + hm(o.t) + ' ~ ' + hm(o.e) : u === 'd' ? md(o.t) : md(o.t) + ' ~ ' + md(o.e - 1);
       s += '<rect class="hit" data-bi="' + i + '" x="' + X(i).toFixed(1) + '" y="' + Tp + '" width="' + bw.toFixed(1) + '" height="' + (H - Tp - B) + '" fill="transparent"'
-        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 는 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : o.pub ? ' · 게시 ' + hm(v.pub) + ' 뒤' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
+        + ' data-tt="' + lab + '" data-tv="+' + full(x) + '회" data-tu="' + U.per + ' 늘어난 조회수' + (o.cut ? ' · ' + md(o.cut) + ' ' + hm(o.cut) + ' 기록 시작 뒤만' : o.pub ? ' · 게시 ' + hm(v.pub) + ' 뒤' : '') + (o.open ? ' · 진행 중' : '') + '"/>';
     });
     return s + '</svg>';
   }
@@ -1268,12 +1272,12 @@
         if (o.done){
           var err = r ? (r.p - o.act) / o.act : null, hit = r && r.lo != null ? o.act >= r.lo && o.act <= r.hi : null;
           return Object.assign(b, { tag: hit ? '✓ 예측 적중' : hit === false ? '범위 밖' : '지남', tone: hit ? 'hit' : hit === false ? 'miss' : '',
-            big: F(o.act), unit: '실제', note: r ? tg.from + ' 때 예측 ' + F(r.p) + ' · 오차 ' + signPct(err) : '예측 없음' });
+            big: F(o.act), unit: '실제', note: r ? tg.from + '째 예측 ' + F(r.p) + ' · 오차 ' + signPct(err) : '예측 없음' });
         }
         if (!r) return Object.assign(b, { tag: '예측 불가', big: '—', note: o.err || '' });
-        return Object.assign(b, { tag: '예측', tone: 'pred', big: F(r.p), unit: '예상', note: r.lo != null ? '80% 범위 ' + (F(r.lo) === F(r.hi) ? fmtR(r.lo, r.hi) : F(r.lo) + ' ~ ' + F(r.hi)) : '범위는 과거 영상이 더 모이면' });
+        return Object.assign(b, { tag: '예측', tone: 'pred', big: F(r.p), unit: '예상', note: r.lo != null ? '80% 범위 ' + (F(r.lo) === F(r.hi) ? fmtR(r.lo, r.hi) : F(r.lo) + ' ~ ' + F(r.hi)) : '범위는 과거 영상이 더 모이면 나옵니다' });
       }),
-      ms: m.h == null ? { head: '다음 ' + fmtM(m.M), txt: '아직 돌파 시점을 예측할 수 없음' }
+      ms: m.h == null ? { head: '다음 ' + fmtM(m.M), txt: m.how === 'none' ? '기록이 더 쌓이면 예측' : '지금 추세로는 닿기 어려움' }
         : { head: fmtM(m.M) + ' 돌파 ' + (m.far ? '멀었음' : '예상'),
             txt: m.far ? '지금 추세로는 8주 넘게 걸릴 듯' : ddayAP(v, m.h) + ' · 약 ' + etaHM(m.h / 24) + ' 뒤',
             how: m.how === 'lt' ? '③ 추세 곡선 기준' : '종합 예측 기준' },
@@ -1310,7 +1314,7 @@
     var box = $('vd-mlg'); if (!box) return;
     var L = mlgRows(v); if (!L){ box.innerHTML = ''; return; }
     var rows = L.rows, last = rows[0];
-    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 뒤로는 아직 없음' : '아직 없음';
+    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 시작 뒤로는 아직 없음' : '아직 없음';
     var h = '<button type="button" class="vd-mlgb" data-mlg aria-expanded="' + MLGOPEN + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>'
       + '<b>100만 단위 달성 기록</b><span class="vd-mlgc">' + rows.length + '</span>'
@@ -1365,7 +1369,7 @@
       return '<div class="vh-h"><div><b>게시 후 ' + tg.name + '</b><small>' + when(v.pub + tg.T * 3600e3) + '</small></div>'
         + '<span class="vh-tag ' + (cls || '') + '">' + tag + '</span></div>';
     };
-    var range = function(lab){ return r && r.lo != null ? '<span class="r">' + lab + ' <b>' + fmtR(r.lo, r.hi) + '</b></span>' : '<span>범위는 과거 영상이 더 모이면</span>'; };
+    var range = function(lab){ return r && r.lo != null ? '<span class="r">' + lab + ' <b>' + fmtR(r.lo, r.hi) + '</b></span>' : '<span>범위는 과거 영상이 더 모이면 나옵니다</span>'; };
     if (o.done && o.act == null) return '<div class="vh na">' + head('기록 없음') + '<small class="vh-n">' + o.err + '</small></div>';
     if (o.done){
       var res = r ? { err: (r.p - o.act) / o.act, hit: r.lo != null && o.act >= r.lo && o.act <= r.hi } : null;
@@ -1375,7 +1379,7 @@
         + '<div class="vh-v">' + fmt(o.act) + '<small>실제</small></div>'
         + (r ? '<div class="vh-up" title="' + (Math.abs(res.err) < 0.005 ? '실제와 거의 같게 예측했습니다'
                : '예측이 실제보다 ' + Math.round(Math.abs(res.err) * 100) + '% ' + (res.err > 0 ? '높았습니다' : '낮았습니다')) + '">'
-             + tg.from + ' 때 예측 <b>' + fmt(r.p) + '</b> · 오차 <b>' + signPct(res.err) + '</b></div>'
+             + tg.from + '째 예측 <b>' + fmt(r.p) + '</b> · 오차 <b>' + signPct(res.err) + '</b></div>'
              + gauge(o.act, r, true) + '<div class="vh-gl"><span>실제 <b>' + fmt(o.act) + '</b></span>' + range('예측 범위') + '</div>'
            : '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>')
         + mchips(o) + '</div>';
@@ -1383,7 +1387,7 @@
     if (!r) return '<div class="vh na">' + head('예측 불가') + '<small class="vh-n">' + (o.err || '이 방법으로는 예측하지 못했습니다') + '</small>' + mchips(o) + '</div>';
     return '<div class="vh" style="--mc:' + m.color + '">' + head(ageTxt(tg.T - a) + ' 남음', 'live')
       + '<div class="vh-v">' + fmt(r.p) + '<small>예상</small></div>'
-      + '<div class="vh-up">지금보다 <b>+' + fmt(Math.max(0, r.p - V)) + '</b> · ' + (r.p / V >= 2 ? '약 ' + (r.p / V).toFixed(1) + '배' : '+' + Math.round((r.p / V - 1) * 100) + '%') + '</div>'
+      + '<div class="vh-up">지금보다 <b>+' + fmt(Math.max(0, r.p - V)) + '</b> · ' + (r.p / V >= 2 ? '약 ' + (r.p / V).toFixed(1) + '배' : signPct(r.p / V - 1)) + '</div>'
       + gauge(V, r, false) + '<div class="vh-gl"><span class="n">지금 <b>' + fmt(V) + '</b></span>' + range('범위') + '</div>'
       + mchips(o) + '</div>';
   }
@@ -1397,7 +1401,7 @@
     var U = UNITS[cm];
     box.innerHTML = chHead('조회수 증가', U.tab + ' 단위 · ' + barRange(sel, cm, U.span))
       + '<div class="vt-hc">' + barChart(sel, cm, U.span, Math.max(320, Math.min(860, (box.clientWidth || 760) - 28)), 240) + '</div>'
-      + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 선이 가끔 튈 수 있습니다.</p>';
+      + '<p class="gnote">유튜브가 조회수를 한꺼번에 갱신할 때가 있어 막대가 가끔 튈 수 있습니다.</p>';
   }
   function chHead(t, sub, tabs){
     return '<div class="vd-ch"><h4>' + t + '</h4><span>' + sub + '</span><div class="seg vd-cm" role="tablist" aria-label="' + (tabs ? '가로축 단위' : '그래프 종류') + '">'
@@ -1520,7 +1524,7 @@
         + '<circle cx="' + mx.toFixed(1) + '" cy="' + my.toFixed(1) + '" r="' + (i ? 4.5 : 5.5) + '" fill="' + MSC + '" fill-opacity="' + (i ? .75 : 1) + '" stroke="#1c1c1e" stroke-width="2"/>';
     });
     var msPill = mss.length ? '<span class="vd-msp"><i></i>' + fmtM(mss[0].M) + ' 돌파 예상 <b>' + ddayAP(v, mss[0].d * 24) + '</b></span>'
-      : ms.how === 'lt' ? '<span class="vd-msp na"><i></i>' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + ' 전에 멈춥니다' : fmtM(ms.M) + ' 돌파는 60일 뒤 <b>' + ddayAP(v, ms.h) + '</b>') + '</span>' : '';
+      : ms.how === 'lt' ? '<span class="vd-msp na"><i></i>' + (ms.h == null ? '지금 추세로는 ' + fmtM(ms.M) + '에 닿기 어렵습니다' : fmtM(ms.M) + ' 돌파 예상 <b>' + ddayAP(v, ms.h) + '</b> · 그래프(게시 60일까지) 밖') + '</span>' : '';
     // 지금
     s += '<line x1="' + X(a).toFixed(1) + '" x2="' + X(a).toFixed(1) + '" y1="' + Tp + '" y2="' + (H - B) + '" stroke="#ff4d4f" stroke-opacity=".5" stroke-dasharray="2 4"/>'
       + '<text x="' + X(a).toFixed(1) + '" y="' + (Tp - 24) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff9e9a">지금</text>'
@@ -1566,7 +1570,7 @@
       return { x: X(h), y: Y(yv), color: val.act != null ? '#ff4d4f' : m.color,
         html: '<b>게시 후 ' + ageTxt(h) + '</b>' + (val.act != null
           ? '<span>실제 조회수 <em>' + full(val.act) + '</em></span>'
-          : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span><small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>') };
+          : '<span>' + m.tab + ' 예측 <em style="color:' + m.color + '">' + fmt(val.p) + '</em></span>' + (val.lo != null && val.hi > val.lo ? '<small>80% 범위 ' + fmt(val.lo) + ' ~ ' + fmt(val.hi) + '</small>' : '')) };   // 범위 없는 예측은 줄을 뺀다 (예전엔 '12만 ~ 12만')
     });
   }
 
@@ -1631,7 +1635,7 @@
           var r = row.pr[k], x = row.res[k], m = ALLM[k];
           return '<div class="vs-c' + (k === best ? ' best' : '') + '" style="--mc:' + m.color + '">'
             + '<div class="vs-ch"><span class="vp-no">' + m.b + '</span>' + m.tab + (k === best ? '<em>가장 정확</em>' : '') + '</div>'
-            + (!r ? '<small>' + (k === 3 ? '예측이 없습니다' : k < 2 ? '비교할 과거 영상이 ' + MINPOOL + '개 모이면 예측합니다' : '기록이 모자라 예측하지 못했습니다') + '</small>'
+            + (!r ? '<small>' + (k === 3 ? '예측이 없습니다' : k < 2 ? '그때는 비교할 과거 영상이 ' + MINPOOL + '개보다 적어 예측하지 않았습니다' : '기록이 모자라 예측하지 못했습니다') + '</small>'
               : '<div class="vs-row"><span>예측</span><b>' + fmt(r.p) + '</b></div>'
                 + '<div class="vs-row"><span>범위</span><em>' + (r.lo != null ? fmt(r.lo) + ' ~ ' + fmt(r.hi) : '—') + '</em></div>'
                 + '<div class="vs-row"><span>오차</span>' + (x ? '<b class="sc-e' + (x.hit == null ? '' : x.hit ? ' hit' : ' miss') + '">' + signPct(x.err) + (x.hit == null ? '' : x.hit ? ' ✓' : ' ✗') + '</b>'
@@ -1646,7 +1650,7 @@
     var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
     // 기록이 없을 때 안내: 어느 영상이든 같은 설명 한 문장 + 아직 지점을 안 지났다는 것
     if (!L.length) return '<p class="anote">100만 단위 구간마다 100만·50만·20만이 남은 지점을 지날 때 다음 100만 도달 예측을 고정하고, 실제로 닿으면 채점합니다. '
-        + '이 영상은 아직 이 지점들을 지나지 않았습니다.</p>';
+        + '이 영상은 수집을 시작한 뒤로 아직 이 지점들을 지나지 않았습니다.</p>';
     return '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
       + '<p class="gnote">100만·50만·20만이 남은 지점을 지날 때 한 도달 예측을 실제로 닿은 때와 비교합니다. 오차가 + 이면 실제보다 늦게, − 이면 빨리 닿는다고 본 것이고, 8주보다 먼 예측은 <i class="sg-far">참고</i>입니다.</p>';
   }

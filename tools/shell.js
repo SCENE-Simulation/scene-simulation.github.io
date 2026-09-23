@@ -27,7 +27,7 @@
   function cur(){
     var t = new URLSearchParams(location.search).get('tab');
     t = ALIAS[t] || t;
-    return t in TABS ? t : 'home';
+    return Object.prototype.hasOwnProperty.call(TABS, t) ? t : 'home';   // 'constructor' 같은 이름으로 빈 화면이 되지 않게
   }
   function show(t){
     if (!TABS[t]) t = 'home';   // 페이지를 못 만든 경우(데이터를 못 읽음 등) 메뉴를 눌러도 멈추지 않게

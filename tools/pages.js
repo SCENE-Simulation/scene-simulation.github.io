@@ -72,6 +72,9 @@
   function gdOwned(){ return goodsAll().filter(function(x){ return GOWN[x.g.id] > 0; }).length; }
 
   var WISH = load(LS.wish, {}), GOWN = load(LS.goods, {});
+  // 보유 수량은 0~99 정수만 (저장값이 깨졌거나 숫자가 아니면 버림 — 화면에 그대로 들어가므로)
+  GOWN = (function(o){ var r = {}; if (o && typeof o === 'object' && !Array.isArray(o)) Object.keys(o).forEach(function(k){ var n = Math.floor(+o[k]); if (n > 0) r[k] = Math.min(99, n); }); return r; })(GOWN);
+  if (!WISH || typeof WISH !== 'object' || Array.isArray(WISH)) WISH = {};
 
   // ===== 위시리스트 하트 =====
   function heart(key, big){
@@ -264,7 +267,7 @@
   }
   function renderGoods(){ GCOLS.forEach(renderGoodsPage); }
   function renderAllGoods(){
-    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 통합 보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
+    var h = sec('i-gift', ['굿즈 컬렉션 북', '굿즈 전체보기'], '지금까지 나온 굿즈를 컬렉션별로 모아서 봅니다.');
     GCOLS.forEach(function(c){
       h += '<div class="sec sec2"><div class="sec-t">' + c.y + '년 · ' + esc(c.title) + '<span class="cnt">' + c.items.length + '종</span></div></div>' + goodsGrid(c.items, c);
     });
@@ -449,7 +452,9 @@
         + '<div class="s">' + sub + '</div>'
         + '<a class="go" href="?tab=' + tab + '" data-tab="' + tab + '">전체보기 →</a>';
     }
-    pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개 · 2024~2026년', 'allcards', '#e96387');
+    // 연도는 컬렉션 출시 연월(ym)에서 (405빵은 2026) — 예전 고정 문구 '2024~2026년' 은 만들지 않는 연도까지 적혀 있었다
+    var ys = pcCols().map(function(c){ return (c.ym || (c === cu() ? '2026' : '')).slice(0, 4); }).filter(Boolean).sort(), yr = ys.length ? ys[0] + (ys[ys.length - 1] !== ys[0] ? '~' + ys[ys.length - 1] : '') + '년' : '';
+    pc.innerHTML = box('i-book', '포토카드 통합', po, pt, '컬렉션 ' + pcCols().length + '개' + (yr ? ' · ' + yr : ''), 'allcards', '#e96387');
     gd.innerHTML = box('i-gift', '굿즈 통합', go, gl, gl ? ('상품 ' + gl + '종 · 컬렉션 ' + GCOLS.length + '개') : '등록된 굿즈가 아직 없습니다', 'allgoods', '#47d19a');
     syncHearts();
   }

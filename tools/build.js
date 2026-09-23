@@ -14,9 +14,19 @@ h = h.split('"Press Start 2P",monospace').join('"JetBrains Mono",monospace');
 h = h.split("'Press Start 2P',monospace").join("'JetBrains Mono',monospace");
 rep('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Press+Start+2P&display=swap">',
   '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">\n' +
-  '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">');
+  // integrity: 받은 CSS 가 이 해시와 다르면 브라우저가 쓰지 않는다 (CDN 쪽 파일이 바뀌어도 사이트가 오염되지 않게). 버전을 올리면 해시도 다시
+  '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" integrity="sha384-2nNKoOPayicGa+aRguOQuiZP+RqQ4G3jalfDeOgftkKD7zBM2gJXTwcFqCZltdv0" crossorigin="anonymous">');
+// 제목 · 설명 · 링크 미리보기(디시 · 카톡 등 og 태그) · 파비콘(분홍 바탕 "센", 따로 파일 없이 SVG 한 줄 — 없으면 방문마다 favicon.ico 404)
+// og:image(대표 그림)는 아직 없음 — 정해지면 1200×630 그림을 img/ 에 두고 og:image · twitter:card=summary_large_image 로
+var SITE_DESC = '리센느 포토카드 · 굿즈 컬렉션 북, 포토카드 뽑기 시뮬레이터, 유튜브 조회수 예측기와 예측 게임을 모은 사이트';
+var FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e96387'/%3E"
+  + "%3Ctext x='32' y='45' font-size='34' font-weight='800' text-anchor='middle' fill='%23fff' font-family='sans-serif'%3E%EC%84%BC%3C/text%3E%3C/svg%3E";
 rep('<title>빵뽑기 27종 시뮬레이터</title>',
-  '<title>센둥이 시뮬레이터</title>\n<meta name="description" content="리센느 포토카드 뽑기 시뮬레이터와 실물 컬렉션 북">\n<meta name="theme-color" content="#1c1c1e">');
+  '<title>센둥이 시뮬레이터</title>\n<meta name="description" content="' + SITE_DESC + '">\n<meta name="theme-color" content="#1c1c1e">\n' +
+  '<link rel="icon" href="' + FAVICON + '">\n' +
+  '<meta property="og:type" content="website">\n<meta property="og:site_name" content="센둥이 시뮬레이터">\n<meta property="og:title" content="센둥이 시뮬레이터">\n' +
+  '<meta property="og:description" content="' + SITE_DESC + '">\n<meta property="og:url" content="https://scene-simulation.github.io/">\n<meta property="og:locale" content="ko_KR">\n' +
+  '<meta name="twitter:card" content="summary">');
 
 // 테마 덮어쓰기
 rep('</style>\n</head>', fs.readFileSync(__dirname + '/theme.css', 'utf8') + '\n</style>\n</head>');

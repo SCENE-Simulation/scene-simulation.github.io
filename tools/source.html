@@ -418,7 +418,7 @@ button:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
 <p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종이, 5명 × 4종 = 20종, 여기에 스페셜 카드 7종을 더해 27종입니다.</p>
 
 <div class="tabs">
-  <button id="tab-col" class="on">실물 컬랙션 북</button>
+  <button id="tab-col" class="on">실물 컬렉션 북</button>
   <button id="tab-sim">뽑기 시뮬레이터</button>
 </div>
 <div id="page-sim" hidden>
@@ -514,7 +514,7 @@ var SRC=[];
 function isPix(k){return !PHOTOS[k];}
 function setImg(el,k){el.src=SRC[k];el.className=(isPix(k)?'pix':'')+(isLand(k)?' land':'');}
 
-function won(v){return v.toLocaleString('ko-KR');}
+function won(v){return (+v||0).toLocaleString('ko-KR');}   // 숫자만 (저장값이 문자열이면 HTML 에 그대로 들어가던 것)
 function H(k){var s=0;for(var i=1;i<=k;i++)s+=1/i;return s;}
 
 // 포토카드 뽑기 시뮬레이터(tools/gacha.js)가 405빵 뽑기를 만들 때 쓰는 카드 데이터.
@@ -562,7 +562,7 @@ function logText(e){
   if(e.k==='reset') return '전체 초기화';
   var what=(e.i==null)?'':' <b>'+cardName(e.i)+'</b>';
   var give=(e.give&&e.give.length)?' <span class="gv">↔ 내줌 '+e.give.map(cardName).join(', ')+'</span>':'';
-  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원'+(Math.abs(e.d)>1?' (장당 '+won(unitOf(e))+')':'')+'</span>':'';
+  var money=(e.k==='used'&&e.w)?' <span class="wn">'+(e.w<0?'−':'')+won(Math.abs(e.w))+'원'+(Math.abs(e.d)>1?' (장당 '+won(unitOf(e))+'원)':'')+'</span>':'';
   return kLabel(e.k,e.d)+' '+(e.d>0?'+':'−')+Math.abs(e.d)+what+give+money+(e.ed?' <span class="edt">수정됨</span>':'');
 }
 function editForm(e){
@@ -727,7 +727,7 @@ function colRender(){
     var own=0,tot=0;
     g.ids.forEach(function(i){tot+=COL[i]; if(COL[i]>0)own++;});
     g.v.textContent=own+'/'+g.ids.length;
-    g.s.textContent=won(tot)+'장'+(tot>own?' · 중복 '+won(tot-own):'');
+    g.s.textContent=won(tot)+'장'+(tot>own?' · 중복 '+won(tot-own)+'장':'');
     g.el.classList.toggle('full',own===g.ids.length);
   });
 }
@@ -831,7 +831,7 @@ var ACHDEF=[
   {id:'buy30',   n:'당뇨병 주의',        d:'빵 30개 구매',                  c:'#ecd25b', r:4, t:function(c){return c.buy>=30;}},
   // 거래 및 커뮤니티
   {id:'us1',     n:'혹시... 당근?',      d:'중고 구매 첫 거래',              c:'#47d19a', r:1, t:function(c){return c.used>=1;}},
-  {id:'tr1',     n:'나눔인줄 아셨어요?',  d:'첫 교환',                      c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
+  {id:'tr1',     n:'나눔인 줄 아셨어요?',  d:'첫 교환',                      c:'#47d19a', r:1, t:function(c){return c.trade>=1;}},
   {id:'us5',     n:'당근이 체질',        d:'중고 구매 5회',                  c:'#47d19a', r:2, t:function(c){return c.used>=5;}},
   {id:'tr5',     n:'교환의 고수',        d:'교환 5회',                      c:'#47d19a', r:2, t:function(c){return c.trade>=5;}},
   {id:'tr10',    n:'이 구역의 보부상',    d:'교환 10회',                     c:'#47d19a', r:3, t:function(c){return c.trade>=10;}},
@@ -841,8 +841,8 @@ var ACHDEF=[
   // 히든 및 기믹 — 얻기 전에는 조건을 가린다
   {id:'dup6',    n:'또 너야?',           d:'같은 카드 6장',                  c:'#a080d0', r:5, t:function(c){return c.maxDup>=6;}},
   {id:'dup10',   n:'아 복사버그 ㅡㅡ',    d:'같은 카드 10장',                 c:'#a080d0', r:5, t:function(c){return c.maxDup>=10;}},
-  {id:'thrifty', n:'확율의 여신의 사도의 운', d:'20만 원 이하로 27종 완성',     c:'#a080d0', r:5, t:function(c){return c.own>=27&&c.money<=200000;}},
-  {id:'nosp20',  n:'이거 모두 같은 확률인거 아시죠?', d:'연속 20회 스페셜 카드 미출현', c:'#a080d0', r:5, t:function(c){return c.nosp>=20;}}
+  {id:'thrifty', n:'확률의 여신의 사도의 운', d:'20만 원 이하로 27종 완성',     c:'#a080d0', r:5, t:function(c){return c.own>=27&&c.money<=200000;}},
+  {id:'nosp20',  n:'이거 모두 같은 확률인 거 아시죠?', d:'연속 20회 스페셜 카드 미출현', c:'#a080d0', r:5, t:function(c){return c.nosp>=20;}}
 ];
 
 function achCtx(){
@@ -1262,16 +1262,25 @@ function colSnap(){
     strk:{nodup:STRK.nodup,nosp:STRK.nosp,bNodup:STRK.bNodup,bNosp:STRK.bNosp},updated:new Date().toISOString()};
 }
 function colLoad(d){
-  for(var i=0;i<N;i++)COL[i]=(d&&d.counts&&d.counts[i])||0;
-  var g=d&&d.ledger;
+  // 저장값 검사: 숫자 칸은 숫자로, 카드 번호(i · give)는 0~N-1 정수만, 깨진 줄(null 등)은 버림
+  //   — 예전엔 깨진 줄 하나로 기록 화면이 멈추거나(초기화 버튼까지 안 됨) 값이 HTML 에 그대로 들어갔다
+  function num(x,max){ x=Math.floor(+x); return isFinite(x)?Math.max(0,Math.min(max,x)):0; }
+  function okIdx(x){ return x===Math.floor(x)&&x>=0&&x<N; }
+  var cn=d&&Array.isArray(d.counts)?d.counts:[];
+  for(var i=0;i<N;i++)COL[i]=num(cn[i],999);
+  var g=d&&d.ledger&&typeof d.ledger==='object'?d.ledger:null;
   if(g){
-    LG.buy=g.buy||0; LG.trade=g.trade||0;
-    var up=g.uprice==null?15000:g.uprice;
+    LG.buy=num(g.buy,9999); LG.trade=num(g.trade,9999);
+    var up=g.uprice==null?15000:num(g.uprice,1e8);
     // 예전 기록(중고 단가 하나)은 그 단가로 건수만큼 옮김
-    LG.usedList=g.usedList?g.usedList.slice():Array.apply(null,Array(g.used||0)).map(function(){return {i:null,p:up};});
+    LG.usedList=Array.isArray(g.usedList)?g.usedList.filter(function(u){ return u&&typeof u==='object'&&(u.i==null||okIdx(u.i)); }).map(function(u){ return {i:u.i==null?null:u.i,p:num(u.p,1e8),g:u.g}; })
+      :Array.apply(null,Array(num(g.used,9999))).map(function(){return {i:null,p:up};});
   }else{ LG.buy=d&&d.counts?colTotals().cnt:0; LG.trade=0; LG.usedList=[]; }
   LG.used=LG.usedList.length;
-  LOG=(d&&d.log)?d.log.slice(-200):[];
+  LOG=(d&&Array.isArray(d.log))?d.log.filter(function(e){
+    return e&&typeof e==='object'&&typeof e.k==='string'&&(e.i==null||okIdx(e.i))&&(e.give==null||(Array.isArray(e.give)&&e.give.every(okIdx)));
+  }).slice(-200):[];
+  LOG.forEach(function(e){ e.d=+e.d||0; e.w=+e.w||0; e.t=+e.t||0; if(e.id!=null) e.id=String(e.id).replace(/[^\w.\-]/g,''); });
   LOG.forEach(function(e,n){ if(!e.id) e.id='L'+n+'_'+e.t; });
   ACH=(d&&d.ach)?JSON.parse(JSON.stringify(d.ach)):{};
   var sk=(d&&d.strk)||{};   // 예전 기록에는 없으므로 0부터 센다
@@ -1368,7 +1377,7 @@ function colBuildGrid(){
     var box=document.createElement('div'); box.className='set'+(isSp?' sp':'');
     var hd=document.createElement('div'); hd.className='shead';
     hd.innerHTML='<span class="chip" style="background:'+color+'"></span><b>'+title+'</b>'+
-      '<span class="vs">'+(isSp?'5인 전원 수록 7종':'같은 멤버 4종')+'</span>'+
+      '<span class="vs">'+(isSp?'스페셜 7종':'같은 멤버 4종')+'</span>'+
       '<span class="pr num" data-prog="'+ids.join(',')+'">0/'+ids.length+'</span>';
     box.appendChild(hd);
     var por=[],lan=[];
@@ -1401,7 +1410,7 @@ SG405.share=function(){
   for(var m=0;m<MCOUNT;m++){var cs=[];for(var v=0;v<VPER;v++)cs.push(cd(m*VPER+v)); gs.push({name:MEM[m].n,color:MEM[m].c,cols:2,cards:cs});}
   for(var i=MTOTAL;i<N;i++)sp.push(cd(i));
   return {kind:'포카 컬렉션 북', title:'CU 리센느 405빵 콜라보', sub:'2026년 9월 출시 · 포토카드 27종 (멤버 20 + 스페셜 7)', at:Date.now(), file:'sendungi-cu405',
-    stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+' · 중고 '+LG.used},
+    stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+'장 · 중고 '+LG.used+'장'},
       {k:'누적 금액',v:won(totalWon())+'원',s:'빵 + 중고 구매'},{k:'중복',v:t.dup+'장',s:'여분 카드'}],
     rows:[gs,[{name:'스페셜',color:'#f5b23a',cols:7,cards:sp}]],
     ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length}};
