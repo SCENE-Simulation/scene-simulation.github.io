@@ -3,7 +3,7 @@
 //   SGShare.video(card): 조회수 예측기 영상 카드. card 는 views.js 의 shareCard(v) 가 글자까지 만들어 넘긴다
 //     { id, title, thumbs: [썸네일 주소 후보…], hue, demo, at: 기록 시각(ms), chips: [...], when, views, sub,
 //       boxes: [{ name, at, tag, tone: 'pred'|'hit'|'miss'|'', big, unit, note } × 3], ms: { head, txt, how }, last }
-// [공유 카드]를 누르면 바로 클립보드에 복사(게시글에 Ctrl+V). 못 넣는 브라우저는 저장(다운로드)으로, 휴대폰은 공유 시트도
+// [공유하기]를 누르면 바로 클립보드에 복사(게시글에 Ctrl+V). 못 넣는 브라우저는 저장(다운로드)으로, 휴대폰은 공유 시트도
 (function(){
   var SITE = 'scene-simulation.github.io';
   var SANS = '"Pretendard Variable","Noto Sans KR",sans-serif', MONO = '"JetBrains Mono","Pretendard Variable",monospace';
@@ -167,7 +167,7 @@
   }
 
   // ---------- 미리보기 창 ----------
-  // [공유 카드]를 누르는 순간 클립보드 복사를 시작한다 (이미지는 다 그려지면 채워짐 — 누른 순간이어야 브라우저가 허락).
+  // [공유하기]를 누르는 순간 클립보드 복사를 시작한다 (이미지는 다 그려지면 채워짐 — 누른 순간이어야 브라우저가 허락).
   // 클립보드에 이미지를 못 넣는 브라우저이거나 실패하면 [이미지 저장](파일 받기)을 대신 보여 준다. 휴대폰은 [공유…]도
   var CAN_COPY = !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
   var box = null, url = null, blob = null, name = '';
