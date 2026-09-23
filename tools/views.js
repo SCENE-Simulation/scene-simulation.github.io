@@ -680,14 +680,13 @@
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) / 1,000만 명예의 전당 / 즐겨찾기(별표한 영상, 가로 카드) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
-      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button><button type="button" role="tab" id="vr-hof" data-rv="hof"></button></div>'
+      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button><button type="button" role="tab" id="vr-hof" data-rv="hof"></button><a class="vr-fav" id="vr-fav" href="?tab=vfav" data-tab="vfav"></a></div>'
       + '<div class="vr-side"><div class="seg vr-ft" id="vr-ft"></div>'
       // 바로 가기: 아래 칸으로 한 번에 내려간다
       + '<nav class="vr-jump" aria-label="바로 가기">' + [['vd-pred', '예측 현황'], ['vt-h', '전체 영상'], ['vs-h', '예측 성적표']].map(function(x){
           return '<button type="button" data-jump="' + x[0] + '">' + x[1]
             + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-        }).join('') + '</nav>'
-      + '<a class="vr-fav" id="vr-fav" href="?tab=vfav" data-tab="vfav"></a></div></div>'
+        }).join('') + '</nav></div></div>'
       + '<p class="vr-cap" id="vr-cap"></p>'
       + '<div class="vc-wrap at-start" id="vc-wrap"><button type="button" class="vc-nav prev" data-nav="-1" aria-label="이전 영상들">‹</button>'
       + '<div class="vc-row" id="vc-row"></div>'
