@@ -2057,6 +2057,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .shr-b .shr-go{background:#ff4d4f;border-color:#ff4d4f!important;color:#fff}
 .shr-b .shr-go:hover:not(:disabled){background:#ff6466;color:#fff}
 .shr-m{font-size:12.5px;color:#6fe0b3}
+.shr-m.bad{color:#ffb36b}
 html.shr-on{overflow:hidden}
 /* 예측기 예상 (③ 추세 곡선, 민트 — 조회수 예측기의 100만 단위 색 MSC) : 그래프 점 · 그래프 아래 줄 */
 .og-gai{stroke:#6fe0b3;stroke-width:1.2;stroke-dasharray:2 3;opacity:.8}
