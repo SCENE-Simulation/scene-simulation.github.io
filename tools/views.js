@@ -1446,9 +1446,10 @@
   // [100만 단위 예측 확인]: 이 영상의 구간 기록
   function segScore(v){
     var L = (v.seg || []).filter(function(s){ return s.c && s.c.length; }).slice().reverse();
-    if (!L.length) return '<p class="anote">' + (late(v)
-        ? '이 영상은 아직 100만 단위 구간의 세 지점(100만·50만·20만 남음)을 지나지 않았습니다. 지나면 그때마다 다음 100만 도달 예측을 고정하고, 닿으면 채점합니다.'
-        : '게시 15일이 지나면(' + ageTxt(VE.LATE - age(v)) + ' 뒤) 100만 단위 구간을 채점합니다.') + '</p>';
+    // 기록이 없을 때 안내: 어느 영상이든 같은 설명 한 문장 + 이 영상의 상태 한 문장 (15일 전이면 언제부터인지, 지났으면 아직 지점을 안 지났다는 것)
+    if (!L.length) return '<p class="anote">100만 단위 구간마다 100만·50만·20만이 남은 지점을 지날 때 다음 100만 도달 예측을 고정하고, 실제로 닿으면 채점합니다. '
+        + (late(v) ? '이 영상은 아직 이 지점들을 지나지 않았습니다.'
+          : '이 영상은 게시 15일 뒤(' + when(v.pub + VE.LATE * 3600e3) + ')부터 채점하며, ' + ageTxt(VE.LATE - age(v)) + ' 남았습니다.') + '</p>';
     return '<div class="sg-list">' + L.map(function(s){ return segRow(v, s, true); }).join('') + '</div>'
       + '<p class="gnote">100만·50만·20만이 남은 지점을 지날 때 한 도달 예측을 실제로 닿은 때와 비교합니다. 오차가 + 이면 실제보다 늦게, − 이면 빨리 닿는다고 본 것이고, 8주보다 먼 예측은 <i class="sg-far">참고</i>입니다.</p>';
   }
@@ -1479,15 +1480,15 @@
     }
     var rvb = e.target.closest('[data-rv]');
     if (rvb){
-      // 탭을 바꿔도 아래 상세·성적표는 보던 영상 그대로 — 그 영상이 이 탭 목록에 없을 때만(100만·명예의 전당) 이 탭에서 마지막으로 본 영상, 그다음 목록 첫 영상
+      // 탭마다 보던 영상을 기억해 두고, 탭을 바꾸면 아래 상세도 그 탭의 영상으로 (100만 탭은 목록 안의 영상만)
       var to = rvb.getAttribute('data-rv');
       if (to === rv) return;
       if (sel) TABSEL[rv] = sel.id;
       rv = to; renderRank();
       var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
-      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(sel) >= 0 ? sel : MB.indexOf(back) >= 0 ? back : MB[0]; }
-      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(sel) >= 0 ? sel : HA.indexOf(back) >= 0 ? back : HA[0] || VIDEOS[0]; }
-      else next = sel || back || VIDEOS[0];
+      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
+      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(back) >= 0 ? back : HA.indexOf(sel) >= 0 ? sel : HA[0] || VIDEOS[0]; }
+      else next = back || VIDEOS[0];
       if (next && next !== sel) pick(next);
       return;
     }
