@@ -410,8 +410,9 @@
   function ledVal(p, k){ return k === 'd' ? String(p.d) : two(p[k]); }
   function led(to, over){
     var p = ledParts(to - Date.now()), ks = p.d > 0 ? ['d', 'h', 'm', 's'] : ['h', 'm', 's'], lab = { d: '일', h: '시간', m: '분', s: '초' };
+    var nd = ks.reduce(function(n, k){ return n + ledVal(p, k).length; }, 0), u = nd * 6.6 + (nd - ks.length) * 0.9 + (ks.length - 1) * 3.4 + 1;
     return '<div class="og-bomb' + (over ? ' over' : '') + '" data-to="' + to + '" aria-label="남은 시간">'
-      + '<div class="og-lcd">'
+      + '<div class="og-lcd" style="--u:' + u.toFixed(1) + '">'
       + ks.map(function(k, i){
           return (i ? '<span class="og-lcol"><i></i><i></i></span>' : '')
             + '<span class="og-lu"><span class="og-lds" data-u="' + k + '">' + ledVal(p, k).split('').map(ledDigit).join('') + '</span><small>' + lab[k] + '</small></span>';

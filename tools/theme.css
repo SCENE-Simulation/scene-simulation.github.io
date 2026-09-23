@@ -2113,16 +2113,17 @@ html.shr-on{overflow:hidden}
 /* 예측의 신: 카운트다운 LED 숫자 (채점 기다림 카드의 내 예측 상자) — 노랑 도트 매트릭스, 꾸밈 없이 숫자만 */
 .og-flw{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .og-flh{font-size:11.5px;color:var(--ink2)}
-.og-bomb{align-self:flex-start;padding:2px 0}
-.og-lcd{display:flex;align-items:flex-start;gap:6px}
-.og-lu{display:flex;flex-direction:column;align-items:center;gap:4px}
-.og-lu small{font-size:9.5px;color:rgba(255,210,60,.55);letter-spacing:.06em}
-.og-lds{display:flex;gap:4px}
-.og-ld{display:grid;grid-template-columns:repeat(5,3.2px);grid-auto-rows:3.2px;gap:1.3px}
+/* 폭 = 상자 가득. 점 크기 --d 는 상자 폭 ÷ 숫자 칸 수(--u, led() 가 넣음)로 정해 가로에 꼭 맞춘다 (최대 8px) */
+.og-bomb{box-sizing:border-box;width:100%;container-type:inline-size;padding:14px 16px 10px;border-radius:12px;background:linear-gradient(180deg,#3b3b41,#303035);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 2px 8px rgba(0,0,0,.35)}
+.og-lcd{--d:min(8px,calc(100cqw / var(--u,50)));display:flex;align-items:flex-start;justify-content:center;gap:calc(var(--d) * 1.2)}
+.og-lu{display:flex;flex-direction:column;align-items:center;gap:calc(var(--d) * 1.1)}
+.og-lu small{font-size:11px;color:rgba(255,210,60,.6);letter-spacing:.06em}
+.og-lds{display:flex;gap:calc(var(--d) * .9)}
+.og-ld{display:grid;grid-template-columns:repeat(5,var(--d));grid-auto-rows:var(--d);gap:calc(var(--d) * .4)}
 .og-ld i{border-radius:50%;background:rgba(255,196,40,.09)}
-.og-ld i.on{background:#ffd23c;box-shadow:0 0 3px rgba(255,205,50,.95),0 0 7px rgba(255,180,20,.45)}
-.og-lcol{display:flex;flex-direction:column;justify-content:center;gap:7px;height:30.8px;padding:0 1px}
-.og-lcol i{width:3.2px;height:3.2px;border-radius:50%;background:#ffd23c;box-shadow:0 0 4px rgba(255,205,50,.9);animation:ogBlink 1s steps(2) infinite}
+.og-ld i.on{background:#ffd23c;box-shadow:0 0 calc(var(--d) * .9) rgba(255,205,50,.95),0 0 calc(var(--d) * 2.2) rgba(255,180,20,.45)}
+.og-lcol{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--d) * 2.2);height:calc(var(--d) * 9.4)}
+.og-lcol i{width:var(--d);height:var(--d);border-radius:50%;background:#ffd23c;box-shadow:0 0 4px rgba(255,205,50,.9);animation:ogBlink 1s steps(2) infinite}
 @keyframes ogBlink{50%{opacity:.15}}
 .og-clkv{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
 .og-clkv i{width:10px;height:3px;border-radius:2px;background:#6fe0b3}
@@ -2142,4 +2143,4 @@ html.shr-on{overflow:hidden}
 .og-bomb.over .og-lu small{color:rgba(255,90,90,.6)}
 @keyframes ogOver{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.og-lcol i,.og-bomb.over .og-lcd{animation:none}}
-@media (max-width:400px){.og-ld{grid-template-columns:repeat(5,2.7px);grid-auto-rows:2.7px;gap:1.1px}.og-lcol{height:25.5px;gap:6px}.og-lds{gap:3px}.og-lcd{gap:4px}}
+
