@@ -224,7 +224,9 @@ a.hc:hover{background:var(--glass-h);border-color:rgba(255,255,255,.2);transform
 
   #totop{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 }
-@media (max-width:360px){.bb a,.bb button{min-width:54px}}
+/* 하단 탭 6칸(홈 · 포카 · 굿즈 · 장난감 · 위시 · 즐겨찾기): 좁은 화면에서도 한 줄에 */
+@media (max-width:640px){.bb a,.bb button{min-width:52px;padding:7px 4px}}
+@media (max-width:360px){.bb{width:calc(100vw - 24px)}.bb a,.bb button{flex:1 1 0;min-width:0;padding:7px 2px;font-size:10px!important;white-space:nowrap}}
 
 /* ===== 컬렉션 정보: 출시 달 · 수집 난이도 ===== */
 .dlv{display:inline-flex;align-items:center;gap:7px;color:var(--dc)}
