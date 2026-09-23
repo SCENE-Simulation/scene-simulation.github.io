@@ -1068,10 +1068,11 @@
       + '<span class="vd-mc" title="최근 1시간 동안 늘어난 조회수">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em></span>'
       + '<span class="vd-mc" title="최근 24시간 동안 늘어난 조회수">24시간 <em>+' + fmt(p.g) + '</em></span>'
       + '<span class="vd-mc" title="' + fmtM(m.M) + '까지 남은 조회수"><em>' + fmt(m.M - V) + '</em> 남음</span></div>';
-    // 배치(사용자 시안): [다음 N만까지 · 남은 시간(가운데) · 날짜 무렵 달성 예상] / [1시간] [24시간] [N만 남음] / [700만 ~막대~ 800만]
+    // 배치(사용자 시안): 윗줄 상자 [N만 달성까지 · 남은 시간(크게) ··· 날짜 / 오전·오후 무렵] / [1시간] [24시간] [N만 남음] / [700만 ~막대~ 800만]
+    //   윗줄은 100만 목록 카드의 "달성까지" 상자(.mb-e)와 같은 짜임 — 색만 카운터 칸의 황금. 남은 시간이 주 단위면 8주 넘게도 숫자로 보인다
     return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">'
-      + '<div class="vd-mst">' + hd + '<b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>'
-      + '<small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
+      + '<div class="vd-mst"><span class="vd-mel"><small>' + fmtM(m.M) + ' 달성까지</small><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b></span>'
+      + '<span class="vd-med"><b>' + dday(v, m.h) + '</b><small>' + ddayAP(v, m.h).split(' ').pop() + ' 무렵</small></span></div>'
       + boxes + '<div class="vd-sv">' + bar + '</div></div>';
   }
   // 카운터 막대의 액체: SVG 로 그린다. 오른쪽 끝선은 사인파 두 개를 겹친 물결이고, waveLoop 가 매 프레임 위상을 옮겨 마루가 위아래로 흐른다.
