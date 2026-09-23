@@ -1452,7 +1452,7 @@
       if (!best) return null;
       var t = v.pub + best.h * 3600e3;                                       // 날짜는 dday (이 함수 안에서 md 는 예측선 path 변수)
       return { x: X(best.h), y: Y(best.M), color: MSC,
-        html: '<b>게시 후 ' + ageTxt(best.h) + '</b><span>' + fmtM(best.M) + ' 돌파 예상 <em style="color:' + MSC + '">' + dday(v, best.h - a) + ' ' + hm(t) + '</em></span>'
+        html: '<b>게시 후 ' + ageTxt(best.h) + '</b><span><em style="color:' + MSC + '">' + fmtM(best.M) + '</em> 돌파 예상 <em style="color:' + MSC + '">' + dday(v, best.h - a) + ' ' + hm(t) + '</em></span>'
           + '<small>지금부터 약 ' + etaHM(best.d) + ' 뒤 · 추세가 바뀌면 달라집니다</small>' };
     }
     lineTip(box, W, H, L, R, function(x, y){
