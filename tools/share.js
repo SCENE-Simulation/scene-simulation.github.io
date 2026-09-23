@@ -168,7 +168,7 @@
   // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
   // d = { kind: '포카 컬렉션 북', title, sub, at, file,
   //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
-  //       ach: { got: [{ n, c }], total } | null, note }
+  //       ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
   // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
   var PK = { pink: '#e96387', pinkT: '#f28aa7' };
   function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
@@ -286,7 +286,7 @@
     }
 
     // 발
-    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText(fit(x, d.note || '이 브라우저에 기록한 실물 수집 기록입니다', AW - 330), P, HH - 30);
+    if (d.note){ font(x, 500, 18); x.fillStyle = C.ink3; x.fillText(fit(x, d.note, AW - 330), P, HH - 30); }
     font(x, 700, 20, MONO); x.fillStyle = PK.pinkT; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
     return cv;
   }
@@ -360,7 +360,7 @@
       var cards = []; d.rows.forEach(function(r){ r.forEach(function(g){ cards = cards.concat(g.cards); }); });
       var text = [d.kind, d.title, d.sub, d.note || ''].concat(d.stats.map(function(s){ return s.k + s.v + (s.s || ''); }))
         .concat(d.rows.map(function(r){ return r.map(function(g){ return g.name; }).join(''); }))
-        .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 이 브라우저에 기록한 실물 수집 기록입니다 ✦';
+        .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 ✦';
       open(function(){ return loadAll(cards.map(function(c){ return c.src; })).then(function(ims){ return drawCollection(d, ims); }); },
         (d.file || 'sendungi-collection') + '-' + fileStamp(d.at) + '.png', text);
     }

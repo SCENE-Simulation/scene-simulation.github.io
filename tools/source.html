@@ -1404,8 +1404,7 @@ SG405.share=function(){
     stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+' · 중고 '+LG.used},
       {k:'누적 금액',v:won(totalWon())+'원',s:'빵 + 중고 구매'},{k:'중복',v:t.dup+'장',s:'여분 카드'}],
     rows:[gs,[{name:'스페셜',color:'#f5b23a',cols:7,cards:sp}]],
-    ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length},
-    note:PEND.length?'저장하지 않은 변경 포함 · 이 브라우저에 기록한 실물 수집 기록':'이 브라우저에 기록한 실물 수집 기록입니다'};
+    ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length}};
 };
 document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-shr405]')&&window.SGShare) SGShare.collection(SG405.share()); });
 function setUprice(v){

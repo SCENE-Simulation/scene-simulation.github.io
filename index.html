@@ -3712,8 +3712,7 @@ SG405.share=function(){
     stats:[{k:'보유 종수',v:t.own+' / '+N,bar:t.own/N},{k:'빵 구매',v:LG.buy+'개',s:'교환 '+LG.trade+' · 중고 '+LG.used},
       {k:'누적 금액',v:won(totalWon())+'원',s:'빵 + 중고 구매'},{k:'중복',v:t.dup+'장',s:'여분 카드'}],
     rows:[gs,[{name:'스페셜',color:'#f5b23a',cols:7,cards:sp}]],
-    ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length},
-    note:PEND.length?'저장하지 않은 변경 포함 · 이 브라우저에 기록한 실물 수집 기록':'이 브라우저에 기록한 실물 수집 기록입니다'};
+    ach:{got:ACHDEF.filter(function(a){return ACH[a.id];}).sort(function(a,b){return (b.r||1)-(a.r||1);}).map(function(a){return {n:a.n,c:a.c};}),total:ACHDEF.length}};
 };
 document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('[data-shr405]')&&window.SGShare) SGShare.collection(SG405.share()); });
 function setUprice(v){
@@ -6552,7 +6551,7 @@ goTab(true,true);
   // ---------- 컬렉션 카드 (포카 · 굿즈 컬렉션 북) ----------
   // d = { kind: '포카 컬렉션 북', title, sub, at, file,
   //       stats: [{ k, v, s, bar: 0~1 (첫 칸만) }], rows: [[{ name, color, cols, cards: [{ src, n: 가진 장수, land, pix }] }]],
-  //       ach: { got: [{ n, c }], total } | null, note }
+  //       ach: { got: [{ n, c }], total } | null, note: 맨 아래 왼쪽 글(없으면 비움) }
   // rows: 한 줄에 여러 묶음(멤버별 등). 묶음 안 카드는 cols 개씩 줄바꿈. 줄마다 카드 높이를 폭에 맞춰 정한다
   var PK = { pink: '#e96387', pinkT: '#f28aa7' };
   function asp(c){ return c.land ? 4 / 3 : 3 / 4; }
@@ -6670,7 +6669,7 @@ goTab(true,true);
     }
 
     // 발
-    font(x, 500, 18); x.fillStyle = C.ink3; x.fillText(fit(x, d.note || '이 브라우저에 기록한 실물 수집 기록입니다', AW - 330), P, HH - 30);
+    if (d.note){ font(x, 500, 18); x.fillStyle = C.ink3; x.fillText(fit(x, d.note, AW - 330), P, HH - 30); }
     font(x, 700, 20, MONO); x.fillStyle = PK.pinkT; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
     return cv;
   }
@@ -6744,7 +6743,7 @@ goTab(true,true);
       var cards = []; d.rows.forEach(function(r){ r.forEach(function(g){ cards = cards.concat(g.cards); }); });
       var text = [d.kind, d.title, d.sub, d.note || ''].concat(d.stats.map(function(s){ return s.k + s.v + (s.s || ''); }))
         .concat(d.rows.map(function(r){ return r.map(function(g){ return g.name; }).join(''); }))
-        .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 이 브라우저에 기록한 실물 수집 기록입니다 ✦';
+        .concat(d.ach ? d.ach.got.map(function(a){ return a.n; }) : []).join('') + '센둥이 시뮬레이터 기준 칭호 아직 얻은 칭호가 없어요 ✦';
       open(function(){ return loadAll(cards.map(function(c){ return c.src; })).then(function(ims){ return drawCollection(d, ims); }); },
         (d.file || 'sendungi-collection') + '-' + fileStamp(d.at) + '.png', text);
     }
