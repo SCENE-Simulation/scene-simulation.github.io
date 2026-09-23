@@ -1017,18 +1017,23 @@ a.vd-th:hover .vd-play{background:#ff0033;transform:scale(1.08)}
 .vd-ms b i{font:700 12px "Pretendard Variable",sans-serif;font-style:normal;color:rgba(240,199,94,.7);margin:0 6px 0 2px}
 .vd-ms b i:last-child{margin-right:0}
 .vd-ms small em{font-style:normal;font-weight:800;color:var(--au)}
-/* 줄 순서: [남은 시간 · 날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [N만 남음] */
-.vd-msr{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px}
-.vd-msr small{font-size:11px;color:var(--ink2)}
-.vd-msn{display:flex;align-items:baseline;gap:10px;margin-top:5px;font-size:11.5px;color:var(--ink2)}
-.vd-msn em{font-size:13px}
-.vd-msl{margin-left:auto;white-space:nowrap}
-/* 최근 1시간 · 24시간 증가 (카운터 칸 맨 아랫줄) — 상자 두 개를 나란히 */
-.vd-msv{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-/* 1시간 · 24시간 증가: 칸마다 작은 황금 상자 (라벨은 Pretendard, 숫자는 "N만 남음"과 같은 JetBrains Mono) */
-.vd-mc{display:inline-flex;align-items:baseline;gap:5px;padding:3px 8px;border-radius:7px;line-height:1.25;font-size:11px;color:var(--ink2);
+/* 카운터 칸 배치(사용자 시안) — 1줄 [다음 N만까지 · 남은 시간(가운데 크게) · 날짜 무렵 달성 예상] / 2줄 상자 세 개 [1시간 · 24시간 · N만 남음] / 3줄 [700만 ~막대~ 800만]
+   1줄은 양옆 칸 폭을 같게(1fr) 해서 남은 시간이 칸 한가운데에 온다. 좁으면 양옆 글자가 두 줄로 접힌다 */
+.vd-mst{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.vd-mst .vd-sh{min-width:0}
+.vd-mst .vd-sh span{white-space:normal;word-break:keep-all}   /* 휴대폰 규칙(.vd-sh span nowrap)보다 특이도가 높음 — 좁으면 "다음 / 900만까지" 로 접힘 */
+.vd-mst > b{text-align:center;white-space:nowrap}
+.vd-s.vd-ms .vd-mst > small{text-align:right;display:block;overflow:visible;-webkit-line-clamp:unset}   /* "· 8주 넘게"가 붙어 세 줄이 돼도 잘리지 않게 (뒤에 오는 .vd-s small:not(…) 의 두 줄 제한 풀기) */
+.vd-msv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 2px}
+/* 상자: 라벨은 Pretendard, 숫자는 JetBrains Mono 황금. 칸이 좁으면 라벨 · 숫자가 두 줄로 */
+.vd-mc{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;align-content:center;gap:0 5px;min-width:0;padding:5px 6px;border-radius:8px;
+  line-height:1.25;font-size:11px;color:var(--ink2);white-space:nowrap;
   border:1px solid rgba(217,164,65,.4);background:linear-gradient(180deg,rgba(240,199,94,.15),rgba(176,125,38,.06));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .vd-ms .vd-mc em{font:800 13px "JetBrains Mono",monospace;font-style:normal;color:var(--au)}
+/* 칸이 좁으면(휴대폰 · 1024px 쯤의 좁은 오른쪽 칸) 상자 하나만 두 줄로 꺾여 들쭉날쭉하므로 세 상자 모두 [라벨 / 숫자] 두 줄로 ("N만 남음"은 숫자가 위).
+   기준은 화면 폭이 아니라 카운터 칸 폭(container query) — 상자 한 줄에 약 104px 필요 → 칸 안쪽 340px 이하 */
+.vd-ms{container:vdms / inline-size}
+@container vdms (max-width:340px){.vd-mc{flex-direction:column;align-items:center;gap:1px;padding:5px 4px}}
 .vd-ms.soon{border-color:rgba(240,199,94,.75)!important;box-shadow:0 0 0 1px rgba(217,164,65,.14),0 0 22px rgba(217,164,65,.16)}
 .vd-ms.na{border-color:var(--line)!important;background:rgba(255,255,255,.04)!important}
 .vd-s.vd-ms.na .vd-sh span{color:var(--ink2)}
@@ -1384,7 +1389,15 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .mb-r.in{border-color:rgba(255,77,79,.32)!important}
 #v-views .mb-r.on{border-color:var(--vg)!important;box-shadow:0 0 0 1px var(--vg)}
 /* 썸네일은 카드 왼쪽을 모서리까지 꽉 채운다 (16:9 를 가운데 기준으로 잘라 씀) */
-#v-views .mb-r > .mb-th{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+#v-views .mb-r > .mb-th{width:100%;height:100%;aspect-ratio:auto;border-radius:0;
+  -webkit-mask-image:linear-gradient(90deg,#000 72%,transparent);mask-image:linear-gradient(90deg,#000 72%,transparent)}   /* 오른쪽 끝이 뒤 번짐으로 스며든다 */
+/* 썸네일 번짐 (시안 A 응용): 흐리고 어둡게 한 썸네일을 카드 왼쪽 뒤에 깔고, 글자 칸 40% 쯤에서 완전히 사라지게.
+   밝은 썸네일(흰 배경)이어도 글자가 묻히지 않도록 밝기를 낮추고 투명도를 작게 — 글자 칸 왼쪽 끝에서도 배경이 살짝 물드는 정도 */
+.mb-r{position:relative;isolation:isolate}
+.mb-bg{position:absolute;top:0;bottom:0;left:0;width:calc(var(--thw) + 40%);z-index:-1;pointer-events:none;
+  background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) center/cover no-repeat;
+  filter:blur(16px) saturate(1.3) brightness(.6);opacity:.32;transform:scale(1.15);transform-origin:left center;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(var(--thw) * .5),transparent);mask-image:linear-gradient(90deg,#000 calc(var(--thw) * .5),transparent)}
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
 /* 글자 묶음: 제목 · 지금 → 목표 · 막대 · 달성까지 (따로 떼지 않고 한 덩어리로 세로 가운데) */
@@ -1689,10 +1702,6 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vd-sc .vs-row{gap:8px}
 .vd-sc .vs-row > span{flex:0 0 auto;white-space:nowrap}
 .vd-sc .vs-row em{text-align:right}
-/* 카운터 칸: "N만 남음" 은 남은 시간 줄 오른쪽 끝에, 날짜는 그 아래 한 줄 (좁은 화면에서 맨 아랫줄이 잘리던 것) */
-.vd-msr .vd-msl{font-size:11.5px;color:var(--ink2)}
-.vd-msr .vd-msl em{font:800 14px "JetBrains Mono",monospace;font-style:normal;color:var(--au)}
-.vd-msr small{flex-basis:100%}
 /* 현황 칸: 추이 · 다음 100만 카운터를 위아래 2단(각각 한 줄 전체 폭)으로 — 좁은 칸에서 "추/이"처럼 꺾이거나 글자가 잘리지 않게.
    넓어진 추이 칸은 [추이 ··· 1위 / 31편] / [강함 · 최근 24시간 +N ··· 약함|중간|강함] 두 줄 */
 .vd-stats{grid-template-rows:auto}

@@ -224,8 +224,9 @@
     return { t: a >= VE.LATE ? '100만 단위 추적' : '30일 지남', live: false };
   }
   // 썸네일: 수집한 주소 → 유튜브 기본 썸네일 → (예시 데이터) 색 카드
+  function thumbSrc(v){ return v.thumb || (DATA.demo ? '' : 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/mqdefault.jpg'); }
   function thumb(v){
-    var src = v.thumb || (DATA.demo ? '' : 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/mqdefault.jpg');
+    var src = thumbSrc(v);
     return src ? '<img src="' + esc(src) + '" alt="" loading="lazy">'
       : '<span class="vt-ph" style="--h:' + v.hue + '"><em>' + esc(v.title) + '</em></span>';
   }
@@ -780,6 +781,8 @@
         + '<span class="mb-ed na"><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small></span>';
     var a0 = x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
+      // 썸네일 번짐: 흐리고 어둡게 한 썸네일을 카드 왼쪽 뒤에 깔고 오른쪽으로 사라지게 (시안 A 의 "썸네일 배경" 을 왼쪽에만 살짝)
+      + '<span class="mb-bg" aria-hidden="true" style="' + (thumbSrc(v) ? 'background-image:url(&quot;' + esc(thumbSrc(v)) + '&quot;)' : '--h:' + v.hue) + '"></span>'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-c">'
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
@@ -1055,18 +1058,21 @@
     var pc = Math.round(f * 100);
     var bar = '<div class="vd-msb" title="' + (M0 > 0 ? fmtM(M0) : '0') + ' → ' + fmtM(m.M) + ' · ' + pc + '%"><span>' + (M0 > 0 ? fmtM(M0) : '0') + '</span>'
       + '<div class="vd-msg" role="img" aria-label="' + fmtM(m.M) + '까지 ' + pc + '%">' + waveSvg(f) + '<em>' + pc + '%</em></div><span>' + fmtM(m.M) + '</span></div>';
-    // 맨 아랫줄: 최근 1시간 · 24시간 증가를 작은 상자 두 개로 (1시간 전 기록이 없으면 24시간 증가 ÷ 24). 남은 조회수는 윗줄 남은 시간 오른쪽에 (좁은 화면에서 잘리지 않게)
-    var g1 = gain(v, a, 1), rate = !p ? '' : '<span class="vd-msv" title="최근 1시간 · 최근 24시간 동안 늘어난 조회수">'
-      + '<span class="vd-mc">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em></span><span class="vd-mc">24시간 <em>+' + fmt(p.g) + '</em></span></span>';
-    var leftTxt = '<small class="vd-msn">' + rate + '</small>', remain = '<span class="vd-msl"><em>' + fmt(m.M - V) + '</em> 남음</span>';
     if (!p || m.how !== 'lt') return '<div class="vd-s vd-ms na">' + hd + '<b>—</b><small>최근 기록이 3시간 이상 쌓이면 남은 시간이 나옵니다</small><div class="vd-sv">' + bar + '</div></div>';
     if (m.h == null) return '<div class="vd-s vd-ms na">' + hd + '<b>닿기 어려움</b><small>지금 추세로는 ' + fmtM(m.M) + '에 닿기 어렵습니다</small><div class="vd-sv">' + bar + '</div></div>';
     var atMs = nowMs(v) + m.h * 3600e3;
     if (!WAVE.raf) WAVE.raf = requestAnimationFrame(waveLoop);
-    return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">' + hd
-      // 줄 순서: [남은 시간 ········ N만 남음] / [날짜 무렵 달성 예상] / [700만 ~막대~ 800만] / [1시간 · 24시간 증가 상자]
-      + '<div class="vd-msr"><b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>' + remain + '<small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
-      + '<div class="vd-sv">' + bar + leftTxt + '</div></div>';
+    // 가운데 줄 상자 세 개: 최근 1시간 증가(1시간 전 기록이 없으면 24시간 증가 ÷ 24) · 최근 24시간 증가 · 남은 조회수
+    var g1 = gain(v, a, 1);
+    var boxes = '<div class="vd-msv">'
+      + '<span class="vd-mc" title="최근 1시간 동안 늘어난 조회수">1시간 <em>+' + fmt(g1 != null ? g1 : p.g / 24) + '</em></span>'
+      + '<span class="vd-mc" title="최근 24시간 동안 늘어난 조회수">24시간 <em>+' + fmt(p.g) + '</em></span>'
+      + '<span class="vd-mc" title="' + fmtM(m.M) + '까지 남은 조회수"><em>' + fmt(m.M - V) + '</em> 남음</span></div>';
+    // 배치(사용자 시안): [다음 N만까지 · 남은 시간(가운데) · 날짜 무렵 달성 예상] / [1시간] [24시간] [N만 남음] / [700만 ~막대~ 800만]
+    return '<div class="vd-s vd-ms' + (m.h <= 48 ? ' soon' : '') + '" title="최근 하루 +' + fmt(p.g) + ' 기준">'
+      + '<div class="vd-mst">' + hd + '<b id="vd-cnt" data-at="' + atMs + '">' + cntTxt(atMs) + '</b>'
+      + '<small>' + ddayAP(v, m.h) + ' 무렵 달성 예상' + (m.far ? ' · 8주 넘게' : '') + '</small></div>'
+      + boxes + '<div class="vd-sv">' + bar + '</div></div>';
   }
   // 카운터 막대의 액체: SVG 로 그린다. 오른쪽 끝선은 사인파 두 개를 겹친 물결이고, waveLoop 가 매 프레임 위상을 옮겨 마루가 위아래로 흐른다.
   //   처음 1초는 0 에서 채운 만큼까지 차오른다. 진폭도 천천히 숨 쉬듯 변한다. 움직임 줄이기 설정이면 멈춘 물결
