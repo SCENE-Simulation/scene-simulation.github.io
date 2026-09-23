@@ -102,7 +102,7 @@
   }
   function show(){
     if (!timer) timer = setInterval(function(){ if (!el.hidden && loaded) tick(); }, 30e3);
-    if (!ftimer) ftimer = setInterval(function(){ if (!el.hidden && loaded) flipTick(); }, 1000);   // 플립 시계 초
+    if (!ftimer) ftimer = setInterval(function(){ if (!el.hidden && loaded) ledTick(); }, 1000);    // 시한폭탄 시계 초
     if (loaded){ render(); return; }
     el.innerHTML = head() + '<p class="gnote">기록을 불러오는 중…</p>';
     V.ready().then(function(){ loaded = true; if (!el.hidden) render(); });
@@ -377,7 +377,7 @@
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
       h += '<div class="og-flw' + (left > 0 ? '' : ' over') + '">'
         + '<small class="og-flh">' + (left > 0 ? '예측한 때까지 남은 시간' : '예측한 때가 ' + durTxt(-left) + ' 지났는데 아직 못 넘음') + '</small>'
-        + flip(x.g) + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div>';
+        + led(x.g, left <= 0) + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div>';
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
@@ -390,34 +390,41 @@
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
     return h + '</div></article>';
   }
-  // 카운트다운 플립 시계 (채점 기다림 카드) — 사용자 요청 "카운트다운하는 디지털 아날로그 시계"(넘기는 카드식)
-  //   [일] 시 : 분 : 초 — 하루 안이면 일 칸 없음. 1초마다 flipTick 이 숫자를 바꾸고, 바뀐 칸만 넘어가는 애니메이션(.fl)
-  //   고른 때가 지나면 00 으로 멈추고 빨강 (.over)
-  function flipParts(ms){
+  // 카운트다운 시한폭탄 시계 (채점 기다림 카드) — 사용자 요청 "시한폭탄 느낌의 점(LED, 노랑) 시계"
+  //   5×7 점 글자(도트 매트릭스)로 [일] : 시 : 분 : 초. 꺼진 점도 희미하게 보인다. 빨간 ARMED 불빛 · 나사 · 전선은 CSS 장식
+  //   1초마다 ledTick 이 바뀐 글자만 다시 그린다. 고른 때가 지나면 00 에서 멈추고 빨강으로 깜빡임(.over)
+  var DOTS = {
+    '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'], '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+    '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'], '3': ['11111', '00010', '00100', '00010', '00001', '10001', '01110'],
+    '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'], '5': ['11111', '10000', '11110', '00001', '00001', '10001', '01110'],
+    '6': ['00110', '01000', '10000', '11110', '10001', '10001', '01110'], '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+    '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'], '9': ['01110', '10001', '10001', '01111', '00001', '00010', '01100']
+  };
+  function ledParts(ms){
     var s = Math.max(0, Math.floor(ms / 1000));
     return { d: Math.floor(s / 86400), h: Math.floor(s / 3600) % 24, m: Math.floor(s / 60) % 60, s: s % 60 };
   }
-  function flip(to){
-    var p = flipParts(to - Date.now()), days = p.d > 0;
-    function unit(k, v, lab){
-      var t = k === 'd' ? String(v) : two(v);
-      return '<span class="og-fu u' + k + '"><span class="og-fds" data-u="' + k + '">' + t.split('').map(function(c){ return '<b class="og-fd">' + c + '</b>'; }).join('')
-        + '</span><small>' + lab + '</small></span>';
-    }
-    return '<div class="og-fl" data-to="' + to + '" aria-label="남은 시간">' + (days ? unit('d', p.d, '일') : '')
-      + unit('h', p.h, '시간') + '<i class="og-fc">:</i>' + unit('m', p.m, '분') + '<i class="og-fc">:</i>' + unit('s', p.s, '초') + '</div>';
+  function ledDigit(c){
+    return '<span class="og-ld" data-c="' + c + '">' + DOTS[c].join('').split('').map(function(b){ return b === '1' ? '<i class="on"></i>' : '<i></i>'; }).join('') + '</span>';
   }
-  // 1초마다: 보이는 플립 시계의 숫자만 바꾼다 (카드 전체는 30초마다 tick 이 다시 그림)
-  function flipTick(){
-    Array.prototype.forEach.call(el.querySelectorAll('.og-fl[data-to]'), function(w){
-      var p = flipParts(+w.getAttribute('data-to') - Date.now());
-      Array.prototype.forEach.call(w.querySelectorAll('.og-fds'), function(g){
-        var k = g.getAttribute('data-u'), t = k === 'd' ? String(p.d) : two(p[k]), ds = g.querySelectorAll('.og-fd');
-        if (ds.length !== t.length){ g.innerHTML = t.split('').map(function(c){ return '<b class="og-fd">' + c + '</b>'; }).join(''); return; }
-        Array.prototype.forEach.call(ds, function(d, i){
-          if (d.textContent === t[i]) return;
-          d.textContent = t[i]; d.classList.remove('fl'); void d.offsetWidth; d.classList.add('fl');
-        });
+  function ledVal(p, k){ return k === 'd' ? String(p.d) : two(p[k]); }
+  function led(to, over){
+    var p = ledParts(to - Date.now()), ks = p.d > 0 ? ['d', 'h', 'm', 's'] : ['h', 'm', 's'], lab = { d: '일', h: '시간', m: '분', s: '초' };
+    return '<div class="og-bomb' + (over ? ' over' : '') + '" data-to="' + to + '" aria-label="남은 시간">'
+      + '<span class="og-arm"><i></i>' + (over ? 'TIME' : 'ARMED') + '</span><div class="og-lcd">'
+      + ks.map(function(k, i){
+          return (i ? '<span class="og-lcol"><i></i><i></i></span>' : '')
+            + '<span class="og-lu"><span class="og-lds" data-u="' + k + '">' + ledVal(p, k).split('').map(ledDigit).join('') + '</span><small>' + lab[k] + '</small></span>';
+        }).join('') + '</div></div>';
+  }
+  // 1초마다: 보이는 시한폭탄 시계의 바뀐 글자만 (카드 전체는 30초마다 tick 이 다시 그림)
+  function ledTick(){
+    Array.prototype.forEach.call(el.querySelectorAll('.og-bomb[data-to]:not(.over)'), function(w){
+      var p = ledParts(+w.getAttribute('data-to') - Date.now());
+      Array.prototype.forEach.call(w.querySelectorAll('.og-lds'), function(g){
+        var t = ledVal(p, g.getAttribute('data-u')), ds = g.querySelectorAll('.og-ld');
+        if (ds.length !== t.length){ g.innerHTML = t.split('').map(ledDigit).join(''); return; }
+        Array.prototype.forEach.call(ds, function(d, i){ if (d.getAttribute('data-c') !== t[i]) d.outerHTML = ledDigit(t[i]); });
       });
     });
   }

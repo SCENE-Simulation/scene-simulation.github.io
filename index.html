@@ -2526,35 +2526,36 @@ html.shr-on{overflow:hidden}
 #v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}.og-mine .og-mh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
 .og-mine .og-mh small{font-size:11.5px;font-weight:500;color:var(--ink2)}
 .og-mine .og-mh small span{font-size:inherit;font-weight:600;color:var(--ink)}
-/* 예측의 신: 카운트다운 플립 시계 (채점 기다림 카드의 내 예측 상자) — 넘기는 카드식 숫자 */
+/* 예측의 신: 카운트다운 시한폭탄 시계 (채점 기다림 카드의 내 예측 상자) — 노랑 LED 도트 매트릭스 */
 .og-flw{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .og-flh{font-size:11.5px;color:var(--ink2)}
-.og-fl{display:flex;align-items:flex-start;gap:5px}
-.og-fu{display:flex;flex-direction:column;align-items:center;gap:4px}
-.og-fu.ud{margin-right:9px}   /* 일 칸 뒤는 쌍점 대신 띄움 */
-.og-fu small{font-size:10.5px;color:var(--ink3);letter-spacing:.04em}
-.og-fds{display:flex;gap:3px;perspective:220px}
-.og-fd{position:relative;display:grid;place-items:center;width:30px;height:42px;border-radius:7px;
-  background:linear-gradient(180deg,#34304a 0%,#2a2640 49.5%,#1e1b2c 50.5%,#25213a 100%);
-  box-shadow:0 4px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
-  font:800 26px/1 "JetBrains Mono",monospace;color:#f3eeff;text-shadow:0 1px 0 rgba(0,0,0,.5)}
-.og-fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.06)}   /* 가운데 접힌 선 */
-.og-fd::before{content:"";position:absolute;top:50%;left:-2px;right:-2px;height:6px;margin-top:-3px;border-radius:2px;
-  background:linear-gradient(90deg,#15131e 0 4px,transparent 4px calc(100% - 4px),#15131e calc(100% - 4px))}   /* 양옆 경첩 */
-.og-fd.fl{animation:ogFlip .42s cubic-bezier(.3,.7,.4,1)}
-@keyframes ogFlip{0%{transform:rotateX(-88deg);filter:brightness(1.6)}60%{transform:rotateX(8deg)}100%{transform:none;filter:none}}
-.og-fu.us .og-fd{color:var(--au)}   /* 초는 금색 */
-.og-fc{align-self:flex-start;height:42px;display:grid;place-items:center;font:800 20px/1 "JetBrains Mono",monospace;font-style:normal;color:var(--og-t);opacity:.7;animation:ogBlink 1s steps(2) infinite}
-@keyframes ogBlink{50%{opacity:.2}}
+.og-bomb{position:relative;align-self:flex-start;margin-left:10px;padding:18px 14px 9px;border-radius:9px;
+  background:radial-gradient(circle at 7px 7px,#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) 7px,#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),
+    radial-gradient(circle at 7px calc(100% - 7px),#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#6b6b6b 0 1.6px,#2b2b2b 2.2px,transparent 2.8px),
+    linear-gradient(180deg,#1b1c1a,#101110);
+  border:2px solid #3a3b36;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 6px 16px rgba(0,0,0,.5)}
+/* 옆으로 나온 전선 두 가닥 (빨강 · 파랑) */
+.og-bomb::before,.og-bomb::after{content:"";position:absolute;left:-11px;width:12px;border:2.4px solid;border-right:0;border-radius:12px 0 0 12px}
+.og-bomb::before{top:22%;height:26px;border-color:#e0333f}
+.og-bomb::after{top:40%;height:20px;border-color:#2f7fe0;left:-8px}
+.og-arm{position:absolute;top:4px;left:18px;display:flex;align-items:center;gap:5px;font:700 8.5px/1 "JetBrains Mono",monospace;letter-spacing:.14em;color:#ff5a5a}
+.og-arm i{width:6px;height:6px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 6px #ff3b3b;animation:ogArm 1s steps(2) infinite}
+@keyframes ogArm{50%{background:#5a1616;box-shadow:none}}
+.og-lcd{display:flex;align-items:flex-start;gap:5px;padding:7px 9px 5px;border-radius:5px;background:#070806;box-shadow:inset 0 2px 6px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,210,60,.08)}
+.og-lu{display:flex;flex-direction:column;align-items:center;gap:4px}
+.og-lu small{font-size:9.5px;color:rgba(255,210,60,.55);letter-spacing:.06em}
+.og-lds{display:flex;gap:4px}
+.og-ld{display:grid;grid-template-columns:repeat(5,3.2px);grid-auto-rows:3.2px;gap:1.3px}
+.og-ld i{border-radius:50%;background:rgba(255,196,40,.09)}
+.og-ld i.on{background:#ffd23c;box-shadow:0 0 3px rgba(255,205,50,.95),0 0 7px rgba(255,180,20,.45)}
+.og-lcol{display:flex;flex-direction:column;justify-content:center;gap:7px;height:30.8px;padding:0 1px}
+.og-lcol i{width:3.2px;height:3.2px;border-radius:50%;background:#ffd23c;box-shadow:0 0 4px rgba(255,205,50,.9);animation:ogBlink 1s steps(2) infinite}
+@keyframes ogBlink{50%{opacity:.15}}
 .og-clkv{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
 .og-clkv i{width:10px;height:3px;border-radius:2px;background:#6fe0b3}
 .og-clkv em{font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:#6fe0b3}
-/* 고른 때가 지남: 00 에서 멈추고 빨강 */
+/* 고른 때가 지남: 00 에서 멈추고 빨강 점이 깜빡 */
 .og-flw.over .og-flh{color:#ff9a9a;font-weight:600}
-.og-flw.over .og-fd{color:#ff8a8a;background:linear-gradient(180deg,#3d2a30 0%,#33232a 49.5%,#261a1f 50.5%,#2e2027 100%)}
-.og-flw.over .og-fc{animation:none;color:#ff8a8a}
-@media (prefers-reduced-motion:reduce){.og-fd.fl,.og-fc{animation:none}}
-@media (max-width:400px){.og-fd{width:25px;height:36px;font-size:22px}.og-fc{height:36px;font-size:17px}.og-fl{gap:3px}.og-fds{gap:2px}}
 /* 좁은 화면: 제목이 한 줄을 다 쓰고, 그 아래 한 줄에 YouTube에서 보기(왼쪽) · 공유하기(오른쪽) */
 @media (max-width:640px){
   .vd-hd{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 10px}
@@ -2563,6 +2564,13 @@ html.shr-on{overflow:hidden}
   .vd-yt{justify-self:start}
   .vd-ha{grid-column:2;margin-left:0}
 }
+.og-bomb.over .og-ld i.on,.og-bomb.over .og-lcol i{background:#ff4a4a;box-shadow:0 0 4px rgba(255,70,70,.9)}
+.og-bomb.over .og-lcd{animation:ogOver 1s steps(2) infinite}
+.og-bomb.over .og-lu small{color:rgba(255,90,90,.6)}
+@keyframes ogOver{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.og-arm i,.og-lcol i,.og-bomb.over .og-lcd{animation:none}}
+@media (max-width:400px){.og-ld{grid-template-columns:repeat(5,2.7px);grid-auto-rows:2.7px;gap:1.1px}.og-lcol{height:25.5px;gap:6px}.og-lds{gap:3px}.og-lcd{gap:4px;padding:6px 7px 5px}}
+.og-mine .og-arm{color:#ff5a5a}   /* 상자 안 span 보라 글자색(.og-have span)보다 우선 */
 
 </style>
 </head>
@@ -8696,7 +8704,7 @@ goTab(true,true);
   }
   function show(){
     if (!timer) timer = setInterval(function(){ if (!el.hidden && loaded) tick(); }, 30e3);
-    if (!ftimer) ftimer = setInterval(function(){ if (!el.hidden && loaded) flipTick(); }, 1000);   // 플립 시계 초
+    if (!ftimer) ftimer = setInterval(function(){ if (!el.hidden && loaded) ledTick(); }, 1000);    // 시한폭탄 시계 초
     if (loaded){ render(); return; }
     el.innerHTML = head() + '<p class="gnote">기록을 불러오는 중…</p>';
     V.ready().then(function(){ loaded = true; if (!el.hidden) render(); });
@@ -8971,7 +8979,7 @@ goTab(true,true);
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
       h += '<div class="og-flw' + (left > 0 ? '' : ' over') + '">'
         + '<small class="og-flh">' + (left > 0 ? '예측한 때까지 남은 시간' : '예측한 때가 ' + durTxt(-left) + ' 지났는데 아직 못 넘음') + '</small>'
-        + flip(x.g) + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div>';
+        + led(x.g, left <= 0) + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div>';
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
@@ -8984,34 +8992,41 @@ goTab(true,true);
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
     return h + '</div></article>';
   }
-  // 카운트다운 플립 시계 (채점 기다림 카드) — 사용자 요청 "카운트다운하는 디지털 아날로그 시계"(넘기는 카드식)
-  //   [일] 시 : 분 : 초 — 하루 안이면 일 칸 없음. 1초마다 flipTick 이 숫자를 바꾸고, 바뀐 칸만 넘어가는 애니메이션(.fl)
-  //   고른 때가 지나면 00 으로 멈추고 빨강 (.over)
-  function flipParts(ms){
+  // 카운트다운 시한폭탄 시계 (채점 기다림 카드) — 사용자 요청 "시한폭탄 느낌의 점(LED, 노랑) 시계"
+  //   5×7 점 글자(도트 매트릭스)로 [일] : 시 : 분 : 초. 꺼진 점도 희미하게 보인다. 빨간 ARMED 불빛 · 나사 · 전선은 CSS 장식
+  //   1초마다 ledTick 이 바뀐 글자만 다시 그린다. 고른 때가 지나면 00 에서 멈추고 빨강으로 깜빡임(.over)
+  var DOTS = {
+    '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'], '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+    '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'], '3': ['11111', '00010', '00100', '00010', '00001', '10001', '01110'],
+    '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'], '5': ['11111', '10000', '11110', '00001', '00001', '10001', '01110'],
+    '6': ['00110', '01000', '10000', '11110', '10001', '10001', '01110'], '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+    '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'], '9': ['01110', '10001', '10001', '01111', '00001', '00010', '01100']
+  };
+  function ledParts(ms){
     var s = Math.max(0, Math.floor(ms / 1000));
     return { d: Math.floor(s / 86400), h: Math.floor(s / 3600) % 24, m: Math.floor(s / 60) % 60, s: s % 60 };
   }
-  function flip(to){
-    var p = flipParts(to - Date.now()), days = p.d > 0;
-    function unit(k, v, lab){
-      var t = k === 'd' ? String(v) : two(v);
-      return '<span class="og-fu u' + k + '"><span class="og-fds" data-u="' + k + '">' + t.split('').map(function(c){ return '<b class="og-fd">' + c + '</b>'; }).join('')
-        + '</span><small>' + lab + '</small></span>';
-    }
-    return '<div class="og-fl" data-to="' + to + '" aria-label="남은 시간">' + (days ? unit('d', p.d, '일') : '')
-      + unit('h', p.h, '시간') + '<i class="og-fc">:</i>' + unit('m', p.m, '분') + '<i class="og-fc">:</i>' + unit('s', p.s, '초') + '</div>';
+  function ledDigit(c){
+    return '<span class="og-ld" data-c="' + c + '">' + DOTS[c].join('').split('').map(function(b){ return b === '1' ? '<i class="on"></i>' : '<i></i>'; }).join('') + '</span>';
   }
-  // 1초마다: 보이는 플립 시계의 숫자만 바꾼다 (카드 전체는 30초마다 tick 이 다시 그림)
-  function flipTick(){
-    Array.prototype.forEach.call(el.querySelectorAll('.og-fl[data-to]'), function(w){
-      var p = flipParts(+w.getAttribute('data-to') - Date.now());
-      Array.prototype.forEach.call(w.querySelectorAll('.og-fds'), function(g){
-        var k = g.getAttribute('data-u'), t = k === 'd' ? String(p.d) : two(p[k]), ds = g.querySelectorAll('.og-fd');
-        if (ds.length !== t.length){ g.innerHTML = t.split('').map(function(c){ return '<b class="og-fd">' + c + '</b>'; }).join(''); return; }
-        Array.prototype.forEach.call(ds, function(d, i){
-          if (d.textContent === t[i]) return;
-          d.textContent = t[i]; d.classList.remove('fl'); void d.offsetWidth; d.classList.add('fl');
-        });
+  function ledVal(p, k){ return k === 'd' ? String(p.d) : two(p[k]); }
+  function led(to, over){
+    var p = ledParts(to - Date.now()), ks = p.d > 0 ? ['d', 'h', 'm', 's'] : ['h', 'm', 's'], lab = { d: '일', h: '시간', m: '분', s: '초' };
+    return '<div class="og-bomb' + (over ? ' over' : '') + '" data-to="' + to + '" aria-label="남은 시간">'
+      + '<span class="og-arm"><i></i>' + (over ? 'TIME' : 'ARMED') + '</span><div class="og-lcd">'
+      + ks.map(function(k, i){
+          return (i ? '<span class="og-lcol"><i></i><i></i></span>' : '')
+            + '<span class="og-lu"><span class="og-lds" data-u="' + k + '">' + ledVal(p, k).split('').map(ledDigit).join('') + '</span><small>' + lab[k] + '</small></span>';
+        }).join('') + '</div></div>';
+  }
+  // 1초마다: 보이는 시한폭탄 시계의 바뀐 글자만 (카드 전체는 30초마다 tick 이 다시 그림)
+  function ledTick(){
+    Array.prototype.forEach.call(el.querySelectorAll('.og-bomb[data-to]:not(.over)'), function(w){
+      var p = ledParts(+w.getAttribute('data-to') - Date.now());
+      Array.prototype.forEach.call(w.querySelectorAll('.og-lds'), function(g){
+        var t = ledVal(p, g.getAttribute('data-u')), ds = g.querySelectorAll('.og-ld');
+        if (ds.length !== t.length){ g.innerHTML = t.split('').map(ledDigit).join(''); return; }
+        Array.prototype.forEach.call(ds, function(d, i){ if (d.getAttribute('data-c') !== t[i]) d.outerHTML = ledDigit(t[i]); });
       });
     });
   }
