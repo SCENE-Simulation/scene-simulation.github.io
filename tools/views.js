@@ -777,13 +777,14 @@
       : '<b class="mb-eta na">—</b><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small>';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
+      + '<span class="mb-c">'
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
       + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
       + '</span>'
       + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
       + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
       + '<span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
-      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></button>';
+      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
@@ -1473,15 +1474,15 @@
     }
     var rvb = e.target.closest('[data-rv]');
     if (rvb){
-      // 탭마다 보던 영상을 기억해 두고, 탭을 바꾸면 아래 상세도 그 탭의 영상으로 (100만 탭은 목록 안의 영상만)
+      // 탭을 바꿔도 아래 상세·성적표는 보던 영상 그대로 — 그 영상이 이 탭 목록에 없을 때만(100만·명예의 전당) 이 탭에서 마지막으로 본 영상, 그다음 목록 첫 영상
       var to = rvb.getAttribute('data-rv');
       if (to === rv) return;
       if (sel) TABSEL[rv] = sel.id;
       rv = to; renderRank();
       var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
-      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
-      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(back) >= 0 ? back : HA.indexOf(sel) >= 0 ? sel : HA[0] || VIDEOS[0]; }
-      else next = back || VIDEOS[0];
+      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(sel) >= 0 ? sel : MB.indexOf(back) >= 0 ? back : MB[0]; }
+      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(sel) >= 0 ? sel : HA.indexOf(back) >= 0 ? back : HA[0] || VIDEOS[0]; }
+      else next = sel || back || VIDEOS[0];
       if (next && next !== sel) pick(next);
       return;
     }
