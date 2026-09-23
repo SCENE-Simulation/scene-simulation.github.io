@@ -2455,9 +2455,10 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   background:#1a1012;border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .shr-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .shr-h b{font-size:16px;color:var(--ink)}
-.shr-x{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink2);cursor:pointer;font-size:14px}
+.shr-x{display:grid;place-items:center;flex:none;width:34px;height:34px;padding:0;border-radius:50%!important;border:1px solid var(--line)!important;background:rgba(255,255,255,.05);color:var(--ink2);cursor:pointer}
+.shr-x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .shr-x:hover{color:var(--ink);background:rgba(255,255,255,.1)}
-.shr-im{position:relative;aspect-ratio:1200/720;border-radius:12px;overflow:hidden;background:#140b0d;border:1px solid rgba(255,255,255,.08);
+.shr-im{position:relative;aspect-ratio:1200/780;border-radius:12px;overflow:hidden;background:#140b0d;border:1px solid rgba(255,255,255,.08);
   display:flex;align-items:center;justify-content:center}
 .shr-im img{display:block;width:100%;height:100%}
 .shr-ld{font-size:13px;color:var(--ink2)}
@@ -6365,7 +6366,7 @@ goTab(true,true);
 (function(){
   var SITE = 'scene-simulation.github.io';
   var SANS = '"Pretendard Variable","Noto Sans KR",sans-serif', MONO = '"JetBrains Mono","Pretendard Variable",monospace';
-  var W = 1200, H = 720, SC = 2;                       // 논리 크기 × 배율(선명하게)
+  var W = 1200, H = 780, SC = 2;                       // 논리 크기 × 배율(선명하게)
   var C = { bg: '#140b0d', ink: '#fff4f3', ink2: '#c9aeb0', ink3: '#8c7477', line: 'rgba(255,255,255,.1)', box: 'rgba(255,255,255,.045)',
             red: '#ff4d4f', redT: '#ff9e9a', mint: '#6fe0b3', miss: '#ffb36b' };
 
@@ -6451,76 +6452,75 @@ goTab(true,true);
     x.fillStyle = g; x.fillRect(0, 0, W, 6);
 
     // 머리: 사이트 이름 · 기록 시각
+    // 글자 크기: 디시에서 가로 700px 안팎으로 줄어 보이므로(약 0.6배) 작은 글자도 18px 이상으로
     var P = 48;
-    font(x, 800, 22); x.fillStyle = C.ink; x.fillText('센둥이 시뮬레이터', P, 62);
+    font(x, 800, 28); x.fillStyle = C.ink; x.fillText('센둥이 시뮬레이터', P, 70);
     var bw = x.measureText('센둥이 시뮬레이터').width;
-    font(x, 600, 18); x.fillStyle = C.redT; x.fillText('·  조회수 예측기', P + bw + 12, 62);
-    font(x, 500, 16, MONO); x.fillStyle = C.ink2; x.textAlign = 'right';
-    x.fillText(stamp(d.at) + ' 기록 기준', W - P, 61); var sw = x.measureText(stamp(d.at) + ' 기록 기준').width; x.textAlign = 'left';
-    if (d.demo){ font(x, 700, 14); pill(x, W - P - sw - 14 - (x.measureText('예시 데이터').width + 14 * 1.3), 41, '예시 데이터', '#2b0608', '#ffc93c', null, 14); }
+    font(x, 600, 22); x.fillStyle = C.redT; x.fillText('·  조회수 예측기', P + bw + 14, 69);
+    font(x, 500, 20, MONO); x.fillStyle = C.ink2; x.textAlign = 'right';
+    x.fillText(stamp(d.at) + ' 기록 기준', W - P, 68); var sw = x.measureText(stamp(d.at) + ' 기록 기준').width; x.textAlign = 'left';
+    if (d.demo){ font(x, 700, 17); pill(x, W - P - sw - 14 - (x.measureText('예시 데이터').width + 17 * 1.3), 45, '예시 데이터', '#2b0608', '#ffc93c', null, 17); }
 
     // 썸네일
-    var TX = P, TY = 96, TW = 480, TH = 270;
+    var TX = P, TY = 104, TW = 480, TH = 270;
     x.save(); rr(x, TX, TY, TW, TH, 18); x.clip();
     if (im) cover(x, im, TX, TY, TW, TH);
     else {
       g = x.createLinearGradient(TX, TY, TX + TW, TY + TH);
       g.addColorStop(0, 'hsl(' + d.hue + ' 55% 34%)'); g.addColorStop(1, 'hsl(' + (d.hue + 50) + ' 60% 16%)');
       x.fillStyle = g; x.fillRect(TX, TY, TW, TH);
-      font(x, 800, 22); x.fillStyle = 'rgba(255,255,255,.88)';
-      wrap(x, d.title, TW - 48, 3).forEach(function(l, i, a){ x.fillText(l, TX + 24, TY + TH - 24 - (a.length - 1 - i) * 30); });
+      font(x, 800, 24); x.fillStyle = 'rgba(255,255,255,.88)';
+      wrap(x, d.title, TW - 48, 3).forEach(function(l, i, a){ x.fillText(l, TX + 24, TY + TH - 24 - (a.length - 1 - i) * 32); });
     }
     x.restore();
     rr(x, TX + .5, TY + .5, TW - 1, TH - 1, 18); x.strokeStyle = 'rgba(255,255,255,.14)'; x.lineWidth = 1; x.stroke();
 
     // 오른쪽: 상태 · 제목 · 게시 · 조회수
     var RX = TX + TW + 36, RW = W - P - RX, cx = RX;
-    d.chips.forEach(function(t, i){ cx += pill(x, cx, TY, t, i ? C.ink2 : C.redT, i ? 'rgba(255,255,255,.06)' : 'rgba(255,77,79,.14)', i ? C.line : 'rgba(255,77,79,.45)', 14) + 8; });
-    font(x, 800, 30); x.fillStyle = C.ink;
+    d.chips.forEach(function(t, i){ cx += pill(x, cx, TY, t, i ? C.ink2 : C.redT, i ? 'rgba(255,255,255,.06)' : 'rgba(255,77,79,.14)', i ? C.line : 'rgba(255,77,79,.45)', 18) + 8; });
+    font(x, 800, 36); x.fillStyle = C.ink;
     var tl = wrap(x, d.title, RW, 2);
-    tl.forEach(function(l, i){ x.fillText(l, RX, TY + 72 + i * 40); });
-    var y = TY + 72 + (tl.length - 1) * 40 + 34;
-    font(x, 500, 16); x.fillStyle = C.ink2; x.fillText(d.when, RX, y);
-    font(x, 700, 15); x.fillStyle = C.ink3; x.fillText('지금 조회수', RX, TY + TH - 72);
-    font(x, 700, 54, MONO); x.fillStyle = C.ink; x.fillText(fit(x, d.views, RW), RX, TY + TH - 18);
-    font(x, 500, 15); x.fillStyle = C.ink2; x.fillText(d.sub, RX, TY + TH + 10);
+    tl.forEach(function(l, i){ x.fillText(l, RX, TY + 80 + i * 46); });
+    font(x, 500, 21); x.fillStyle = C.ink2; x.fillText(fit(x, d.when, RW), RX, TY + 80 + (tl.length - 1) * 46 + 38);
+    font(x, 700, 20); x.fillStyle = C.ink3; x.fillText('지금 조회수', RX, TY + TH - 80);
+    font(x, 700, 58, MONO); x.fillStyle = C.ink; x.fillText(fit(x, d.views, RW), RX, TY + TH - 22);
+    font(x, 500, 20); x.fillStyle = C.ink2; x.fillText(fit(x, d.sub, RW), RX, TY + TH + 14);
 
-    // 100만 단위 줄 (민트)
-    var MY = TY + TH + 34, MH = 58;
-    rr(x, P, MY, W - P * 2, MH, 14); x.fillStyle = 'rgba(111,224,179,.08)'; x.fill(); x.strokeStyle = 'rgba(111,224,179,.35)'; x.lineWidth = 1.5; x.stroke();
+    // 100만 단위 줄 (민트): 머리 · 때 · (자리가 남으면) 오른쪽에 최근 돌파, 그다음 계산 기준
+    var MY = TY + TH + 36, MH = 72, MR = W - P - 24;
+    rr(x, P, MY, W - P * 2, MH, 16); x.fillStyle = 'rgba(111,224,179,.08)'; x.fill(); x.strokeStyle = 'rgba(111,224,179,.35)'; x.lineWidth = 1.5; x.stroke();
     x.textBaseline = 'middle';
-    x.save(); x.translate(P + 30, MY + MH / 2); x.rotate(Math.PI / 4); x.fillStyle = C.mint; x.fillRect(-7, -7, 14, 14); x.restore();
-    font(x, 800, 20); x.fillStyle = C.mint; x.fillText(d.ms.head, P + 52, MY + MH / 2 + 1);
-    var hx = P + 52 + x.measureText(d.ms.head).width + 16;
-    font(x, 600, 18); x.fillStyle = C.ink; x.fillText(d.ms.txt, hx, MY + MH / 2 + 1);
-    hx += x.measureText(d.ms.txt).width + 14;
-    if (d.ms.how){ font(x, 500, 14); x.fillStyle = C.ink3; x.fillText(d.ms.how, hx, MY + MH / 2 + 1); hx += x.measureText(d.ms.how).width; }
-    if (d.last){
-      font(x, 500, 14); x.fillStyle = C.ink2; x.textAlign = 'right';
-      var lw = W - P - 22 - hx - 30;
-      if (lw > 120) x.fillText(fit(x, d.last, lw), W - P - 22, MY + MH / 2 + 1);
-      x.textAlign = 'left';
-    }
-    x.textBaseline = 'alphabetic';
+    var my = MY + MH / 2 + 1;
+    x.save(); x.translate(P + 32, MY + MH / 2); x.rotate(Math.PI / 4); x.fillStyle = C.mint; x.fillRect(-8, -8, 16, 16); x.restore();
+    font(x, 800, 26); x.fillStyle = C.mint; x.fillText(d.ms.head, P + 58, my);
+    var hx = P + 58 + x.measureText(d.ms.head).width + 18;
+    font(x, 600, 24); x.fillStyle = C.ink; x.fillText(fit(x, d.ms.txt, MR - hx), hx, my);
+    hx += x.measureText(d.ms.txt).width + 18;
+    font(x, 500, 19);
+    var lw = d.last ? x.measureText(d.last).width : 0, how = d.ms.how ? x.measureText(d.ms.how).width : 0;
+    x.textAlign = 'right';
+    if (lw && hx + lw <= MR){ x.fillStyle = C.ink2; x.fillText(d.last, MR, my); if (how && hx + how + 24 + lw <= MR){ x.textAlign = 'left'; x.fillStyle = C.ink3; x.fillText(d.ms.how, hx, my); } }
+    else if (how && hx + how <= MR){ x.textAlign = 'left'; x.fillStyle = C.ink3; x.fillText(d.ms.how, hx, my); }
+    x.textAlign = 'left'; x.textBaseline = 'alphabetic';
 
     // 24시간 · 7일 · 30일 칸
-    var BY = MY + MH + 18, BH = 162, GAP = 16, BW = (W - P * 2 - GAP * 2) / 3;
+    var BY = MY + MH + 20, BH = 204, GAP = 16, BW = (W - P * 2 - GAP * 2) / 3;
     d.boxes.forEach(function(b, i){
       var bx = P + i * (BW + GAP), tone = b.tone === 'hit' ? C.mint : b.tone === 'miss' ? C.miss : b.tone === 'pred' ? C.redT : C.ink3;
       rr(x, bx, BY, BW, BH, 16); x.fillStyle = C.box; x.fill(); x.strokeStyle = b.tone === 'pred' ? 'rgba(255,77,79,.35)' : C.line; x.lineWidth = 1.5; x.stroke();
-      font(x, 800, 18); x.fillStyle = C.ink; x.fillText(b.name, bx + 20, BY + 36);
-      font(x, 500, 13, MONO); x.fillStyle = C.ink3; x.fillText(b.at, bx + 20, BY + 56);
-      font(x, 700, 14); var tw = x.measureText(b.tag).width + 18;
-      pill(x, bx + BW - 20 - tw, BY + 18, b.tag, tone, 'rgba(255,255,255,.05)', tone, 14);
-      font(x, 700, 42, MONO); x.fillStyle = b.tone === 'pred' ? C.ink : b.tone ? C.ink : C.ink2; x.fillText(b.big, bx + 20, BY + 112);
-      if (b.unit){ var nw = x.measureText(b.big).width; font(x, 700, 15); x.fillStyle = tone; x.fillText(b.unit, bx + 20 + nw + 10, BY + 110); }
-      font(x, 500, 14); x.fillStyle = C.ink2; x.fillText(fit(x, b.note, BW - 40), bx + 20, BY + 142);
+      font(x, 700, 17); var tw = x.measureText(b.tag).width + 17 * 1.3;
+      font(x, 800, 24); x.fillStyle = C.ink; x.fillText(fit(x, b.name, BW - 44 - tw - 10), bx + 22, BY + 44);
+      font(x, 500, 18, MONO); x.fillStyle = C.ink3; x.fillText(b.at, bx + 22, BY + 72);
+      pill(x, bx + BW - 22 - tw, BY + 20, b.tag, tone, 'rgba(255,255,255,.05)', tone, 17);
+      font(x, 700, 50, MONO); x.fillStyle = b.tone ? C.ink : C.ink2; x.fillText(b.big, bx + 22, BY + 142);
+      if (b.unit){ var nw = x.measureText(b.big).width; font(x, 700, 19); x.fillStyle = tone; x.fillText(b.unit, bx + 22 + nw + 10, BY + 140); }
+      font(x, 500, 18); x.fillStyle = C.ink2; x.fillText(fit(x, b.note, BW - 44), bx + 22, BY + 180);
     });
 
     // 발
-    font(x, 500, 14); x.fillStyle = C.ink3;
-    x.fillText('15분마다 모은 기록으로 계산한 예측입니다 · 비전문가가 만든 계산식이니 재미로만 참고해 주세요', P, H - 26);
-    font(x, 700, 15, MONO); x.fillStyle = C.redT; x.textAlign = 'right'; x.fillText(SITE, W - P, H - 26); x.textAlign = 'left';
+    font(x, 500, 18); x.fillStyle = C.ink3;
+    x.fillText('15분마다 모은 기록으로 계산 · 비전문가가 만든 계산식이니 재미로만 참고해 주세요', P, H - 30);
+    font(x, 700, 20, MONO); x.fillStyle = C.redT; x.textAlign = 'right'; x.fillText(SITE, W - P, H - 30); x.textAlign = 'left';
     return cv;
   }
 
@@ -6533,7 +6533,7 @@ goTab(true,true);
     if (box) return box;
     box = document.createElement('div'); box.className = 'shr'; box.hidden = true;
     box.innerHTML = '<div class="shr-bg" data-shx></div><div class="shr-p" role="dialog" aria-modal="true" aria-labelledby="shr-t">'
-      + '<div class="shr-h"><b id="shr-t">공유 카드</b><button type="button" class="shr-x" data-shx aria-label="닫기">✕</button></div>'
+      + '<div class="shr-h"><b id="shr-t">공유 카드</b><button type="button" class="shr-x" data-shx aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
       + '<div class="shr-im"><span class="shr-ld">이미지를 만드는 중…</span><img alt="공유 카드 미리보기" hidden></div>'
       + '<p class="shr-d">지금 기록 기준으로 고정된 이미지입니다. 클립보드에 복사되니 게시글 쓰기 창에서 붙여 넣기(Ctrl+V) 하세요.</p>'
       + '<div class="shr-b"><button type="button" class="gs shr-go" data-sha="copy">클립보드에 복사</button>'
@@ -6595,7 +6595,7 @@ goTab(true,true);
   window.SGShare = {
     video: function(d){
       var text = [d.title, d.when, d.views, d.sub, d.ms.head, d.ms.txt, d.ms.how || '', d.last, d.chips.join('')]
-        .concat(d.boxes.map(function(b){ return b.name + b.tag + (b.unit || '') + b.note; })).join('') + '센둥이 시뮬레이터 조회수 예측기 기록 기준 예시 데이터 15분마다 모은 기록으로 계산한 예측입니다 비전문가가 만든 계산식이니 재미로만 참고해 주세요';
+        .concat(d.boxes.map(function(b){ return b.name + b.tag + (b.unit || '') + b.note; })).join('') + '센둥이 시뮬레이터 조회수 예측기 기록 기준 예시 데이터 15분마다 모은 기록으로 계산 비전문가가 만든 계산식이니 재미로만 참고해 주세요';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawVideo(d, im); }); },
         'sendungi-views-' + (d.id || 'demo') + '-' + fileStamp(d.at) + '.png', text);
     }
