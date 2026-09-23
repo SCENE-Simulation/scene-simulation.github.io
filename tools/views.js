@@ -135,12 +135,17 @@
   el.id = 'v-views'; el.className = 'wrap page'; el.hidden = true;
   main.appendChild(el);
   window.SG.pages.views = el;
+  window.SG.pages.vfav = el;                           // 영상 즐겨찾기(?tab=vfav): 같은 화면을 즐겨찾기 탭으로 연 별도 페이지
   var prevShow = window.SG.onShow;
-  window.SG.onShow = function(tab){ prevShow(tab); if (tab === 'views') show(); };
+  window.SG.onShow = function(tab){
+    prevShow(tab);
+    if (tab === 'views' || tab === 'vfav'){ setRv(tab === 'vfav' ? 'fav' : rv === 'fav' ? rvBack : rv); show(); }
+  };
 
   var ALLM = METHODS.concat([ALL]);                    // 0~2 방법, 3 종합
   var ORDER = [3, 0, 1, 2];                            // 화면에 보이는 순서: 종합 먼저
   var sel = null, mi = 3, si = 1, loading = false;     // 고른 영상, 고른 방법(기본 종합), 성적표 목표(기본 7일)
+  var rvBack = 'rank';                                 // 즐겨찾기 페이지에서 순위 줄 탭을 누르면 조회수 예측기의 그 탭으로
   var TABSEL = {};                                     // 순위 줄 탭(예측 조회수 · 100만 단위 돌파 · 명예의 전당 · 즐겨찾기)마다 마지막으로 본 영상 id
   var PRED = {};                                       // 영상·목표별 예측 (한 번 계산하면 재사용)
 
@@ -151,6 +156,7 @@
   var FKEY = 'sendungi:vfav', FAV = (function(){
     try { var o = JSON.parse(localStorage.getItem(FKEY) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e){ return {}; }
   })();
+  setTimeout(function(){ favSide(); }, 0);
 
   function show(){
     if (DATA){ render(); return; }
@@ -217,9 +223,10 @@
   }
 
   function head(){
-    return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span></div></div>'
+    return '<div class="sec"><div class="sec-t">' + (rv === 'fav' ? '<svg viewBox="0 0 24 24"><use href="#i-star"/></svg>영상 즐겨찾기'
+        : '<svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">조회수 예측기</span>') + '</div></div>'
       + '<div class="vx-hero"><div class="vx-meta" id="vx-meta"></div>'
-      + '<h2 class="vx-h">안원잘부 영상들,<br>조회수가 <em>어디까지 오를까?</em></h2>'
+      + '<h2 class="vx-h">' + (rv === 'fav' ? '즐겨찾기한 영상들,' : '안원잘부 영상들,') + '<br>조회수가 <em>어디까지 오를까?</em></h2>'
       + '<p class="vx-d">15분마다 조회수를 수집하여, 24시간·7일·30일 뒤 조회수와 다음 100만 단위 돌파 시점을 예측하는 계산기입니다.<br>지난 예측이 맞았는지 오차율도 채점해 기록합니다.<br>예측기의 계산식은 비전문가가 만든 것이므로 재미로만 참고해 주세요.</p></div>';
   }
   function status(v){
@@ -346,6 +353,22 @@
     return h ? h + '시간' + (m ? ' ' + m + '분' : '') : m ? m + '분' + (x ? ' ' + x + '초' : '') : x + '초';
   }
   function ymd(ms){ var d = new Date(ms); return String(d.getFullYear()).slice(2) + '.' + two(d.getMonth() + 1) + '.' + two(d.getDate()) + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
+  function setRv(to){
+    if (to === rv) return false;
+    if (sel) TABSEL[rv] = sel.id;
+    if (to === 'fav') rvBack = rv;
+    rv = to;
+    if (!DATA) return true;
+    var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
+    if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
+    else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(back) >= 0 ? back : HA.indexOf(sel) >= 0 ? sel : HA[0] || VIDEOS[0]; }
+    else if (rv === 'fav'){ var FA = favList().sort(byGain); next = FA.indexOf(back) >= 0 ? back : FA.indexOf(sel) >= 0 ? sel : FA[0] || sel; }
+    else next = back || VIDEOS[0];
+    if (next) sel = next;
+    return true;
+  }
+  // 다른 페이지로 (사이드바 메뉴를 누른 것과 같게: 주소 바꾸고 shell 이 페이지를 다시 보여 줌)
+  function goTab(t){ history.pushState(null, '', '?tab=' + t); window.dispatchEvent(new PopStateEvent('popstate')); }
   function list(){
     return VIDEOS.filter(function(v){ return ft === 'all' || v.type === ft; });
   }
@@ -657,13 +680,14 @@
         : '')
       // 예측 조회수(가로 카드) / 100만 단위 돌파(진행 목록) / 1,000만 명예의 전당 / 즐겨찾기(별표한 영상, 가로 카드) — 한 줄 탭으로 바꿔 본다
       + '<div class="vr-head"><div class="seg vr-tabs" role="tablist" aria-label="보기">'
-      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button><button type="button" role="tab" id="vr-hof" data-rv="hof"></button><button type="button" role="tab" id="vr-fav" data-rv="fav"></button></div>'
+      + '<button type="button" role="tab" id="vr-tb" data-rv="rank"></button><button type="button" role="tab" id="vr-msb" data-rv="ms"></button><button type="button" role="tab" id="vr-hof" data-rv="hof"></button></div>'
       + '<div class="vr-side"><div class="seg vr-ft" id="vr-ft"></div>'
       // 바로 가기: 아래 칸으로 한 번에 내려간다
       + '<nav class="vr-jump" aria-label="바로 가기">' + [['vd-pred', '예측 현황'], ['vt-h', '전체 영상'], ['vs-h', '예측 성적표']].map(function(x){
           return '<button type="button" data-jump="' + x[0] + '">' + x[1]
             + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-        }).join('') + '</nav></div></div>'
+        }).join('') + '</nav>'
+      + '<a class="vr-fav" id="vr-fav" href="?tab=vfav" data-tab="vfav"></a></div></div>'
       + '<p class="vr-cap" id="vr-cap"></p>'
       + '<div class="vc-wrap at-start" id="vc-wrap"><button type="button" class="vc-nav prev" data-nav="-1" aria-label="이전 영상들">‹</button>'
       + '<div class="vc-row" id="vc-row"></div>'
@@ -673,8 +697,7 @@
       + '<div class="vd" id="vd"></div>'
       + '<div class="vt-head" id="vt-h"><h3 class="ahead">전체 영상</h3><input type="search" class="vt-q" id="vt-q" placeholder="제목 검색" value="' + esc(tq) + '" aria-label="제목 검색"></div>'
       + '<div class="vt" id="vt"></div>'
-      + '<h3 class="ahead">예측 방법</h3><div class="vm-list" id="vm-list"></div>'
-      + about()
+      + (rv === 'fav' ? '' : '<h3 class="ahead">예측 방법</h3><div class="vm-list" id="vm-list"></div>' + about())
       + '<div class="vx-toast" id="vx-toast" role="status" hidden></div>';
     $('vx-meta').innerHTML = '<span>집계 <b>' + when(Date.parse(DATA.updated)) + '</b></span>'
       + (DATA.demo ? '' : '<button type="button" class="vx-chk" id="vx-chk"><i></i><span id="vx-next"></span></button>');
@@ -692,7 +715,7 @@
       + '<li><b>게시 15일 뒤</b> 24시간·7일·30일 예측 대신 다음 100만 단위(예: 1,000만)를 1일 추세법으로 봅니다. 최근 하루 증가량이 영상이 오래될수록 조금씩 줄어드는 곡선으로 이어 붙여 며칠 뒤 넘을지 세고, 1주 ~ 8주로 보여 줍니다. 조회수는 끝없이 오르지 않고 한쪽으로 수렴합니다.</li>'
       + '<li><b>100만 단위 돌파</b> 게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 다음 100만을 언제 넘을지 모은 탭입니다. 오른쪽 아래 추이는 1일 추세법으로 본 1주 증가가 15일 지난 영상 중 상위 20%면 강함, 50%면 중간, 그 아래는 약함입니다. 탭의 숫자는 8주 안에 넘을 것으로 보이는 영상 수입니다. 기록이 2일이 안 된 영상은 줄어드는 정도를 아직 몰라 기본 곡선으로 계산합니다.</li>'
       + '<li><b>1,000만 명예의 전당</b> 조회수 1,000만을 넘은 영상을 조회수 순으로 모은 탭입니다. 아래 "달성 직전"은 900만을 넘었지만 아직 1,000만이 안 된 영상입니다.</li>'
-      + '<li><b>즐겨찾기</b> 예측 조회수 카드와 전체 영상 표의 별표를 누른 영상만 모아 보는 탭입니다. 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
+      + '<li><b>즐겨찾기</b> 예측 조회수 카드와 전체 영상 표의 별표를 누른 영상만 모아 보는 페이지입니다(순위 줄 맨 오른쪽 버튼 · 왼쪽 메뉴 "영상 즐겨찾기"). 이 브라우저에만 저장되어 다른 기기와는 이어지지 않습니다.</li>'
       + '<li><b>영상 범위</b> 채널의 동영상 탭 영상만 모읍니다 (쇼츠·라이브 제외).</li>'
       + '<li>모든 수치는 유튜브 공개 조회수와 게시 시각으로 이 페이지가 직접 계산한 값입니다. 유튜브가 조회수를 묶어서 갱신해 15분별 증가가 가끔 튀어 보일 수 있습니다.</li>'
       + '</ul></details>';
@@ -707,8 +730,9 @@
     }).join('');
     var B = board(), n8 = B.filter(in8).length, ms = rv === 'ms', hof = rv === 'hof', fav = rv === 'fav', HF = hall(), FL = favList();
     $('vr-tb').innerHTML = '예측 조회수'; $('vr-msb').innerHTML = '100만 단위 돌파<b>' + n8 + '</b>'; $('vr-hof').innerHTML = CROWN + '1,000만 명예의 전당<b>' + HF.top.length + '</b>';
-    $('vr-fav').innerHTML = favTab(FL);
-    [['vr-tb', rv === 'rank'], ['vr-msb', ms], ['vr-hof', hof], ['vr-fav', fav]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
+    $('vr-fav').innerHTML = favTab(FL); favSide();
+    $('vr-fav').classList.toggle('on', fav); if (fav) $('vr-fav').setAttribute('aria-current', 'page'); else $('vr-fav').removeAttribute('aria-current');
+    [['vr-tb', rv === 'rank'], ['vr-msb', ms], ['vr-hof', hof]].forEach(function(x){ $(x[0]).classList.toggle('on', x[1]); $(x[0]).setAttribute('aria-selected', String(x[1])); });
     $('vr-cap').innerHTML = fav
       ? '<b>별표</b>를 누른 영상만 모았습니다. 최근 24시간 동안 많이 오른 영상부터 보여 주고, 별표를 다시 누르면 빠집니다.'
       : hof
@@ -743,6 +767,10 @@
   // ----- 즐겨찾기 -----
   var STAR = '<path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
   function favList(){ return list().filter(function(v){ return !!FAV[v.id]; }); }
+  function favSide(){
+    var n = document.getElementById('vfav-n'), k = DATA ? favList().length : Object.keys(FAV).length;
+    if (n){ n.textContent = k; n.hidden = !k; }
+  }
   function favTab(FL){ return '<svg class="vf-ic" viewBox="0 0 24 24" aria-hidden="true">' + STAR + '</svg>즐겨찾기<b>' + FL.length + '</b>'; }
   // 별표 버튼. inBtn: 카드처럼 버튼 안에 들어가면 span(role=button), 표에서는 진짜 버튼
   function star(v, inBtn){
@@ -766,6 +794,7 @@
     });
     if (rv === 'fav'){ var row = $('vc-row'), x = row.scrollLeft; renderRank(); row.scrollLeft = x; navState(); }   // 즐겨찾기 탭: 카드를 바로 넣고 뺀다 (보던 자리는 그대로)
     else $('vr-fav').innerHTML = favTab(favList());
+    favSide();
   }
   // ----- 1,000만 명예의 전당: 조회수 1,000만을 넘은 영상(조회수 순) + 달성 직전(900만 이상) -----
   // 탭 버튼 왼쪽의 왕관 (이모지 대신 SVG — 기기마다 모양이 다르지 않게)
@@ -1469,6 +1498,7 @@
 
   // ----- 예측 방법: 공식 없이 쉬운 설명 -----
   function renderMethods(){
+    if (!$('vm-list')) return;
     $('vm-list').innerHTML = METHODS.map(function(m, k){
       var s = track(1).sum[k];
       return '<button type="button" class="vm" data-mi="' + k + '" style="--mc:' + m.color + '">'
@@ -1583,19 +1613,15 @@
       }
       return;
     }
+    if (e.target.closest('#vr-fav') && rv === 'fav'){ e.preventDefault(); e.stopPropagation(); return; }
     var rvb = e.target.closest('[data-rv]');
     if (rvb){
       // 탭마다 보던 영상을 기억해 두고, 탭을 바꾸면 아래 상세도 그 탭의 영상으로 (100만 탭은 목록 안의 영상만)
       var to = rvb.getAttribute('data-rv');
-      if (to === rv) return;
-      if (sel) TABSEL[rv] = sel.id;
-      rv = to; renderRank();
-      var back = VIDEOS.filter(function(x){ return x.id === TABSEL[rv]; })[0], next;
-      if (rv === 'ms'){ var MB = board().map(function(x){ return x.v; }); next = MB.indexOf(back) >= 0 ? back : MB.indexOf(sel) >= 0 ? sel : MB[0]; }
-      else if (rv === 'hof'){ var HL = hall(), HA = HL.top.concat(HL.next).map(function(x){ return x.v; }); next = HA.indexOf(back) >= 0 ? back : HA.indexOf(sel) >= 0 ? sel : HA[0] || VIDEOS[0]; }
-      else if (rv === 'fav'){ var FA = favList().sort(byGain); next = FA.indexOf(back) >= 0 ? back : FA.indexOf(sel) >= 0 ? sel : FA[0] || sel; }
-      else next = back || VIDEOS[0];
-      if (next && next !== sel) pick(next);
+      if (rv === 'fav'){ rvBack = to; goTab('views'); return; }                 // 즐겨찾기 페이지 → 조회수 예측기의 그 탭
+      var was = sel;
+      if (!setRv(to)) return;
+      renderRank(); if (sel && sel !== was) pick(sel);
       return;
     }
     var f = e.target.closest('[data-ft]');
