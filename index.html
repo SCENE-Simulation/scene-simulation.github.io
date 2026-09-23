@@ -2555,6 +2555,14 @@ html.shr-on{overflow:hidden}
 .og-flw.over .og-fc{animation:none;color:#ff8a8a}
 @media (prefers-reduced-motion:reduce){.og-fd.fl,.og-fc{animation:none}}
 @media (max-width:400px){.og-fd{width:25px;height:36px;font-size:22px}.og-fc{height:36px;font-size:17px}.og-fl{gap:3px}.og-fds{gap:2px}}
+/* 좁은 화면: 제목이 한 줄을 다 쓰고, 그 아래 한 줄에 YouTube에서 보기(왼쪽) · 공유하기(오른쪽) */
+@media (max-width:640px){
+  .vd-hd{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 10px}
+  .vd-ht,.vd-tt{display:contents}
+  .vd-hm,.vd-ht h3{grid-column:1/-1}
+  .vd-yt{justify-self:start}
+  .vd-ha{grid-column:2;margin-left:0}
+}
 
 </style>
 </head>
