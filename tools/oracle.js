@@ -194,7 +194,8 @@
       + '<div class="og-gb"><button type="button" class="og-gt" data-og-gt aria-expanded="' + !GSHUT[v.id] + '">'
       + '<svg class="og-gv" aria-hidden="true"><use href="#i-chev"/></svg><span class="og-gl">조회수 추이</span>'
       + '<span class="og-hint"><span>남은 <b>' + V.fmt(d.M - nowV) + '</b></span><span>하루 <b>' + (P ? '+' + V.fmt(P.g) : '—') + '</b></span></span></button>'
-      + '<div class="og-gw"' + (GSHUT[v.id] ? ' hidden' : '') + '></div></div>';
+      + '<div class="og-gw"' + (GSHUT[v.id] ? ' hidden' : '') + '></div></div>'
+      + '<div class="og-aip" data-og-aip></div>';                // 조회수 예측기(③ 추세 곡선)의 예상 — 사용자 요청으로 폼 위에 보여 줌 (live 가 채움)
     if (have) h += '<div class="og-have"><span>이 목표는 이미 예측했습니다</span><b>' + whenTxt(have.g) + '</b>'
       + '<small>결과는 아래 “내 예측 기록”에서 볼 수 있습니다.</small></div>';
     else h += '<div class="og-f"><label class="og-lb" for="' + id + '">' + V.fmtM(d.M) + '을 넘을 때</label>'
@@ -214,29 +215,42 @@
     if (g > now + 730 * D) return { ok: false, t: '2년 안으로 골라 주세요' };
     return { ok: true, g: g, t: '지금부터 <b>' + durTxt(g - now) + '</b> 뒤 · ' + whenTxt(g) };
   }
+  // 조회수 예측기(③ 추세 곡선)가 보는 M 돌파 때(ms). 0 = 지금 추세로는 못 닿음, null = 기록이 모자라 계산 전
+  function aiAt(v, M){
+    var P = V.plan(v), m = P && P.ms.filter(function(x){ return x.M === M; })[0];
+    return !m ? null : m.days == null ? 0 : Math.round(V.lastMs(v) + m.days * D);
+  }
   function live(c){
     graph(c);
+    var ap = c.querySelector('[data-og-aip]'), vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid];
+    if (ap && v && d){
+      var t = aiAt(v, d.M), now = Date.now();
+      ap.innerHTML = '<span class="og-aik"><i></i>예측기 예상</span>'
+        + (t == null ? '<small>기록이 더 쌓이면 계산합니다</small>' : t === 0 ? '<small>지금 추세로는 ' + V.fmtM(d.M) + '에 못 닿는다고 봅니다</small>'
+          : '<b>' + whenTxt(t) + '</b><small>' + (t > now ? '지금부터 ' + durTxt(t - now) + ' 뒤' : '곧') + '</small>');
+    }
     var inp = c.querySelector('[data-og-in]'); if (!inp) return;
     var r = check(inp.value), p = c.querySelector('[data-og-live]'), go = c.querySelector('[data-og-go]');
     p.innerHTML = r.t; p.classList.toggle('bad', !r.ok); go.disabled = !r.ok;
     inp.min = toLocal(Date.now());
   }
 
-  // ----- 카드 그래프: 최근 72시간 실제 조회수 + 최근 하루 속도를 그대로 이은 점선 + 목표선 + 내가 고른 때 -----
-  // 예측기(③)의 곡선은 그리지 않는다 (채점 때 겨룰 상대라 미리 보여 주지 않음). 점선은 "지금 속도가 안 줄면" 참고용
+  // ----- 카드 그래프: 최근 72시간 실제 조회수 + 최근 하루 속도를 그대로 이은 점선 + 목표선 + 내가 고른 때 + 예측기 예상(목표선 위 민트 점) -----
+  // 점선은 "지금 속도가 안 줄면" 참고용. 예측기(③ 추세 곡선)는 곡선 대신 목표에 닿는 때만 점으로 (그래프 아래 줄과 같은 값)
   function graph(c){
     var box = c.querySelector('.og-gw'); if (!box || box.hidden) return;
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid]; if (!v || !d) return;
     var have = mine(vid, d.M), inp = c.querySelector('[data-og-in]'), g = have ? have.g : inp ? fromLocal(inp.value) : NaN;
-    box.innerHTML = chart(v, d.M, g > V.lastMs(v) ? g : NaN, !!have);
+    box.innerHTML = chart(v, d.M, g > V.lastMs(v) ? g : NaN, !!have, aiAt(v, d.M));
   }
-  function chart(v, M, g, fixed){
+  function chart(v, M, g, fixed, ai){
     var a = v.vs.snaps.length ? v.vs.snaps[v.vs.snaps.length - 1][0] : 0;
     var pts = v.vs.snaps.filter(function(p){ return p[0] >= a - 72; }).map(function(p){ return [v.pub + p[0] * H, p[1]]; });
     if (pts.length < 2) return '<p class="og-gn">기록이 더 쌓이면 그래프가 나옵니다.</p>';
     var P = V.plan(v), t0 = pts[0][0], tn = pts[pts.length - 1][0], vn = pts[pts.length - 1][1];
     var perMs = P ? P.g / D : (vn - pts[0][1]) / (tn - t0);                      // 최근 하루 속도 (조회수 / ms)
     var t1 = !isNaN(g) ? Math.max(tn + D, g + Math.max(6 * H, (g - tn) * 0.12)) : tn + 2 * D, far = false;
+    if (ai > tn) t1 = Math.max(t1, ai + Math.max(6 * H, (ai - tn) * 0.12));      // 예측기 점도 보이게
     if (t1 > tn + 30 * D){ t1 = tn + 30 * D; far = !isNaN(g) && g > t1; }
     var y0 = pts[0][1], y1 = M + (M - y0) * 0.14;
     var W = 320, Hh = 138, L = 8, R = 8, T = 14, B = 20;
@@ -262,6 +276,12 @@
       + '<path class="og-ga" d="' + area + '"/><path class="og-gl2" d="' + line + '"/>'
       + (perMs > 0 ? '<line class="og-ge" x1="' + f(X(tn)) + '" y1="' + f(Y(vn)) + '" x2="' + f(X(te)) + '" y2="' + f(Y(ve)) + '"/>' : '')
       + '<circle class="og-gd" cx="' + f(X(tn)) + '" cy="' + f(Y(vn)) + '" r="3.4"/>';
+    if (ai > tn && ai <= t1){
+      var ax = X(ai), aa = ax > W - 50 ? 'end' : ax < 50 ? 'start' : 'middle';
+      s += '<line class="og-gai" x1="' + f(ax) + '" y1="' + f(Y(M)) + '" x2="' + f(ax) + '" y2="' + (Hh - B) + '"/>'
+        + '<circle class="og-gaid" cx="' + f(ax) + '" cy="' + f(Y(M)) + '" r="3.6"/>'
+        + '<text class="og-gait" x="' + f(ax) + '" y="' + f(Y(M) + 13) + '" text-anchor="' + aa + '">예측기</text>';
+    }
     if (!isNaN(g) && !far){
       var gx = X(g), anc = gx > W - 60 ? 'end' : 'start', tx = anc === 'end' ? gx - 4 : gx + 4;
       s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + T + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
@@ -269,16 +289,14 @@
     }
     else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T + 8) + '" text-anchor="end">' + (fixed ? '남긴 예측' : '내 예측') + ' ' + dayTxt(g) + ' →</text>';
     return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span><span><i class="e"></i>최근 하루 속도 그대로</span>'
-      + '<span><i class="m"></i>목표</span>' + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
+      + '<span><i class="m"></i>목표</span>' + (ai > tn && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
   }
   function submit(c){
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid], r = check(d && d.val);
     if (!v || !r.ok || mine(vid, d.M)) return;
     var nowV = V.views(v); if (d.M <= nowV){ renderCards(); return; }
     // 그때 예측기(③ 추세 곡선)가 본 때 — 채점 때 비교용. 못 닿는다고 보면 0, 아직 계산 못 하면 null
-    var P = V.plan(v), m = P && P.ms.filter(function(x){ return x.M === d.M; })[0];
-    var ai = !m ? null : m.days == null ? 0 : Math.round(V.lastMs(v) + m.days * D);
-    var now = Date.now();
+    var ai = aiAt(v, d.M), now = Date.now();
     LOG.push({ k: now.toString(36) + Math.random().toString(36).slice(2, 6), id: vid, t: v.title, M: d.M, g: r.g, at: now, v0: Math.round(nowV), ai: ai });
     save();
     if (window.toastSG) window.toastSG('예측을 남겼습니다 — ' + esc(V.fmtM(d.M)), esc(whenTxt(r.g)));
