@@ -5564,15 +5564,11 @@ goTab(true,true);
     for (var k = 1; k < GRADES.length; k++) if (q <= GRADES[k].max) return GRADES[k];
     return GRADES[GRADES.length - 1];
   }
-  // 뽑기 창 자리표시자(.mg-ph, 시뮬레이터 READY 와 같은 모양): 표지가 없는 뽑기 종류(엔진 도감)는 빈 img(깨진 그림) 대신 이것
+  // 뽑기 창 자리표시자(.mg-ph, 시뮬레이터 READY 와 같은 모양): 뽑기 전에는 뽑기 종류와 상관없이 이것 (405빵 분홍 픽셀 표지도 쓰지 않음 — 시뮬레이터 showCover 와 같게)
   function mgPh(img, on){ var p = img.parentNode.querySelector('.mg-ph'); img.hidden = on; if (p) p.hidden = !on; }
   function backImg(img){ img.removeAttribute('src'); img.className = 'gback'; img.parentNode.classList.remove('land'); mgPh(img, false); }
   function cardImg(img, i){ setImg(img, i); img.parentNode.classList.toggle('land', !!G.land(i)); mgPh(img, false); }
-  function coverImg(img){
-    if (!G.cover){ backImg(img); mgPh(img, true); return; }
-    mgPh(img, false);
-    img.src = G.cover; img.className = G.coverCls; img.parentNode.classList.remove('land');
-  }
+  function coverImg(img){ backImg(img); mgPh(img, true); }
   function mgStop(){
     mgT.forEach(clearTimeout); mgT = []; mgEnd = null;
     $('g-mini').classList.remove('busy'); $('mg-go').classList.remove('skip');
