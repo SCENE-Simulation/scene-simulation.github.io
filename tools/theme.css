@@ -1213,6 +1213,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .vd-key .k-p{width:16px;height:0;border-top:2.5px dashed var(--mc)}
 .vd-key .k-r{width:16px;height:10px;border-radius:3px;background:color-mix(in srgb,var(--mc) 30%,transparent);border:1px solid color-mix(in srgb,var(--mc) 50%,transparent)}
 .vd-key .k-d{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--vg)}
+.vd-key .k-dm{width:8px;height:8px;margin:0 8px 0 2px;border-radius:1px;background:var(--mc);transform:rotate(45deg)}   /* 예측 포인트(목표 시점 예측 다이아몬드) */
 .vd-key .k-o{width:10px;height:10px;border-radius:50%;border:2px solid var(--mc)}
 /* 예측 방법: 쉬운 설명 카드, 누르면 그 방법으로 예측 현황을 본다 */
 .vm-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}

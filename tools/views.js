@@ -1421,10 +1421,14 @@
       knots.slice().reverse().forEach(function(k){ dn += ' L' + X(k.h).toFixed(1) + ' ' + Y(k.lo).toFixed(1); });
       s += '<path d="' + up + dn + ' Z" fill="url(#vg-f)" stroke="' + m.color + '" stroke-opacity=".35" stroke-width="1"/>'
         + '<path d="' + mdp + '" fill="none" stroke="' + m.color + '" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"/>';
+      // 목표 시점 예측 점(범례 "예측 포인트"): 다이아몬드. 값 글자는 점 위로 8px 띄워 가운데 맞춤(오른쪽 끝 점은 칸 안쪽으로 끝 맞춤),
+      //   어두운 테두리(paint-order stroke)를 둘러 예측 점선 · 100만 단위 선 위에서도 읽히게
       knots.slice(1).forEach(function(k){
-        var right = X(k.h) > W - 90;
-        s += '<circle cx="' + X(k.h).toFixed(1) + '" cy="' + Y(k.p).toFixed(1) + '" r="5" fill="' + m.color + '" stroke="#1c1c1e" stroke-width="2"/>'
-          + '<text x="' + (X(k.h) + (right ? -9 : 9)).toFixed(1) + '" y="' + (Y(k.p) - 9).toFixed(1) + '" text-anchor="' + (right ? 'end' : 'start') + '" font-size="12" font-weight="700" fill="' + m.color + '">' + fmt(k.p) + '</text>';
+        var x = X(k.h), y = Y(k.p), D = 6.5, right = x > W - R - 24;
+        s += '<path d="M' + x.toFixed(1) + ' ' + (y - D).toFixed(1) + ' L' + (x + D).toFixed(1) + ' ' + y.toFixed(1) + ' L' + x.toFixed(1) + ' ' + (y + D).toFixed(1)
+          + ' L' + (x - D).toFixed(1) + ' ' + y.toFixed(1) + ' Z" fill="' + m.color + '" stroke="#1c1c1e" stroke-width="2" stroke-linejoin="round"/>'
+          + '<text x="' + (right ? x + D : x).toFixed(1) + '" y="' + (y - D - 8).toFixed(1) + '" text-anchor="' + (right ? 'end' : 'middle') + '" font-size="12" font-weight="700" fill="' + m.color
+          + '" stroke="#1c1c1e" stroke-width="4" stroke-linejoin="round" paint-order="stroke">' + fmt(k.p) + '</text>';
       });
     }
     // 고른 방법의 예측이 아직 없으면, 예측선이 들어갈 자리(지금 오른쪽)에 이유를 적는다
@@ -1460,8 +1464,10 @@
       + (msPill ? '<div class="vd-cms">' + msPill + '</div>' : '')
       + s + '<div class="vd-tip" id="vd-tip" hidden></div>'
       + '<div class="vd-key"><span><i class="k-a"></i>실제 조회수</span>'
-      + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>' : '')
-      + (past.length ? '<span><i class="k-d"></i>예측 포인트</span>' : '')
+      + (knots.length > 1 ? '<span style="--mc:' + m.color + '"><i class="k-p"></i>예측</span><span style="--mc:' + m.color + '"><i class="k-r"></i>80% 범위</span>'
+        + '<span style="--mc:' + m.color + '"><i class="k-dm"></i>예측 포인트</span>' : '')
+      // 흰 점은 지난 목표 시점의 실제 조회수 — 예전 이름 "예측 포인트"는 위 다이아몬드(목표 시점 예측)에 쓰게 되어 이름을 나눔
+      + (past.length ? '<span><i class="k-d"></i>지난 목표 실제</span>' : '')
       + (mss.length ? '<span style="--mc:' + MSC + '"><i class="k-ms"></i>100만 단위 돌파 예상</span><small class="vd-kn">100만 단위 예상은 추세가 바뀌면 달라집니다</small>' : '')
       + '</div>';
     // 값 읽기: 지금까지는 실제, 그 뒤는 부채꼴 매듭 사이를 가로 위치 기준으로 잇는다
