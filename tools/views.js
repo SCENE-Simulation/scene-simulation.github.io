@@ -781,7 +781,7 @@
         + '<span class="mb-ed na"><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small></span>';
     var a0 = x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
-      // 썸네일 번짐: 흐리고 어둡게 한 썸네일을 카드 왼쪽 뒤에 깔고 오른쪽으로 사라지게 (시안 A 의 "썸네일 배경" 을 왼쪽에만 살짝)
+      // 글자 칸 배경: 흐리고 어둡게 한 썸네일을 글자 칸 뒤에 깔고 왼쪽 진하게 → 오른쪽 투명 (시안 A 의 "썸네일 배경" 응용)
       + '<span class="mb-bg" aria-hidden="true" style="' + (thumbSrc(v) ? 'background-image:url(&quot;' + esc(thumbSrc(v)) + '&quot;)' : '--h:' + v.hue) + '"></span>'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-c">'
