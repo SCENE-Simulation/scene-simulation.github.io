@@ -2478,12 +2478,12 @@ html.shr-on{overflow:hidden}
 .og-gaid{fill:#6fe0b3;stroke:var(--bg);stroke-width:2}
 .og-gait{fill:#6fe0b3;font:700 9.5px "Pretendard Variable",sans-serif}
 .og-glg i.a{width:8px;height:8px;border:0;border-radius:50%;background:#6fe0b3}
-.og-aip{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 10px;padding:9px 12px;border-radius:12px;
+.og-aip{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;gap:3px 10px;padding:9px 12px;border-radius:12px;
   background:rgba(111,224,179,.07);border:1px solid rgba(111,224,179,.3)}
 .og-aik{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#6fe0b3}
 .og-aik i{width:7px;height:7px;border-radius:50%;background:#6fe0b3;box-shadow:0 0 6px rgba(111,224,179,.6)}
-.og-aip b{font-size:13.5px;font-weight:700;color:var(--ink)}
-.og-aip small{margin-left:auto;font-size:11.5px;color:var(--ink2)}
+.og-aip b{min-width:0;font-size:13.5px;font-weight:700;color:var(--ink);word-break:keep-all}
+.og-aip small{grid-column:2;font-size:11.5px;color:var(--ink2)}   /* 줄바꿈이 제멋대로 되지 않게: 늘 시각 아랫줄에 */
 
 /* ===== 30일 예측 중인 영상: 예측 현황 아래 100만 단위 돌파 예측 카드 (views.js renderMsx) ===== */
 .vd-msx:not(:empty){margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
@@ -2575,10 +2575,12 @@ html.shr-on{overflow:hidden}
 .og-myl > div + div{border-left:1px dashed rgba(169,139,255,.22)}
 .og-mine .og-myl small{font-size:10.5px;font-weight:600;color:var(--ink3);letter-spacing:.02em}
 .og-mine .og-myl b{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;white-space:nowrap}
-@media (max-width:400px){.og-myl > div{padding:6px 7px}.og-mine .og-myl b{font-size:11.5px;white-space:normal;word-break:keep-all}}/* 예측의 신 기록 카드 [공유하기] (왼쪽 끝, 지우기는 오른쪽) */
+@media (max-width:400px){.og-myl > div{padding:6px 7px}.og-mine .og-myl b{font-size:11.5px;white-space:normal;word-break:keep-all}}
+/* 예측의 신 기록 카드 [공유하기] (왼쪽 끝, 지우기는 오른쪽) */
 #v-oracle .og-lf .og-shr{margin-right:auto;padding:5px 11px;font-size:12px;background:var(--og-soft);border-color:var(--og-line)!important;color:var(--og-t)}
 #v-oracle .og-lf .og-shr svg{width:13px;height:13px}
 #v-oracle .og-lf .og-shr:hover:not(:disabled){background:rgba(169,139,255,.26);color:#e6dcff}
+.og-ct .og-ctm{margin-top:-3px;font-size:11px;color:var(--ink3)}
 
 </style>
 </head>
@@ -9087,7 +9089,7 @@ goTab(true,true);
     var h = '<article class="og-c" data-vid="' + esc(v.id) + '">'
       + '<div class="og-ch"><span class="og-th">' + thumbImg(v) + '</span>'
       + '<div class="og-ct"><b title="' + esc(v.title) + '">' + esc(v.title) + '</b>'
-      + '<small>지금 <em>' + V.full(nowV) + '</em>회 · ' + shortTxt(V.lastMs(v)) + ' 기록</small></div>'
+      + '<small>지금 <em>' + V.full(nowV) + '</em>회</small><small class="og-ctm">' + shortTxt(V.lastMs(v)) + ' 기록</small></div>'   // 두 줄로 (좁은 카드에서 ' · ' 가 줄머리에 남던 것)
       // 즐겨찾기 별표 (켜진 상태) — 누르면 즐겨찾기에서 빠지고 카드도 사라진다. 남긴 예측 기록은 그대로
       + '<button type="button" class="og-fav" data-og-fav aria-pressed="true" title="즐겨찾기에서 빼기" aria-label="즐겨찾기에서 빼기">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></button></div>'
@@ -9149,6 +9151,10 @@ goTab(true,true);
     box.innerHTML = chart(v, d.M, { g: g > V.lastMs(v) ? g : NaN, fixed: !!have, ai: aiAt(v, d.M) });
     fixLegends(box);
   }
+  // 창 크기가 바뀌거나(휴대폰 돌림) 글꼴이 늦게 들어오면 범례 줄바꿈이 달라지므로 다시 잰다
+  var fixT = null;
+  window.addEventListener('resize', function(){ clearTimeout(fixT); fixT = setTimeout(function(){ if (!el.hidden) fixLegends(); }, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if (!el.hidden) fixLegends(); });
   // 범례가 두 줄로 꺾이며 마지막 하나만 아랫줄에 남으면 3칸 격자(.g3)로 — 좁은 카드 · 휴대폰에서 '내 예측'만 떨어지던 것
   function fixLegends(root){
     Array.prototype.forEach.call((root || el).querySelectorAll('.og-glg'), function(g){

@@ -193,7 +193,7 @@
     var h = '<article class="og-c" data-vid="' + esc(v.id) + '">'
       + '<div class="og-ch"><span class="og-th">' + thumbImg(v) + '</span>'
       + '<div class="og-ct"><b title="' + esc(v.title) + '">' + esc(v.title) + '</b>'
-      + '<small>지금 <em>' + V.full(nowV) + '</em>회 · ' + shortTxt(V.lastMs(v)) + ' 기록</small></div>'
+      + '<small>지금 <em>' + V.full(nowV) + '</em>회</small><small class="og-ctm">' + shortTxt(V.lastMs(v)) + ' 기록</small></div>'   // 두 줄로 (좁은 카드에서 ' · ' 가 줄머리에 남던 것)
       // 즐겨찾기 별표 (켜진 상태) — 누르면 즐겨찾기에서 빠지고 카드도 사라진다. 남긴 예측 기록은 그대로
       + '<button type="button" class="og-fav" data-og-fav aria-pressed="true" title="즐겨찾기에서 빼기" aria-label="즐겨찾기에서 빼기">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></button></div>'
@@ -255,6 +255,10 @@
     box.innerHTML = chart(v, d.M, { g: g > V.lastMs(v) ? g : NaN, fixed: !!have, ai: aiAt(v, d.M) });
     fixLegends(box);
   }
+  // 창 크기가 바뀌거나(휴대폰 돌림) 글꼴이 늦게 들어오면 범례 줄바꿈이 달라지므로 다시 잰다
+  var fixT = null;
+  window.addEventListener('resize', function(){ clearTimeout(fixT); fixT = setTimeout(function(){ if (!el.hidden) fixLegends(); }, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if (!el.hidden) fixLegends(); });
   // 범례가 두 줄로 꺾이며 마지막 하나만 아랫줄에 남으면 3칸 격자(.g3)로 — 좁은 카드 · 휴대폰에서 '내 예측'만 떨어지던 것
   function fixLegends(root){
     Array.prototype.forEach.call((root || el).querySelectorAll('.og-glg'), function(g){
