@@ -850,6 +850,8 @@ body.has-sfloat #totop{bottom:84px}
 /* 카드 틀은 가로형 카드가 와도 3:4 그대로 둔다(연출 중 상자 높이가 출렁이지 않게). 가로형은 틀 안에 잘리지 않게 맞춘다 */
 .mg-card.land img{object-fit:contain}
 .mg-card img{width:100%;height:100%;object-fit:cover;display:block}
+.mg-card img[hidden],.mg-ph[hidden]{display:none}
+.mg-card .mg-ph{height:calc(100% - 10px);margin:5px}      /* 뽑기 창 자리표시자: 카드 틀 안에 안쪽 틀(.gph-in) */
 .mg-slot > b{max-width:100%;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mg-slot small{font-size:11.5px;color:var(--ink2)}
 .mg-arrow{font-size:20px;color:var(--dim)}
@@ -864,6 +866,10 @@ body.has-sfloat #totop{bottom:84px}
 .mg-grp{margin-bottom:12px}
 .mg-gh{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12.5px;font-weight:700;color:var(--ink)}
 .mg-gh i{width:10px;height:10px;border-radius:3px}
+.mg-pick.compact{display:flex;flex-wrap:wrap;gap:12px 14px}            /* 멤버당 1~2장: 멤버 묶음을 나란히 (gacha.js mgPicker) */
+.mg-pick.compact .mg-grp{margin:0;flex:0 0 auto}
+.mg-pick.compact .mg-row{grid-template-columns:repeat(var(--n,1),86px)}
+.mg-pick.compact[hidden]{display:none}
 .mg-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
 .mg-pc{display:flex;flex-direction:column;gap:5px;min-width:0;padding:5px;border-radius:10px!important;text-align:left;
   background:rgba(255,255,255,.04);border-color:var(--line)!important}
@@ -1422,10 +1428,11 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 썸네일 한 장 (시안 A 응용): 16:9 썸네일을 카드 높이에 맞춰 왼쪽부터 깔아, 썸네일 칸에서는 그대로 보이고
    글자 칸으로 이어지는 나머지 부분은 반투명 어둠(::after) 밑으로 비친다. 그림 오른쪽 끝은 투명하게 풀어 카드 바탕으로 사라진다 */
 .mb-r{position:relative;isolation:isolate}
-.mb-bg{position:absolute;top:0;bottom:0;left:0;aspect-ratio:16/9;z-index:-1;pointer-events:none;
+.mb-bg{--bgx:28px;position:absolute;top:0;bottom:0;left:calc(-1 * var(--bgx));aspect-ratio:16/9;   /* 그림을 왼쪽으로 조금 당겨 인물이 썸네일 칸 가운데 쪽에 오게 */
+  z-index:-1;pointer-events:none;
   background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) left center/cover no-repeat;
   -webkit-mask-image:linear-gradient(90deg,#000 62%,transparent);mask-image:linear-gradient(90deg,#000 62%,transparent)}
-.mb-bg::after{content:"";position:absolute;top:0;bottom:0;right:0;left:calc(var(--thw) - 24px);
+.mb-bg::after{content:"";position:absolute;top:0;bottom:0;right:0;left:calc(var(--thw) + var(--bgx) - 24px);
   background:linear-gradient(90deg,rgba(24,24,26,0),rgba(24,24,26,.74) 24px,rgba(24,24,26,.9) 60%)}   /* 글자 칸 쪽만 어둡게 — 글자가 묻히지 않게 */
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}

@@ -257,7 +257,7 @@
     +       '<div class="mg-slot mg-target"><span class="mg-k">목표 카드</span><div class="mg-card" id="mg-tcard"><img alt=""></div>'
     +         '<b id="mg-tname"></b></div>'
     +       '<div class="mg-arrow" aria-hidden="true">→</div>'
-    +       '<div class="mg-slot mg-draw" id="mg-draw"><span class="mg-k">뽑기 창</span><div class="mg-card" id="mg-dcard"><img alt=""></div>'
+    +       '<div class="mg-slot mg-draw" id="mg-draw"><span class="mg-k">뽑기 창</span><div class="mg-card" id="mg-dcard"><img alt=""><div class="gph-in mg-ph" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-img"/></svg></div></div>'
     +         '<b id="mg-count" aria-live="polite"></b><small id="mg-sub"></small></div>'
     +     '</div>'
     +     '<button type="button" class="gp gp1 mg-go" id="mg-go"><span class="gp-l">' + ICON.one + '<span id="mg-gol">뽑기 시작</span></span><span class="gp-s" id="mg-gos"></span></button>'
@@ -880,10 +880,13 @@
     for (var k = 1; k < GRADES.length; k++) if (q <= GRADES[k].max) return GRADES[k];
     return GRADES[GRADES.length - 1];
   }
-  function backImg(img){ img.removeAttribute('src'); img.className = 'gback'; img.parentNode.classList.remove('land'); }
-  function cardImg(img, i){ setImg(img, i); img.parentNode.classList.toggle('land', !!G.land(i)); }
+  // 뽑기 창 자리표시자(.mg-ph, 시뮬레이터 READY 와 같은 모양): 표지가 없는 뽑기 종류(엔진 도감)는 빈 img(깨진 그림) 대신 이것
+  function mgPh(img, on){ var p = img.parentNode.querySelector('.mg-ph'); img.hidden = on; if (p) p.hidden = !on; }
+  function backImg(img){ img.removeAttribute('src'); img.className = 'gback'; img.parentNode.classList.remove('land'); mgPh(img, false); }
+  function cardImg(img, i){ setImg(img, i); img.parentNode.classList.toggle('land', !!G.land(i)); mgPh(img, false); }
   function coverImg(img){
-    if (!G.cover){ backImg(img); return; }
+    if (!G.cover){ backImg(img); mgPh(img, true); return; }
+    mgPh(img, false);
     img.src = G.cover; img.className = G.coverCls; img.parentNode.classList.remove('land');
   }
   function mgStop(){
@@ -920,8 +923,12 @@
   function mgPicker(){
     var m = mini(), box = $('mg-pick');
     box.innerHTML = '';
+    // 묶음마다 카드가 2장 이하면(HOLLYS · 나랑드 · 도미노 — 멤버당 1장) 묶음을 한 줄에 나란히, 폭이 모자라면 아래 줄로
+    var compact = G.groups.length > 1 && G.groups.every(function(gr){ return gr.ids.length <= 2; });
+    box.classList.toggle('compact', compact);
     G.groups.forEach(function(gr){
       var g = document.createElement('div'); g.className = 'mg-grp';
+      g.style.setProperty('--n', gr.ids.length);
       g.innerHTML = '<div class="mg-gh"><i style="background:' + gr.color + '"></i>' + esc(gr.name) + '</div>';
       var row = document.createElement('div'); row.className = 'mg-row';
       gr.ids.forEach(function(i){
