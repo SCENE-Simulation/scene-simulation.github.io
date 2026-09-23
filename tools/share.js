@@ -3,7 +3,7 @@
 //   SGShare.video(card): 조회수 예측기 영상 카드. card 는 views.js 의 shareCard(v) 가 글자까지 만들어 넘긴다
 //     { id, title, thumbs: [썸네일 주소 후보…], hue, demo, at: 기록 시각(ms), chips: [...], when, views, sub,
 //       boxes: [{ name, at, tag, tone: 'pred'|'hit'|'miss'|'', big, unit, note } × 3], ms: { head, txt, how }, last }
-// [공유하기]를 누르면 바로 클립보드에 복사(게시글에 Ctrl+V). 못 넣는 브라우저는 저장(다운로드)으로, 휴대폰은 공유 시트도
+// 미리보기 창에서 고른다: 클립보드에 복사(게시글에 Ctrl+V) · 이미지 저장 · 공유(휴대폰 공유 시트)
 (function(){
   var SITE = 'scene-simulation.github.io';
   var SANS = '"Pretendard Variable","Noto Sans KR",sans-serif', MONO = '"JetBrains Mono","Pretendard Variable",monospace';
@@ -166,8 +166,8 @@
   }
 
   // ---------- 미리보기 창 ----------
-  // [공유하기]를 누르는 순간 클립보드 복사를 시작한다 (이미지는 다 그려지면 채워짐 — 누른 순간이어야 브라우저가 허락).
-  // 클립보드에 이미지를 못 넣는 브라우저이거나 실패하면 [이미지 저장](파일 받기)을 대신 보여 준다. 휴대폰은 [공유…]도
+  // 이미지를 다 그리면 고를 수 있게 버튼을 켠다: [클립보드에 복사](되는 브라우저만) · [이미지 저장] · [공유…](되는 곳만 — 휴대폰 공유 시트)
+  // 바로 복사하지 않는다 — 디시 앱(모바일)은 클립보드 붙여 넣기를 받지 않아 저장 · 공유가 필요하다
   var CAN_COPY = !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
   var box = null, url = null, blob = null, name = '';
   function ui(){
@@ -176,9 +176,9 @@
     box.innerHTML = '<div class="shr-bg" data-shx></div><div class="shr-p" role="dialog" aria-modal="true" aria-labelledby="shr-t">'
       + '<div class="shr-h"><b id="shr-t">공유 카드</b><button type="button" class="shr-x" data-shx aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
       + '<div class="shr-im"><span class="shr-ld">이미지를 만드는 중…</span><img alt="공유 카드 미리보기" hidden></div>'
-      + '<p class="shr-d">지금 기록 기준으로 고정된 이미지입니다. 클립보드에 복사되니 게시글 쓰기 창에서 붙여 넣기(Ctrl+V) 하세요.</p>'
-      + '<div class="shr-b"><button type="button" class="gs shr-go" data-sha="copy">클립보드에 복사</button>'
-      + '<button type="button" class="gs" data-sha="save" hidden>이미지 저장</button>'
+      + '<p class="shr-d">지금 기록 기준으로 고정된 이미지입니다. 복사해서 게시글에 붙여 넣거나(Ctrl+V), 저장해서 사진으로 첨부하세요.</p>'
+      + '<div class="shr-b"><button type="button" class="gs" data-sha="copy">클립보드에 복사</button>'
+      + '<button type="button" class="gs" data-sha="save">이미지 저장</button>'
       + '<button type="button" class="gs" data-sha="share" hidden>공유…</button><span class="shr-m" aria-live="polite"></span></div></div>';
     document.body.appendChild(box);
     box.addEventListener('click', function(e){
@@ -191,46 +191,34 @@
   function msg(t, bad){ var m = box.querySelector('.shr-m'); m.textContent = t; m.classList.toggle('bad', !!bad); }
   function close(){ box.hidden = true; document.documentElement.classList.remove('shr-on'); }
   function file(){ return new File([blob], name, { type: 'image/png' }); }
-  // 클립보드에 넣기. png 는 Blob 또는 Blob 을 줄 Promise
-  function copy(png){
-    var cb = box.querySelector('[data-sha="copy"]');
-    return navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]).then(function(){
-      cb.textContent = '✓ 복사됨 · 다시 복사'; msg('클립보드에 복사했습니다 · 게시글에 붙여 넣기(Ctrl+V)');
-    });
-  }
-  function noCopy(){
-    box.querySelector('[data-sha="copy"]').hidden = true;
-    var s = box.querySelector('[data-sha="save"]'); s.hidden = false; s.classList.add('shr-go');
-    msg('이 브라우저에서는 클립보드에 넣지 못했어요 · 저장해서 올려 주세요', true);
-  }
   function act(k){
-    if (k === 'copy') copy(blob).catch(noCopy);
-    else if (k === 'save'){
+    if (k === 'copy'){
+      var cb = box.querySelector('[data-sha="copy"]');
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function(){
+        cb.textContent = '✓ 복사됨'; msg('클립보드에 복사했습니다 · 게시글에 붙여 넣기(Ctrl+V)');
+      }, function(){ cb.hidden = true; msg('이 브라우저에서는 클립보드에 넣지 못했어요 · 저장해서 올려 주세요', true); });
+    } else if (k === 'save'){
       var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       msg('저장했습니다');
     } else if (k === 'share') navigator.share({ files: [file()], title: '센둥이 시뮬레이터' }).catch(function(){});
   }
   function open(make, fname, text){
     ui(); box.hidden = false; document.documentElement.classList.add('shr-on');
-    var img = box.querySelector('.shr-im img'), ld = box.querySelector('.shr-ld'), cb = box.querySelector('[data-sha="copy"]'), sv = box.querySelector('[data-sha="save"]');
+    var img = box.querySelector('.shr-im img'), ld = box.querySelector('.shr-ld'), cb = box.querySelector('[data-sha="copy"]');
     img.hidden = true; ld.hidden = false; ld.textContent = '이미지를 만드는 중…'; blob = null; msg('');
-    cb.hidden = false; cb.textContent = '클립보드에 복사'; sv.hidden = true; sv.classList.remove('shr-go');
+    cb.hidden = !CAN_COPY; cb.textContent = '클립보드에 복사';
     Array.prototype.forEach.call(box.querySelectorAll('[data-sha]'), function(b){ b.disabled = true; });
     if (url){ URL.revokeObjectURL(url); url = null; }
     name = fname;
-    var pb = fontsFor(text).then(make).then(function(cv){
+    fontsFor(text).then(make).then(function(cv){
       return new Promise(function(r){ cv.toBlob(r, 'image/png'); });
-    }).then(function(b){ if (!b) throw new Error('blob'); return b; });
-    // 누른 순간 복사 시작 (실패하면 버튼으로 다시 — 그래도 안 되면 저장으로 바꿈)
-    var auto = CAN_COPY ? copy(pb).catch(function(){ if (blob) msg('[클립보드에 복사]를 눌러 주세요'); return 'retry'; }) : null;
-    if (!CAN_COPY) noCopy();
-    pb.then(function(b){
+    }).then(function(b){
+      if (!b) throw new Error('blob');
       blob = b; url = URL.createObjectURL(b); img.src = url; img.hidden = false; ld.hidden = true;
       var canShare = false; try { canShare = !!(navigator.canShare && navigator.canShare({ files: [file()] })); } catch (e){}
       box.querySelector('[data-sha="share"]').hidden = !canShare;
       Array.prototype.forEach.call(box.querySelectorAll('[data-sha]'), function(b){ b.disabled = false; });
-      if (auto) auto.then(function(r){ if (r === 'retry') msg('[클립보드에 복사]를 눌러 주세요'); });
-    }).catch(function(){ ld.textContent = '이미지를 만들지 못했습니다. 잠시 뒤 다시 해 주세요.'; msg(''); });
+    }).catch(function(){ ld.textContent = '이미지를 만들지 못했습니다. 잠시 뒤 다시 해 주세요.'; });
   }
 
   window.SGShare = {
