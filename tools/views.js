@@ -849,7 +849,7 @@
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       // 썸네일 한 장: 카드 왼쪽부터 깔아 썸네일 칸 → 글자 칸(반투명 어둠 밑)으로 이어지게 (시안 A 응용). .mb-th 는 자리만
       + '<span class="mb-bg" aria-hidden="true" style="' + (thumbSrc(v) ? 'background-image:url(&quot;' + esc(thumbSrc(v)) + '&quot;)' : '--h:' + v.hue) + '"></span>'
-      + '<span class="mb-th">' + thumb(v) + '</span>'
+      + '<span class="mb-th">' + thumb(v) + star(v, true) + '</span>'
       + '<span class="mb-c">'
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
       + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
