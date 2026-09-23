@@ -463,17 +463,31 @@
       + (big ? '<span class="wk-x">' + wk.map(function(o){ return '<span>' + o.k + '주</span>'; }).join('') + '</span>' : '');
   }
 
-  // 상세(30일 예측이 끝난 영상): 다음 100만 단위 세 개 (초기 예측 결과·구간 기록은 그래프 아래 예측 성적표에)
-  function renderLate(){
-    var v = sel, p = plan(v);
-    $('vd-md').innerHTML = '<i style="background:' + MSC + '"></i><span>' + METHODS[2].short + '</span>'
+  // 다음 100만 단위 세 개 카드 — 영상 나이와 상관없이 나온다.
+  //   30일 예측이 끝난 영상: 예측 현황 자리에 (renderLate) / 30일 예측 중인 영상: 예측 현황(24시간·7일·30일) 아래에 (renderMsx)
+  function msMd(p){
+    return '<i style="background:' + MSC + '"></i><span>' + METHODS[2].short + '</span>'
       + (p ? '<em>최근 하루 +' + fmt(p.g) + '회 · ' + dropTxt(p.r)
         + (p.src === 'data' ? ' (최근 ' + Math.min(7, Math.floor(p.days)) + '일 기록)' : ' (기록 2일이 쌓이기 전이라 기본 곡선)') + '</em>' : '');
-    $('vd-hs').innerHTML = p ? p.ms.map(function(m){ return msCard(v, p, m); }).join('')
+  }
+  function msCards(v, p){
+    return p ? p.ms.map(function(m){ return msCard(v, p, m); }).join('')
       : '<div class="vh na" style="grid-column:1/-1"><div class="vh-h"><div><b>100만 단위 돌파</b></div><span class="vh-tag">예측 준비 중</span></div>'
         + '<small class="vh-n">최근 기록이 3시간 이상 쌓이면 예측합니다.</small></div>';
+  }
+  function renderLate(){
+    var v = sel, p = plan(v);
+    $('vd-md').innerHTML = msMd(p);
+    $('vd-hs').innerHTML = msCards(v, p);
     $('vd-ex').innerHTML = '';
     chart();
+  }
+  function renderMsx(v){
+    var box = $('vd-msx'); if (!box) return;
+    if (late(v)){ box.innerHTML = ''; return; }
+    var p = plan(v);
+    box.innerHTML = '<div class="vd-ph"><h4>100만 단위 돌파 예측</h4><span class="vd-lt" style="--mc:' + MSC + '">③ 추세 곡선</span></div>'
+      + '<p class="vd-md">' + msMd(p) + '</p><div class="vd-hs">' + msCards(v, p) + '</div>';
   }
   function msCard(v, p, m){
     var ok = VE.likely(m);
@@ -1217,7 +1231,7 @@
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
         }).join('') + '</div></div>')
-      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div><div class="vd-mlg" id="vd-mlg"></div></div>'
+      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div><div class="vd-msx" id="vd-msx"></div><div class="vd-mlg" id="vd-mlg"></div></div>'
       + '<div class="vd-chart" id="vd-chart"></div>'
       // 예측 성적표: 이 영상에 한 예측이 실제와 얼마나 맞았는지 (그래프 아래)
       + '<div class="vd-sc" id="vs-h"><div class="vd-sch"><h4>예측 성적표</h4><span>이 영상에 한 예측이 실제와 얼마나 맞았는지</span></div><div class="vs" id="vs"></div></div>';
@@ -1309,7 +1323,7 @@
   }
 
   function renderPred(){
-    renderMlg(sel);
+    renderMlg(sel); renderMsx(sel);
     if (late(sel)){ renderLate(); return; }
     var v = sel, m = ALLM[mi];
     Array.prototype.forEach.call(el.querySelectorAll('.vd-mt [data-mi]'), function(b){

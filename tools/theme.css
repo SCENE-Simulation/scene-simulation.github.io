@@ -2069,3 +2069,6 @@ html.shr-on{overflow:hidden}
 .og-aik i{width:7px;height:7px;border-radius:50%;background:#6fe0b3;box-shadow:0 0 6px rgba(111,224,179,.6)}
 .og-aip b{font-size:13.5px;font-weight:700;color:var(--ink)}
 .og-aip small{margin-left:auto;font-size:11.5px;color:var(--ink2)}
+
+/* ===== 30일 예측 중인 영상: 예측 현황 아래 100만 단위 돌파 예측 카드 (views.js renderMsx) ===== */
+.vd-msx:not(:empty){margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
