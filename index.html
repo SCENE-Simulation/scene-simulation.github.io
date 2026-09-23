@@ -6528,13 +6528,13 @@ goTab(true,true);
     x.fillStyle = fg; x.textBaseline = 'middle'; x.fillText(t, c + s * .65, y + h / 2 + 1); x.textBaseline = 'alphabetic';
     return w;
   }
-  // 썸네일 불러오기: 후보를 차례로. 유튜브는 없는 크기면 120×90 회색 그림을 주므로 그것도 실패로 본다
+  // 그림 불러오기: 후보를 차례로. 유튜브는 없는 크기면 120×90 회색 그림을 주므로 그것도 실패로 본다(유튜브 주소일 때만)
   function loadImg(list){
     return new Promise(function(done){
       (function next(i){
         if (i >= list.length) return done(null);
         var im = new Image(); im.crossOrigin = 'anonymous';
-        im.onload = function(){ im.naturalWidth > 200 ? done(im) : next(i + 1); };
+        im.onload = function(){ /ytimg.com/.test(list[i]) && im.naturalWidth <= 120 ? next(i + 1) : done(im); };   // 유튜브 회색 그림(120×90)만 실패로 — 작은 카드 그림(나랑드 174px 등)은 그대로
         im.onerror = function(){ next(i + 1); };
         im.src = list[i];
       })(0);
