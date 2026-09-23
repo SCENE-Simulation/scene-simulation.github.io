@@ -1805,3 +1805,31 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 @media (max-width:360px){   /* 아주 좁은 휴대폰: "달성까지" 는 숫자 위 줄로 내려가고, 상자 좌우 여백을 줄여 긴 기간(141주 5일)도 날짜와 겹치지 않게 */
   #v-views .mb-r .mb-e{gap:6px;padding:7px 8px}
 }
+/* 예측 현황 맨 아래 "100만 단위 달성 기록" 토글 (views.js renderMlg) — 실제 기록 두 개 사이에서 100만 단위를 넘은 때. 100만 단위 색은 그래프와 같은 민트 */
+.vd-mlg{margin-top:12px}
+.vd-mlg:empty{display:none}
+.vd-mlgb{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px!important;border-radius:12px!important;text-align:left;
+  background:rgba(255,255,255,.035);border:1px solid var(--line)!important;font-size:13px;font-weight:600;color:var(--ink)}
+.vd-mlgb:hover:not(:disabled){background:rgba(255,255,255,.06)}
+.vd-mlgb > svg:first-child{flex:none;width:16px;height:16px;fill:none;stroke:#6fe0b3;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.vd-mlgb > b{flex:none;font-weight:700}
+.vd-mlgc{flex:none;min-width:20px;padding:1px 6px;border-radius:6px;text-align:center;font:700 11px/1.5 "JetBrains Mono",monospace;color:#6fe0b3;background:rgba(71,209,154,.14)}
+.vd-mlgs{flex:1;min-width:0;text-align:right;font-size:12px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-mlgv{flex:none;width:14px;height:14px;color:var(--ink2);transform:rotate(90deg);transition:transform .15s ease}
+.vd-mlgb[aria-expanded="true"]{background:rgba(71,209,154,.07);border-color:rgba(71,209,154,.45)!important}
+.vd-mlgb[aria-expanded="true"] .vd-mlgv{transform:rotate(-90deg);color:#6fe0b3}
+.vd-mlgp{margin-top:8px;padding:4px 14px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.vd-mlgl{list-style:none;margin:0;padding:0}
+.vd-mlgl li{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.vd-mlgl li:last-child{border-bottom:0}
+.vd-mlgm{flex:none;min-width:66px;font:700 14px/1 "JetBrains Mono",monospace;color:#6fe0b3}
+.vd-mlgw{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vd-mlgw b{font-size:13.5px;font-weight:600;color:var(--ink);word-break:keep-all}
+.vd-mlgw small{font-size:11.5px;color:var(--ink2)}
+.vd-mlge,.vd-mlgn{margin:9px 0;font-size:12px;line-height:1.6;color:var(--ink2);word-break:keep-all}
+.vd-mlgn{color:var(--dim)}
+@media (max-width:640px){   /* 좁은 화면: 요약("최근 900만 · 날짜")은 제목 아랫줄로 */
+  .vd-mlgb{flex-wrap:wrap;row-gap:4px}
+  .vd-mlgs{order:5;flex-basis:100%;text-align:left;padding-left:24px}
+  .vd-mlgv{margin-left:auto}   /* 화살표는 윗줄 오른쪽 끝 */
+}

@@ -1133,7 +1133,7 @@
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
         }).join('') + '</div></div>')
-      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div></div>'
+      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div><div class="vd-mlg" id="vd-mlg"></div></div>'
       + '<div class="vd-chart" id="vd-chart"></div>'
       // 예측 성적표: 이 영상에 한 예측이 실제와 얼마나 맞았는지 (그래프 아래)
       + '<div class="vd-sc" id="vs-h"><div class="vd-sch"><h4>예측 성적표</h4><span>이 영상에 한 예측이 실제와 얼마나 맞았는지</span></div><div class="vs" id="vs"></div></div>';
@@ -1149,7 +1149,53 @@
       + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</span>';
   }
 
+  // ----- 100만 단위 달성 기록 (예측 현황 상자 맨 아래 토글) -----
+  // 실제 기록(v.vs: snaps · 15분 기록 hr · 마지막 값)에서 조회수가 100만 단위를 넘은 두 기록 사이를 찾아 그 사이를 곧게 이어 넘은 때를 추정한다.
+  // 두 기록 간격이 1.5시간 이하면 분까지("오후 3:12쯤"), 더 넓으면 두 기록 시각 사이("오후 1:40 ~ 7:40 사이") — 모르는 시각을 지어내지 않게.
+  // 첫 기록이 게시 2시간(VE.EARLY) 안이면 게시 순간 0회부터 이어 본다. 첫 기록 전에 넘은 단위는 "수집 전"으로만 적는다
+  var MLGOPEN = false, WD = ['일', '월', '화', '수', '목', '금', '토'];
+  function mlgRows(v){
+    var key = v.id + '|mlg';
+    if (key in VC) return VC[key];
+    var p = v.vs.snaps, rows = [];
+    if (!p.length) return (VC[key] = null);
+    var pts = p[0][0] <= VE.EARLY ? [[0, 0]].concat(p) : p;
+    for (var i = 1; i < pts.length; i++){
+      var a = pts[i - 1], b = pts[i];
+      for (var M = (Math.floor(a[1] / 1e6) + 1) * 1e6; M <= b[1]; M += 1e6)
+        rows.push({ M: M, h: a[0] + (M - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), h0: a[0], h1: b[0] });
+    }
+    return (VC[key] = { rows: rows.reverse(), before: Math.floor(pts[0][1] / 1e6) * 1e6, firstMs: v.pub + pts[0][0] * 3600e3 });
+  }
+  function mlgDay(ms){ return dY(ms, Date.now()) + ' (' + WD[new Date(ms).getDay()] + ')'; }
+  function mlgTime(ms){ var d = new Date(ms), H = d.getHours(); return (H < 12 ? '오전 ' : '오후 ') + (H % 12 || 12) + ':' + two(d.getMinutes()); }
+  function mlgWhen(v, r){
+    if (r.h1 - r.h0 <= 1.5){ var t = v.pub + r.h * 3600e3; return mlgDay(t) + ' ' + mlgTime(t) + '쯤'; }
+    var t0 = v.pub + r.h0 * 3600e3, t1 = v.pub + r.h1 * 3600e3;
+    return mlgDay(t0) + ' ' + mlgTime(t0) + ' ~ ' + (new Date(t0).toDateString() === new Date(t1).toDateString() ? '' : mlgDay(t1) + ' ') + mlgTime(t1) + ' 사이';
+  }
+  function renderMlg(v){
+    var box = $('vd-mlg'); if (!box) return;
+    var L = mlgRows(v); if (!L){ box.innerHTML = ''; return; }
+    var rows = L.rows, last = rows[0];
+    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 뒤로는 아직 없음' : '아직 없음';
+    var h = '<button type="button" class="vd-mlgb" data-mlg aria-expanded="' + MLGOPEN + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>'
+      + '<b>100만 단위 달성 기록</b><span class="vd-mlgc">' + rows.length + '</span>'
+      + '<span class="vd-mlgs">' + esc(sum) + '</span><svg class="vd-mlgv" aria-hidden="true"><use href="#i-chev"/></svg></button>'
+      + '<div class="vd-mlgp"' + (MLGOPEN ? '' : ' hidden') + '>';
+    if (rows.length) h += '<ol class="vd-mlgl">' + rows.map(function(r, i){
+        var prev = rows[i + 1];
+        return '<li><span class="vd-mlgm">' + fmtM(r.M) + '</span><span class="vd-mlgw"><b>' + esc(mlgWhen(v, r)) + '</b><small>게시 후 ' + ageTxt(r.h)
+          + (prev ? ' · ' + fmtM(prev.M) + '부터 ' + ageTxt(r.h - prev.h) : '') + '</small></span></li>';
+      }).join('') + '</ol>';
+    else h += '<p class="vd-mlge">' + (L.before ? '수집을 시작한 뒤로 새로 넘은 100만 단위가 아직 없습니다.' : '아직 100만을 넘지 않았습니다.') + '</p>';
+    if (L.before) h += '<p class="vd-mlgn">' + (L.before >= 2e6 ? '100만 ~ ' : '') + fmtM(L.before) + '은 수집을 시작하기 전(' + when(L.firstMs) + ')에 넘어서 날짜 기록이 없습니다.</p>';
+    box.innerHTML = h + '</div>';
+  }
+
   function renderPred(){
+    renderMlg(sel);
     if (late(sel)){ renderLate(); return; }
     var v = sel, m = ALLM[mi];
     Array.prototype.forEach.call(el.querySelectorAll('.vd-mt [data-mi]'), function(b){
@@ -1482,6 +1528,8 @@
     renderVideo();
   }
   el.addEventListener('click', function(e){
+    var mlg = e.target.closest('[data-mlg]');                 // 100만 단위 달성 기록 펼치기 · 접기 (영상을 바꿔도 유지)
+    if (mlg){ MLGOPEN = !MLGOPEN; mlg.setAttribute('aria-expanded', String(MLGOPEN)); mlg.nextElementSibling.hidden = !MLGOPEN; return; }
     var jp = e.target.closest('[data-jump]');
     if (jp){ ($(jp.getAttribute('data-jump')) || $('vd')).scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
     var b = e.target.closest('[data-vid]');

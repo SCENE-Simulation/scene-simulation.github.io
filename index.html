@@ -2219,6 +2219,34 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 @media (max-width:360px){   /* 아주 좁은 휴대폰: "달성까지" 는 숫자 위 줄로 내려가고, 상자 좌우 여백을 줄여 긴 기간(141주 5일)도 날짜와 겹치지 않게 */
   #v-views .mb-r .mb-e{gap:6px;padding:7px 8px}
 }
+/* 예측 현황 맨 아래 "100만 단위 달성 기록" 토글 (views.js renderMlg) — 실제 기록 두 개 사이에서 100만 단위를 넘은 때. 100만 단위 색은 그래프와 같은 민트 */
+.vd-mlg{margin-top:12px}
+.vd-mlg:empty{display:none}
+.vd-mlgb{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px!important;border-radius:12px!important;text-align:left;
+  background:rgba(255,255,255,.035);border:1px solid var(--line)!important;font-size:13px;font-weight:600;color:var(--ink)}
+.vd-mlgb:hover:not(:disabled){background:rgba(255,255,255,.06)}
+.vd-mlgb > svg:first-child{flex:none;width:16px;height:16px;fill:none;stroke:#6fe0b3;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.vd-mlgb > b{flex:none;font-weight:700}
+.vd-mlgc{flex:none;min-width:20px;padding:1px 6px;border-radius:6px;text-align:center;font:700 11px/1.5 "JetBrains Mono",monospace;color:#6fe0b3;background:rgba(71,209,154,.14)}
+.vd-mlgs{flex:1;min-width:0;text-align:right;font-size:12px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-mlgv{flex:none;width:14px;height:14px;color:var(--ink2);transform:rotate(90deg);transition:transform .15s ease}
+.vd-mlgb[aria-expanded="true"]{background:rgba(71,209,154,.07);border-color:rgba(71,209,154,.45)!important}
+.vd-mlgb[aria-expanded="true"] .vd-mlgv{transform:rotate(-90deg);color:#6fe0b3}
+.vd-mlgp{margin-top:8px;padding:4px 14px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.vd-mlgl{list-style:none;margin:0;padding:0}
+.vd-mlgl li{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.vd-mlgl li:last-child{border-bottom:0}
+.vd-mlgm{flex:none;min-width:66px;font:700 14px/1 "JetBrains Mono",monospace;color:#6fe0b3}
+.vd-mlgw{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vd-mlgw b{font-size:13.5px;font-weight:600;color:var(--ink);word-break:keep-all}
+.vd-mlgw small{font-size:11.5px;color:var(--ink2)}
+.vd-mlge,.vd-mlgn{margin:9px 0;font-size:12px;line-height:1.6;color:var(--ink2);word-break:keep-all}
+.vd-mlgn{color:var(--dim)}
+@media (max-width:640px){   /* 좁은 화면: 요약("최근 900만 · 날짜")은 제목 아랫줄로 */
+  .vd-mlgb{flex-wrap:wrap;row-gap:4px}
+  .vd-mlgs{order:5;flex-basis:100%;text-align:left;padding-left:24px}
+  .vd-mlgv{margin-left:auto}   /* 화살표는 윗줄 오른쪽 끝 */
+}
 
 </style>
 </head>
@@ -7342,7 +7370,7 @@ goTab(true,true);
       + ORDER.map(function(k){ var m = ALLM[k];
           return '<button type="button" role="tab" data-mi="' + k + '" class="' + (k === mi ? 'on' : '') + '" aria-selected="' + (k === mi) + '" style="--mc:' + m.color + '"><i>' + m.b + '</i>' + m.tab + '</button>';
         }).join('') + '</div></div>')
-      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div></div>'
+      + '<p class="vd-md" id="vd-md"></p><div class="vd-hs" id="vd-hs"></div><div id="vd-ex"></div><div class="vd-mlg" id="vd-mlg"></div></div>'
       + '<div class="vd-chart" id="vd-chart"></div>'
       // 예측 성적표: 이 영상에 한 예측이 실제와 얼마나 맞았는지 (그래프 아래)
       + '<div class="vd-sc" id="vs-h"><div class="vd-sch"><h4>예측 성적표</h4><span>이 영상에 한 예측이 실제와 얼마나 맞았는지</span></div><div class="vs" id="vs"></div></div>';
@@ -7358,7 +7386,53 @@ goTab(true,true);
       + (m.h < 1 ? '1시간 안' : '약 ' + ageTxt(m.h) + ' 뒤') + '</span>';
   }
 
+  // ----- 100만 단위 달성 기록 (예측 현황 상자 맨 아래 토글) -----
+  // 실제 기록(v.vs: snaps · 15분 기록 hr · 마지막 값)에서 조회수가 100만 단위를 넘은 두 기록 사이를 찾아 그 사이를 곧게 이어 넘은 때를 추정한다.
+  // 두 기록 간격이 1.5시간 이하면 분까지("오후 3:12쯤"), 더 넓으면 두 기록 시각 사이("오후 1:40 ~ 7:40 사이") — 모르는 시각을 지어내지 않게.
+  // 첫 기록이 게시 2시간(VE.EARLY) 안이면 게시 순간 0회부터 이어 본다. 첫 기록 전에 넘은 단위는 "수집 전"으로만 적는다
+  var MLGOPEN = false, WD = ['일', '월', '화', '수', '목', '금', '토'];
+  function mlgRows(v){
+    var key = v.id + '|mlg';
+    if (key in VC) return VC[key];
+    var p = v.vs.snaps, rows = [];
+    if (!p.length) return (VC[key] = null);
+    var pts = p[0][0] <= VE.EARLY ? [[0, 0]].concat(p) : p;
+    for (var i = 1; i < pts.length; i++){
+      var a = pts[i - 1], b = pts[i];
+      for (var M = (Math.floor(a[1] / 1e6) + 1) * 1e6; M <= b[1]; M += 1e6)
+        rows.push({ M: M, h: a[0] + (M - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), h0: a[0], h1: b[0] });
+    }
+    return (VC[key] = { rows: rows.reverse(), before: Math.floor(pts[0][1] / 1e6) * 1e6, firstMs: v.pub + pts[0][0] * 3600e3 });
+  }
+  function mlgDay(ms){ return dY(ms, Date.now()) + ' (' + WD[new Date(ms).getDay()] + ')'; }
+  function mlgTime(ms){ var d = new Date(ms), H = d.getHours(); return (H < 12 ? '오전 ' : '오후 ') + (H % 12 || 12) + ':' + two(d.getMinutes()); }
+  function mlgWhen(v, r){
+    if (r.h1 - r.h0 <= 1.5){ var t = v.pub + r.h * 3600e3; return mlgDay(t) + ' ' + mlgTime(t) + '쯤'; }
+    var t0 = v.pub + r.h0 * 3600e3, t1 = v.pub + r.h1 * 3600e3;
+    return mlgDay(t0) + ' ' + mlgTime(t0) + ' ~ ' + (new Date(t0).toDateString() === new Date(t1).toDateString() ? '' : mlgDay(t1) + ' ') + mlgTime(t1) + ' 사이';
+  }
+  function renderMlg(v){
+    var box = $('vd-mlg'); if (!box) return;
+    var L = mlgRows(v); if (!L){ box.innerHTML = ''; return; }
+    var rows = L.rows, last = rows[0];
+    var sum = last ? '최근 ' + fmtM(last.M) + ' · ' + mlgWhen(v, last) : L.before ? '수집 뒤로는 아직 없음' : '아직 없음';
+    var h = '<button type="button" class="vd-mlgb" data-mlg aria-expanded="' + MLGOPEN + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/></svg>'
+      + '<b>100만 단위 달성 기록</b><span class="vd-mlgc">' + rows.length + '</span>'
+      + '<span class="vd-mlgs">' + esc(sum) + '</span><svg class="vd-mlgv" aria-hidden="true"><use href="#i-chev"/></svg></button>'
+      + '<div class="vd-mlgp"' + (MLGOPEN ? '' : ' hidden') + '>';
+    if (rows.length) h += '<ol class="vd-mlgl">' + rows.map(function(r, i){
+        var prev = rows[i + 1];
+        return '<li><span class="vd-mlgm">' + fmtM(r.M) + '</span><span class="vd-mlgw"><b>' + esc(mlgWhen(v, r)) + '</b><small>게시 후 ' + ageTxt(r.h)
+          + (prev ? ' · ' + fmtM(prev.M) + '부터 ' + ageTxt(r.h - prev.h) : '') + '</small></span></li>';
+      }).join('') + '</ol>';
+    else h += '<p class="vd-mlge">' + (L.before ? '수집을 시작한 뒤로 새로 넘은 100만 단위가 아직 없습니다.' : '아직 100만을 넘지 않았습니다.') + '</p>';
+    if (L.before) h += '<p class="vd-mlgn">' + (L.before >= 2e6 ? '100만 ~ ' : '') + fmtM(L.before) + '은 수집을 시작하기 전(' + when(L.firstMs) + ')에 넘어서 날짜 기록이 없습니다.</p>';
+    box.innerHTML = h + '</div>';
+  }
+
   function renderPred(){
+    renderMlg(sel);
     if (late(sel)){ renderLate(); return; }
     var v = sel, m = ALLM[mi];
     Array.prototype.forEach.call(el.querySelectorAll('.vd-mt [data-mi]'), function(b){
@@ -7691,6 +7765,8 @@ goTab(true,true);
     renderVideo();
   }
   el.addEventListener('click', function(e){
+    var mlg = e.target.closest('[data-mlg]');                 // 100만 단위 달성 기록 펼치기 · 접기 (영상을 바꿔도 유지)
+    if (mlg){ MLGOPEN = !MLGOPEN; mlg.setAttribute('aria-expanded', String(MLGOPEN)); mlg.nextElementSibling.hidden = !MLGOPEN; return; }
     var jp = e.target.closest('[data-jump]');
     if (jp){ ($(jp.getAttribute('data-jump')) || $('vd')).scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
     var b = e.target.closest('[data-vid]');
