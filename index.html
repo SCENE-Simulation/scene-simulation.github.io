@@ -2581,7 +2581,16 @@ html.shr-on{overflow:hidden}
 #v-oracle .og-lf .og-shr svg{width:13px;height:13px}
 #v-oracle .og-lf .og-shr:hover:not(:disabled){background:rgba(169,139,255,.26);color:#e6dcff}
 .og-ct .og-ctm{margin-top:-3px;font-size:11px;color:var(--ink3)}
-
+/* ===== 예측의 신: 비율 맞춤 (9/24 사용자 요청 — 같은 줄 카드끼리 칸 높이가 달라 아래 칸들이 어긋나던 것) =====
+   카드 머리 높이를 고정(제목 두 줄 자리)하고 글자 묶음은 썸네일 가운데에, 범례는 늘 3칸 격자 */
+.og-ch{min-height:80px;align-items:center}
+.og-ch .og-fav,.og-ch .og-st2{align-self:start}
+.og-ct{gap:3px}
+.og-ct b{margin-bottom:2px}
+.og-glg,.og-glg.g3{display:grid;grid-template-columns:repeat(3,max-content);gap:5px 14px;justify-content:start}
+@media (max-width:640px){.og-ch{min-height:72px}}#v-oracle .og-tg button{height:36px;display:flex;align-items:center;justify-content:center;gap:2px;line-height:1}
+.og-tg button i{font-size:13px;line-height:1}
+.og-lc .og-lf{margin-top:auto}   /* 지우기 · 공유하기는 늘 카드 맨 아래 (같은 줄 카드끼리 높이는 격자가 맞춤) */
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -9388,7 +9397,9 @@ goTab(true,true);
       h += '<div class="og-aip"><span class="og-aik"><i></i>예측기 예상</span>'
         + (x.ai == null ? '<small>그때는 기록이 모자라 계산 전' + (j.st === 'done' ? ' — 대결 없음' : '') + '</small>'
           : (x.ai === 0 ? '<b>못 닿는다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
-            + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>' : ''))
+            + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>'
+              // 채점 기다림도 두 줄로 (같은 줄 카드끼리 높이가 같게): 남길 때 본 값 · 그때까지 남은 시간
+              : '<small>남길 때 계산 · ' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
         + '</div>';
     }
     // 내 예측

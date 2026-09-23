@@ -380,7 +380,9 @@
       h += '<div class="og-aip"><span class="og-aik"><i></i>예측기 예상</span>'
         + (x.ai == null ? '<small>그때는 기록이 모자라 계산 전' + (j.st === 'done' ? ' — 대결 없음' : '') + '</small>'
           : (x.ai === 0 ? '<b>못 닿는다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
-            + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>' : ''))
+            + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>'
+              // 채점 기다림도 두 줄로 (같은 줄 카드끼리 높이가 같게): 남길 때 본 값 · 그때까지 남은 시간
+              : '<small>남길 때 계산 · ' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
         + '</div>';
     }
     // 내 예측

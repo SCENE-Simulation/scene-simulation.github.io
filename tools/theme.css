@@ -2167,3 +2167,13 @@ html.shr-on{overflow:hidden}
 #v-oracle .og-lf .og-shr svg{width:13px;height:13px}
 #v-oracle .og-lf .og-shr:hover:not(:disabled){background:rgba(169,139,255,.26);color:#e6dcff}
 .og-ct .og-ctm{margin-top:-3px;font-size:11px;color:var(--ink3)}
+/* ===== 예측의 신: 비율 맞춤 (9/24 사용자 요청 — 같은 줄 카드끼리 칸 높이가 달라 아래 칸들이 어긋나던 것) =====
+   카드 머리 높이를 고정(제목 두 줄 자리)하고 글자 묶음은 썸네일 가운데에, 범례는 늘 3칸 격자 */
+.og-ch{min-height:80px;align-items:center}
+.og-ch .og-fav,.og-ch .og-st2{align-self:start}
+.og-ct{gap:3px}
+.og-ct b{margin-bottom:2px}
+.og-glg,.og-glg.g3{display:grid;grid-template-columns:repeat(3,max-content);gap:5px 14px;justify-content:start}
+@media (max-width:640px){.og-ch{min-height:72px}}#v-oracle .og-tg button{height:36px;display:flex;align-items:center;justify-content:center;gap:2px;line-height:1}
+.og-tg button i{font-size:13px;line-height:1}
+.og-lc .og-lf{margin-top:auto}   /* 지우기 · 공유하기는 늘 카드 맨 아래 (같은 줄 카드끼리 높이는 격자가 맞춤) */
