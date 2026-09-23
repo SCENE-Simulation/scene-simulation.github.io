@@ -1786,7 +1786,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
    글꼴: 글자는 Pretendard, 숫자만 JetBrains Mono (큰 숫자 옆 한글 단위는 크기 차를 줄여 한 덩어리로 읽히게).
    색 강조는 8주 안에 넘을 줄(.in)의 남은 시간·진행 막대에만 — 줄 배경·알약 테두리는 쓰지 않는다 */
 .mb-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.mb-r{--thw:190px;--mbh:152px;
+.mb-r{--thw:190px;--mbh:170px;
   display:grid;grid-template-columns:var(--thw) minmax(0,1fr);min-height:var(--mbh);
   padding:0!important;border-radius:14px!important;overflow:hidden;text-align:left;
   background:rgba(255,255,255,.03);border:1px solid var(--line)!important;color:inherit}
@@ -1798,12 +1798,15 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
 /* 글자 묶음: 제목 · 지금 → 목표 · 막대 · 달성까지 (따로 떼지 않고 한 덩어리로 세로 가운데) */
-.mb-c{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0;padding:13px 15px}
+.mb-c{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0;padding:12px 13px}
+/* 카드 안의 작은 상자: ① 다음 100만 단위까지(지금 → 목표 · 남은 조회수 · 막대) ② 달성까지(남은 시간 · 날짜). 현황 칸 타일(.vd-s)과 같은 톤 */
+.mb-bx{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px 11px 9px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid var(--line)}
+#v-views .mb-r.in .mb-bx2{background:rgba(255,77,79,.07);border-color:rgba(255,77,79,.22)}
 /* 제목 줄: 제목(두 줄까지) + 오른쪽 끝 추이 */
 .mb-hd{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .mb-t{flex:0 1 auto;min-width:0;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #v-views .mb-r .mb-t{font-size:14px;line-height:1.35;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-.mb-tg{flex:none;margin-left:auto;margin-top:2px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink2)}
+.mb-tg{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--ink2)}
 .mb-tg svg{width:12px;height:9px;flex:0 0 auto}
 .mb-tg rect{fill:rgba(255,255,255,.18)}
 .mb-tg.hi{color:#ff7478}.mb-tg.hi rect.on{fill:#ff5a5f}
@@ -1831,8 +1834,8 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 @media (prefers-reduced-motion:reduce){.mb-pg i{animation:none;background-position:100% 0}}
 /* 마지막 줄: 달성까지 · 남은 시간(크게) · 날짜(오른쪽 끝) — 구분선 없이 글자 묶음의 한 줄 */
 .mb-e{display:flex;align-items:baseline;gap:8px;min-width:0}
-.mb-lb{flex:none;font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--dim)}
-.mb-e small:not(.mb-lb){margin-left:auto;font-size:11.5px;color:var(--ink2);white-space:nowrap}   /* 날짜만 오른쪽 끝 (라벨도 small 이라 :not 이 필요) */
+.mb-lb{flex:none;font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--dim)}
+.mb-e small{margin-left:auto;font-size:11.5px;color:var(--ink2);white-space:nowrap}   /* 날짜는 오른쪽 끝 */
 /* 1,000만 명예의 전당 탭 버튼: 황금색 + 왼쪽 왕관. 켜지면 황금 그라데이션 */
 #v-views #vr-hof{color:#f0c75e}
 #v-views #vr-hof .hf-crown{width:16px;height:16px;flex:0 0 auto;margin-right:-1px;filter:drop-shadow(0 0 4px rgba(240,199,94,.55))}
@@ -1875,11 +1878,12 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 /* 카드 폭에 따라 썸네일·글자 크기만 바꾼다 (배치는 어느 폭에서나 같다) */
 @media (max-width:980px){.mb-list{grid-template-columns:1fr}}
 @media (min-width:981px) and (max-width:1199px){   /* 두 칸인데 카드가 좁을 때(약 400px) */
-  #v-views .mb-r{--thw:158px;--mbh:142px}
-  #v-views .mb-r .mb-c{gap:8px;padding:12px 13px}
+  #v-views .mb-r{--thw:136px;--mbh:162px}
+  #v-views .mb-r .mb-c{gap:7px;padding:11px 11px}
+  #v-views .mb-r .mb-bx{padding:7px 10px 8px}
   #v-views .mb-r .mb-t{font-size:13.5px}
   #v-views .mb-r .mb-n{font-size:11.5px}
-  #v-views .mb-r .mb-n b{font-size:13.5px}
+  #v-views .mb-r .mb-n b{font-size:13px}
   #v-views .mb-r .mb-eta{font-size:19px}
 }
 @media (max-width:760px){.vt-tab .w{display:none}}
@@ -2111,11 +2115,12 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .mb-r.in .mb-eta{color:var(--vg)}
 /* 휴대폰: 배치는 같고 썸네일·글자만 작게 */
 @media (max-width:640px){
-  #v-views .mb-r{--thw:112px;--mbh:132px}
-  #v-views .mb-r .mb-c{gap:7px;padding:11px 12px}
+  #v-views .mb-r{--thw:96px;--mbh:150px}
+  #v-views .mb-r .mb-c{gap:6px;padding:10px 10px}
+  #v-views .mb-r .mb-bx{padding:7px 9px 8px;gap:5px}
   #v-views .mb-r .mb-t{font-size:13px}
   #v-views .mb-r .mb-n{font-size:11px;gap:5px}
-  #v-views .mb-r .mb-n b{font-size:12.5px}
+  #v-views .mb-r .mb-n b{font-size:12px}
   #v-views .mb-r .mb-n em b{font-size:11.5px}
   #v-views .mb-r .mb-eta{font-size:17px}
   #v-views .mb-r .mb-eta i{font-size:11.5px;margin:0 2px 0 1px}
@@ -6858,10 +6863,14 @@ goTab(true,true);
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
       + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
       + '</span>'
+      // 상자 ①: 다음 100만 단위까지 — 지금 → 목표 · 남은 조회수 · 진행 막대
+      + '<span class="mb-bx"><small class="mb-lb">다음 100만 단위까지</small>'
       + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
       + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
-      + '<span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
-      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></span></button>';
+      + '<span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span></span>'
+      // 상자 ②: 달성까지 — 남은 시간(크게) · 날짜
+      + '<span class="mb-bx mb-bx2"><small class="mb-lb">달성까지</small><span class="mb-e">' + eta + '</span></span>'
+      + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
   function navState(){
