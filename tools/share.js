@@ -385,6 +385,83 @@
     return cv;
   }
 
+  // ---------- 뽑기 미니게임 카드 (결과 한 판) ----------
+  // d = { at, game: 뽑기 종류 이름, sub: '27종 중 1장 · 3.70%', grade: { t, c }, head: 'N번 만에 나왔다!', text,
+  //       target: { name, src, land, pix }, stats: [{ k, v, s }] × 4, strip: [{ src, land, pix }] (목표까지 뽑힌 카드, 마지막이 목표), more: 넘기기 전에 줄인 장수 }
+  // imgs: [목표, strip…] 순서
+  function drawMini(d, imgs){
+    var P = 48, AW = W - P * 2, GC = d.grade.c;
+    var SY = 104, CH = 300, CW = d.target.land ? 400 : 225;
+    var STY = SY + CH + 90, STH = 132, RY = STY + STH + 30, RH = 96;
+    var HH = RY + 40 + RH + 80;
+    var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
+    var x = cv.getContext('2d'); x.scale(SC, SC);
+    x.fillStyle = '#17121a'; x.fillRect(0, 0, W, HH);
+    var g = x.createRadialGradient(W * .88, -40, 10, W * .88, -40, 660); g.addColorStop(0, 'rgba(233,99,135,.28)'); g.addColorStop(1, 'rgba(233,99,135,0)');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);
+    g = x.createRadialGradient(P + CW / 2, SY + CH / 2, 10, P + CW / 2, SY + CH / 2, 360); g.addColorStop(0, GC + '40'); g.addColorStop(1, GC + '00');
+    x.fillStyle = g; x.fillRect(0, 0, W, HH);                                      // 목표 카드 뒤 등급 색 빛
+    g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#f6a6c1'); g.addColorStop(.6, PK.pink); g.addColorStop(1, GC);
+    x.fillStyle = g; x.fillRect(0, 0, W, 6);
+
+    // 머리
+    font(x, 800, 28); x.fillStyle = C.ink; x.fillText('센둥이 시뮬레이터', P, 70);
+    var bw = x.measureText('센둥이 시뮬레이터').width;
+    font(x, 600, 22); x.fillStyle = PK.pinkT; x.fillText('·  뽑기 미니게임', P + bw + 14, 69);
+    font(x, 500, 20, MONO); x.fillStyle = C.ink2; x.textAlign = 'right'; x.fillText(stamp(d.at) + ' 기준', W - P, 68); x.textAlign = 'left';
+
+    // 목표 카드 (크게, 등급 색 테두리)
+    function card(im, c, cx, cy, cw, ch, r){
+      x.save(); rr(x, cx, cy, cw, ch, r); x.clip(); x.fillStyle = '#241c26'; x.fillRect(cx, cy, cw, ch);
+      if (im){ x.imageSmoothingEnabled = !c.pix; cover(x, im, cx, cy, cw, ch); x.imageSmoothingEnabled = true; }
+      x.restore();
+    }
+    card(imgs[0], d.target, P, SY, CW, CH, 14);
+    rr(x, P + 1, SY + 1, CW - 2, CH - 2, 14); x.strokeStyle = GC; x.lineWidth = 3; x.stroke();
+    font(x, 700, 18); x.fillStyle = C.ink3; x.fillText('목표 카드', P, SY + CH + 34);
+    font(x, 800, 22); x.fillStyle = C.ink; x.fillText(fit(x, d.target.name, Math.max(CW, 260)), P, SY + CH + 64);
+
+    // 오른쪽: 등급 · 몇 번 만에 · 뽑기 종류 · 설명
+    var RX = P + Math.max(CW, 260) + 44, RW = W - P - RX;
+    pill(x, RX, SY + 6, d.grade.t, '#1a1016', GC, null, 24);
+    font(x, 800, 60); x.fillStyle = C.ink; x.fillText(fit(x, d.head, RW), RX, SY + 132);
+    font(x, 700, 23); x.fillStyle = PK.pinkT; x.fillText(fit(x, d.game, RW), RX, SY + 182);
+    font(x, 500, 20); x.fillStyle = C.ink2; x.fillText(fit(x, d.sub, RW), RX, SY + 214);
+    font(x, 500, 20); x.fillStyle = C.ink2;
+    wrap(x, d.text, RW, 2).forEach(function(l, i){ x.fillText(l, RX, SY + 262 + i * 30); });
+
+    // 숫자 칸 4개
+    var GAP = 14, n = d.stats.length, sw = (AW - GAP * (n - 1)) / n;
+    d.stats.forEach(function(s, i){
+      var sx = P + i * (sw + GAP);
+      rr(x, sx, STY, sw, STH, 16); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = i < 2 ? GC + '80' : C.line; x.lineWidth = 1.5; x.stroke();
+      font(x, 700, 18); x.fillStyle = C.ink3; x.fillText(s.k, sx + 20, STY + 34);
+      var fs = 34; font(x, 800, fs); while (fs > 20 && x.measureText(s.v).width > sw - 40){ fs -= 2; font(x, 800, fs); }
+      x.fillStyle = i < 2 ? GC : C.ink; x.fillText(fit(x, s.v, sw - 40), sx + 20, STY + 80);
+      font(x, 500, 17); x.fillStyle = C.ink2; x.fillText(fit(x, s.s || '', sw - 40), sx + 20, STY + 112);
+    });
+
+    // 목표까지 뽑힌 카드 줄 (마지막이 목표 — 등급 색 테두리). 많으면 가운데를 "+N" 으로 줄인다
+    font(x, 700, 19); x.fillStyle = C.ink2; x.fillText('목표 카드가 나오기까지 뽑힌 카드', P, RY);
+    // 목표(마지막)는 늘 오른쪽 끝에 — 앞 카드는 자리만큼, 못 그린 장수는 "… +N"
+    var cy = RY + 22, cx = P, gapC = 6, L = d.strip.length, tg = d.strip[L - 1], rest = d.strip.slice(0, -1);
+    function cwOf(c){ return (c.land ? 4 / 3 : 3 / 4) * RH; }
+    var limit = W - P - cwOf(tg) - 120, drawn = 0;
+    rest.some(function(c, i){
+      var cw = cwOf(c); if (cx + cw > limit) return true;
+      card(imgs[1 + i], c, cx, cy, cw, RH, 7);
+      rr(x, cx + .75, cy + .75, cw - 1.5, RH - 1.5, 7); x.strokeStyle = 'rgba(255,255,255,.18)'; x.lineWidth = 1.2; x.stroke();
+      cx += cw + gapC; drawn++; return false;
+    });
+    var hid = (d.more || 0) + rest.length - drawn;
+    if (hid){ font(x, 800, 20, MONO); var mt = '… +' + hid; x.fillStyle = C.ink3; x.textBaseline = 'middle'; x.fillText(mt, cx + 8, cy + RH / 2); x.textBaseline = 'alphabetic'; cx += x.measureText(mt).width + 22; }
+    card(imgs[L], tg, cx, cy, cwOf(tg), RH, 7);
+    rr(x, cx + 1.5, cy + 1.5, cwOf(tg) - 3, RH - 3, 7); x.strokeStyle = GC; x.lineWidth = 3; x.stroke();
+
+    font(x, 700, 20, MONO); x.fillStyle = PK.pinkT; x.textAlign = 'right'; x.fillText(SITE, W - P, HH - 30); x.textAlign = 'left';
+    return cv;
+  }
+
   // ---------- 미리보기 창 ----------
   // 이미지를 다 그리면 고를 수 있게 버튼을 켠다: [클립보드에 복사](되는 브라우저만) · [이미지 저장] · [공유…](되는 곳만 — 휴대폰 공유 시트)
   // 바로 복사하지 않는다 — 디시 앱(모바일)은 클립보드 붙여 넣기를 받지 않아 저장 · 공유가 필요하다
@@ -464,6 +541,12 @@
         .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (남긴 때부터 실제로 넘은 때까지)';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
         'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
+    },
+    // 뽑기 미니게임 결과 한 판 (형식은 drawMini 위 주석, 글자는 gacha.js mgShareCard 가 만든다)
+    mini: function(d){
+      var text = [d.game, d.sub, d.grade.t, d.head, d.text, d.target.name].concat(d.stats.map(function(s){ return s.k + s.v + (s.s || ''); })).join('') + '센둥이 시뮬레이터 뽑기 미니게임 기준 목표 카드 목표 카드가 나오기까지 뽑힌 카드 … +';
+      open(function(){ return loadAll([d.target.src].concat(d.strip.map(function(c){ return c.src; }))).then(function(ims){ return drawMini(d, ims); }); },
+        'sendungi-minigame-' + fileStamp(d.at) + '.png', text);
     }
   };
 })();

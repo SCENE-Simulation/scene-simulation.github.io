@@ -231,11 +231,14 @@
   // ---------- 뽑기 미니게임 페이지 (?tab=minigame) ----------
   // 원래 시뮬레이터 안의 세 번째 화면이었는데, 사이드바의 별도 페이지로 올렸다(pages.js 가 window.SGMINI 를 페이지로 등록).
   // 뽑기 종류(G)는 시뮬레이터와 같이 쓴다 — 어느 페이지에서 바꿔도 둘 다 바뀐다
+  var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
   var mgPage = document.createElement('section');
   mgPage.id = 'v-minigame'; mgPage.className = 'wrap page'; mgPage.hidden = true;
   (document.querySelector('main.mn') || document.body).appendChild(mgPage);
   mgPage.insertAdjacentHTML('beforeend',
-    '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">뽑기 미니게임</span></div></div>'
+    '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">뽑기 미니게임</span></div>'
+    // [공유하기]: 결과가 나온 뒤에만 켜진다 (결과 아래 버튼과 같음 — mgShareCard)
+    + '<button type="button" class="gs shr-btn" id="mg-shr" data-mgshr disabled title="뽑기 결과가 나오면 이미지 카드로 공유할 수 있어요">' + SHRI + '공유하기</button></div>'
     + '<p class="sec-d">원하는 포토카드 한 장을 고르고, 그 카드가 몇 번 만에 나오는지 도전해 보세요. 결과는 등급과 확률 그래프로 보여 주고, 도전 기록은 이 브라우저에 남습니다.</p>'
     + '<div class="gsel">'
     +   '<div class="gsel-h">뽑기 종류<small>콜라보마다 포토카드 구성이 다릅니다</small></div>'
@@ -1022,6 +1025,26 @@
     return s + '</svg>';
   }
 
+  // ---------- 공유 카드 (tools/share.js SGShare.mini) ----------
+  // 지금 뽑기 종류의 마지막 결과 한 판. 뽑힌 카드 줄은 앞 17장 + 목표(많으면 사이를 "+N" 으로 줄임)
+  function mgShareCard(){
+    var r = mini().res, n = r.n, N = G.N, gr = gradeOf(n), diff = N - n, dCost = (n - N) * G.price;
+    var cnt = {}, top = -1, topN = 0;
+    r.seq.slice(0, -1).forEach(function(i){ cnt[i] = (cnt[i] || 0) + 1; if (cnt[i] > topN){ topN = cnt[i]; top = i; } });
+    var kinds = Object.keys(cnt).length, others = Math.max(1, N - 1);
+    function cd(i){ return { src: G.src[i] || '', land: !!G.land(i), pix: !!G.pix(i), name: G.names[i] }; }
+    var MAX = 18, seq = r.seq.length <= MAX ? r.seq : r.seq.slice(0, MAX - 1).concat([r.seq[r.seq.length - 1]]);
+    return { at: Date.now(), game: G.title, sub: N + '종 중 1장 · 한 번에 나올 확률 ' + pctTxt(1 / N) + ' · 평균 ' + N + '번', grade: { t: gr.t, c: gr.c },
+      head: won(n) + '번 만에 나왔다!',
+      text: n === 1 ? '첫 번째에 바로 나왔습니다. 확률 ' + pctTxt(1 / N) + '의 행운입니다.'
+        : won(n) + '번 안에 나올 확률은 ' + pctTxt(within(n)) + '. 같은 카드를 노린 100명 중 약 ' + Math.round(within(n - 1) * 100) + '명이 이보다 빨리 뽑았습니다.',
+      target: cd(r.i),
+      stats: [{ k: '쓴 돈', v: won(n * G.price) + '원', s: dCost > 0 ? '평균보다 ' + won(dCost) + '원 더' : dCost < 0 ? '평균보다 ' + won(-dCost) + '원 아낌' : '평균과 같음' },
+        { k: '평균과 비교', v: diff > 0 ? '▲ ' + won(diff) + '번 빨리' : diff < 0 ? '▼ ' + won(-diff) + '번 늦게' : '딱 평균', s: '평균 ' + N + '번 · 절반은 ' + mgMedian() + '번 안에' },
+        { k: '그 사이 나온 카드', v: n > 1 ? won(n - 1) + '장' : '없음', s: n > 1 ? '다른 카드 ' + kinds + '/' + others + '종' : '첫 번째에 바로' },
+        { k: '제일 많이 나온 카드', v: topN >= 2 ? G.names[top] : '—', s: topN >= 2 ? topN + '번 나옴' : (n > 1 ? '겹친 카드 없음' : '바로 나옴') }],
+      strip: seq.map(cd), more: r.seq.length > MAX ? r.seq.length - MAX : 0 };
+  }
   // 결과 타일의 색·효과 단계. 평균(N번)의 몇 배 걸렸는지로 정한다
   //   great 금색·빛남 / good 민트 / even 기본 / bad 주황 / worst 빨강·깜빡임
   function mgTone(n){
@@ -1103,7 +1126,9 @@
       + (r ? '이고, 진하게 칠한 막대가 이번 결과보다 빨리 나온 경우입니다.' : '입니다.') + '</p>'
       + '<div class="cmeta">' + mgTiles(r, n, cnt, top, topN) + '</div>'
       + '<div class="mg-strip" id="mg-strip">' + (r ? '' : '<em>목표 카드가 나오기까지 뽑힌 카드가 여기에 순서대로 나옵니다</em>') + '</div>'
-      + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button></div>' : '');
+      + (r ? '<div class="mg-btns"><button type="button" class="gs" id="mg-again">' + ICON.reset + '같은 카드로 한 번 더</button>'
+        + '<button type="button" class="gs shr-btn" data-mgshr>' + SHRI + '결과 공유하기</button></div>' : '');
+    $('mg-shr').disabled = !r;
     if (!r) return;
     // 제일 많이 나온 카드 그림 (큰 이미지는 문자열로 넣지 않고 요소로 붙인다)
     var tc = $('mg-topc');
@@ -1139,6 +1164,10 @@
       + '<tbody>' + rows + '</tbody></table></div>';
   }
 
+  // [공유하기] 두 곳(제목 줄 · 결과 아래) — 제목 줄은 #g-mini 밖이라 페이지 전체에서 받는다
+  mgPage.addEventListener('click', function(e){
+    if (e.target.closest('[data-mgshr]') && mini().res && !mgEnd && window.SGShare) SGShare.mini(mgShareCard());
+  });
   $('g-mini').addEventListener('click', function(e){
     var m = mini(), b = e.target.closest('[data-mg]');
     if (b){
