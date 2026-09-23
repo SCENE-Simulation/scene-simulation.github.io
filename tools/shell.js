@@ -2,12 +2,13 @@
   // ===== 메뉴 배지 (HOT · NEW) =====
   // 여기만 고치면 사이드바와 모바일 메뉴(하단 시트)에 같이 붙는다. 떼려면 그 줄을 지운다.
   // 키 = 메뉴의 탭 이름(data-tab): cu405 405빵 콜라보 · goods2026 더현대 팝업 스토어 · kream2026 크림 티셔츠 · gacha 포토카드 뽑기 시뮬레이션
-  //       · views 조회수 예측기 · collections.js 로 추가한 콜라보는 그 설정의 id
+  //       · views 조회수 예측기 · oracle 예측의 신 · collections.js 로 추가한 콜라보는 그 설정의 id
   //       (들여쓴 하위 메뉴만 된다. 홈·위시리스트는 글자 왼쪽 자리에 아이콘이 있어서 붙지 않는다)
   // 값 = 'hot' 또는 'new'
   var TAGS = {
     cu405: 'hot',
-    views: 'new'
+    views: 'new',
+    oracle: 'new'
   };
   document.querySelectorAll('.sb .nv.sub[data-tab]').forEach(function(a){
     var k = String(TAGS[a.getAttribute('data-tab')] || '').toLowerCase();

@@ -163,7 +163,12 @@
     if (loading) return;
     loading = true;
     el.innerHTML = head() + '<p class="gnote">기록을 불러오는 중…</p>';
-    load(0).then(function(d){ apply(d); render(); if (!timer) timer = setInterval(tick, 30e3); });
+    ready().then(render);
+  }
+  // 기록을 한 번만 읽는다 — 조회수 예측기와 예측의 신(oracle.js, window.SGV)이 같이 쓴다
+  var READY = null;
+  function ready(){
+    return READY || (READY = load(0).then(function(d){ apply(d); if (!timer) timer = setInterval(tick, 30e3); }));
   }
   // 기록을 화면용으로 바꾼다. 다시 불러와도 고른 영상은 그대로
   function apply(d){
@@ -180,7 +185,9 @@
         type: v.type || 'long', dur: v.dur || 0, pred: v.pred || null, ms: v.ms || [], seg: v.seg || [], snaps: s, vs: { snaps: vs } };
     }).filter(function(v){ return v.snaps.length; }).sort(function(a, b){ return b.pub - a.pub; });
     sel = VIDEOS.filter(function(v){ return v.id === keep; })[0] || VIDEOS[0] || null;
+    SUBS.forEach(function(f){ f(); });                  // 새 기록 → 예측의 신 페이지도 다시 그림
   }
+  var SUBS = [];
   // 기록은 data 브랜치에 쌓인다(수집기가 15분마다 올림). 못 읽으면 main 의 data/views.json, 둘 다 비었으면 예시 데이터
   var SOURCES = ['https://raw.githubusercontent.com/SCENE-Simulation/scene-simulation.github.io/data/views.json', 'data/views.json'];
   function load(i){
@@ -203,6 +210,8 @@
   }
   function tick(){
     cntTick();
+    // 예측의 신 페이지를 보는 중에도 새 기록을 확인한다 (그 페이지는 조회수 예측기 화면이 숨어 있음)
+    if (DATA && !DATA.demo && el.hidden && SGV.active() && nextRun() - Date.now() < -3 * 60e3 && Date.now() - lastCheck > 5 * 60e3) recheck(false);
     var m = $('vx-next'); if (!m || !DATA || DATA.demo || el.hidden) return;
     var left = nextRun() - Date.now();
     m.textContent = left > 60e3 ? '다음 수집 약 ' + Math.ceil(left / 60e3) + '분 뒤' : '새 기록 기다리는 중';
@@ -221,6 +230,24 @@
     var x = $('vx-toast'); if (!x) return;
     x.textContent = t; x.hidden = false; clearTimeout(x._t); x._t = setTimeout(function(){ x.hidden = true; }, 3200);
   }
+  // ---------- 예측의 신(oracle.js)에 넘기는 것: 기록 · 즐겨찾기 · 100만 단위 계산 ----------
+  var SGV = window.SGV = {
+    ready: ready,
+    demo: function(){ return !!(DATA && DATA.demo); },
+    videos: function(){ return VIDEOS; },
+    favs: function(){ return VIDEOS.filter(function(v){ return !!FAV[v.id]; }); },   // 종류 거르기(ft)와 상관없이 전부
+    views: function(v){ return av(v, age(v)); },                                      // 마지막 기록의 조회수
+    lastMs: nowMs,                                                                    // 마지막 기록 시각
+    plan: plan,                                                                       // ③ 추세 곡선 { g: 최근 하루 증가, ms: [{ M, days }] } | null
+    // 실제로 M 을 넘은 때: 100만 단위 달성 기록(mlgRows)과 같은 계산 — 넘은 두 기록 사이를 곧게 이어 추정. ms0~ms1 = 그 두 기록 시각
+    cross: function(v, M){
+      var L = mlgRows(v), r = L && L.rows.filter(function(x){ return x.M === M; })[0];
+      return r ? { ms: v.pub + r.h * 3600e3, ms0: v.pub + r.h0 * 3600e3, ms1: v.pub + r.h1 * 3600e3 } : null;
+    },
+    thumb: thumbSrc, fmt: fmt, fmtM: fmtM, full: full,
+    onData: function(f){ SUBS.push(f); },
+    active: function(){ return false; }                                               // oracle.js 가 "그 페이지가 보이는 중"으로 바꾼다
+  };
 
   function head(){
     return '<div class="sec"><div class="sec-t">' + (rv === 'fav' ? '<svg viewBox="0 0 24 24"><use href="#i-star"/></svg>영상 즐겨찾기'

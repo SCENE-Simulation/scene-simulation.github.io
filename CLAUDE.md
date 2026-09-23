@@ -76,6 +76,11 @@ node tools/build.js tools/source.html index.html
   (큰 가로 이미지는 `wide: true` → 한 줄 전체·원본 크기. 엔진 도감의 `news` 는 유튜브 주소면 썸네일, `kind` 로 종류 칩 글자)
 - `tools/views.js` — 조회수 예측기 화면. 기록이 비어 있으면 예시 데이터를 만들어 "예시"로 표시한다
 - `tools/views-engine.js` — 조회수 예측 계산식. 사이트와 수집기가 같이 쓴다 (브라우저 `window.VE`, Node `require`)
+- `tools/oracle.js` — **예측의 신** 페이지(`?tab=oracle`, 장난감 맨 아래 · 색은 보라 + 금색, 변수 `#v-oracle{--og…}`).
+  즐겨찾기한 영상이 다음 세 100만 단위를 넘을 때를 이용자가 골라 남기면, 실제로 넘은 때(100만 단위 달성 기록과 같은 계산)로 채점한다.
+  정확도 = 1 − |고른 때 − 실제| ÷ (실제 − 남긴 때), 등급 예측의 신 97% · 예언자 90% · 족집게 75%(= 적중) · 감 좋음 50% · 아슬아슬 25% · 빗나감.
+  남길 때 조회수 예측기(③ 추세 곡선)의 예상도 같이 저장해 채점 때 겨룬다. 기록은 localStorage `sendungi:oracle`(이 브라우저에만, 형식은 파일 맨 위 주석).
+  데이터는 views.js 가 넘겨주는 `window.SGV`(기록 한 번만 읽기 `ready`, 즐겨찾기 `favs`, 실제 돌파 때 `cross`, ③ `plan` …) — 그래서 build.js 에서 views.js 뒤에 붙는다
 
 ## 조회수 수집기 (GitHub Actions)
 

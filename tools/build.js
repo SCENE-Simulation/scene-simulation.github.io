@@ -49,6 +49,8 @@ rep('</body>',
   // views-engine.js 는 예측 계산(수집기 collect-views.js 와 같이 씀), views.js 는 화면
   '<script>\n' + fs.readFileSync(__dirname + '/views-engine.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/views.js', 'utf8') + '\n</script>\n' +
+  // 예측의 신: views.js 가 넘겨주는 window.SGV(기록 · 즐겨찾기)를 쓰므로 그 뒤
+  '<script>\n' + fs.readFileSync(__dirname + '/oracle.js', 'utf8') + '\n</script>\n' +
   '<script>\n' + fs.readFileSync(__dirname + '/shell.js', 'utf8') + '\n</script>\n</body>');
 
 fs.writeFileSync(out, h);
