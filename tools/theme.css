@@ -434,6 +434,12 @@ body.has-sfloat #totop{bottom:84px}
 .bdg.holo{--bc:#c1a8ea;border-color:rgba(255,255,255,.35);
   background:linear-gradient(110deg,rgba(255,120,200,.22),rgba(110,230,255,.22),rgba(255,240,140,.22),rgba(180,140,255,.22));background-size:300% 100%;animation:sheen 4s linear infinite}
 .bdg.holo .em{background:conic-gradient(from 20deg,#ff8ad0,#8ee8ff,#fff08c,#b48cff,#ff8ad0)}
+/* 크림 티셔츠 플래티넘(5종 완성) — 흰색에 민트를 살짝(사용자 지정). 실버(#c3ccd8, 회청색)와 구분되게 밝은 테두리 · 민트 섞인 흰 빛 · 광택 */
+#v-kream2026 .bdg[data-r="4"]{border-color:rgba(226,255,243,.85);
+  background:linear-gradient(110deg,rgba(226,255,243,.1) 20%,rgba(240,255,249,.34) 40%,rgba(160,240,208,.26) 50%,rgba(226,255,243,.1) 70%);
+  background-size:240% 100%;box-shadow:0 0 16px rgba(190,250,225,.3),0 0 3px rgba(226,255,243,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+#v-kream2026 .bdg[data-r="4"] .em{background:linear-gradient(160deg,#fff 0%,#f2fff9 35%,#c6f3df 65%,#8ed8b8 100%);box-shadow:0 0 8px #e2fff3}
+#v-kream2026 .bdg[data-r="4"] .bt b{color:#f4fffa;text-shadow:0 0 8px rgba(190,250,225,.45)}
 .bdg-empty{font-size:12.5px;color:var(--ink2)}
 @media (prefers-reduced-motion:reduce){.bdg,.chead2 .m.done b{animation:none}}
 @media (max-width:760px){
