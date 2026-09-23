@@ -1394,12 +1394,13 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-tl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap}
 .mb-tl b{font:700 14.5px "JetBrains Mono",monospace;color:var(--ink)}
 .mb-tl .rt b{color:#f0c75e}                       /* 남은 조회수는 황금색 */
-.mb-trw{position:relative;padding:4px 0}          /* 점이 막대 밖으로 나가도 잘리지 않게 여유 */
+.mb-br{display:flex;align-items:center;gap:10px;min-width:0}   /* 양 끝 단위와 막대 사이는 점(지름 11 + 테두리 3)이 닿지 않을 만큼 */
+.mb-a0,.mb-a1{flex:none;min-width:4.1em;font:700 10.5px/1 "JetBrains Mono",monospace;color:var(--dim);white-space:nowrap}   /* 폭을 "9,900만" 만큼 고정 → 카드마다 막대 시작·끝이 같은 자리 */
+.mb-a1{color:var(--ink2);text-align:right}
+.mb-trw{flex:1 1 auto;min-width:0;position:relative;padding:4px 0}   /* 점이 막대 밖으로 나가도 잘리지 않게 여유 */
 .mb-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);
   background:var(--ink2);box-shadow:0 0 0 3px #232325}
 #v-views .mb-r.in .mb-dot{background:var(--vg);box-shadow:0 0 0 3px #232325,0 0 10px rgba(255,77,79,.7)}
-.mb-ta{display:flex;justify-content:space-between;font:700 10.5px "JetBrains Mono",monospace;color:var(--dim)}
-.mb-ta span:last-child{color:var(--ink2)}
 /* 제목 줄: 제목(두 줄까지) + 오른쪽 끝 추이 */
 .mb-hd{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .mb-t{flex:0 1 auto;min-width:0;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1423,10 +1424,20 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .mb-r.in .mb-pg i{--c1:rgba(255,77,79,.52);--c2:rgba(255,142,120,.85)}
 @keyframes mbSweep{from{background-position:200% 0}to{background-position:0 0}}
 @media (prefers-reduced-motion:reduce){.mb-pg i{animation:none;background-position:100% 0}}
-/* 마지막 줄: 달성까지 · 남은 시간(크게) · 날짜(오른쪽 끝) — 구분선 없이 글자 묶음의 한 줄 */
-.mb-e{display:flex;align-items:baseline;gap:8px;min-width:0;padding-top:9px;border-top:1px dashed var(--line)}
-.mb-lb{flex:none;font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--dim)}
-.mb-e small{margin-left:auto;font-size:11.5px;color:var(--ink2);white-space:nowrap}   /* 날짜는 오른쪽 끝 */
+/* 달성까지 상자: 왼쪽 [달성까지 · 남은 시간(크게)] / 오른쪽 날짜 두 줄 [9/23 · 오후 무렵].
+   세 덩어리 모두 상자 안에서 세로 가운데 — "달성까지" 와 남은 시간은 같은 글자 바닥선(한 문장으로 읽히게),
+   오른쪽 두 줄 날짜는 큰 숫자와 높이가 거의 같아 상자 위아래 여백이 같게 보인다. 8주 안에 넘을 줄은 빨강으로 물든 상자 */
+.mb-e{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;
+  padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+#v-views .mb-r.in .mb-e{background:linear-gradient(90deg,rgba(255,77,79,.15),rgba(255,77,79,.05));border-color:rgba(255,77,79,.3)}
+.mb-el{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px;min-width:0}   /* 아주 좁으면 "달성까지" 가 숫자 위 줄로 */
+.mb-lb{flex:none;font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--dim);white-space:nowrap}
+#v-views .mb-r.in .mb-lb{color:rgba(255,160,160,.78)}
+.mb-ed{flex:none;display:flex;flex-direction:column;align-items:flex-end;text-align:right;white-space:nowrap}
+.mb-ed b{font:700 13px/1.15 "JetBrains Mono",monospace;color:var(--ink)}
+.mb-ed small{font-size:10.5px;line-height:1.2;font-weight:600;color:var(--ink2)}
+.mb-ed.na{min-height:27.5px;justify-content:center}   /* 날짜 두 줄과 같은 높이 → 예측이 없는 줄도 상자 높이가 같다 */
+.mb-ed.na small{font-size:11.5px;color:var(--dim)}
 /* 1,000만 명예의 전당 탭 버튼: 황금색 + 왼쪽 왕관. 켜지면 황금 그라데이션 */
 #v-views #vr-hof{color:#f0c75e}
 #v-views #vr-hof .hf-crown{width:16px;height:16px;flex:0 0 auto;margin-right:-1px;filter:drop-shadow(0 0 4px rgba(240,199,94,.55))}
@@ -1711,7 +1722,13 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   #v-views .mb-r .mb-tl b{font-size:13px}
   #v-views .mb-r .mb-eta{font-size:17px}
   #v-views .mb-r .mb-eta i{font-size:11.5px;margin:0 2px 0 1px}
-  /* 글자 칸이 좁아 "달성까지 47시간 56분 9/25 오전 무렵" 이 한 줄에 안 들어간다 → 날짜만 아랫줄 오른쪽 */
-  #v-views .mb-r .mb-e{gap:6px;flex-wrap:wrap}
-  #v-views .mb-r .mb-e small:not(.mb-lb){flex-basis:100%;margin-left:0;text-align:right}
+  #v-views .mb-r .mb-e{gap:8px;padding:7px 10px}
+  #v-views .mb-r .mb-el{column-gap:6px}
+  #v-views .mb-r .mb-lb{font-size:10.5px}
+  #v-views .mb-r .mb-ed b{font-size:12.5px}
+  #v-views .mb-r .mb-br{gap:9px}
+  #v-views .mb-r .mb-a0,#v-views .mb-r .mb-a1{font-size:10px}
+}
+@media (max-width:360px){   /* 아주 좁은 휴대폰: "달성까지" 는 숫자 위 줄로 내려가고, 상자 좌우 여백을 줄여 긴 기간(141주 5일)도 날짜와 겹치지 않게 */
+  #v-views .mb-r .mb-e{gap:6px;padding:7px 8px}
 }

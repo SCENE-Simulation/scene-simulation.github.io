@@ -772,23 +772,27 @@
   function mbRow(x, i){
     var v = x.v, ok = in8(x), left = Math.max(0, x.M - x.V), tr = ltTrend(v);
     var p = Math.max(0, Math.min(1, (x.V - (x.M - VE.MSTEP)) / VE.MSTEP));     // 지난 100만 단위 → 다음 100만 단위 진행률
+    // 달성까지 상자: 왼쪽 [달성까지 · 남은 시간(크게)] / 오른쪽 날짜 두 줄 [9/23 · 오후 무렵] — 두 줄 날짜가 큰 숫자와 높이가 비슷해 한 줄 상자로 가운데가 맞는다
     var eta = x.eta != null
-      ? '<b class="mb-eta">' + etaHM(x.eta).replace(/(시간|분|일|주)/g, '<i>$1</i>') + '</b><small>' + ddayAP(v, x.eta * 24) + ' 무렵</small>'
-      : '<b class="mb-eta na">—</b><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small>';
+      ? '<span class="mb-el"><small class="mb-lb">달성까지</small><b class="mb-eta">' + etaHM(x.eta).replace(/(시간|분|일|주)/g, '<i>$1</i>') + '</b></span>'
+        + '<span class="mb-ed"><b>' + dday(v, x.eta * 24) + '</b><small>' + ddayAP(v, x.eta * 24).split(' ').pop() + ' 무렵</small></span>'
+      : '<span class="mb-el"><small class="mb-lb">달성까지</small><b class="mb-eta na">—</b></span>'
+        + '<span class="mb-ed na"><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small></span>';
+    var a0 = x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-c">'
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
       + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
       + '</span>'
-      // 트랙: 위 라벨 줄 [지금 "N만 달성" · 오른쪽 "N만 남음"] / 막대(지난 100만 단위 → 다음 100만 단위, 지금 위치에 점) / 아래 양 끝 단위
+      // 트랙: 위 라벨 줄 [지금 "N만 달성" · 오른쪽 "N만 남음"] / [지난 100만 단위 ━ 막대(지금 위치에 점) ━ 다음 100만 단위] 한 줄
       + '<span class="mb-tk">'
       + '<span class="mb-tl"><span><b>' + fmtM(x.V) + '</b> 달성</span><span class="rt"><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</span></span>'
+      + '<span class="mb-br"><span class="mb-a0">' + a0 + '</span>'
       + '<span class="mb-trw"><span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><u class="mb-dot" style="left:' + (p * 100).toFixed(1) + '%"></u></span>'
-      + '<span class="mb-ta"><span>' + (x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0') + '</span><span>' + fmtM(x.M) + '</span></span>'
+      + '<span class="mb-a1">' + fmtM(x.M) + '</span></span>'
       + '</span>'
-      // 달성까지 · 남은 시간(크게) · 날짜 — 점선 위
-      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span>'
+      + '<span class="mb-e">' + eta + '</span>'
       + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
