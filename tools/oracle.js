@@ -350,7 +350,7 @@
     var h = '<article class="og-c og-lc ' + j.st + '"' + (j.gr ? ' data-g="' + j.gr.k + '"' : '') + ' data-k="' + esc(x.k) + '">'
       + '<div class="og-ch"><span class="og-th">' + (v ? thumbImg(v) : '<span class="og-ph"></span>') + '</span>'
       + '<div class="og-ct"><b title="' + esc(x.t) + '">' + esc(x.t) + '</b>'
-      + '<small><span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></small><small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></div>'
+      + '<small><span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></small></div>'
       + '<div class="og-st2">' + (j.st === 'done' ? '<b class="og-acc">' + pct(j.acc) + '</b><span class="og-gr" data-g="' + j.gr.k + '">' + j.gr.n + '</span>'
         : '<span class="og-wt">' + (j.st === 'wait' ? '채점 기다림' : '채점 안 함') + '</span>') + '</div></div>';
     // 그래프 (영상 기록이 없으면 생략)
@@ -369,7 +369,8 @@
         + '</div>';
     }
     // 내 예측
-    h += '<div class="og-have og-mine"><span>내 예측</span><b>' + whenTxt(x.g) + '</b>';
+    // 머리 줄: 내 예측 ··· 남긴 때 (사용자 요청으로 카드 머리에서 이 상자 안으로)
+    h += '<div class="og-have og-mine"><span class="og-mh">내 예측<small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></span><b>' + whenTxt(x.g) + '</b>';
     if (j.st === 'wait'){
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0)));
       h += '<small>' + (x.g > now ? '예측한 때까지 <em>' + durTxt(x.g - now) + ' 남음</em>' : '예측한 때가 <em>' + durTxt(now - x.g) + ' 지남</em> · 아직 못 넘음') + '</small>'

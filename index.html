@@ -2522,7 +2522,10 @@ html.shr-on{overflow:hidden}
 .og-mine .og-pg{margin-top:3px}
 .og-mine .og-pgt{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink3)}
 .og-lf{display:flex;justify-content:flex-end;margin-top:-4px}
-#v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}
+#v-oracle .og-lf .og-del{width:auto;height:auto;padding:4px 10px;font-size:12px;color:var(--ink3);border-radius:8px!important}.og-mine .og-mh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 10px}
+.og-mine .og-mh small{font-size:11.5px;font-weight:500;color:var(--ink2)}
+.og-mine .og-mh small span{font-size:inherit;font-weight:600;color:var(--ink)}
+
 </style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -8904,7 +8907,7 @@ goTab(true,true);
     var h = '<article class="og-c og-lc ' + j.st + '"' + (j.gr ? ' data-g="' + j.gr.k + '"' : '') + ' data-k="' + esc(x.k) + '">'
       + '<div class="og-ch"><span class="og-th">' + (v ? thumbImg(v) : '<span class="og-ph"></span>') + '</span>'
       + '<div class="og-ct"><b title="' + esc(x.t) + '">' + esc(x.t) + '</b>'
-      + '<small><span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></small><small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></div>'
+      + '<small><span class="og-rm">' + V.fmtM(x.M) + ' 돌파</span></small></div>'
       + '<div class="og-st2">' + (j.st === 'done' ? '<b class="og-acc">' + pct(j.acc) + '</b><span class="og-gr" data-g="' + j.gr.k + '">' + j.gr.n + '</span>'
         : '<span class="og-wt">' + (j.st === 'wait' ? '채점 기다림' : '채점 안 함') + '</span>') + '</div></div>';
     // 그래프 (영상 기록이 없으면 생략)
@@ -8923,7 +8926,8 @@ goTab(true,true);
         + '</div>';
     }
     // 내 예측
-    h += '<div class="og-have og-mine"><span>내 예측</span><b>' + whenTxt(x.g) + '</b>';
+    // 머리 줄: 내 예측 ··· 남긴 때 (사용자 요청으로 카드 머리에서 이 상자 안으로)
+    h += '<div class="og-have og-mine"><span class="og-mh">내 예측<small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></span><b>' + whenTxt(x.g) + '</b>';
     if (j.st === 'wait'){
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0)));
       h += '<small>' + (x.g > now ? '예측한 때까지 <em>' + durTxt(x.g - now) + ' 남음</em>' : '예측한 때가 <em>' + durTxt(now - x.g) + ' 지남</em> · 아직 못 넘음') + '</small>'
