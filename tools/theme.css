@@ -1417,14 +1417,16 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 #v-views .mb-r.in{border-color:rgba(255,77,79,.32)!important}
 #v-views .mb-r.on{border-color:var(--vg)!important;box-shadow:0 0 0 1px var(--vg)}
 /* 썸네일은 카드 왼쪽을 모서리까지 꽉 채운다 (16:9 를 가운데 기준으로 잘라 씀) */
-#v-views .mb-r > .mb-th{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
-/* 글자 칸 배경 (시안 A 응용): 흐리고 어둡게 한 썸네일을 글자 칸 전체 뒤에 깔고, 왼쪽(썸네일 쪽)은 진하게 → 오른쪽 끝으로 갈수록 투명.
-   밝은 썸네일(흰 배경)이어도 글자가 묻히지 않도록 밝기를 낮추고 투명도를 작게. 흐림 가장자리는 썸네일 밑·카드 밖으로 숨긴다 */
+#v-views .mb-r > .mb-th{width:100%;height:100%;aspect-ratio:auto;border-radius:0;background:transparent}
+#v-views .mb-r > .mb-th img,#v-views .mb-r > .mb-th .vt-ph{opacity:0}   /* 자리만 차지 — 실제 그림은 아래 .mb-bg 한 장 */
+/* 썸네일 한 장 (시안 A 응용): 16:9 썸네일을 카드 높이에 맞춰 왼쪽부터 깔아, 썸네일 칸에서는 그대로 보이고
+   글자 칸으로 이어지는 나머지 부분은 반투명 어둠(::after) 밑으로 비친다. 그림 오른쪽 끝은 투명하게 풀어 카드 바탕으로 사라진다 */
 .mb-r{position:relative;isolation:isolate}
-.mb-bg{position:absolute;top:0;bottom:0;left:calc(var(--thw) - 30px);right:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) center/cover no-repeat;
-  filter:blur(3px) saturate(1.2) brightness(.55);opacity:.5;transform:scaleY(1.06);   /* 흐림을 줄여 뒤 썸네일 모양이 살짝 보이게 */
-  -webkit-mask-image:linear-gradient(90deg,#000 30px,rgba(0,0,0,.55) 45%,transparent);mask-image:linear-gradient(90deg,#000 30px,rgba(0,0,0,.55) 45%,transparent)}
+.mb-bg{position:absolute;top:0;bottom:0;left:0;aspect-ratio:16/9;z-index:-1;pointer-events:none;
+  background:linear-gradient(135deg,hsl(var(--h,0) 55% 34%),hsl(calc(var(--h,0) + 50) 60% 16%)) left center/cover no-repeat;
+  -webkit-mask-image:linear-gradient(90deg,#000 62%,transparent);mask-image:linear-gradient(90deg,#000 62%,transparent)}
+.mb-bg::after{content:"";position:absolute;top:0;bottom:0;right:0;left:calc(var(--thw) - 24px);
+  background:linear-gradient(90deg,rgba(24,24,26,0),rgba(24,24,26,.74) 24px,rgba(24,24,26,.9) 60%)}   /* 글자 칸 쪽만 어둡게 — 글자가 묻히지 않게 */
 .mb-th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#111}
 .mb-th img{width:100%;height:100%;object-fit:cover;display:block}
 /* 글자 묶음: 제목 · 지금 → 목표 · 막대 · 달성까지 (따로 떼지 않고 한 덩어리로 세로 가운데) */

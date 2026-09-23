@@ -781,7 +781,7 @@
         + '<span class="mb-ed na"><small>' + (x.why === 'far' ? '지금 추세로는 어려움' : '기록 쌓는 중') + '</small></span>';
     var a0 = x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0';
     return '<button type="button" class="mb-r' + (ok ? ' in' : '') + (v === sel ? ' on' : '') + '" data-vid="' + esc(v.id) + '" data-go="1">'
-      // 글자 칸 배경: 흐리고 어둡게 한 썸네일을 글자 칸 뒤에 깔고 왼쪽 진하게 → 오른쪽 투명 (시안 A 의 "썸네일 배경" 응용)
+      // 썸네일 한 장: 카드 왼쪽부터 깔아 썸네일 칸 → 글자 칸(반투명 어둠 밑)으로 이어지게 (시안 A 응용). .mb-th 는 자리만
       + '<span class="mb-bg" aria-hidden="true" style="' + (thumbSrc(v) ? 'background-image:url(&quot;' + esc(thumbSrc(v)) + '&quot;)' : '--h:' + v.hue) + '"></span>'
       + '<span class="mb-th">' + thumb(v) + '</span>'
       + '<span class="mb-c">'
