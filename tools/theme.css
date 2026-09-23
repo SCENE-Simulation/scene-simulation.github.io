@@ -2150,3 +2150,13 @@ html.shr-on{overflow:hidden}
 /* 컬렉션 북 제목 줄 오른쪽 [공유하기] (사이트 분홍) */
 .shr-btn{flex:none;background:var(--pink-soft);border-color:rgba(233,99,135,.45)!important;color:var(--pink-t)}
 .shr-btn:hover:not(:disabled){background:rgba(233,99,135,.26);color:#ffd0dd}
+/* 예측의 신 기록 카드 '내 예측' 상자 머리: [내 예측] 고른 때 한 줄 + 남긴 기록 줄 */
+.og-mine .og-myh{display:flex;align-items:center;flex-wrap:wrap;gap:6px 9px}
+.og-mine .og-myk{flex:none;padding:3px 9px;border-radius:7px;background:rgba(169,139,255,.24);border:1px solid rgba(169,139,255,.45);font-size:12px;font-weight:700;color:var(--og-t)}
+.og-mine .og-myh b{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.og-myl{display:grid;grid-template-columns:auto auto auto;margin-top:2px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(169,139,255,.18)}
+.og-myl > div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:7px 9px}
+.og-myl > div + div{border-left:1px dashed rgba(169,139,255,.22)}
+.og-mine .og-myl small{font-size:10.5px;font-weight:600;color:var(--ink3);letter-spacing:.02em}
+.og-mine .og-myl b{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;white-space:nowrap}
+@media (max-width:400px){.og-myl > div{padding:6px 7px}.og-mine .og-myl b{font-size:11.5px;white-space:normal;word-break:keep-all}}

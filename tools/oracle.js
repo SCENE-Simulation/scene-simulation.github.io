@@ -381,7 +381,12 @@
     }
     // 내 예측
     // 머리 줄: 내 예측 ··· 남긴 때 (사용자 요청으로 카드 머리에서 이 상자 안으로)
-    h += '<div class="og-have og-mine"><span class="og-mh">내 예측<small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></span><b>' + whenTxt(x.g) + '</b>';
+    // 머리: [내 예측] 고른 때 한 줄 / 남긴 기록 줄: 남긴 때 · 그때 조회수 · 몇 시간 앞을 내다봤는지 (사용자 요청 — 남긴 로그도 중요)
+    h += '<div class="og-have og-mine"><div class="og-myh"><span class="og-myk">내 예측</span><b>' + whenTxt(x.g) + '</b></div>'
+      + '<div class="og-myl">'
+      + '<div><small>남긴 때</small><b>' + whenTxt(x.at) + '</b></div>'
+      + '<div><small>그때 조회수</small><b>' + V.fmtM(x.v0) + '</b></div>'
+      + '<div><small>내다본 시간</small><b>' + durTxt(x.g - x.at) + '</b></div></div>';
     if (j.st === 'wait'){
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
       h += '<div class="og-flw' + (left > 0 ? '' : ' over') + '">'
