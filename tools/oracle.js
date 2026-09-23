@@ -132,7 +132,7 @@
   function tick(){
     var J = LOG.map(function(x){ return { x: x, j: judge(x) }; });
     notify(J);
-    renderSum(J); renderLog(J);
+    renderSum(J); renderLog(J); fixLegends(document.getElementById('og-log'));
     var jn = document.getElementById('og-jn'); if (jn) jn.textContent = LOG.length;
     Array.prototype.forEach.call(el.querySelectorAll('.og-c[data-vid]'), function(c){ live(c); });
   }
@@ -253,6 +253,15 @@
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid]; if (!v || !d) return;
     var have = mine(vid, d.M), inp = c.querySelector('[data-og-in]'), g = have ? have.g : inp ? fromLocal(inp.value) : NaN;
     box.innerHTML = chart(v, d.M, { g: g > V.lastMs(v) ? g : NaN, fixed: !!have, ai: aiAt(v, d.M) });
+    fixLegends(box);
+  }
+  // 범례가 두 줄로 꺾이며 마지막 하나만 아랫줄에 남으면 3칸 격자(.g3)로 — 좁은 카드 · 휴대폰에서 '내 예측'만 떨어지던 것
+  function fixLegends(root){
+    Array.prototype.forEach.call((root || el).querySelectorAll('.og-glg'), function(g){
+      g.classList.remove('g3');
+      var tops = Array.prototype.map.call(g.children, function(c){ return c.offsetTop; }), rows = tops.filter(function(t, i){ return tops.indexOf(t) === i; });
+      if (rows.length > 1 && rows.some(function(t){ return tops.filter(function(x){ return x === t; }).length === 1; })) g.classList.add('g3');
+    });
   }
   // o = { g: 내가 고른 때, fixed: 남긴 예측인지, ai: 예측기 예상, act: 실제로 넘은 때(채점 끝), from: 남긴 때 }
   //   채점 전: 최근 72시간(남긴 때가 더 앞이면 거기부터, 최대 14일) ~ 고른 때 조금 뒤. 채점 끝: 남긴 때 앞 ~ 실제 · 고른 때 · 예측기 중 늦은 때 조금 뒤
@@ -311,12 +320,12 @@
     if (!isNaN(g) && !far){
       var gx = X(g), anc = gx > W - 60 ? 'end' : 'start', tx = anc === 'end' ? gx - 4 : gx + 4;
       s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + (T - 4) + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
-        + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T - 8) + '" text-anchor="' + anc + '">' + (fixed ? '남긴 예측' : '내 예측') + '</text>';
+        + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T - 8) + '" text-anchor="' + anc + '">' + '내 예측' + '</text>';
     }
-    else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T - 8) + '" text-anchor="end">' + (fixed ? '남긴 예측' : '내 예측') + ' ' + dayTxt(g) + ' →</text>';
-    return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span>' + (perMs > 0 ? '<span><i class="e"></i>최근 하루 속도 그대로</span>' : '')
-      + '<span><i class="m"></i>목표</span>' + (act ? '<span><i class="c"></i>실제로 넘은 때</span>' : '')
-      + (ai >= t0 && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
+    else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T - 8) + '" text-anchor="end">' + '내 예측' + ' ' + dayTxt(g) + ' →</text>';
+    return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span>' + (perMs > 0 ? '<span><i class="e"></i>지금 속도로</span>' : '')
+      + '<span><i class="m"></i>목표</span>' + (act ? '<span><i class="c"></i>실제 돌파</span>' : '')
+      + (ai >= t0 && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + '내 예측' + '</span>' : '') + '</div>';
   }
   function submit(c){
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid], r = check(d && d.val);

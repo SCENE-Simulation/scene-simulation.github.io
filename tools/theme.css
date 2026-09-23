@@ -2001,7 +2001,7 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .og-gl{flex:none;font-size:12.5px;font-weight:700}
 .og-gt .og-hint{margin-left:auto;display:flex;gap:10px;font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap}
 .og-gt .og-hint b{margin-left:3px;font:700 12px "JetBrains Mono",monospace;color:var(--ink)}
-.og-gw{padding:2px 8px 9px;border-top:1px solid var(--line)}
+.og-gw{padding:2px 8px 9px;border-top:1px solid var(--line);container-type:inline-size}
 .og-g{display:block;width:100%;height:auto;overflow:visible}
 .og-gx{stroke:rgba(255,255,255,.06);stroke-width:1}
 .og-gxt{fill:var(--ink3);font:500 9px "JetBrains Mono",monospace;text-anchor:middle}
@@ -2014,7 +2014,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .og-gg{stroke:var(--au);stroke-width:1.5}
 .og-ggt{fill:var(--au);font:700 9.5px "Pretendard Variable",sans-serif}
 .og-gn{margin:10px 4px 4px;font-size:12px;color:var(--ink2)}
-.og-glg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 2px 0;font-size:11px;color:var(--ink2)}
+.og-glg{display:flex;flex-wrap:wrap;gap:4px 9px;margin:6px 2px 0;font-size:11px;color:var(--ink2)}
+/* 범례가 한 줄에 안 들어가 마지막 하나만 아랫줄로 떨어지면 3칸 격자로 */
+.og-glg.g3{display:grid;grid-template-columns:repeat(3,max-content);gap:4px 12px}   /* oracle.js fixLegends 가 붙임 */
 .og-glg span{display:inline-flex;align-items:center;gap:5px}
 .og-glg i{display:inline-block;width:14px;height:0;border-top:2px solid}
 .og-glg i.l{border-color:var(--og-t)}
@@ -2088,7 +2090,9 @@ html.shr-on{overflow:hidden}
 .og-pt b{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700}
 .og-pt b em{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(169,139,255,.25);font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:var(--ink);text-align:center}
 .og-pt small{font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}/* 예측의 신 기록 카드 (예측하기 카드와 같은 짜임) */
+@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}
+.og-pt b{white-space:nowrap}
+@media (max-width:380px){.og-pt svg{display:none}#v-oracle .og-pt button{justify-content:center}}   /* 아주 좁으면 아이콘을 빼 '내 예측 기록' 이 한 줄에 *//* 예측의 신 기록 카드 (예측하기 카드와 같은 짜임) */
 .og-lc.done{border-color:color-mix(in srgb,var(--gc) 35%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gc) 7%,transparent),var(--glass) 45%)}
 .og-lc.void,.og-lc.gone{opacity:.75}
 .og-lc .og-ct small{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
