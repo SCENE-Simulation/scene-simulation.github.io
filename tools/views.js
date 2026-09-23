@@ -236,6 +236,7 @@
     demo: function(){ return !!(DATA && DATA.demo); },
     videos: function(){ return VIDEOS; },
     favs: function(){ return VIDEOS.filter(function(v){ return !!FAV[v.id]; }); },   // 종류 거르기(ft)와 상관없이 전부
+    toggleFav: function(id){ toggleFav(id); },                                        // 예측의 신 카드 별표 (조회수 예측기 별표 · 사이드바 개수와 같이 바뀜)
     views: function(v){ return av(v, age(v)); },                                      // 마지막 기록의 조회수
     lastMs: nowMs,                                                                    // 마지막 기록 시각
     plan: plan,                                                                       // ③ 추세 곡선 { g: 최근 하루 증가, ms: [{ M, days }] } | null
@@ -825,8 +826,10 @@
       var on = !!FAV[b.getAttribute('data-fav')];
       b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.title = on ? '즐겨찾기에서 빼기' : '즐겨찾기에 담기';
     });
-    if (rv === 'fav'){ var row = $('vc-row'), x = row.scrollLeft; renderRank(); row.scrollLeft = x; navState(); }   // 즐겨찾기 탭: 카드를 바로 넣고 뺀다 (보던 자리는 그대로)
-    else $('vr-fav').innerHTML = favTab(favList());
+    // 예측의 신(SGV.toggleFav)에서 누를 땐 이 화면을 아직 안 그렸을 수 있다 → 있는 것만 고친다 (다음에 열 때 어차피 다시 그림)
+    var row = $('vc-row'), vf = $('vr-fav');
+    if (rv === 'fav' && row){ var x = row.scrollLeft; renderRank(); row.scrollLeft = x; navState(); }   // 즐겨찾기 탭: 카드를 바로 넣고 뺀다 (보던 자리는 그대로)
+    else if (vf) vf.innerHTML = favTab(favList());
     favSide();
   }
   // ----- 1,000만 명예의 전당: 조회수 1,000만을 넘은 영상(조회수 순) + 달성 직전(900만 이상) -----

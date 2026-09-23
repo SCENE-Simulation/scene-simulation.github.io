@@ -90,8 +90,6 @@
 
   var DRAFT = {}, lt = 'all', timer = null, loaded = false;   // 영상별 입력 중인 목표·시각, 기록 탭
   var DELK = null;                                            // 지우기 확인 중인 예측(k)
-  // 카드 그래프를 접은 영상 id (기본은 펼침)
-  var GKEY = 'sendungi:oracle-shut', GSHUT = (function(){ try { var o = JSON.parse(localStorage.getItem(GKEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e){ return {}; } })();
 
   function head(){
     return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">예측의 신</span></div></div>'
@@ -107,17 +105,25 @@
     el.innerHTML = head() + '<p class="gnote">기록을 불러오는 중…</p>';
     V.ready().then(function(){ loaded = true; if (!el.hidden) render(); });
   }
+  // 머리 아래 두 쪽 버튼: [예측하기] 예측을 고르는 쪽 · [내 예측 기록] 남긴 예측과 채점을 보는 쪽 (사용자 요청 — 한 페이지에 다 늘어놓지 않음)
+  var mode = 'new';
+  function pages(){
+    return '<div class="og-pt" role="tablist">'
+      + '<button type="button" role="tab" data-og-pg="new" class="' + (mode === 'new' ? 'on' : '') + '" aria-selected="' + (mode === 'new') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><span><b>예측하기</b><small>즐겨찾기 영상의 돌파 때 고르기</small></span></button>'
+      + '<button type="button" role="tab" data-og-pg="log" class="' + (mode === 'log' ? 'on' : '') + '" aria-selected="' + (mode === 'log') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-log"/></svg><span><b>내 예측 기록 <em id="og-jn">' + LOG.length + '</em></b><small>남긴 예측 · 채점 결과</small></span></button></div>';
+  }
   function render(){
     if (!loaded) return;
-    el.innerHTML = head()
-      + '<div class="og-sum" id="og-sum"></div>'
-      + '<div class="sec sec2" id="og-new"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-target"/></svg>예측하기</div></div>'
-      + '<p class="og-sd">목표 조회수를 고르고, 그 조회수를 넘을 날짜와 시각을 정해 남기세요. 영상마다 다음 세 단위까지 하나씩 예측할 수 있습니다.</p>'
-      + '<div class="og-cards" id="og-cards"></div>'
-      + '<div class="sec sec2" id="og-logs"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-log"/></svg>내 예측 기록</div></div>'
-      + '<div id="og-log"></div>'
-      + '<div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg>채점 방법</div></div>'
-      + rules();
+    el.innerHTML = head() + pages() + (mode === 'new'
+      ? '<p class="og-sd">목표 조회수를 고르고, 그 조회수를 넘을 날짜와 시각을 정해 남기세요. 영상마다 다음 세 단위까지 하나씩 예측할 수 있습니다.</p>'
+        + '<div class="og-cards" id="og-cards"></div>'
+      : '<div class="og-sum" id="og-sum"></div>'
+        + '<div class="sec sec2" id="og-logs"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-log"/></svg>내 예측 기록</div></div>'
+        + '<div id="og-log"></div>'
+        + '<div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg>채점 방법</div></div>'
+        + rules());
     renderCards(); tick();
   }
   // 30초마다: 남은 시간 · 기록 · 요약만 다시 (입력 칸은 그대로 둔다)
@@ -125,6 +131,7 @@
     var J = LOG.map(function(x){ return { x: x, j: judge(x) }; });
     notify(J);
     renderSum(J); renderLog(J);
+    var jn = document.getElementById('og-jn'); if (jn) jn.textContent = LOG.length;
     Array.prototype.forEach.call(el.querySelectorAll('.og-c[data-vid]'), function(c){ live(c); });
   }
 
@@ -184,17 +191,19 @@
     var h = '<article class="og-c" data-vid="' + esc(v.id) + '">'
       + '<div class="og-ch"><span class="og-th">' + thumbImg(v) + '</span>'
       + '<div class="og-ct"><b title="' + esc(v.title) + '">' + esc(v.title) + '</b>'
-      + '<small>지금 <em>' + V.full(nowV) + '</em>회 · ' + shortTxt(V.lastMs(v)) + ' 기록</small></div></div>'
+      + '<small>지금 <em>' + V.full(nowV) + '</em>회 · ' + shortTxt(V.lastMs(v)) + ' 기록</small></div>'
+      // 즐겨찾기 별표 (켜진 상태) — 누르면 즐겨찾기에서 빠지고 카드도 사라진다. 남긴 예측 기록은 그대로
+      + '<button type="button" class="og-fav" data-og-fav aria-pressed="true" title="즐겨찾기에서 빼기" aria-label="즐겨찾기에서 빼기">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></button></div>'
       + '<div class="og-tg" role="group" aria-label="목표 조회수">' + Ms.map(function(M){
           var m = mine(v.id, M);
           return '<button type="button" class="' + (M === d.M ? 'on' : '') + (m ? ' done' : '') + '" data-og-m="' + M + '" aria-pressed="' + (M === d.M) + '">'
             + V.fmtM(M) + (m ? '<i aria-label="예측함">✓</i>' : '') + '</button>';
         }).join('') + '</div>'
-      // 조회수 추이 그래프 (접기 · 펼치기). 접어도 머리 줄에 남은 조회수 · 최근 하루 증가는 보인다
-      + '<div class="og-gb"><button type="button" class="og-gt" data-og-gt aria-expanded="' + !GSHUT[v.id] + '">'
-      + '<svg class="og-gv" aria-hidden="true"><use href="#i-chev"/></svg><span class="og-gl">조회수 추이</span>'
-      + '<span class="og-hint"><span>남은 <b>' + V.fmt(d.M - nowV) + '</b></span><span>하루 <b>' + (P ? '+' + V.fmt(P.g) : '—') + '</b></span></span></button>'
-      + '<div class="og-gw"' + (GSHUT[v.id] ? ' hidden' : '') + '></div></div>'
+      // 조회수 추이 그래프 — 머리 줄에 남은 조회수 · 최근 하루 증가 (접기 토글은 9/24 사용자 요청으로 뺌, 늘 펼침)
+      + '<div class="og-gb"><div class="og-gt"><span class="og-gl">조회수 추이</span>'
+      + '<span class="og-hint"><span>남은 <b>' + V.fmt(d.M - nowV) + '</b></span><span>하루 <b>' + (P ? '+' + V.fmt(P.g) : '—') + '</b></span></span></div>'
+      + '<div class="og-gw"></div></div>'
       + '<div class="og-aip" data-og-aip></div>';                // 조회수 예측기(③ 추세 곡선)의 예상 — 사용자 요청으로 폼 위에 보여 줌 (live 가 채움)
     if (have) h += '<div class="og-have"><span>이 목표는 이미 예측했습니다</span><b>' + whenTxt(have.g) + '</b>'
       + '<small>결과는 아래 “내 예측 기록”에서 볼 수 있습니다.</small></div>';
@@ -308,7 +317,7 @@
   // ----- 내 예측 기록 -----
   function renderLog(J){
     var box = document.getElementById('og-log'); if (!box) return;
-    if (!LOG.length){ box.innerHTML = '<p class="og-none">아직 남긴 예측이 없습니다. 위에서 영상 하나를 골라 첫 예측을 남겨 보세요.</p>'; return; }
+    if (!LOG.length){ box.innerHTML = '<p class="og-none">아직 남긴 예측이 없습니다. 위의 [예측하기]에서 영상 하나를 골라 첫 예측을 남겨 보세요.</p>'; return; }
     var W = J.filter(function(o){ return o.j.st === 'wait'; }).sort(function(a, b){ return a.x.g - b.x.g; });
     var Dn = J.filter(function(o){ return o.j.st === 'done' || o.j.st === 'void'; }).sort(function(a, b){ return b.j.c.ms - a.j.c.ms; });
     var G = J.filter(function(o){ return o.j.st === 'gone'; });
@@ -391,20 +400,26 @@
     }
     if ((t = e.target.closest('[data-og-go]'))){ submit(t.closest('.og-c')); return; }
     if ((t = e.target.closest('[data-og-lt]'))){ lt = t.getAttribute('data-og-lt'); tick(); return; }
+    if ((t = e.target.closest('[data-og-pg]'))){
+      var to = t.getAttribute('data-og-pg'); if (to === mode) return;
+      mode = to; DELK = null;
+      var y = el.querySelector('.og-pt').getBoundingClientRect().top;         // 버튼 줄이 화면에서 같은 자리에 있게
+      render();
+      var y2 = el.querySelector('.og-pt').getBoundingClientRect().top; if (y < 0 || y2 !== y) window.scrollBy(0, y2 - Math.max(y, 0));
+      return;
+    }
+    if ((t = e.target.closest('[data-og-fav]'))){
+      var fc = t.closest('.og-c'), fid = fc.getAttribute('data-vid'), fv = byId(fid);
+      V.toggleFav(fid); delete DRAFT[fid];
+      if (window.toastSG && fv) window.toastSG('즐겨찾기에서 뺐습니다', esc(fv.title) + ' · 남긴 예측 기록은 그대로입니다');
+      renderCards(); return;
+    }
     if ((t = e.target.closest('[data-og-del]'))){ DELK = t.getAttribute('data-og-del'); tick(); return; }
     if (e.target.closest('[data-og-no]')){ DELK = null; tick(); return; }
     if ((t = e.target.closest('[data-og-yes]'))){
       var k = t.getAttribute('data-og-yes');
       LOG = LOG.filter(function(y){ return y.k !== k; }); save(); DELK = null;
       renderCards(); tick(); return;
-    }
-    if ((t = e.target.closest('[data-og-gt]'))){                // 그래프 접기 · 펼치기 (영상마다, 이 브라우저에 기억)
-      var gc = t.closest('.og-c'), gid = gc.getAttribute('data-vid'), open = !!GSHUT[gid];
-      if (open) delete GSHUT[gid]; else GSHUT[gid] = 1;
-      try { localStorage.setItem(GKEY, JSON.stringify(GSHUT)); } catch (err){}
-      t.setAttribute('aria-expanded', String(open)); gc.querySelector('.og-gw').hidden = !open;
-      if (open) graph(gc);
-      return;
     }
   });
   el.addEventListener('input', function(e){

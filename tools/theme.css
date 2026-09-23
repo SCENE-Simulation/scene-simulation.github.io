@@ -1996,12 +1996,9 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .og-grs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 12px;margin-top:12px}
 .og-gi{display:flex;align-items:center;gap:8px}
 .og-gi small{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink2)}.og-nw{white-space:nowrap}
-/* 예측의 신 카드 그래프 (접기 · 펼치기) */
+/* 예측의 신 카드 그래프 (머리 줄 + 그래프, 늘 펼침) */
 .og-gb{border-radius:12px;background:rgba(0,0,0,.18);border:1px solid var(--line);overflow:hidden}
-#v-oracle .og-gt{display:flex;align-items:center;gap:7px;width:100%;padding:9px 11px;border:0!important;border-radius:0!important;background:none;text-align:left;color:var(--ink)}
-#v-oracle .og-gt:hover:not(:disabled){background:rgba(255,255,255,.04)}
-.og-gv{flex:none;width:13px;height:13px;color:var(--ink2);transform:rotate(90deg);transition:transform .15s ease}
-.og-gt[aria-expanded="false"] .og-gv{transform:none}
+.og-gt{display:flex;align-items:center;gap:7px;padding:9px 11px;color:var(--ink)}
 .og-gl{flex:none;font-size:12.5px;font-weight:700}
 .og-gt .og-hint{margin-left:auto;display:flex;gap:10px;font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap}
 .og-gt .og-hint b{margin-left:3px;font:700 12px "JetBrains Mono",monospace;color:var(--ink)}
@@ -2073,3 +2070,23 @@ html.shr-on{overflow:hidden}
 
 /* ===== 30일 예측 중인 영상: 예측 현황 아래 100만 단위 돌파 예측 카드 (views.js renderMsx) ===== */
 .vd-msx:not(:empty){margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+/* 예측의 신 카드 오른쪽 위 즐겨찾기 별표 (켜짐 = 노랑, 조회수 예측기 별표와 같은 색) — 누르면 즐겨찾기에서 빠짐 */
+.og-ch{grid-template-columns:112px minmax(0,1fr) auto;align-items:start}
+#v-oracle .og-fav{width:32px;height:32px;padding:0;display:grid;place-items:center;border-radius:50%!important;border-color:rgba(255,201,60,.6)!important;
+  background:rgba(255,201,60,.14);color:#ffc93c}
+#v-oracle .og-fav:hover:not(:disabled){background:rgba(255,201,60,.24)}
+.og-fav svg{width:16px;height:16px;fill:#ffc93c;stroke:#ffc93c;stroke-width:1.9;stroke-linejoin:round}
+@media (max-width:640px){.og-ch{grid-template-columns:100px minmax(0,1fr) auto}}
+/* 예측의 신: 두 쪽 버튼 [예측하기 | 내 예측 기록] */
+.og-pt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+#v-oracle .og-pt button{display:flex;align-items:center;gap:11px;padding:13px 16px;text-align:left;color:var(--ink2);background:var(--glass);border-radius:14px!important}
+#v-oracle .og-pt button:hover:not(:disabled){background:var(--glass-h);color:var(--ink)}
+#v-oracle .og-pt button.on{color:var(--ink);background:linear-gradient(135deg,rgba(169,139,255,.22),rgba(169,139,255,.08));border-color:var(--og)!important;
+  box-shadow:0 0 0 1px rgba(169,139,255,.25),0 6px 20px rgba(143,107,255,.18)}
+.og-pt svg{flex:none;width:22px;height:22px}
+.og-pt button.on svg{color:var(--og-t)}
+.og-pt span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.og-pt b{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700}
+.og-pt b em{min-width:20px;padding:1px 7px;border-radius:999px;background:rgba(169,139,255,.25);font:700 11.5px "JetBrains Mono",monospace;font-style:normal;color:var(--ink);text-align:center}
+.og-pt small{font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){#v-oracle .og-pt button{padding:11px 12px;gap:9px}.og-pt small{display:none}.og-pt svg{width:19px;height:19px}}
