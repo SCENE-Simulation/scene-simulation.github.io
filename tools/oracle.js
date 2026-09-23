@@ -89,6 +89,9 @@
   V.onData(function(){ if (!el.hidden) render(); });
 
   var DRAFT = {}, lt = 'all', timer = null, loaded = false;   // 영상별 입력 중인 목표·시각, 기록 탭
+  var DELK = null;                                            // 지우기 확인 중인 예측(k)
+  // 카드 그래프를 접은 영상 id (기본은 펼침)
+  var GKEY = 'sendungi:oracle-shut', GSHUT = (function(){ try { var o = JSON.parse(localStorage.getItem(GKEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e){ return {}; } })();
 
   function head(){
     return '<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">예측의 신</span></div></div>'
@@ -187,8 +190,11 @@
           return '<button type="button" class="' + (M === d.M ? 'on' : '') + (m ? ' done' : '') + '" data-og-m="' + M + '" aria-pressed="' + (M === d.M) + '">'
             + V.fmtM(M) + (m ? '<i aria-label="예측함">✓</i>' : '') + '</button>';
         }).join('') + '</div>'
-      + '<div class="og-hint"><span>남은 조회수 <b>' + V.fmt(d.M - nowV) + '</b></span>'
-      + '<span>최근 하루 <b>' + (P ? '+' + V.fmt(P.g) : '기록 쌓는 중') + '</b></span></div>';
+      // 조회수 추이 그래프 (접기 · 펼치기). 접어도 머리 줄에 남은 조회수 · 최근 하루 증가는 보인다
+      + '<div class="og-gb"><button type="button" class="og-gt" data-og-gt aria-expanded="' + !GSHUT[v.id] + '">'
+      + '<svg class="og-gv" aria-hidden="true"><use href="#i-chev"/></svg><span class="og-gl">조회수 추이</span>'
+      + '<span class="og-hint"><span>남은 <b>' + V.fmt(d.M - nowV) + '</b></span><span>하루 <b>' + (P ? '+' + V.fmt(P.g) : '—') + '</b></span></span></button>'
+      + '<div class="og-gw"' + (GSHUT[v.id] ? ' hidden' : '') + '></div></div>';
     if (have) h += '<div class="og-have"><span>이 목표는 이미 예측했습니다</span><b>' + whenTxt(have.g) + '</b>'
       + '<small>결과는 아래 “내 예측 기록”에서 볼 수 있습니다.</small></div>';
     else h += '<div class="og-f"><label class="og-lb" for="' + id + '">' + V.fmtM(d.M) + '을 넘을 때</label>'
@@ -209,10 +215,61 @@
     return { ok: true, g: g, t: '지금부터 <b>' + durTxt(g - now) + '</b> 뒤 · ' + whenTxt(g) };
   }
   function live(c){
+    graph(c);
     var inp = c.querySelector('[data-og-in]'); if (!inp) return;
     var r = check(inp.value), p = c.querySelector('[data-og-live]'), go = c.querySelector('[data-og-go]');
     p.innerHTML = r.t; p.classList.toggle('bad', !r.ok); go.disabled = !r.ok;
     inp.min = toLocal(Date.now());
+  }
+
+  // ----- 카드 그래프: 최근 72시간 실제 조회수 + 최근 하루 속도를 그대로 이은 점선 + 목표선 + 내가 고른 때 -----
+  // 예측기(③)의 곡선은 그리지 않는다 (채점 때 겨룰 상대라 미리 보여 주지 않음). 점선은 "지금 속도가 안 줄면" 참고용
+  function graph(c){
+    var box = c.querySelector('.og-gw'); if (!box || box.hidden) return;
+    var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid]; if (!v || !d) return;
+    var have = mine(vid, d.M), inp = c.querySelector('[data-og-in]'), g = have ? have.g : inp ? fromLocal(inp.value) : NaN;
+    box.innerHTML = chart(v, d.M, g > V.lastMs(v) ? g : NaN, !!have);
+  }
+  function chart(v, M, g, fixed){
+    var a = v.vs.snaps.length ? v.vs.snaps[v.vs.snaps.length - 1][0] : 0;
+    var pts = v.vs.snaps.filter(function(p){ return p[0] >= a - 72; }).map(function(p){ return [v.pub + p[0] * H, p[1]]; });
+    if (pts.length < 2) return '<p class="og-gn">기록이 더 쌓이면 그래프가 나옵니다.</p>';
+    var P = V.plan(v), t0 = pts[0][0], tn = pts[pts.length - 1][0], vn = pts[pts.length - 1][1];
+    var perMs = P ? P.g / D : (vn - pts[0][1]) / (tn - t0);                      // 최근 하루 속도 (조회수 / ms)
+    var t1 = !isNaN(g) ? Math.max(tn + D, g + Math.max(6 * H, (g - tn) * 0.12)) : tn + 2 * D, far = false;
+    if (t1 > tn + 30 * D){ t1 = tn + 30 * D; far = !isNaN(g) && g > t1; }
+    var y0 = pts[0][1], y1 = M + (M - y0) * 0.14;
+    var W = 320, Hh = 138, L = 8, R = 8, T = 14, B = 20;
+    function X(t){ return L + (t - t0) / (t1 - t0) * (W - L - R); }
+    function Y(y){ return Hh - B - (y - y0) / (y1 - y0) * (Hh - T - B); }
+    function f(n){ return n.toFixed(1); }
+    var line = pts.map(function(p, i){ return (i ? 'L' : 'M') + f(X(p[0])) + ' ' + f(Y(p[1])); }).join('');
+    var area = line + 'L' + f(X(tn)) + ' ' + (Hh - B) + 'L' + f(X(t0)) + ' ' + (Hh - B) + 'Z';
+    // 점선: 지금부터 같은 속도로 → 그래프 위 끝에 닿으면 거기서 멈춤
+    var te = t1, ve = vn + perMs * (t1 - tn);
+    if (perMs > 0 && ve > y1){ te = tn + (y1 - vn) / perMs; ve = y1; }
+    var s = '<svg class="og-g" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="최근 조회수 추이와 목표">';
+    // 날짜 눈금 (자정마다, 많으면 건너뜀)
+    var span = (t1 - t0) / D, step = Math.max(1, Math.ceil(span / 4)), day = new Date(t0); day.setHours(24, 0, 0, 0);
+    for (var k = 0; day.getTime() < t1; day.setDate(day.getDate() + 1), k++){
+      if (k % step) continue;
+      var x = X(day.getTime());
+      s += '<line class="og-gx" x1="' + f(x) + '" y1="' + T + '" x2="' + f(x) + '" y2="' + (Hh - B) + '"/>'
+        + '<text class="og-gxt" x="' + f(x) + '" y="' + (Hh - 6) + '">' + (day.getMonth() + 1) + '/' + day.getDate() + '</text>';
+    }
+    s += '<line class="og-gm" x1="' + L + '" y1="' + f(Y(M)) + '" x2="' + (W - R) + '" y2="' + f(Y(M)) + '"/>'
+      + '<text class="og-gmt" x="' + (L + 2) + '" y="' + f(Y(M) - 4) + '">' + esc(V.fmtM(M)) + '</text>'
+      + '<path class="og-ga" d="' + area + '"/><path class="og-gl2" d="' + line + '"/>'
+      + (perMs > 0 ? '<line class="og-ge" x1="' + f(X(tn)) + '" y1="' + f(Y(vn)) + '" x2="' + f(X(te)) + '" y2="' + f(Y(ve)) + '"/>' : '')
+      + '<circle class="og-gd" cx="' + f(X(tn)) + '" cy="' + f(Y(vn)) + '" r="3.4"/>';
+    if (!isNaN(g) && !far){
+      var gx = X(g), anc = gx > W - 60 ? 'end' : 'start', tx = anc === 'end' ? gx - 4 : gx + 4;
+      s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + T + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
+        + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T + 8) + '" text-anchor="' + anc + '">' + (fixed ? '남긴 예측' : '내 예측') + '</text>';
+    }
+    else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T + 8) + '" text-anchor="end">' + (fixed ? '남긴 예측' : '내 예측') + ' ' + dayTxt(g) + ' →</text>';
+    return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span><span><i class="e"></i>최근 하루 속도 그대로</span>'
+      + '<span><i class="m"></i>목표</span>' + (!isNaN(g) ? '<span><i class="g"></i>' + (fixed ? '남긴 예측' : '내 예측') + '</span>' : '') + '</div>';
   }
   function submit(c){
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid], r = check(d && d.val);
@@ -272,6 +329,9 @@
     if (j.st === 'done') h += '<b class="og-acc">' + pct(j.acc) + '</b><span class="og-gr" data-g="' + j.gr.k + '">' + j.gr.n + '</span>';
     else if (j.st === 'wait') h += '<span class="og-wt">채점 기다림</span>';
     else h += '<span class="og-wt">채점 안 함</span>';
+    // 지우기: × → 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
+    if (DELK === x.k) return h + '<span class="og-cf"><small>지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
+      + '<button type="button" class="og-no" data-og-no>취소</button></span></div></li>';
     return h + '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '" title="이 예측 지우기" aria-label="이 예측 지우기">×</button></div></li>';
   }
   // 실제로 넘은 때: 두 기록 간격이 1.5시간 안이면 분까지, 넓으면 두 기록 시각 사이
@@ -313,11 +373,20 @@
     }
     if ((t = e.target.closest('[data-og-go]'))){ submit(t.closest('.og-c')); return; }
     if ((t = e.target.closest('[data-og-lt]'))){ lt = t.getAttribute('data-og-lt'); tick(); return; }
-    if ((t = e.target.closest('[data-og-del]'))){
-      var k = t.getAttribute('data-og-del'), x = LOG.filter(function(y){ return y.k === k; })[0];
-      if (!x || !confirm('“' + x.t + '” ' + V.fmtM(x.M) + ' 예측을 지울까요? 되돌릴 수 없습니다.')) return;
-      LOG = LOG.filter(function(y){ return y !== x; }); save();
+    if ((t = e.target.closest('[data-og-del]'))){ DELK = t.getAttribute('data-og-del'); tick(); return; }
+    if (e.target.closest('[data-og-no]')){ DELK = null; tick(); return; }
+    if ((t = e.target.closest('[data-og-yes]'))){
+      var k = t.getAttribute('data-og-yes');
+      LOG = LOG.filter(function(y){ return y.k !== k; }); save(); DELK = null;
       renderCards(); tick(); return;
+    }
+    if ((t = e.target.closest('[data-og-gt]'))){                // 그래프 접기 · 펼치기 (영상마다, 이 브라우저에 기억)
+      var gc = t.closest('.og-c'), gid = gc.getAttribute('data-vid'), open = !!GSHUT[gid];
+      if (open) delete GSHUT[gid]; else GSHUT[gid] = 1;
+      try { localStorage.setItem(GKEY, JSON.stringify(GSHUT)); } catch (err){}
+      t.setAttribute('aria-expanded', String(open)); gc.querySelector('.og-gw').hidden = !open;
+      if (open) graph(gc);
+      return;
     }
   });
   el.addEventListener('input', function(e){

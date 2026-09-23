@@ -1996,3 +1996,38 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .og-grs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 12px;margin-top:12px}
 .og-gi{display:flex;align-items:center;gap:8px}
 .og-gi small{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink2)}.og-nw{white-space:nowrap}
+/* 예측의 신 카드 그래프 (접기 · 펼치기) */
+.og-gb{border-radius:12px;background:rgba(0,0,0,.18);border:1px solid var(--line);overflow:hidden}
+#v-oracle .og-gt{display:flex;align-items:center;gap:7px;width:100%;padding:9px 11px;border:0!important;border-radius:0!important;background:none;text-align:left;color:var(--ink)}
+#v-oracle .og-gt:hover:not(:disabled){background:rgba(255,255,255,.04)}
+.og-gv{flex:none;width:13px;height:13px;color:var(--ink2);transform:rotate(90deg);transition:transform .15s ease}
+.og-gt[aria-expanded="false"] .og-gv{transform:none}
+.og-gl{flex:none;font-size:12.5px;font-weight:700}
+.og-gt .og-hint{margin-left:auto;display:flex;gap:10px;font-size:11.5px;font-weight:500;color:var(--ink2);white-space:nowrap}
+.og-gt .og-hint b{margin-left:3px;font:700 12px "JetBrains Mono",monospace;color:var(--ink)}
+.og-gw{padding:2px 8px 9px;border-top:1px solid var(--line)}
+.og-g{display:block;width:100%;height:auto;overflow:visible}
+.og-gx{stroke:rgba(255,255,255,.06);stroke-width:1}
+.og-gxt{fill:var(--ink3);font:500 9px "JetBrains Mono",monospace;text-anchor:middle}
+.og-gm{stroke:var(--og);stroke-width:1.2;stroke-dasharray:5 4;opacity:.85}
+.og-gmt{fill:var(--og-t);font:700 10px "JetBrains Mono",monospace}
+.og-ga{fill:rgba(169,139,255,.14)}
+.og-gl2{fill:none;stroke:var(--og-t);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.og-ge{stroke:var(--ink3);stroke-width:1.4;stroke-dasharray:3 4;stroke-linecap:round}
+.og-gd{fill:var(--og-t);stroke:var(--bg);stroke-width:2}
+.og-gg{stroke:var(--au);stroke-width:1.5}
+.og-ggt{fill:var(--au);font:700 9.5px "Pretendard Variable",sans-serif}
+.og-gn{margin:10px 4px 4px;font-size:12px;color:var(--ink2)}
+.og-glg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 2px 0;font-size:11px;color:var(--ink2)}
+.og-glg span{display:inline-flex;align-items:center;gap:5px}
+.og-glg i{display:inline-block;width:14px;height:0;border-top:2px solid}
+.og-glg i.l{border-color:var(--og-t)}
+.og-glg i.e{border-top-style:dotted;border-color:var(--ink3)}
+.og-glg i.m{border-top-style:dashed;border-color:var(--og)}
+.og-glg i.g{width:0;height:10px;border-top:0;border-left:2px solid var(--au)}
+/* 기록 지우기 확인 (× 자리) */
+.og-cf{display:inline-flex;align-items:center;gap:5px}
+.og-cf small{font-size:11.5px;color:var(--ink2);white-space:nowrap}
+#v-oracle .og-cf button{padding:4px 9px;font-size:12px}
+#v-oracle .og-cf .og-yes{color:#fff;background:#d9434f;border-color:transparent!important}
+#v-oracle .og-cf .og-yes:hover:not(:disabled){background:#e85561}
