@@ -766,13 +766,10 @@
     $('mb').innerHTML = '<div class="mb-sum"><span><b>' + within(7) + '</b>편 · 7일 안에 새 100만 단위 달성 예상</span><span><b>' + within(30) + '</b>편 · 30일 안에 새 100만 단위 달성 예상</span></div>'
       + (B.length ? '<div class="mb-list">' + B.map(mbRow).join('') + '</div>' : '<p class="anote">게시 15일이 지난 영상 중 조회수 90만 이상인 영상이 없습니다.</p>');
   }
-  // 100만 단위 목록 한 줄 — 목표(다음 100만)는 한 번만:
-  //   [썸네일] 제목 / 지금 → 목표        | 오른쪽(두 줄 높이): 달성까지 / 남은 시간(크게) / 날짜 오전·오후 무렵
-  //   [칩] N 남음 · 추이 ▂▄▆ 강함 · 8주 넘게 (썸네일 아래부터 한 줄)
-  //   못 닿거나 기록이 모자라면 오른쪽은 — 와 까닭
   // 한 줄: [썸네일] [제목·추이 / 지금 → 목표 · 남은 조회수 / 진행 막대] [달성까지 · 남은 시간 · 날짜]
   //   지금·목표는 둘 다 fmtM 이라 표기가 같다("1,197만 → 1,200만"). 색 강조는 8주 안(in) 줄의 남은 시간·막대에만
-  function mbRow(x){
+  //   못 닿거나 기록이 모자라면 오른쪽은 — 와 까닭. i = 목록 순번(막대를 훑는 불빛을 줄마다 조금씩 늦게 시작)
+  function mbRow(x, i){
     var v = x.v, ok = in8(x), left = Math.max(0, x.M - x.V), tr = ltTrend(v);
     var p = Math.max(0, Math.min(1, (x.V - (x.M - VE.MSTEP)) / VE.MSTEP));     // 지난 100만 단위 → 다음 100만 단위 진행률
     var eta = x.eta != null
@@ -785,7 +782,7 @@
       + '</span>'
       + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
       + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
-      + '<span class="mb-pg" aria-hidden="true"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
+      + '<span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span>'
       + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
