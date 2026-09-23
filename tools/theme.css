@@ -1397,18 +1397,17 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
 .mb-n em b{font-size:11.5px;color:#f0c75e}          /* 남은 조회수만 황금색 강조 */
 /* 진행 막대: 지난 100만 단위 → 다음 100만 단위 */
 .mb-pg{grid-area:pg;height:4px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
-.mb-pg i{position:relative;display:block;height:100%;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.22)}
-#v-views .mb-r.in .mb-pg i{background:rgba(255,77,79,.5)}
-/* 채운 부분 위로 옅은 빛이 한 번씩 지나간다 (자료가 갱신되는 느낌).
-   가늘게(최대 30px) · 가장자리는 blur 로 풀고 · 막대 색과 어울리는 따뜻한 빛. 줄마다 조금씩 늦게 시작해(--sw) 목록이 물결처럼.
-   이동 거리는 빛 폭 기준이라 막대가 길든 짧든 빛의 속도는 같다 */
-.mb-pg i::after{content:"";position:absolute;top:-1px;bottom:-1px;left:0;width:11%;min-width:14px;max-width:30px;
-  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.3) 48%,rgba(255,255,255,.38) 58%,rgba(255,255,255,0));
-  filter:blur(1.2px);transform:translateX(-170%);
-  animation:mbSweep 3.4s linear infinite;animation-delay:var(--sw,0s)}
-#v-views .mb-r.in .mb-pg i::after{background:linear-gradient(90deg,rgba(255,214,196,0),rgba(255,226,209,.42) 48%,rgba(255,238,226,.52) 58%,rgba(255,214,196,0))}
-@keyframes mbSweep{0%{transform:translateX(-170%)}55%,100%{transform:translateX(1700%)}}
-@media (prefers-reduced-motion:reduce){.mb-pg i::after{display:none}}
+/* 채운 부분이 은은하게 흐른다 — 흰 띠를 얹지 않고 **막대 색의 밝은 버전**을 그라데이션으로 넣어 흘리는 방식
+   (배경 크기를 220% 로 두고 background-position 만 움직이는, 로딩 막대에서 흔히 쓰는 shimmer).
+   줄마다 조금씩 늦게 시작해(--sw) 목록이 물결처럼 보인다 */
+.mb-pg i{--c1:rgba(255,255,255,.2);--c2:rgba(255,255,255,.42);
+  display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--c1) 0%,var(--c1) 30%,var(--c2) 50%,var(--c1) 70%,var(--c1) 100%);
+  background-size:220% 100%;background-position:120% 0;
+  animation:mbSweep 2.6s linear infinite;animation-delay:var(--sw,0s)}
+#v-views .mb-r.in .mb-pg i{--c1:rgba(255,77,79,.52);--c2:rgba(255,142,120,.85)}
+@keyframes mbSweep{from{background-position:120% 0}to{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.mb-pg i{animation:none;background-position:50% 0}}
 /* 오른쪽 칸: 달성까지 · 남은 시간 · 날짜 (두 줄 높이 가운데) */
 .mb-e{grid-area:e;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;text-align:right;
   min-width:96px;padding-left:13px;border-left:1px solid var(--line)}
@@ -1453,8 +1452,19 @@ button.vh-mc.on{border-color:var(--mc)!important;background:color-mix(in srgb,va
   .vr-tabs{flex-wrap:wrap}.vr-tabs button{padding:7px 10px!important;font-size:12.5px;white-space:nowrap}}   /* 탭 세 개: 글자 중간에서 꺾이지 않게 통째로 다음 줄로 */
 .vt-tab .w{text-align:left;white-space:nowrap}
 .vt-tab td.w b{font-weight:700}
-/* 두 칸은 창 1160px 부터 — 그보다 좁으면 가운데 칸이 140px 로 줄어 "1,198만 → 1,200만 12.1만 남음" 이 두 줄로 꺾인다 */
-@media (max-width:1199px){.mb-list{grid-template-columns:1fr}}
+/* 카드가 400px 보다 좁아지면 "1,198만 → 1,200만 2.4만 남음"(약 176px)이 한 줄에 못 들어간다 → 그 아래로는 한 칸 */
+@media (max-width:1099px){.mb-list{grid-template-columns:1fr}}
+/* 두 칸인데 카드가 좁을 때(창 1100~1199px, 카드 약 400px): 썸네일·여백·글자를 한 단계 줄이고
+   오른쪽 칸은 폭을 고정한다 — auto 로 두면 남은 시간이 긴 줄만 칸이 넓어져 가운데가 줄마다 들쭉날쭉해진다 */
+@media (min-width:1100px) and (max-width:1199px){
+  #v-views .mb-r{grid-template-columns:88px minmax(0,1fr) 93px;column-gap:9px;padding:10px 10px!important}
+  #v-views .mb-r .mb-e{min-width:0;padding-left:9px}
+  #v-views .mb-r .mb-n{font-size:10.5px;gap:3px}
+  #v-views .mb-r .mb-n b{font-size:12px}
+  #v-views .mb-r .mb-n em b{font-size:11px}
+  #v-views .mb-r .mb-eta{font-size:16px}
+  #v-views .mb-r .mb-eta i{font-size:11.5px;margin:0 2px 0 1px}
+}
 @media (max-width:760px){.vt-tab .w{display:none}}
 @media (max-width:640px){.vr-tabs button{padding:7px 12px!important;font-size:13px}}
 #v-views .vr-cap b{color:var(--vg-t)}
