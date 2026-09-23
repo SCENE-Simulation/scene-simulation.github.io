@@ -1314,6 +1314,7 @@ function colSave(){
   var payload=colSnap();
   SAVED=JSON.stringify(payload); savedAt=Date.now();
   try{localStorage.setItem('bread27:collection',SAVED);}catch(e){}
+  if(window.SGPersist) window.SGPersist();   // 브라우저에 영구 저장 요청 (collection.js)
   if(colDoc){
     colDoc.set(payload).then(function(){el.textContent='계정에 저장됨 · 다른 기기에서도 이어집니다.';})
       .catch(function(){el.textContent='이 브라우저에만 저장됨(계정 저장 실패).';});
@@ -1400,9 +1401,9 @@ colBuildSum();
 colBuildGrid();
 try{var raw=localStorage.getItem('bread27:collection');
   if(raw){var d0=JSON.parse(raw); colLoad(d0); SAVED=JSON.stringify(colSnap()); savedAt=d0.updated?Date.parse(d0.updated):null;
-    if(d0.ledger&&d0.ledger.uprice!=null)LG.uprice=d0.ledger.uprice;}
+    if(d0.ledger&&d0.ledger.uprice!=null&&isFinite(d0.ledger.uprice))LG.uprice=Math.max(0,Math.min(1e8,+d0.ledger.uprice));}
 }catch(e){}
-try{var up0=localStorage.getItem('bread27:uprice'); if(up0!=null&&!isNaN(+up0))LG.uprice=+up0;}catch(e){}
+try{var up0=localStorage.getItem('bread27:uprice'); if(up0!=null&&isFinite(+up0))LG.uprice=Math.max(0,Math.min(1e8,+up0));}catch(e){}
 // 공유 카드(tools/share.js): 지금 화면의 수집 기록(저장 전 변경 포함)을 이미지로. 제목 줄 오른쪽 [공유하기](build.js)
 SG405.share=function(){
   var t=colTotals(), gs=[], sp=[];

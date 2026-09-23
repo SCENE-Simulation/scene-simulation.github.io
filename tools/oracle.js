@@ -57,10 +57,16 @@
     try {
       var a = JSON.parse(localStorage.getItem(KEY) || '[]');
       // 모양이 이상한 줄은 버린다 (시각은 2096년 전 · 목표는 100억 아래 — 너무 큰 값이 LED 숫자 그리기를 깨뜨리지 않게)
-      return Array.isArray(a) ? a.filter(function(x){ return x && typeof x.id === 'string' && x.M > 0 && x.M < 1e10 && x.g > 0 && x.g < 4e12 && x.at > 0 && x.at < 4e12; }) : [];
+      //   숫자 칸은 진짜 숫자만(배열 [5] 같은 값은 비교는 통과해도 날짜가 NaN 이 된다), 나머지 칸은 모양을 맞춰 넣는다 (백업 파일로 들어온 값 포함)
+      function n(v, max){ return typeof v === 'number' && v > 0 && v < max; }
+      return Array.isArray(a) ? a.filter(function(x){ return x && typeof x === 'object' && typeof x.id === 'string' && /^[\w-]{1,20}$/.test(x.id) && n(x.M, 1e10) && n(x.g, 4e12) && n(x.at, 4e12); })
+        .map(function(x){
+          return { k: typeof x.k === 'string' && /^[\w-]{1,40}$/.test(x.k) ? x.k : 'o' + Math.random().toString(36).slice(2, 12), id: x.id, t: typeof x.t === 'string' ? x.t.slice(0, 300) : '',
+            M: x.M, g: x.g, at: x.at, v0: n(x.v0, 1e10) ? x.v0 : 0, ai: x.ai === 0 || n(x.ai, 4e12) ? x.ai : null, s: x.s ? 1 : undefined };
+        }) : [];
     } catch (e){ return []; }
   })();
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify(LOG)); } catch (e){} }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(LOG)); } catch (e){} if (window.SGPersist) window.SGPersist(); }
   function mine(id, M){ return LOG.filter(function(x){ return x.id === id && x.M === M; })[0]; }
 
   // ---------- 채점 ----------

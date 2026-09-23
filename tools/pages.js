@@ -2,7 +2,7 @@
 (function(){
   var LS = { wish: 'sendungi:wish', goods: 'sendungi:goods' };
   function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
-  function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} if (window.SGPersist) window.SGPersist(); }   // 위시 · 굿즈 수량을 남길 때 영구 저장 요청
   function won(n){ return (n || 0).toLocaleString('ko-KR'); }
   function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
 
@@ -82,7 +82,14 @@
     return '<button type="button" class="wish' + (on ? ' on' : '') + (big ? ' big' : '') + '" data-wish="' + esc(key) + '"'
       + ' aria-pressed="' + on + '" aria-label="위시리스트에 담기" title="위시리스트"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></button>';
   }
-  function wishCount(){ return Object.keys(WISH).length; }
+  // 위시 키가 지금 목록에 있는 카드 · 상품을 가리키는지. 없는 카드 번호 · 모르는 키는 화면과 개수에서만 빼고 저장값은 남긴다
+  //   (예전엔 없는 카드 번호 하나로 이 파일 전체가 멈춰 굿즈 · 위시리스트 페이지가 안 떴다)
+  function wishPc(key){
+    var pp = key.split(':'), col = pp.length === 3 && pp[0] === 'pc' && /^\d{1,4}$/.test(pp[2]) ? pcCol(pp[1]) : null, i = +pp[2];
+    return col && i < col.N ? { col: col, i: i } : null;
+  }
+  function wishGd(key){ var id = key.slice(3), f = null; if (key.indexOf('gd:') === 0) goodsAll().forEach(function(x){ if (x.g.id === id) f = x; }); return f; }
+  function wishCount(){ return Object.keys(WISH).filter(function(k){ return wishPc(k) || wishGd(k); }).length; }
   function syncHearts(){
     document.querySelectorAll('[data-wish]').forEach(function(b){
       var on = !!WISH[b.getAttribute('data-wish')];
@@ -333,7 +340,7 @@
     h += '<div class="cmeta"><div class="mt ac-tog" role="button" tabindex="0" aria-expanded="' + AC.jump + '" aria-controls="ac-jump" title="컬렉션 바로가기">'
       + '<span class="mk">전체</span><b>' + pcTotal() + '종</b><small>컬렉션 ' + cols.length + '개<span class="ac-hint">바로가기<svg><use href="#i-chev"/></svg></span></small></div>'
       + '<div class="mt"><span class="mk">보유</span><b>' + pcOwned() + '/' + pcTotal() + '</b><small>모은 종류</small></div>'
-      + '<div class="mt"><span class="mk">위시리스트</span><b>' + Object.keys(WISH).filter(function(k){ return k.indexOf('pc:') === 0; }).length + '장</b><small>담아 둔 카드</small></div></div>';
+      + '<div class="mt"><span class="mk">위시리스트</span><b>' + Object.keys(WISH).filter(function(k){ return wishPc(k); }).length + '장</b><small>담아 둔 카드</small></div></div>';
     h += '<div class="ac-jump" id="ac-jump"' + (AC.jump ? '' : ' hidden') + '>' + cols.map(function(c){
         var own = c.counts().filter(function(v){ return v > 0; }).length;
         return '<button type="button" data-jump="' + esc(c.id) + '">' + esc(c.title) + '<span class="cnt">' + own + '/' + c.N + '</span></button>';
@@ -395,15 +402,12 @@
   function wishItems(){
     var c = cu(), out = [];
     Object.keys(WISH).sort(function(a, b){ return WISH[a] - WISH[b]; }).forEach(function(key){
-      if (key.indexOf('pc:') === 0) {
-        var pp = key.split(':'), col = pcCol(pp[1]), i = +pp[2];
-        if (col) out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + col.names[i], from: col.title, img: col.src[i],
+      var p = wishPc(key), f = p ? null : wishGd(key);
+      if (p) {
+        var col = p.col, i = p.i;
+        out.push({ key: key, type: 'pc', name: (i + 1) + '. ' + col.names[i], from: col.title, img: col.src[i],
           pix: col.isPix(i), land: col.isLand(i), own: col.counts()[i] || 0, tab: col.id });
-      } else if (key.indexOf('gd:') === 0) {
-        var id = key.slice(3), f = null;
-        goodsAll().forEach(function(x){ if (x.g.id === id) f = x; });
-        if (f) out.push({ key: key, type: 'gd', name: f.g.name, from: f.c.y + '년 · ' + f.c.title, img: f.g.img, price: f.g.price, own: GOWN[id] || 0, tab: f.c.id });
-      }
+      } else if (f) out.push({ key: key, type: 'gd', name: f.g.name, from: f.c.y + '년 · ' + f.c.title, img: f.g.img, price: f.g.price, own: GOWN[f.g.id] || 0, tab: f.c.id });
     });
     return out;
   }

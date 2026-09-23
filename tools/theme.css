@@ -2177,3 +2177,30 @@ html.shr-on{overflow:hidden}
 @media (max-width:640px){.og-ch{min-height:72px}}#v-oracle .og-tg button{height:36px;display:flex;align-items:center;justify-content:center;gap:2px;line-height:1}
 .og-tg button i{font-size:13px;line-height:1}
 .og-lc .og-lf{margin-top:auto}   /* 지우기 · 공유하기는 늘 카드 맨 아래 (같은 줄 카드끼리 높이는 격자가 맞춤) */
+/* ===== 기록 백업 · 복원 (backup.js, ?tab=backup) ===== */
+.bk-home{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:12px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--line);color:var(--ink);text-decoration:none;transition:background .15s ease,border-color .15s ease}
+.bk-home:hover{background:var(--glass-h);border-color:var(--line2)}
+.bk-home svg{flex:none;width:22px;height:22px;color:var(--pink-t)}
+.bk-home span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bk-home b{font-size:14px;font-weight:700}
+.bk-home small{font-size:12px;color:var(--ink2)}
+.bk-home em{margin-left:auto;font-style:normal;font-weight:700;color:var(--pink-t)}
+#v-backup .sec-d b{color:var(--ink)}
+.bk-sum{margin-top:4px}
+.bk-sum .mt small{word-break:keep-all;line-height:1.5}
+.bk-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:16px 0 0}
+.bk-card{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.bk-card > b{font-size:15px;font-weight:700;color:var(--ink)}
+.bk-card > small{font-size:12.5px;line-height:1.6;color:var(--ink2)}
+.bk-card button{align-self:flex-start;margin-top:4px;padding:9px 16px;font-size:13.5px}
+.bk-card .bk-na{font-size:11.5px;color:var(--ink3)}
+.bk-prev{display:flex;flex-direction:column;gap:8px;margin:14px 0 0;padding:16px;border-radius:14px;background:var(--pink-soft);border:1px solid rgba(233,99,135,.4)}
+.bk-prev > b{font-size:15px;color:var(--ink)}
+.bk-prev > small{font-size:12.5px;line-height:1.6;color:var(--ink2)}
+.bk-row{display:flex;gap:8px;flex-wrap:wrap}
+.bk-row button{padding:9px 16px;font-size:13.5px}
+.bk-err{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:rgba(255,90,90,.1);border:1px solid rgba(255,90,90,.4);color:#ff9a9a;font-size:13px}
+.bk-ok{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:var(--mint-soft);border:1px solid rgba(71,209,154,.4);color:var(--mint-t);font-size:13px;font-weight:600}
+.bk-undo,.bk-per{margin:14px 0 0;font-size:12.5px;line-height:1.7;color:var(--ink2)}
+.bk-undo button,.bk-per button{margin-left:6px;padding:4px 10px;font-size:12px}
+.bk-per b{color:var(--ink)}

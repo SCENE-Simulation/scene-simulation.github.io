@@ -826,6 +826,7 @@
   function toggleFav(id){
     if (FAV[id]) delete FAV[id]; else FAV[id] = Date.now();
     try { localStorage.setItem(FKEY, JSON.stringify(FAV)); } catch (e){}
+    if (window.SGPersist) window.SGPersist();
     Array.prototype.forEach.call(el.querySelectorAll('[data-fav]'), function(b){
       var on = !!FAV[b.getAttribute('data-fav')];
       b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.title = on ? '즐겨찾기에서 빼기' : '즐겨찾기에 담기';

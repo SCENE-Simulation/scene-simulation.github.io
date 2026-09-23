@@ -32,6 +32,12 @@
   function when(t){ var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()); }
   function newId(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
+  // 이 사이트 저장값을 브라우저가 공간이 모자랄 때 지우지 않게 "영구 저장"을 요청한다 (Chrome 등은 알림 없이 판단, Firefox 는 한 번 묻는다).
+  //   이용자가 실제로 기록을 남길 때(도감 저장 · 굿즈 수량 · 위시 · 즐겨찾기 · 예측)만 부르고, 한 번 물으면 이 방문 동안은 다시 묻지 않는다
+  window.SGPersist = window.SGPersist || function(){
+    if (window.__sgPersistAsked) return; window.__sgPersistAsked = true;
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(function(p){ if (!p) return navigator.storage.persist(); }).catch(function(){}); } catch(e){}
+  };
   // 유튜브 주소에서 영상 id (youtu.be/ID · watch?v=ID · shorts/ID)
   function ytId(u){ var m = /(?:youtu\.be\/|[?&]v=|\/shorts\/)([\w-]{11})/.exec(u || ''); return m ? m[1] : null; }
 
@@ -73,7 +79,7 @@
     function shown(){ var a = ENTRIES.concat(PEND); return a.slice(Math.max(0, lastReset(a))); }
     function counts(){
       var c = new Array(N).fill(0);
-      all().forEach(function(e){ if (e.i != null) c[e.i] += e.d; });
+      all().forEach(function(e){ if (e.i != null && e.i < N) c[e.i] += e.d; });   // 목록에 없는 카드 번호(보존된 기록)는 세지 않는다
       return c.map(function(v){ return Math.max(0, v); });
     }
     function ledger(k){ var s = 0; all().forEach(function(e){ if (e.k === k) s += e.d; }); return Math.max(0, s); }
@@ -105,6 +111,7 @@
       var r = lastReset(ENTRIES); if (r > 0) ENTRIES = ENTRIES.slice(r);        // 초기화 줄 앞의 기록은 버리고 초기화 줄은 로그에 남긴다
       PEND = []; EDITS = 0; EDITING = null;
       try { localStorage.setItem(KEY, JSON.stringify(snap())); } catch(e){}
+      if (window.SGPersist) window.SGPersist();
       savedAt = Date.now();
       render();
       if (window.toastSG) window.toastSG('저장했습니다', '기록이 이 브라우저에 저장되었습니다');
@@ -113,8 +120,13 @@
     //   예전엔 도감 페이지 전체가 안 나오거나 HTML 로 들어갔다. 줄 모양은 { id, t, k, i(카드 번호 | null), d(수량), w(금액) }
     function cleanEntries(a){
       return (Array.isArray(a) ? a : []).filter(function(e){
-        return e && typeof e === 'object' && typeof e.k === 'string' && isFinite(e.d) && (e.i == null || (e.i === Math.floor(e.i) && e.i >= 0 && e.i < N));
-      }).map(function(e){ return { id: String(e.id), t: +e.t || 0, k: e.k, i: e.i == null ? null : e.i, d: +e.d, w: +e.w || 0 }; });
+        return e && typeof e === 'object' && typeof e.k === 'string' && isFinite(e.d) && (e.i == null || (e.i === Math.floor(e.i) && e.i >= 0));
+        // 카드 번호가 지금 목록보다 커도 버리지 않는다 — 설정에서 카드가 잘못 빠졌다가 돌아와도 이용자 기록이 남아 있게 (계산 · 화면에서는 건너뜀)
+      }).map(function(e){
+        var id = String(e.id);                                                    // id 는 화면 속성에 들어가므로 글자를 제한 (백업 파일로 들어온 값 포함). 이상하면 새로 붙인다
+        return { id: /^[\w-]{1,40}$/.test(id) ? id : newId(), t: +e.t || 0, k: e.k, i: e.i == null ? null : e.i,
+          d: Math.max(-9999, Math.min(9999, +e.d)), w: Math.max(-1e10, Math.min(1e10, +e.w || 0)) };           // 수량 · 금액은 말이 되는 범위로 (한 줄 수량은 99까지)
+      });
     }
     function cleanAch(o){ return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
     function revert(){
@@ -274,7 +286,7 @@
       // 전체 초기화 줄: 수정 버튼 없이 한 줄 (405빵과 같게)
       if (e.k === 'reset') return '<div class="lrow' + (pend ? ' pend' : '') + '"><span class="tg">' + (pend ? '저장 전' : when(e.t)) + '</span><span class="lt">전체 초기화</span></div>';
       var c = counts();
-      var mode = MODE[e.k], what = e.i == null ? '' : ' <b>' + (e.i + 1) + '. ' + esc(cfg.cards[e.i].n) + '</b>';
+      var mode = MODE[e.k], what = e.i == null ? '' : ' <b>' + (e.i + 1) + '. ' + esc(cfg.cards[e.i] ? cfg.cards[e.i].n : '(목록에 없는 카드)') + '</b>';
       var w = e.w ? ' <span class="wn">' + (e.w < 0 ? '−' : '') + won(Math.abs(e.w)) + '원</span>' : '';
       var h = '<div class="lrow' + (pend ? ' pend' : '') + (EDITING === e.id ? ' editing' : '') + '">'
         + '<span class="tg">' + (pend ? '저장 전' : when(e.t)) + '</span>'
@@ -285,8 +297,8 @@
       return h + '<div class="ledit">'
         + '<label class="lf"><span>수량</span><input class="le-qty" type="number" min="1" max="99" value="' + Math.abs(e.d) + '"></label>'
         + (mode && (mode['var'] || mode.price) ? '<label class="lf"><span>장당 금액</span><span class="lp"><input class="le-price" type="text" inputmode="numeric" value="' + won(unit) + '">원</span></label>' : '')
-        + '<div class="le-btns"><button type="button" class="le-del" data-del="' + e.id + '">기록 삭제</button>'
-        + '<button type="button" class="le-cancel">취소</button><button type="button" class="p le-ok" data-ok="' + e.id + '">적용</button></div>'
+        + '<div class="le-btns"><button type="button" class="le-del" data-del="' + esc(e.id) + '">기록 삭제</button>'
+        + '<button type="button" class="le-cancel">취소</button><button type="button" class="p le-ok" data-ok="' + esc(e.id) + '">적용</button></div>'
         + '<p class="le-note">적용하면 카드 수량과 금액도 함께 바뀝니다. 저장을 눌러야 확정됩니다.</p></div>';
     }
     function logBox(){
