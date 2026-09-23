@@ -781,13 +781,14 @@
       + '<span class="mb-hd"><span class="mb-t">' + esc(v.title) + '</span>'
       + (tr ? '<span class="mb-tg ' + tr.lv.c + '" title="1주 동안 +' + fmt(tr.x) + ' 예상 · 게시 15일 지난 영상 ' + tr.n + '편 중 ' + tr.rank + '위">' + sigBars(tr.lv) + '<b>' + tr.lv.t + '</b></span>' : '')
       + '</span>'
-      // 상자 ①: 다음 100만 단위까지 — 지금 → 목표 · 남은 조회수 · 진행 막대
-      + '<span class="mb-bx"><small class="mb-lb">다음 100만 단위까지</small>'
-      + '<span class="mb-n"><b>' + fmtM(x.V) + '</b><i>→</i><b class="to">' + fmtM(x.M) + '</b>'
-      + '<em><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</em></span>'
-      + '<span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span></span>'
-      // 상자 ②: 달성까지 — 남은 시간(크게) · 날짜
-      + '<span class="mb-bx mb-bx2"><small class="mb-lb">달성까지</small><span class="mb-e">' + eta + '</span></span>'
+      // 트랙: 위 라벨 줄 [지금 "N만 달성" · 오른쪽 "N만 남음"] / 막대(지난 100만 단위 → 다음 100만 단위, 지금 위치에 점) / 아래 양 끝 단위
+      + '<span class="mb-tk">'
+      + '<span class="mb-tl"><span><b>' + fmtM(x.V) + '</b> 달성</span><span class="rt"><b>' + (left < 1e4 ? full(left) + '회' : fmt(left)) + '</b> 남음</span></span>'
+      + '<span class="mb-trw"><span class="mb-pg" aria-hidden="true" style="--sw:' + ((i || 0) % 8 * 0.18).toFixed(2) + 's"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><u class="mb-dot" style="left:' + (p * 100).toFixed(1) + '%"></u></span>'
+      + '<span class="mb-ta"><span>' + (x.M - VE.MSTEP > 0 ? fmtM(x.M - VE.MSTEP) : '0') + '</span><span>' + fmtM(x.M) + '</span></span>'
+      + '</span>'
+      // 달성까지 · 남은 시간(크게) · 날짜 — 점선 위
+      + '<span class="mb-e"><small class="mb-lb">달성까지</small>' + eta + '</span>'
       + '</span></button>';
   }
   var TYPE = { short: '쇼츠', live: '라이브' };           // 일반 영상은 표시하지 않는다. 예측은 같은 종류끼리만 비교
