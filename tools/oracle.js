@@ -372,10 +372,12 @@
     // 머리 줄: 내 예측 ··· 남긴 때 (사용자 요청으로 카드 머리에서 이 상자 안으로)
     h += '<div class="og-have og-mine"><span class="og-mh">내 예측<small>남긴 때 <span class="og-nw">' + shortTxt(x.at) + ' (' + V.fmtM(x.v0) + ')</span></small></span><b>' + whenTxt(x.g) + '</b>';
     if (j.st === 'wait'){
-      var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0)));
-      h += '<small>' + (x.g > now ? '예측한 때까지 <em>' + durTxt(x.g - now) + ' 남음</em>' : '예측한 때가 <em>' + durTxt(now - x.g) + ' 지남</em> · 아직 못 넘음') + '</small>'
-        + '<div class="og-pg" aria-hidden="true"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
-        + '<small class="og-pgt">' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' 중 ' + pct(f) + '</small>';
+      var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
+      h += '<div class="og-clkw' + (left > 0 ? '' : ' over') + '">' + clock(x, now, f)
+        + '<div class="og-clkt"><small>' + (left > 0 ? '예측한 때까지' : '예측한 때가 지났는데 아직') + '</small>'
+        + '<b>' + (left > 0 ? countTxt(left) : '못 넘음') + '</b>'
+        + '<small>' + (left > 0 ? '남았습니다' : durTxt(-left) + ' 지남') + '</small>'
+        + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div></div>';
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
@@ -387,6 +389,38 @@
       + '<button type="button" class="og-no" data-og-no>취소</button></span>';
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
     return h + '</div></article>';
+  }
+  // 카운트다운 아날로그 시계 (채점 기다림 카드) — 사용자 요청 "업데이트바 대신 카운트다운 아날로그 시계"
+  //   보라 부채꼴 = 기다리는 시간(남긴 때 → 고른 때) 중 남은 몫, 12시부터 시계 방향 — 시간이 갈수록 줄어드는 주방 타이머처럼. 굵은 바늘이 그 끝.
+  //   금색 초침 = 남은 초를 거꾸로 돌며 센다 (CSS 애니메이션 · 시작 각도는 animation-delay 로 맞춤, 30초마다 다시 그려도 이어짐)
+  //   바깥 민트 고리 = 조회수 진행 (남길 때 → 목표). 고른 때가 지나면 빨강 · 멈춤
+  function clock(x, now, f){
+    var C = 50, R = 38, left = Math.max(0, x.g - now), frac = Math.min(1, left / Math.max(1, x.g - x.at));
+    function pt(a, r){ var t = (a - 90) * Math.PI / 180; return (C + r * Math.cos(t)).toFixed(2) + ' ' + (C + r * Math.sin(t)).toFixed(2); }
+    var s = '<svg class="og-clk" viewBox="0 0 100 100" aria-hidden="true">'
+      + '<circle class="og-clkf" cx="50" cy="50" r="' + R + '"/>';
+    // 남은 몫 부채꼴
+    if (frac >= 0.999) s += '<circle class="og-clkw2" cx="50" cy="50" r="' + (R - 3) + '"/>';
+    else if (frac > 0) s += '<path class="og-clkw2" d="M50 50 L' + pt(0, R - 3) + ' A' + (R - 3) + ' ' + (R - 3) + ' 0 ' + (frac > 0.5 ? 1 : 0) + ' 1 ' + pt(frac * 360, R - 3) + 'Z"/>';
+    // 눈금 60개 (5분마다 길게)
+    for (var i = 0; i < 60; i++){
+      var big = i % 5 === 0;
+      s += '<path class="og-clkk' + (big ? ' b' : '') + '" d="M' + pt(i * 6, R - (big ? 7 : 3.5)) + ' L' + pt(i * 6, R - 1) + '"/>';
+    }
+    // 바깥 고리: 조회수 진행
+    var OR = R + 7, circ = 2 * Math.PI * OR;
+    s += '<circle class="og-clkr" cx="50" cy="50" r="' + OR + '"/>'
+      + '<circle class="og-clkp" cx="50" cy="50" r="' + OR + '" stroke-dasharray="' + (circ * f).toFixed(2) + ' ' + circ.toFixed(2) + '" transform="rotate(-90 50 50)"/>';
+    // 바늘: 남은 몫 끝을 가리키는 굵은 바늘 + 초침
+    var sec = Math.floor(left / 1000) % 60;
+    s += '<line class="og-clkh" x1="50" y1="50" x2="' + pt(frac * 360, R - 10).replace(' ', '" y2="') + '"/>';
+    if (left > 0) s += '<g class="og-clks" style="animation-delay:-' + (60 - sec) + 's"><line x1="50" y1="56" x2="50" y2="' + (C - R + 5) + '"/><circle cx="50" cy="' + (C - R + 5) + '" r="1.6"/></g>';
+    return s + '<circle class="og-clkc" cx="50" cy="50" r="3.2"/></svg>';
+  }
+  // 남은 시간 크게: 3일 안은 "24시간 09분", 그 뒤는 "5일 3시간"
+  function countTxt(ms){
+    var mn = Math.floor(ms / 60e3), hh = Math.floor(mn / 60);
+    return hh < 72 ? hh + '<i>시간</i> ' + two(mn % 60) + '<i>분</i>' : Math.floor(hh / 24) + '<i>일</i> ' + (hh % 24) + '<i>시간</i>';
   }
   // 실제로 넘은 때: 두 기록 간격이 1.5시간 안이면 분까지, 넓으면 두 기록 시각 사이
   function actual(c){
