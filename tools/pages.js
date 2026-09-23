@@ -14,8 +14,10 @@
   //   title  메뉴 · 페이지 이름(짧게) / desc 페이지 설명 / card 홈 카드 설명(없으면 desc) / c 홈 카드 색
   //   items  상품 [{ id, name, price, parts(한 줄 설명), date(출시), img(이미지 주소) }] — 상품 id 는 보유 수량 · 위시리스트 저장 키라 바꾸지 않는다
   //   ratio  상품 그림 칸 비율 [가로, 세로] — 없으면 4:3. 사진 비율을 넣으면 잘리지 않는다(크림 티셔츠 셀카 399×501)
-  //   ach    칭호 [{ at: 보유 종류 수, n: 칭호, d?: 한마디, r?: 등급 1~4, c?: 색 }] — 있으면 페이지에 칭호 창(도감 페이지와 같은 모양).
-  //          설명은 "N종 보유 · 한마디"(마지막 단계는 "N종 전부 보유"). 지금 보유한 종류 수로 매번 계산한다(따로 저장하지 않음)
+  //   ach    칭호 [{ at: 보유 종류 수, n: 칭호, d?: 한마디, r?: 등급 1~4(405빵 TIER: 1 브론즈 · 2 실버 · 3 골드 · 4 플래티넘), c?: 색 }]
+  //          — 있으면 페이지에 칭호 창(도감 페이지와 같은 모양). 설명은 "N종 보유 · 한마디"(마지막 단계는 "N종 전부 보유").
+  //          지금 보유한 종류 수로 매번 계산한다(따로 저장하지 않음)
+  //   cheer  전 종류를 처음 다 모은 순간 화면 가운데에 크게 나타났다 사라지는 축하 문구 (cheerFx — 빛 번짐 · 메아리 · 색종이)
   //   news   관련 미디어 [{ title, src(언론사 · 채널), date, url, kind? }] — 있으면 페이지 위쪽에 "관련 미디어 보기" 토글(도감 페이지와 같은 모양).
   //          유튜브 주소면 썸네일이 붙고, 종류 칩은 kind(없으면 영상/기사). 공유 주소의 추적값(?si= 등)은 빼고 넣는다
   var GCOLS = [
@@ -33,14 +35,16 @@
       news: [{ title: '리센느 야-호★ 김씨네과일 야-호★', src: 'KREAM · YouTube', date: '2026.07.16', url: 'https://www.youtube.com/shorts/3SMQxQdPVJk' }],
       // 사진: 사용자 제공 멤버 셀카(각자 고향 티셔츠, 399×501). 티셔츠 글자로 짝을 확인함
       ratio: [399, 501],
-      // 칭호: 사용자 요청 "5장 구매에 따른 컬렉션을 1~5장 별로" → 보유 종류 1~5종. '야호'(산에서 외치는 소리 · 메아리)와 멤버 고향 순회를 엮음
+      // 칭호: 사용자 요청 "5장 구매에 따른 컬렉션을 1~5장 별로", 등급은 골드 · 플래티넘 두 종류(9/23) → 1~4종 골드(r3), 5종 완성만 플래티넘(r4).
+      // '야호'(산에서 외치는 소리 · 메아리)와 멤버 고향 순회를 엮음
       ach: [
-        { at: 1, n: '첫 야호',         d: '산 정상에서 외치는 첫 한마디', r: 1 },
-        { at: 2, n: '야호 메아리',     d: '한 번 외치면 두 번 돌아온다', r: 1 },
-        { at: 3, n: '전국 야호 투어',  d: '반은 넘게 돌았다', r: 2 },
-        { at: 4, n: '야호 원정대',     d: '이제 한 곳만 남았다', r: 3 },
-        { at: 5, n: '야호 그랜드슬램', d: '거제 · 경주 · 수원 · 치바 · 고양 완주', r: 4 }
+        { at: 1, n: '첫 야호',         d: '산 정상에서 외치는 첫 한마디', r: 3, c: '#ecd25b' },
+        { at: 2, n: '야호 메아리',     d: '한 번 외치면 두 번 돌아온다', r: 3, c: '#ecd25b' },
+        { at: 3, n: '전국 야호 투어',  d: '반은 넘게 돌았다', r: 3, c: '#ecd25b' },
+        { at: 4, n: '야호 원정대',     d: '이제 한 곳만 남았다', r: 3, c: '#ecd25b' },
+        { at: 5, n: '야호 그랜드슬램', d: '거제 · 경주 · 수원 · 치바 · 고양 완주', r: 4, c: '#f6b93c' }
       ],
+      cheer: '야-호!',
       items: [
         { id: 'kream2026-geoje',    name: '거제 야호', price: 32000, date: '2026.07.09', parts: '원이의 고향 거제 · 섬과 모래성 손그림', img: 'img/kream2026/geoje.jpg' },
         { id: 'kream2026-gyeongju', name: '경주 야호', price: 32000, date: '2026.07.09', parts: '제나의 고향 경주 · 첨성대와 경주빵 손그림', img: 'img/kream2026/gyeongju.jpg' },
@@ -216,6 +220,24 @@
       + '<div class="badges">' + (got.length ? got.map(function(a){ return gBadge(a, false); }).join('')
           : '<span class="bdg-empty">아직 얻은 칭호가 없습니다 · “전체 보기”에서 조건을 확인해 보세요</span>') + '</div>'
       + '<div class="badges all"' + (GACHALL[c.id] ? '' : ' hidden') + '>' + defs.map(function(a){ return gBadge(a, own < a.at); }).join('') + '</div></div>';
+  }
+  // 컴플리트 축하 연출 — 화면 가운데에 문구(cheer)가 크게 튀어나왔다 사라진다.
+  // 빛 번짐 + 금색 글자 + 양옆으로 번지는 메아리 두 개("야호" 컨셉) + 멤버 색 색종이 26장. 약 2.6초 뒤 스스로 사라짐.
+  // 움직임 줄이기 설정이면 색종이 · 메아리 없이 은은하게 떴다 사라지기만 한다 (theme.css .chr)
+  function cheerFx(text){
+    var old = document.querySelector('.chr'); if (old) old.parentNode.removeChild(old);
+    var box = document.createElement('div'); box.className = 'chr'; box.setAttribute('aria-hidden', 'true');
+    var h = '<i class="chr-flash"></i><span class="chr-e e1">' + esc(text) + '</span><span class="chr-e e2">' + esc(text) + '</span>'
+      + '<b class="chr-t">' + esc(text) + '</b>';
+    var COLS = ['#f286a8', '#fca2c4', '#76d4c8', '#eec06a', '#9ec2f0', '#ffd95e'];   // 멤버 5색 + 금색
+    for (var i = 0; i < 26; i++){
+      var a = Math.random() * Math.PI * 2, d = 130 + Math.random() * 190;            // 흩날리는 방향 · 거리
+      h += '<i class="chr-p" style="--pc:' + COLS[i % COLS.length] + ';--px:' + Math.round(Math.cos(a) * d) + 'px;--py:'
+        + Math.round(Math.sin(a) * d - 60) + 'px;--pr:' + Math.round(Math.random() * 720 - 360) + 'deg;--pd:' + (Math.random() * 0.35).toFixed(2) + 's;--ps:' + (0.6 + Math.random() * 0.8).toFixed(2) + '"></i>';
+    }
+    box.innerHTML = h;
+    document.body.appendChild(box);
+    setTimeout(function(){ if (box.parentNode) box.parentNode.removeChild(box); }, 2700);
   }
   function renderGoodsPage(c){
     elGd[c.id].innerHTML = sec('i-gift', ['굿즈 컬렉션 북', c.y + ' 굿즈', c.title], esc(c.desc || ''))
@@ -439,10 +461,11 @@
       var gc = (goodsAll().filter(function(x){ return x.g.id === id; })[0] || {}).c, before = gc ? gOwnKinds(gc) : 0;
       GOWN[id] = Math.max(0, Math.min(99, (GOWN[id] || 0) + d));
       save(LS.goods, GOWN);
-      // 보유 종류가 늘어 칭호 단계를 넘으면 알림 (도감 페이지와 같은 toastSG)
+      // 보유 종류가 늘어 칭호 단계를 넘으면 알림 (도감 페이지와 같은 toastSG), 전 종류를 처음 다 모으면 축하 연출
       if (gc && gc.ach && window.toastSG) {
         var after = gOwnKinds(gc);
         gAchDefs(gc).forEach(function(a){ if (before < a.at && after >= a.at) window.toastSG('칭호 획득 — ' + esc(a.n), esc(a.d)); });
+        if (gc.cheer && before < gc.items.length && after >= gc.items.length) cheerFx(gc.cheer);
       }
       renderGoods(); renderAllGoods(); renderWish(); renderSum();
     }

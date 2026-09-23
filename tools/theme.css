@@ -563,6 +563,30 @@ body.has-sfloat #totop{bottom:84px}
 .gdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .gdgrid.gd-port{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}   /* 세로 사진(GCOLS ratio 가 세로) — PC 3~4칸, 휴대폰 1칸 */
 .cach.gd-ach{margin:0 0 14px}   /* 굿즈 페이지 칭호 창 (도감 페이지에선 통계 줄 grid 안에 있어 여백이 없음) */
+/* 컴플리트 축하 연출 (pages.js cheerFx) — 화면 가운데 문구가 튀어나왔다 사라짐. 약 2.6초, 클릭은 그대로 뒤로 통과 */
+.chr{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;pointer-events:none;overflow:hidden}
+.chr > *{grid-area:1/1}
+.chr-flash{width:min(80vw,520px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(246,185,60,.42),rgba(236,210,91,.16) 40%,transparent 68%);animation:chrFlash 2.6s ease-out both}
+.chr-t,.chr-e{font:900 clamp(46px,13vw,104px)/1 Pretendard,sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.chr-t{background:linear-gradient(180deg,#fff6c9,#f6d25e 45%,#e89a2c);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 rgba(120,70,10,.55)) drop-shadow(0 0 18px rgba(246,185,60,.55));animation:chrPop 2.6s cubic-bezier(.2,1.5,.4,1) both}
+.chr-e{color:transparent;-webkit-text-stroke:2px rgba(246,210,94,.55);opacity:0}
+.chr-e.e1{--ex:-1;animation:chrEcho 1.5s .35s ease-out both}
+.chr-e.e2{--ex:1;animation:chrEcho 1.5s .6s ease-out both}
+.chr-p{width:9px;height:14px;border-radius:2px;background:var(--pc);opacity:0;transform:scale(var(--ps));
+  animation:chrBurst 1.9s var(--pd) cubic-bezier(.15,.7,.3,1) both}
+@keyframes chrFlash{0%{opacity:0;transform:scale(.3)}18%{opacity:1;transform:scale(1)}70%{opacity:.7}100%{opacity:0;transform:scale(1.25)}}
+@keyframes chrPop{0%{opacity:0;transform:scale(.2) rotate(-8deg)}16%{opacity:1;transform:scale(1.12) rotate(2deg)}28%{transform:scale(1) rotate(0)}
+  78%{opacity:1;transform:scale(1.03)}100%{opacity:0;transform:scale(1.18) translateY(-14px)}}
+@keyframes chrEcho{0%{opacity:0;transform:translateX(0) scale(1)}25%{opacity:.8}100%{opacity:0;transform:translateX(calc(var(--ex) * 34vw)) scale(.72)}}
+@keyframes chrBurst{0%{opacity:1;transform:translate(0,0) rotate(0) scale(var(--ps))}
+  100%{opacity:0;transform:translate(var(--px),calc(var(--py) + 140px)) rotate(var(--pr)) scale(var(--ps))}}
+@media (prefers-reduced-motion:reduce){
+  .chr-e,.chr-p{display:none}
+  .chr-flash,.chr-t{animation-name:chrFade;animation-timing-function:ease}
+}
+@keyframes chrFade{0%,100%{opacity:0}20%,75%{opacity:1}}
 .gd{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--glass);border:1px solid var(--line)}
 .gd.have{border-color:rgba(71,209,154,.5)}
 .gd-img{position:relative;aspect-ratio:4/3;background:var(--cell)}
