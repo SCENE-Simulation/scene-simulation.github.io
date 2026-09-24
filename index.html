@@ -6878,13 +6878,19 @@ goTab(true,true);
   }
   function loadAll(list){ return Promise.all(list.map(function(s){ return s ? loadImg([s]) : Promise.resolve(null); })); }
 
-  // ---------- 예측의 신 카드 (내 예측 기록 하나) ----------
-  // d = { at, title, thumbs, hue, M: '1,100만 돌파', st: 'wait'|'done'|'void'|'gone', guess: 내 예측(글), mine: [[이름, 값] × 3],
-  //       done: { acc, grade, gc: 등급 색, actual, err } | null, wait: { now, goal, f: 0~1, left, over } | null,
-  //       ai: { when, res } | null, note: 채점 못 할 때 글 }
-  var OG = { p: '#a98bff', pt: '#cdb9ff', au: '#f0c75e', mint: '#6fe0b3' };
+  // ---------- 예측의 신 카드 (내 예측 기록 하나) — 화면 기록 카드와 같은 짜임 (9/24) ----------
+  // d = { at, title, thumbs, hue, M: '1,000만 돌파', st: 'wait'|'done'|'void'|'gone', guess: 내 예측(글),
+  //       my: { t: 내 예측 아랫줄, tone: 'fast'|'slow'|'eq'|'' }, mine: [[이름, 값] × 2],
+  //       ai: { when, sub } | null (예측기 예상), done: { acc, grade, gc } | null,
+  //       wait: { left, over, remain, nowgoal, prob, ptone: 'hi'|'mid'|'lo'|'' } | null }
+  var OG = { p: '#a98bff', pt: '#cdb9ff', au: '#f0c75e', mint: '#6fe0b3', red: '#ff9a9a' };
   function drawOracle(d, im){
-    var P = 48, AW = W - P * 2, HH = 790;
+    var P = 48, AW = W - P * 2;
+    var TX = P, TY = 100, TW = 400, TH = 225;
+    var AY = TY + TH + 26, AH = d.ai ? 74 : 0;                                      // 예측기 예상
+    var MY = AY + (AH ? AH + 14 : 0), MH = 196;                                     // 내 예측
+    var BY = MY + MH + 14, BH = d.wait ? 150 : 0;                                   // 기다림: 남은 시간 · 목표까지 · 성공 확률
+    var HH = BY + (BH ? BH + 14 : 0) + 64;
     var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
     var x = cv.getContext('2d'); x.scale(SC, SC);
     x.fillStyle = '#130f1b'; x.fillRect(0, 0, W, HH);
@@ -6902,7 +6908,6 @@ goTab(true,true);
     font(x, 500, 20, MONO); x.fillStyle = C.ink2; x.textAlign = 'right'; x.fillText(stamp(d.at) + ' 기준', W - P, 68); x.textAlign = 'left';
 
     // 썸네일 · 제목 · 결과(정확도 · 등급 또는 상태)
-    var TX = P, TY = 100, TW = 400, TH = 225;
     x.save(); rr(x, TX, TY, TW, TH, 16); x.clip();
     if (im) cover(x, im, TX, TY, TW, TH);
     else { g = x.createLinearGradient(TX, TY, TX + TW, TY + TH); g.addColorStop(0, 'hsl(' + d.hue + ' 55% 34%)'); g.addColorStop(1, 'hsl(' + (d.hue + 50) + ' 60% 16%)'); x.fillStyle = g; x.fillRect(TX, TY, TW, TH); }
@@ -6920,47 +6925,59 @@ goTab(true,true);
       pill(x, RX + aw + 16, ry - 34, d.done.grade, d.done.gc, 'rgba(255,255,255,.05)', d.done.gc, 20);
     } else {
       font(x, 800, 30); x.fillStyle = d.st === 'wait' ? OG.pt : C.ink3;
-      x.fillText(d.st === 'wait' ? '채점 기다림' : '채점 안 함', RX, ry - 8);   // 기록 카드 상태 글자와 같게
+      x.fillText(d.st === 'wait' ? '채점 기다리는 중' : '채점하지 않음', RX, ry - 8);
     }
 
-    // 내 예측 (보라 상자): 고른 때를 크게, 아래에 남긴 기록 3칸
-    var MY = TY + TH + 26, MH = 162;
+    function dot(cx, cy, col){ x.fillStyle = col; x.beginPath(); x.arc(cx, cy, 6, 0, Math.PI * 2); x.fill(); }
+    // 예측기 예상 (민트 상자, 한 줄: 이름 · 때 ··· 아랫말)
+    if (d.ai){
+      rr(x, P, AY, AW, AH, 16); x.fillStyle = 'rgba(111,224,179,.07)'; x.fill(); x.strokeStyle = 'rgba(111,224,179,.35)'; x.lineWidth = 1.5; x.stroke();
+      x.textBaseline = 'middle'; var ay = AY + AH / 2 + 1;
+      dot(P + 28, ay, OG.mint);
+      font(x, 800, 21); x.fillStyle = OG.mint; x.fillText('예측기 예상', P + 44, ay);
+      var ax = P + 44 + x.measureText('예측기 예상').width + 18;
+      font(x, 800, 26); x.fillStyle = C.ink; x.fillText(d.ai.when, ax, ay);
+      ax += x.measureText(d.ai.when).width + 20;
+      if (d.ai.sub){ font(x, 600, 20); x.fillStyle = C.ink2; x.textAlign = 'right'; x.fillText(fit(x, d.ai.sub, W - P - 26 - ax), W - P - 26, ay); x.textAlign = 'left'; }
+      x.textBaseline = 'alphabetic';
+    }
+
+    // 내 예측 (보라 상자): 이름 · 고른 때(크게) / 아랫줄(예측기와 비교 · 실제와 차이) / 등록 일시 · 예측 당시 조회수
     rr(x, P, MY, AW, MH, 18); x.fillStyle = 'rgba(169,139,255,.1)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.45)'; x.lineWidth = 1.5; x.stroke();
-    font(x, 800, 21); x.fillStyle = OG.pt; x.fillText('내 예측', P + 26, MY + 42);
+    x.textBaseline = 'middle';
+    dot(P + 28, MY + 38, OG.p);
+    font(x, 800, 21); x.fillStyle = OG.pt; x.fillText('내 예측', P + 44, MY + 38);
     var kw = x.measureText('내 예측').width;
-    font(x, 800, 38); x.fillStyle = C.ink; x.fillText(fit(x, d.guess, AW - kw - 70), P + 26 + kw + 20, MY + 46);
-    var cw = (AW - 52) / d.mine.length;
+    font(x, 800, 38); x.fillStyle = C.ink; x.fillText(fit(x, d.guess, AW - kw - 90), P + 44 + kw + 20, MY + 40);
+    font(x, 700, 21); x.fillStyle = d.my.tone === 'fast' ? OG.mint : d.my.tone === 'slow' ? OG.red : d.my.tone === 'eq' ? OG.au : C.ink2;
+    x.fillText(fit(x, d.my.t, AW - 52), P + 26, MY + 84);
+    x.textBaseline = 'alphabetic';
+    var CY = MY + 108, CHh = 70, cw = (AW - 52) / d.mine.length;
+    rr(x, P + 26, CY, AW - 52, CHh, 12); x.fillStyle = 'rgba(0,0,0,.22)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.2)'; x.lineWidth = 1; x.stroke();
     d.mine.forEach(function(r, i){
       var cx = P + 26 + i * cw;
-      font(x, 600, 18); x.fillStyle = C.ink3; x.fillText(r[0], cx, MY + 98);
-      font(x, 700, 23); x.fillStyle = C.ink; x.fillText(fit(x, r[1], cw - 20), cx, MY + 132);
+      if (i){ x.strokeStyle = 'rgba(169,139,255,.25)'; x.setLineDash([4, 4]); x.beginPath(); x.moveTo(cx, CY + 10); x.lineTo(cx, CY + CHh - 10); x.stroke(); x.setLineDash([]); }
+      font(x, 600, 17); x.fillStyle = C.ink3; x.fillText(r[0], cx + 18, CY + 28);
+      font(x, 700, 22); x.fillStyle = C.ink; x.fillText(fit(x, r[1], cw - 36), cx + 18, CY + 56);
     });
 
-    // 결과 줄: 채점 끝 = 실제 | 예측기 / 기다림 = 조회수 진행 | 남은 시간 · 예측기 / 그 밖 = 안내 한 줄
-    var BY = MY + MH + 18, BH = 172, GAP = 16, BW = (AW - GAP) / 2;
-    function box(bx, col, k, big, s1, s2, f){
-      rr(x, bx, BY, BW, BH, 18); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke();
-      x.fillStyle = col; x.beginPath(); x.arc(bx + 32, BY + 36, 6, 0, Math.PI * 2); x.fill();
-      font(x, 700, 20); x.fillStyle = C.ink2; x.fillText(k, bx + 46, BY + 43);
-      var fs = 30; font(x, 800, fs); while (fs > 20 && x.measureText(big).width > BW - 52){ fs -= 2; font(x, 800, fs); }
-      x.fillStyle = C.ink; x.fillText(fit(x, big, BW - 52), bx + 26, BY + 92);
-      if (f != null){
-        rr(x, bx + 26, BY + 112, BW - 52, 10, 5); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill();
-        if (f > 0){ rr(x, bx + 26, BY + 112, Math.max(10, (BW - 52) * Math.min(1, f)), 10, 5); x.fillStyle = col; x.fill(); }
-      }
-      font(x, 500, 19); x.fillStyle = C.ink2;
-      if (s1) x.fillText(fit(x, s1, BW - 52), bx + 26, BY + (f != null ? 152 : 128));
-      if (s2) x.fillText(fit(x, s2, BW - 52), bx + 26, BY + 156);
-    }
-    if (d.done){
-      box(P, OG.mint, '실제로 넘은 때', d.done.actual, d.done.err);
-      box(P + BW + GAP, OG.mint, '조회수 예측기 예상', d.ai ? d.ai.when : '—', d.ai ? d.ai.res : '');
-    } else if (d.wait){
-      box(P, OG.au, '지금 조회수', d.wait.now + ' → ' + d.wait.goal, Math.round(d.wait.f * 100) + '% 왔어요', null, d.wait.f);
-      box(P + BW + GAP, d.wait.over ? '#ff6b6b' : OG.p, d.wait.over ? '예측한 때가 지났어요' : '예측한 때까지', d.wait.left, d.ai ? '조회수 예측기 예상 · ' + d.ai.when : '');
-    } else {
-      rr(x, P, BY, AW, 90, 18); x.fillStyle = 'rgba(255,255,255,.045)'; x.fill(); x.strokeStyle = C.line; x.lineWidth = 1.5; x.stroke();
-      font(x, 500, 20); x.fillStyle = C.ink2; x.fillText(fit(x, d.note || '', AW - 52), P + 26, BY + 52);
+    // 기다림: [예측한 때까지 | 목표까지 | 예측 성공 확률]
+    if (d.wait){
+      var GAP = 14, bw3 = (AW - GAP * 2) / 3, w = d.wait;
+      var PC = { hi: [OG.mint, 'rgba(111,224,179,'], mid: [OG.au, 'rgba(240,199,94,'], lo: [OG.red, 'rgba(255,120,120,'] }[w.ptone] || [C.ink2, 'rgba(255,255,255,'];
+      [[w.over ? '예측한 때가 지났어요' : '예측한 때까지', w.left, '', w.over ? OG.red : OG.au],
+       ['목표까지', w.remain, w.nowgoal, OG.p],
+       ['예측 성공 확률', w.prob, '족집게(정확도 75%) 이상일 가능성', PC[0]]].forEach(function(b, i){
+        var bx = P + i * (bw3 + GAP), last = i === 2;
+        rr(x, bx, BY, bw3, BH, 16); x.fillStyle = last ? PC[1] + '.08)' : 'rgba(255,255,255,.045)'; x.fill();
+        x.strokeStyle = last ? PC[1] + '.4)' : C.line; x.lineWidth = 1.5; x.stroke();
+        dot(bx + 28, BY + 34, b[3]);
+        font(x, 700, 19); x.fillStyle = C.ink2; x.fillText(fit(x, b[0], bw3 - 60), bx + 42, BY + 41);
+        var fs = last ? 48 : 30; font(x, 800, fs, last ? MONO : null);
+        while (fs > 20 && x.measureText(b[1]).width > bw3 - 48){ fs -= 2; font(x, 800, fs, last ? MONO : null); }
+        x.fillStyle = last ? b[3] : C.ink; x.fillText(b[1], bx + 24, BY + (last ? 104 : 96));
+        if (b[2]){ font(x, 500, 17); x.fillStyle = C.ink3; x.fillText(fit(x, b[2], bw3 - 48), bx + 24, BY + 132); }
+      });
     }
 
     // 발
@@ -7122,9 +7139,9 @@ goTab(true,true);
     },
     // 예측의 신 기록 카드 하나 (형식은 drawOracle 위 주석, 글자는 oracle.js shareCard 가 만든다)
     oracle: function(d){
-      var text = [d.title, d.M, d.guess, d.note || ''].concat(d.mine.map(function(r){ return r.join(''); }))
-        .concat(d.done ? [d.done.acc, d.done.grade, d.done.actual, d.done.err] : []).concat(d.wait ? [d.wait.now, d.wait.goal, d.wait.left] : [])
-        .concat(d.ai ? [d.ai.when, d.ai.res] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다림 채점 안 함 등록 일시 등록 시 조회수 내다본 시간 내 예측 실제로 넘은 때 조회수 예측기 예상 지금 조회수 왔어요 예측한 때까지 예측한 때가 지났어요 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
+      var text = [d.title, d.M, d.guess, d.my.t].concat(d.mine.map(function(r){ return r.join(''); }))
+        .concat(d.done ? [d.done.acc, d.done.grade] : []).concat(d.wait ? [d.wait.left, d.wait.remain, d.wait.nowgoal, d.wait.prob] : [])
+        .concat(d.ai ? [d.ai.when, d.ai.sub] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 예측기 예상 내 예측 예측한 때까지 예측한 때가 지났어요 목표까지 예측 성공 확률 족집게(정확도 75%) 이상일 가능성 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
         'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
     },
@@ -9515,21 +9532,12 @@ goTab(true,true);
           : (x.ai === 0 ? '<b>닿기 어렵다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
             + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>'
               // 채점 기다림도 두 줄로 (같은 줄 카드끼리 높이가 같게): 남길 때 본 값 · 그때까지 남은 시간
-              : '<small>' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
+              : '<small>' + aiLine(x, now) + '</small>'))
         + '</div>';
     }
     // 내 예측 (예측기 예상과 같은 모양의 보라 상자): 고른 때 / 아랫줄 — 기다림: 예측기와 비교, 채점 끝: 실제와의 차이, 그 밖: 안내
-    var my;
-    if (j.st === 'done') my = '실제 <em>' + actual(j.c) + '</em> · '
-      + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측');
-    else if (j.st === 'void') my = '등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다 · 실제 ' + actual(j.c);
-    else if (j.st === 'gone') my = '이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다';
-    else if (x.ai == null) my = '예측기는 그때 기록이 모자라 비교할 수 없어요';
-    else if (x.ai === 0) my = '예측기는 닿기 어렵다고 봤어요';
-    else { var gp = x.ai - x.g;                                                   // 위 상자의 예측기 예상과 비교
-      my = Math.abs(gp) < 30 * 60e3 ? '<em class="eq">예측기와 내 예측이 거의 같아요</em>'
-        : gp < 0 ? '<em class="fast">예측기는 내 예측보다 ' + durTxt(-gp) + ' 빨라요</em>' : '<em class="slow">예측기는 내 예측보다 ' + durTxt(gp) + ' 느려요</em>'; }
-    h += '<div class="og-aip og-myp"><span class="og-aik"><i></i>내 예측</span><b>' + whenTxt(x.g) + '</b><small>' + my + '</small></div>';
+    var my = myLine(x, j), myH = my.tone ? '<em class="' + my.tone + '">' + esc(my.t) + '</em>' : esc(my.t);
+    h += '<div class="og-aip og-myp"><span class="og-aik"><i></i>내 예측</span><b>' + whenTxt(x.g) + '</b><small>' + myH + '</small></div>';
     // 남긴 기록(등록 일시 · 예측 당시 조회수) · 남은 시간 · 성공 확률
     h += '<div class="og-have og-mine">'
       + '<div class="og-myl">'
@@ -9550,6 +9558,19 @@ goTab(true,true);
     if (window.SGShare) h += '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>';
     return h + '</div></article>';
   }
+  // 내 예측 상자 아랫줄 { t: 글, tone: fast · slow · eq } — 기다림: 위 상자 예측기 예상(x.ai)과 비교, 채점 끝: 실제와 차이, 그 밖: 안내
+  function myLine(x, j){
+    if (j.st === 'done') return { t: '실제 ' + actual(j.c) + ' · ' + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') };
+    if (j.st === 'void') return { t: '등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다 · 실제 ' + actual(j.c) };
+    if (j.st === 'gone') return { t: '이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다' };
+    if (x.ai == null) return { t: '예측기는 그때 기록이 모자라 비교할 수 없어요' };
+    if (x.ai === 0) return { t: '예측기는 닿기 어렵다고 봤어요' };
+    var gp = x.ai - x.g;
+    return Math.abs(gp) < 30 * 60e3 ? { t: '예측기와 내 예측이 거의 같아요', tone: 'eq' }
+      : gp < 0 ? { t: '예측기는 내 예측보다 ' + durTxt(-gp) + ' 빨라요', tone: 'fast' } : { t: '예측기는 내 예측보다 ' + durTxt(gp) + ' 느려요', tone: 'slow' };
+  }
+  // 예측기 예상 상자 아랫줄 (기다림)
+  function aiLine(x, now){ return x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남'; }
   // 채점 기다림 카드 아래 상자 (사용자 요청 9/24): [목표까지 N 남음 ··· 지금 / 목표] + 예측 성공 확률
   //   성공 = 정확도 75%(족집게) 이상 = 실제로 넘는 때 c 가 [등록 + (고른 때 − 등록) ÷ 1.25, 등록 + (고른 때 − 등록) ÷ 0.75] 안.
   //   c 의 분포: ③ 추세 곡선으로 본 도달까지 날 수 T 를 로그정규로 — 가운데 = 지금 k 로 본 T, 폭(σ) = k ± 0.15 로 본 T 의 차이(최소 0.2).
@@ -9566,9 +9587,10 @@ goTab(true,true);
     function cdf(ms){ var t = (ms - last) / D; return t <= 0 ? 0 : 0.5 * (1 + erf((Math.log(t) - Math.log(d)) / (sg * Math.SQRT2))); }
     return Math.max(0, cdf(x.at + gu / 0.75) - cdf(x.at + gu / 1.25));
   }
+  function chancePct(x, j){ var p = winChance(x, j.v); return p == null ? null : Math.max(1, Math.min(99, Math.round(p * 100))); }
+  function chanceTone(pc){ return pc == null ? '' : pc >= 60 ? 'hi' : pc >= 30 ? 'mid' : 'lo'; }
   function progress(x, j){
-    var p = winChance(x, j.v), pc = p == null ? null : Math.max(1, Math.min(99, Math.round(p * 100)));
-    var tone = pc == null ? '' : pc >= 60 ? 'hi' : pc >= 30 ? 'mid' : 'lo';
+    var pc = chancePct(x, j), tone = chanceTone(pc);
     return '<div class="og-prg"><div class="og-prgh"><span>목표까지 <b>' + V.fmt(Math.max(0, x.M - j.now)) + '</b> 남음</span>'
       + '<span class="og-prgv">지금 ' + V.fmt(j.now) + ' / ' + V.fmtM(x.M) + '</span></div>'
       + '<div class="og-prgp ' + tone + '"><span>예측 성공 확률</span><b>' + (pc == null ? '—' : pc + '%') + '</b></div>'
@@ -9578,22 +9600,23 @@ goTab(true,true);
   // 기록 카드 [공유하기] → 공유 카드 이미지 (tools/share.js SGShare.oracle). 누른 때 기준으로 고정
   var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
   var GC = { god: '#f0c75e', seer: '#cdb9ff', hit: '#6fe0b3', ok: '#8cc8f5', meh: '#aeaeb2', miss: '#8e8e93' };   // 등급 색 (theme.css #v-oracle [data-g])
+  // 화면 카드와 같은 짜임(9/24): 예측기 예상 상자 · 내 예측 상자(아랫줄 비교 · 등록 일시 · 예측 당시 조회수) · 기다림이면 [남은 시간 | 목표까지 | 성공 확률]
   function shareCard(x){
-    var j = judge(x), v = j.v, now = Date.now();
+    var j = judge(x), v = j.v, now = Date.now(), my = myLine(x, j);
     var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
-    var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '닿기 어렵다고 봄' : whenTxt(x.ai);
     var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
-      mine: [['등록 일시', whenTxt(x.at)], ['예측 당시 조회수', V.fmtM(x.v0)]], done: null, wait: null, ai: null };
-    if (j.st === 'done'){
-      d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k], actual: actual(j.c),
-        err: Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측' };
-      d.ai = { when: ai, res: x.ai == null ? '대결 없음' : '정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '내가 이김' : j.win < 0 ? '예측기가 이김' : '무승부') };
-    } else if (j.st === 'wait'){
-      var left = x.g - now;
-      d.wait = { now: V.fmtM(j.now), goal: V.fmtM(x.M), f: Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), over: left <= 0,
-        left: left > 0 ? durTxt(left) + ' 남음' : durTxt(-left) + ' 지났는데 아직 못 넘음' };
-      d.ai = { when: ai };
-    } else d.note = j.st === 'void' ? '예측을 남기기 전에 이미 넘어서 채점하지 않습니다 · 실제 ' + actual(j.c) : '이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다';
+      my: { t: my.t, tone: my.tone || '' }, mine: [['등록 일시', whenTxt(x.at)], ['예측 당시 조회수', V.fmtM(x.v0)]], done: null, wait: null, ai: null };
+    if (j.st === 'wait' || j.st === 'done')
+      d.ai = { when: x.ai == null ? '계산 전' : x.ai === 0 ? '닿기 어렵다고 봄' : whenTxt(x.ai),
+        sub: x.ai == null ? (j.st === 'done' ? '대결 없음' : '')
+          : j.st === 'done' ? '정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '내가 이김' : j.win < 0 ? '예측기가 이김' : '무승부') : aiLine(x, now) };
+    if (j.st === 'done') d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k] };
+    else if (j.st === 'wait'){
+      var left = x.g - now, pc = chancePct(x, j);
+      d.wait = { left: left > 0 ? durTxt(left) + ' 남음' : durTxt(-left) + ' 지남', over: left <= 0,
+        remain: V.fmt(Math.max(0, x.M - j.now)) + ' 남음', nowgoal: '지금 ' + V.fmt(j.now) + ' / ' + V.fmtM(x.M),
+        prob: pc == null ? '—' : pc + '%', ptone: chanceTone(pc) };
+    }
     return d;
   }
   // 카운트다운 LED 숫자 (채점 기다림 카드) — 사용자 요청 "점(LED, 노랑) 숫자 시계", 꾸밈(시한폭탄 판 · 전선)은 빼고 숫자만
