@@ -2231,3 +2231,26 @@ html.shr-on{overflow:hidden}
 .og-myp .og-aik i{background:var(--og);box-shadow:0 0 6px rgba(169,139,255,.6)}
 .og-myp small em{font-style:normal;font-weight:700}
 .og-myp small em.fast{color:#6fe0b3}.og-myp small em.slow{color:#ff9a9a}.og-myp small em.eq{color:var(--au)}
+/* 홈 머리 소개 강조 상자 (shell-top.html .intro.hi) — 흐르는 그라데이션 테두리 + 은은한 빛 */
+@property --hia{syntax:"<angle>";inherits:false;initial-value:0deg}
+.home .intro.hi{position:relative;margin:0 0 22px;padding:20px 22px 18px;border-radius:18px;isolation:isolate;
+  background:linear-gradient(135deg,rgba(233,99,135,.12),rgba(160,128,208,.1) 60%,rgba(255,255,255,.03)),var(--bg);
+  box-shadow:0 10px 34px rgba(233,99,135,.12),inset 0 1px 0 rgba(255,255,255,.06)}
+.home .intro.hi::before{content:"";position:absolute;inset:0;padding:1.5px;border-radius:inherit;z-index:-1;
+  background:conic-gradient(from var(--hia),#e96387,#c1a8ea,#f6a6c1,#a080d0,#e96387);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:hiSpin 8s linear infinite}
+.home .intro.hi::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:radial-gradient(420px 120px at 12% 0%,rgba(233,99,135,.2),transparent 70%)}
+@keyframes hiSpin{to{--hia:360deg}}
+.hi p{margin:0}
+.hi-t{font-size:clamp(17px,2.2vw,21px);font-weight:800;line-height:1.5;letter-spacing:-.01em;color:var(--ink);word-break:keep-all}
+.hi-t em{font-style:normal;background:linear-gradient(90deg,#f28aa7,#c1a8ea);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hi-d{margin-top:10px!important;font-size:14px;line-height:2;color:var(--ink2);word-break:keep-all}
+.hi-c{display:inline-block;margin:0 1px;padding:1px 10px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.7;text-decoration:none;
+  color:var(--pink-t);background:var(--pink-soft);border:1px solid rgba(233,99,135,.4);transition:background .15s,transform .15s}
+.hi-c:hover{background:rgba(233,99,135,.26);transform:translateY(-1px)}
+.hi-s{display:flex;align-items:center;gap:7px;margin-top:8px!important;padding-top:10px;border-top:1px dashed rgba(255,255,255,.1);font-size:12.5px;color:var(--ink3)}
+.hi-s i{font-style:normal;color:#ffd36b;text-shadow:0 0 8px rgba(255,211,107,.6);animation:hiTw 2.4s ease-in-out infinite}
+@keyframes hiTw{50%{opacity:.35;transform:scale(.8)}}
+@media (prefers-reduced-motion:reduce){.home .intro.hi::before,.hi-s i{animation:none}}
