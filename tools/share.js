@@ -305,7 +305,7 @@
     var TX = P, TY = 100, TW = 400, TH = 225;
     var AY = TY + TH + 26, AH = d.ai ? 74 : 0;                                      // 예측기 예상
     var MY = AY + (AH ? AH + 14 : 0), MH = 152;                                     // 내 예측
-    var BY = MY + MH + 14, BH = d.wait ? 150 : 0;                                   // 기다림: 남은 시간 · 목표까지 · 성공 확률
+    var BY = MY + MH + 14, BH = d.wait ? 172 : 0;                                   // 기다림: 남은 시간 · 목표까지 · 성공 확률
     var HH = BY + (BH ? BH + 14 : 0) + 64;
     var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
     var x = cv.getContext('2d'); x.scale(SC, SC);
@@ -387,16 +387,17 @@
       var PC = { hi: [OG.mint, 'rgba(111,224,179,'], mid: [OG.au, 'rgba(240,199,94,'], lo: [OG.red, 'rgba(255,120,120,'] }[w.ptone] || [C.ink2, 'rgba(255,255,255,'];
       [[w.over ? '예측한 때가 지났어요' : '예측한 때까지', w.left, '', w.over ? OG.red : OG.au],
        ['목표까지', w.remain, w.nowgoal, OG.p],
-       ['예측 성공 확률', w.prob, '족집게(정확도 75%) 이상일 가능성', PC[0]]].forEach(function(b, i){
+       ['예측 성공 확률', w.prob, '족집게(정확도 75%) 이상일 확률', PC[0]]].forEach(function(b, i){
         var bx = P + i * (bw3 + GAP), last = i === 2;
         rr(x, bx, BY, bw3, BH, 16); x.fillStyle = last ? PC[1] + '.08)' : 'rgba(255,255,255,.045)'; x.fill();
         x.strokeStyle = last ? PC[1] + '.4)' : C.line; x.lineWidth = 1.5; x.stroke();
-        dot(bx + 28, BY + 34, b[3]);
-        font(x, 700, 19); x.fillStyle = C.ink2; x.fillText(fit(x, b[0], bw3 - 60), bx + 42, BY + 41);
-        var fs = last ? 48 : 30; font(x, 800, fs, last ? MONO : null);
-        while (fs > 20 && x.measureText(b[1]).width > bw3 - 48){ fs -= 2; font(x, 800, fs, last ? MONO : null); }
-        x.fillStyle = last ? b[3] : C.ink; x.fillText(b[1], bx + 24, BY + (last ? 104 : 96));
-        if (b[2]){ font(x, 500, 17); x.fillStyle = C.ink3; x.fillText(fit(x, b[2], bw3 - 48), bx + 24, BY + 132); }
+        // 제목 → 바로 아래 설명(잘 보이게, 사용자 요청 9/24) → 큰 값
+        dot(bx + 28, BY + 36, b[3]);
+        font(x, 800, 22); x.fillStyle = C.ink; x.fillText(fit(x, b[0], bw3 - 62), bx + 44, BY + 44);
+        if (b[2]){ font(x, 600, 20); x.fillStyle = C.ink2; x.fillText(fit(x, b[2], bw3 - 48), bx + 24, BY + 80); }
+        var fs = last ? 60 : 40; font(x, 800, fs, last ? MONO : null);
+        while (fs > 22 && x.measureText(b[1]).width > bw3 - 48){ fs -= 2; font(x, 800, fs, last ? MONO : null); }
+        x.fillStyle = last ? b[3] : C.ink; x.fillText(b[1], bx + 24, BY + BH - 30);
       });
     }
 
@@ -561,7 +562,7 @@
     oracle: function(d){
       var text = [d.title, d.M, d.guess, d.my.t].concat(d.mine.map(function(r){ return r.join(''); }))
         .concat(d.done ? [d.done.acc, d.done.grade] : []).concat(d.wait ? [d.wait.left, d.wait.remain, d.wait.nowgoal, d.wait.prob] : [])
-        .concat(d.ai ? [d.ai.when, d.ai.sub] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 예측기 예상 내 예측 예측한 때까지 예측한 때가 지났어요 목표까지 예측 성공 확률 족집게(정확도 75%) 이상일 가능성 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
+        .concat(d.ai ? [d.ai.when, d.ai.sub] : []).join('') + '센둥이 시뮬레이터 예측의 신 기준 예측 정확도 채점 기다리는 중 채점하지 않음 예측기 예상 내 예측 예측한 때까지 예측한 때가 지났어요 목표까지 예측 성공 확률 족집게(정확도 75%) 이상일 확률 정확도 = 100% − 오차 ÷ 기간 (등록 일시부터 실제로 넘은 때까지)';
       open(function(){ return loadImg(d.thumbs).then(function(im){ return drawOracle(d, im); }); },
         'sendungi-oracle-' + (d.id || 'x') + '-' + fileStamp(d.at) + '.png', text);
     },
