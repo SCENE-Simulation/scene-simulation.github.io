@@ -304,7 +304,7 @@
     var P = 48, AW = W - P * 2;
     var TX = P, TY = 100, TW = 400, TH = 225;
     var AY = TY + TH + 26, AH = d.ai ? 74 : 0;                                      // 예측기 예상
-    var MY = AY + (AH ? AH + 14 : 0), MH = 196;                                     // 내 예측
+    var MY = AY + (AH ? AH + 14 : 0), MH = 152;                                     // 내 예측
     var BY = MY + MH + 14, BH = d.wait ? 150 : 0;                                   // 기다림: 남은 시간 · 목표까지 · 성공 확률
     var HH = BY + (BH ? BH + 14 : 0) + 64;
     var cv = document.createElement('canvas'); cv.width = W * SC; cv.height = HH * SC;
@@ -358,24 +358,28 @@
       x.textBaseline = 'alphabetic';
     }
 
-    // 내 예측 (보라 상자): 이름 · 고른 때(크게) / 아랫줄(예측기와 비교 · 실제와 차이) / 등록 일시 · 예측 당시 조회수
+    // 내 예측 (보라 상자, 두 열 — 사용자 요청 9/24): 왼쪽 [● 내 예측 · 고른 때(크게) / 아랫줄(예측기와 비교 · 실제와 차이)]
+    //   오른쪽 [등록 일시 / 예측 당시 조회수] 위아래 두 칸 (이름 왼쪽 · 값 오른쪽)
     rr(x, P, MY, AW, MH, 18); x.fillStyle = 'rgba(169,139,255,.1)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.45)'; x.lineWidth = 1.5; x.stroke();
+    var CW2 = 380, CX = P + AW - 18 - CW2, CY = MY + 18, CHh = MH - 36, LW = CX - P - 26 - 22;
     x.textBaseline = 'middle';
-    dot(P + 28, MY + 38, OG.p);
-    font(x, 800, 21); x.fillStyle = OG.pt; x.fillText('내 예측', P + 44, MY + 38);
-    var kw = x.measureText('내 예측').width;
-    font(x, 800, 38); x.fillStyle = C.ink; x.fillText(fit(x, d.guess, AW - kw - 90), P + 44 + kw + 20, MY + 40);
+    dot(P + 28, MY + 52, OG.p);
+    font(x, 800, 21); x.fillStyle = OG.pt; x.fillText('내 예측', P + 44, MY + 52);
+    var kw = x.measureText('내 예측').width, gfs = 38; font(x, 800, gfs);
+    while (gfs > 26 && x.measureText(d.guess).width > LW - kw - 38){ gfs -= 2; font(x, 800, gfs); }
+    x.fillStyle = C.ink; x.fillText(fit(x, d.guess, LW - kw - 38), P + 44 + kw + 18, MY + 54);
     font(x, 700, 21); x.fillStyle = d.my.tone === 'fast' ? OG.mint : d.my.tone === 'slow' ? OG.red : d.my.tone === 'eq' ? OG.au : C.ink2;
-    x.fillText(fit(x, d.my.t, AW - 52), P + 26, MY + 84);
-    x.textBaseline = 'alphabetic';
-    var CY = MY + 108, CHh = 70, cw = (AW - 52) / d.mine.length;
-    rr(x, P + 26, CY, AW - 52, CHh, 12); x.fillStyle = 'rgba(0,0,0,.22)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.2)'; x.lineWidth = 1; x.stroke();
+    x.fillText(fit(x, d.my.t, LW), P + 26, MY + 104);
+    rr(x, CX, CY, CW2, CHh, 12); x.fillStyle = 'rgba(0,0,0,.22)'; x.fill(); x.strokeStyle = 'rgba(169,139,255,.2)'; x.lineWidth = 1; x.stroke();
+    var rh = CHh / d.mine.length;
     d.mine.forEach(function(r, i){
-      var cx = P + 26 + i * cw;
-      if (i){ x.strokeStyle = 'rgba(169,139,255,.25)'; x.setLineDash([4, 4]); x.beginPath(); x.moveTo(cx, CY + 10); x.lineTo(cx, CY + CHh - 10); x.stroke(); x.setLineDash([]); }
-      font(x, 600, 17); x.fillStyle = C.ink3; x.fillText(r[0], cx + 18, CY + 28);
-      font(x, 700, 22); x.fillStyle = C.ink; x.fillText(fit(x, r[1], cw - 36), cx + 18, CY + 56);
+      var ry2 = CY + i * rh + rh / 2;
+      if (i){ x.strokeStyle = 'rgba(169,139,255,.25)'; x.setLineDash([4, 4]); x.beginPath(); x.moveTo(CX + 14, CY + i * rh); x.lineTo(CX + CW2 - 14, CY + i * rh); x.stroke(); x.setLineDash([]); }
+      font(x, 600, 17); x.fillStyle = C.ink3; x.fillText(r[0], CX + 18, ry2);
+      var lw2 = x.measureText(r[0]).width;
+      font(x, 700, 21); x.fillStyle = C.ink; x.textAlign = 'right'; x.fillText(fit(x, r[1], CW2 - 54 - lw2), CX + CW2 - 18, ry2); x.textAlign = 'left';
     });
+    x.textBaseline = 'alphabetic';
 
     // 기다림: [예측한 때까지 | 목표까지 | 예측 성공 확률]
     if (d.wait){
