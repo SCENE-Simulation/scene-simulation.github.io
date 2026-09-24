@@ -41,4 +41,4 @@ node tools/build.js tools/source.html index.html
 - `tools/shell-top.html` · `tools/shell-bottom.html` · `tools/shell.js` — 사이드바 · 홈 · 메뉴 이동
 - `tools/collect-views.js` — 조회수 수집기 (GitHub Actions `.github/workflows/collect-views.yml` 이 15분마다 실행, 기록은 `data` 브랜치의 `views.json`)
 
-MADE BY 비효율주의자 OF 여자 아이돌 컨텐츠 마이너갤러리
+MADE BY 비효율주의자 OF 여자아이돌 라이브 마이너갤러리
