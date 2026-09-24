@@ -1,0 +1,5 @@
+# GitHub Pages(Jekyll): 사이트 주소로 내줄 필요가 없는 파일은 빼고 배포한다
+exclude:
+  - CLAUDE.md
+  - README.md
+  - collector

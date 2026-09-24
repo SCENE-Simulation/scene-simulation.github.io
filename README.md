@@ -20,25 +20,4 @@
 사이트가 업데이트되어도 기록은 그대로 남습니다. 다만 인터넷 기록을 지우거나 기기 · 브라우저를 바꾸면 사라지니, 가끔 **기록 백업**으로 파일을 저장해 두세요. 백업 파일로 다른 기기에 옮길 수도 있습니다.
 조회수 예측은 비전문가가 만든 계산식이므로 재미로만 참고해 주세요.
 
-## 수정 방법
-
-`index.html` 은 `tools/` 의 파일들로 만들어집니다. `index.html` 을 직접 고치지 말고 `tools/` 를 고친 뒤 다시 만듭니다.
-
-```
-node tools/build.js tools/source.html index.html
-```
-
-- `tools/source.html` — 원본 페이지 (405빵 카드 데이터 · 컬렉션 북)
-- `tools/collection.js` · `tools/collections.js` — 포토카드 도감 엔진과 콜라보별 설정 (설정 형식은 `collection.js` 맨 위 주석)
-- `tools/pages.js` — 굿즈 · 전체보기 · 위시리스트 페이지 (굿즈 컬렉션은 `GCOLS`)
-- `tools/gacha.js` — 포토카드 뽑기 시뮬레이터 · 뽑기 미니게임
-- `tools/views.js` · `tools/views-engine.js` — 조회수 예측기 화면과 계산식
-- `tools/oracle.js` — 예측의 신
-- `tools/backup.js` — 기록 백업 (저장 · 불러오기)
-- `tools/cards.lock.json` — 카드 잠금. 빌드할 때 카드 순서 · id 가 바뀌어 이용자 기록이 엉뚱한 카드에 붙지 않는지 검사합니다 (카드는 맨 뒤에만 추가)
-- `tools/share.js` — 공유 카드(이미지) 만들기
-- `tools/theme.css` — 디자인
-- `tools/shell-top.html` · `tools/shell-bottom.html` · `tools/shell.js` — 사이드바 · 홈 · 메뉴 이동
-- `tools/collect-views.js` — 조회수 수집기 (GitHub Actions `.github/workflows/collect-views.yml` 이 15분마다 실행, 기록은 `data` 브랜치의 `views.json`)
-
 MADE BY 비효율주의자 OF 여자아이돌 라이브 마이너갤러리

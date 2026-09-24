@@ -25,11 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: 수집 스크립트 (main 의 tools/)
+      - name: 수집 스크립트 (main 의 collector/)
         uses: actions/checkout@v4
         with:
           path: site
-          sparse-checkout: tools
+          sparse-checkout: collector
           persist-credentials: false   # 스크립트만 읽는 checkout — 쓰기 토큰을 남기지 않는다 (push 는 아래 store 에서만)
 
       - name: 기록 (data 브랜치)
@@ -42,7 +42,7 @@ jobs:
         env:
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
           FULL: ${{ inputs.full && '1' || '' }}
-        run: node site/tools/collect-views.js store/views.json
+        run: node site/collector/collect.js store/views.json
 
       - name: 기록 올리기
         working-directory: store
