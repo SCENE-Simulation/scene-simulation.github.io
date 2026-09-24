@@ -330,13 +330,15 @@
     }
     if (!isNaN(g) && !far){
       var gx = X(g), anc = gx > W - 60 ? 'end' : 'start', tx = anc === 'end' ? gx - 4 : gx + 4;
+      var gy = Y(M);                                                               // 목표선과 만나는 곳: 금색 다이아몬드
       s += '<line class="og-gg" x1="' + f(gx) + '" y1="' + (T - 4) + '" x2="' + f(gx) + '" y2="' + (Hh - B) + '"/>'
+        + '<path class="og-ggd" d="M' + f(gx) + ' ' + f(gy - 5.5) + 'L' + f(gx + 5.5) + ' ' + f(gy) + 'L' + f(gx) + ' ' + f(gy + 5.5) + 'L' + f(gx - 5.5) + ' ' + f(gy) + 'Z"/>'
         + '<text class="og-ggt" x="' + f(tx) + '" y="' + (T - 8) + '" text-anchor="' + anc + '">' + '내 예측' + '</text>';
     }
     else if (far) s += '<text class="og-ggt" x="' + (W - R) + '" y="' + (T - 8) + '" text-anchor="end">' + '내 예측' + ' ' + dayTxt(g) + ' →</text>';
     return s + '</svg><div class="og-glg"><span><i class="l"></i>실제 조회수</span>' + (perMs > 0 ? '<span><i class="e"></i>지금 속도로</span>' : '')
       + '<span><i class="m"></i>목표</span>' + (act ? '<span><i class="c"></i>실제 돌파</span>' : '')
-      + (ai >= t0 && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + '내 예측' + '</span>' : '') + '</div>';
+      + (ai >= t0 && ai <= t1 ? '<span><i class="a"></i>예측기 예상</span>' : '') + (!isNaN(g) ? '<span><i class="g"></i>' + '내 예측' + '</span>' + (far ? '' : '<span><i class="gd"></i>내 예측 돌파</span>') : '') + '</div>';
   }
   function submit(c){
     var vid = c.getAttribute('data-vid'), v = byId(vid), d = DRAFT[vid], r = check(d && d.val);
@@ -389,7 +391,7 @@
           : (x.ai === 0 ? '<b>닿기 어렵다고 봄</b>' : '<b>' + whenTxt(x.ai) + '</b>')
             + (j.st === 'done' ? '<small>정확도 ' + pct(j.ai) + ' · ' + (j.win > 0 ? '<em class="w">내가 이김</em>' : j.win < 0 ? '<em class="l">예측기가 이김</em>' : '<em>무승부</em>') + '</small>'
               // 채점 기다림도 두 줄로 (같은 줄 카드끼리 높이가 같게): 남길 때 본 값 · 그때까지 남은 시간
-              : '<small>남길 때 계산 · ' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
+              : '<small>' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
         + '</div>';
     }
     // 내 예측
@@ -398,24 +400,38 @@
     h += '<div class="og-have og-mine"><div class="og-myh"><span class="og-myk">내 예측</span><b>' + whenTxt(x.g) + '</b></div>'
       + '<div class="og-myl">'
       + '<div><small>등록 일시</small><b>' + whenTxt(x.at) + '</b></div>'
-      + '<div><small>등록 시 조회수</small><b>' + V.fmtM(x.v0) + '</b></div>'
-      + '<div><small>내다본 시간</small><b>' + durTxt(x.g - x.at) + '</b></div></div>';
+      + '<div><small>예측 당시 조회수</small><b>' + V.fmtM(x.v0) + '</b></div></div>';
     if (j.st === 'wait'){
       var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
       h += '<div class="og-flw' + (left > 0 ? '' : ' over') + '">'
         + '<small class="og-flh">' + (left > 0 ? '예측한 때까지 남은 시간' : '예측한 때가 ' + durTxt(-left) + ' 지났는데 아직 못 넘음') + '</small>'
-        + led(x.g, left <= 0) + '<span class="og-clkv"><i></i>조회수 ' + V.fmtM(x.v0) + ' → ' + V.fmtM(x.M) + ' <em>' + pct(f) + '</em></span></div>';
+        + led(x.g, left <= 0) + progress(x, j, f) + '</div>';
     }
     else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
       + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
     else if (j.st === 'void') h += '<small>예측을 등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
     else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
-    h += '</div><div class="og-lf">' + (window.SGShare ? '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>' : '');
+    h += '</div><div class="og-lf">';
     // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
     if (DELK === x.k) h += '<span class="og-cf"><small>이 예측을 지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
       + '<button type="button" class="og-no" data-og-no>취소</button></span>';
     else h += '<button type="button" class="og-del" data-og-del="' + esc(x.k) + '">지우기</button>';
+    // 공유하기는 오른쪽 끝 (사용자 요청: 지우기 ↔ 공유하기 자리 바꿈)
+    if (window.SGShare) h += '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>';
     return h + '</div></article>';
+  }
+  // 채점 기다림 카드의 조회수 진행 (사용자 요청 "978만 → 1,000만 2% 는 직관성이 떨어짐"):
+  //   머리 [목표까지 N 남음 ··· 진행 %] / 막대(예측 당시 → 목표, 채운 곳 = 지금) / 눈금 [예측 당시 · 지금 · 목표]
+  //   / 한 줄: 최근 하루 속도(③ plan.g)로 가면 언제 닿는지와 내 예측보다 빠른지 느린지
+  function progress(x, j, f){
+    var P = V.plan(j.v), rate = P && P.g > 0 ? P.g / D : 0, now = Date.now(), eta = rate ? now + (x.M - j.now) / rate : NaN, gap = eta - x.g;
+    var pace = !rate ? '최근 증가 속도를 아직 계산할 수 없습니다'
+      : '지금 속도라면 <b>' + whenTxt(eta) + '</b>쯤 닿아요' + (Math.abs(gap) < 30 * 60e3 ? '<em class="eq">내 예측과 거의 같아요</em>'
+        : gap < 0 ? '<em class="fast">내 예측보다 ' + durTxt(-gap) + ' 빨라요</em>' : '<em class="slow">내 예측보다 ' + durTxt(gap) + ' 늦어요</em>');
+    return '<div class="og-prg"><div class="og-prgh"><span>목표까지 <b>' + V.fmt(Math.max(0, x.M - j.now)) + '</b> 남음</span><em>' + pct(f) + '</em></div>'
+      + '<div class="og-prgb"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
+      + '<div class="og-prgs"><span>예측 당시 ' + V.fmtM(x.v0) + '</span><span class="n">지금 ' + V.fmt(j.now) + '</span><span>목표 ' + V.fmtM(x.M) + '</span></div>'
+      + '<small class="og-prgn">' + pace + '</small></div>';
   }
   // 기록 카드 [공유하기] → 공유 카드 이미지 (tools/share.js SGShare.oracle). 누른 때 기준으로 고정
   var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
@@ -425,7 +441,7 @@
     var th = v && !V.demo() ? ['https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/maxresdefault.jpg', 'https://i.ytimg.com/vi/' + encodeURIComponent(v.id) + '/hqdefault.jpg', V.thumb(v)] : [];
     var ai = x.ai == null ? '계산 전' : x.ai === 0 ? '닿기 어렵다고 봄' : whenTxt(x.ai);
     var d = { id: x.id, at: now, title: x.t, thumbs: th, hue: (v && v.hue) || 270, M: V.fmtM(x.M) + ' 돌파', st: j.st, guess: whenTxt(x.g),
-      mine: [['등록 일시', whenTxt(x.at)], ['등록 시 조회수', V.fmtM(x.v0)], ['내다본 시간', durTxt(x.g - x.at)]], done: null, wait: null, ai: null };
+      mine: [['등록 일시', whenTxt(x.at)], ['예측 당시 조회수', V.fmtM(x.v0)]], done: null, wait: null, ai: null };
     if (j.st === 'done'){
       d.done = { acc: pct(j.acc), grade: j.gr.n, gc: GC[j.gr.k], actual: actual(j.c),
         err: Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측' };
