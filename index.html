@@ -2395,16 +2395,27 @@ animation:hiSpin 8s linear infinite}
 background:radial-gradient(420px 120px at 12% 0%,rgba(233,99,135,.2),transparent 70%)}
 @keyframes hiSpin{to{--hia:360deg}}
 .hi p{margin:0}
-.hi-t{font-size:clamp(17px,2.2vw,21px);font-weight:800;line-height:1.5;letter-spacing:-.01em;color:var(--ink);word-break:keep-all}
-.hi-t em{font-style:normal;background:linear-gradient(90deg,#f28aa7,#c1a8ea);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hi-d{margin-top:10px!important;font-size:14px;line-height:2;color:var(--ink2);word-break:keep-all}
-.hi-c{display:inline-block;margin:0 1px;padding:1px 10px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.7;text-decoration:none;
+.hi-t{font-size:clamp(18px,2.3vw,22px);font-weight:800;line-height:1.5;letter-spacing:-.01em;color:var(--ink);word-break:keep-all}
+.hi-t em{font-style:normal;background:linear-gradient(90deg,#f28aa7,#c1a8ea);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.hi-d{margin-top:12px!important;font-size:15.5px;font-weight:500;line-height:2.05;color:var(--ink);word-break:keep-all}
+.hi .hi-nw{white-space:nowrap}
+.hi-c{display:inline-block;margin:0 1px;padding:2px 12px;border-radius:999px;font-size:14.5px;font-weight:700;line-height:1.7;text-decoration:none;
 color:var(--pink-t);background:var(--pink-soft);border:1px solid rgba(233,99,135,.4);transition:background .15s,transform .15s}
 .hi-c:hover{background:rgba(233,99,135,.26);transform:translateY(-1px)}
-.hi-s{display:flex;align-items:center;gap:7px;margin-top:8px!important;padding-top:10px;border-top:1px dashed rgba(255,255,255,.1);font-size:12.5px;color:var(--ink3)}
+.hi-s{display:flex;align-items:center;gap:8px;margin-top:10px!important;padding-top:12px;border-top:1px dashed rgba(193,168,234,.28);font-size:14px;font-weight:500;line-height:1.55;color:#e6dbff;word-break:keep-all}
 .hi-s i{font-style:normal;color:#ffd36b;text-shadow:0 0 8px rgba(255,211,107,.6);animation:hiTw 2.4s ease-in-out infinite}
 @keyframes hiTw{50%{opacity:.35;transform:scale(.8)}}
-@media (prefers-reduced-motion:reduce){.home .intro.hi::before,.hi-s i{animation:none}}</style>
+@media (prefers-reduced-motion:reduce){.home .intro.hi::before,.hi-s i{animation:none}}
+@media (max-width:560px){
+.home .intro.hi{padding:18px 16px 16px}
+.hi-t{font-size:18.5px}
+.hi-d{font-size:15px;line-height:1.6}
+.hi-d .hi-dk{display:block;margin-bottom:8px}
+.hi-d .hi-cs{display:flex;flex-wrap:wrap;align-items:center;gap:8px 6px}
+.hi-c{font-size:14px;padding:3px 12px}
+.hi-s{align-items:flex-start;font-size:13.5px}
+.hi-s i{margin-top:1px}
+}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -2477,8 +2488,9 @@ color:var(--pink-t);background:var(--pink-soft);border:1px solid rgba(233,99,135
   <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
   
   <div class="intro hi">
-    <p class="hi-t">아이돌 그룹 리센느와 관련된 <em>덕질을 더 재미있게</em> 하기 위한 도구를 모아 둔 사이트입니다.</p>
-    <p class="hi-d">대표적인 기능으로는 <a class="hi-c" href="?tab=allgoods" data-tab="allgoods">굿즈</a>, <a class="hi-c" href="?tab=allcards" data-tab="allcards">포토카드 컬렉션 북</a>, <a class="hi-c" href="?tab=views" data-tab="views">조회수 예측기</a>가 있습니다.</p>
+    <p class="hi-t">아이돌 그룹 리센느와 관련된 <em>덕질을 더 재미있게</em> 하기 위한 도구를 <span class="hi-nw">모아 둔 사이트입니다.</span></p>
+    
+    <p class="hi-d"><span class="hi-dk">대표적인 기능으로는</span> <span class="hi-cs"><span class="hi-nw"><a class="hi-c" href="?tab=allgoods" data-tab="allgoods">굿즈</a>,</span> <span class="hi-nw"><a class="hi-c" href="?tab=allcards" data-tab="allcards">포토카드 컬렉션 북</a>,</span> <span class="hi-nw"><a class="hi-c" href="?tab=views" data-tab="views">조회수 예측기</a>가 있습니다.</span></span></p>
     <p class="hi-s"><i aria-hidden="true">✦</i>이외 다양한 미니 게임이나 기능들이 추가될 예정입니다.</p>
   </div>
 
