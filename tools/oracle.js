@@ -394,23 +394,29 @@
               : '<small>' + (x.ai === 0 ? '대결에서 정확도 0%' : x.ai > now ? '지금부터 ' + durTxt(x.ai - now) + ' 뒤' : durTxt(now - x.ai) + ' 지남') + '</small>'))
         + '</div>';
     }
-    // 내 예측
-    // 머리 줄: 내 예측 ··· 남긴 때 (사용자 요청으로 카드 머리에서 이 상자 안으로)
-    // 머리: [내 예측] 고른 때 한 줄 / 남긴 기록 줄: 남긴 때 · 그때 조회수 · 몇 시간 앞을 내다봤는지 (사용자 요청 — 남긴 로그도 중요)
-    h += '<div class="og-have og-mine"><div class="og-myh"><span class="og-myk">내 예측</span><b>' + whenTxt(x.g) + '</b></div>'
+    // 내 예측 (예측기 예상과 같은 모양의 보라 상자): 고른 때 / 아랫줄 — 기다림: 예측기와 비교, 채점 끝: 실제와의 차이, 그 밖: 안내
+    var my;
+    if (j.st === 'done') my = '실제 <em>' + actual(j.c) + '</em> · '
+      + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측');
+    else if (j.st === 'void') my = '등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다 · 실제 ' + actual(j.c);
+    else if (j.st === 'gone') my = '이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다';
+    else if (x.ai == null) my = '예측기는 그때 기록이 모자라 비교할 수 없어요';
+    else if (x.ai === 0) my = '예측기는 닿기 어렵다고 봤어요';
+    else { var gp = x.ai - x.g;                                                   // 위 상자의 예측기 예상과 비교
+      my = Math.abs(gp) < 30 * 60e3 ? '<em class="eq">예측기와 내 예측이 거의 같아요</em>'
+        : gp < 0 ? '<em class="fast">예측기는 내 예측보다 ' + durTxt(-gp) + ' 빨라요</em>' : '<em class="slow">예측기는 내 예측보다 ' + durTxt(gp) + ' 느려요</em>'; }
+    h += '<div class="og-aip og-myp"><span class="og-aik"><i></i>내 예측</span><b>' + whenTxt(x.g) + '</b><small>' + my + '</small></div>';
+    // 남긴 기록(등록 일시 · 예측 당시 조회수) · 남은 시간 · 성공 확률
+    h += '<div class="og-have og-mine">'
       + '<div class="og-myl">'
       + '<div><small>등록 일시</small><b>' + whenTxt(x.at) + '</b></div>'
       + '<div><small>예측 당시 조회수</small><b>' + V.fmtM(x.v0) + '</b></div></div>';
     if (j.st === 'wait'){
-      var f = Math.max(0, Math.min(1, (j.now - x.v0) / (x.M - x.v0))), left = x.g - now;
+      var left = x.g - now;
       h += '<div class="og-flw' + (left > 0 ? '' : ' over') + '">'
         + '<small class="og-flh">' + (left > 0 ? '예측한 때까지 남은 시간' : '예측한 때가 ' + durTxt(-left) + ' 지났는데 아직 못 넘음') + '</small>'
-        + led(x.g, left <= 0) + progress(x, j, f) + '</div>';
+        + led(x.g, left <= 0) + progress(x, j) + '</div>';
     }
-    else if (j.st === 'done') h += '<small>실제 <em>' + actual(j.c) + '</em> · '
-      + (Math.abs(j.err) < 60e3 ? '분 단위까지 정확' : durTxt(j.err) + ' ' + (j.err < 0 ? '이르게' : '늦게') + ' 예측') + '</small>';
-    else if (j.st === 'void') h += '<small>예측을 등록하기 전(마지막 기록과 등록 일시 사이)에 이미 넘어서 채점하지 않습니다. 실제 ' + actual(j.c) + '</small>';
-    else h += '<small>이 영상의 기록을 더는 찾을 수 없어 채점할 수 없습니다.</small>';
     h += '</div><div class="og-lf">';
     // 지우기: 그 자리에서 한 번 더 확인 (브라우저 confirm 창은 앱 · 웹뷰에서 막혀 아무 일도 안 일어날 수 있어 쓰지 않는다)
     if (DELK === x.k) h += '<span class="og-cf"><small>이 예측을 지울까요?</small><button type="button" class="og-yes" data-og-yes="' + esc(x.k) + '">지우기</button>'
@@ -420,19 +426,30 @@
     if (window.SGShare) h += '<button type="button" class="gs og-shr" data-og-shr="' + esc(x.k) + '">' + SHRI + '공유하기</button>';
     return h + '</div></article>';
   }
-  // 채점 기다림 카드의 조회수 진행 (사용자 요청 "978만 → 1,000만 2% 는 직관성이 떨어짐"):
-  //   머리 [목표까지 N 남음 ··· 진행 %] / 막대(예측 당시 → 목표, 채운 곳 = 지금) / 눈금 [예측 당시 · 지금 · 목표]
-  //   / 한 줄: 최근 하루 속도(③ plan.g)로 닿는 때가 내 예측보다 빠른지 느린지
-  function progress(x, j, f){
-    var P = V.plan(j.v), rate = P && P.g > 0 ? P.g / D : 0, now = Date.now(), eta = rate ? now + (x.M - j.now) / rate : NaN, gap = eta - x.g;
-    // 한 줄로 (사용자 요청 9/24): "예측기는 내 예측보다 N 빨라요 / 늦어요" — 예측기 = 지금 속도(③)로 닿는 때
-    var pace = !rate ? '예측기가 아직 속도를 계산하지 못했어요'
-      : Math.abs(gap) < 30 * 60e3 ? '<em class="eq">예측기와 내 예측이 거의 같아요</em>'
-        : gap < 0 ? '<em class="fast">예측기는 내 예측보다 ' + durTxt(-gap) + ' 빨라요</em>' : '<em class="slow">예측기는 내 예측보다 ' + durTxt(gap) + ' 늦어요</em>';
-    return '<div class="og-prg"><div class="og-prgh"><span>목표까지 <b>' + V.fmt(Math.max(0, x.M - j.now)) + '</b> 남음</span><em>' + pct(f) + '</em></div>'
-      + '<div class="og-prgb"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
-      + '<div class="og-prgs"><span>예측 당시 ' + V.fmtM(x.v0) + '</span><span class="n">지금 ' + V.fmt(j.now) + '</span><span>목표 ' + V.fmtM(x.M) + '</span></div>'
-      + '<small class="og-prgn">' + pace + '</small></div>';
+  // 채점 기다림 카드 아래 상자 (사용자 요청 9/24): [목표까지 N 남음 ··· 지금 / 목표] + 예측 성공 확률
+  //   성공 = 정확도 75%(족집게) 이상 = 실제로 넘는 때 c 가 [등록 + (고른 때 − 등록) ÷ 1.25, 등록 + (고른 때 − 등록) ÷ 0.75] 안.
+  //   c 의 분포: ③ 추세 곡선으로 본 도달까지 날 수 T 를 로그정규로 — 가운데 = 지금 k 로 본 T, 폭(σ) = k ± 0.15 로 본 T 의 차이(최소 0.2).
+  //   추세로는 못 닿는다고 나오면 지금 하루 증가 그대로 이어 간다고 보고 σ 0.6. 일부러 단순하게 둔 어림값이다
+  function erf(z){ var t = 1 / (1 + 0.3275911 * Math.abs(z)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-z * z); return z < 0 ? -y : y; }
+  function winChance(x, v){
+    var P = V.plan(v); if (!P || !(P.g > 0)) return null;
+    var VE = window.VE, d = VE.daysTo(P, x.M), sg;
+    if (d == null){ d = (x.M - P.V) / P.g; sg = 0.6; }
+    else { var lo = VE.daysTo(P, x.M, Math.max(VE.KMIN, P.k - 0.15)), hi = VE.daysTo(P, x.M, P.k + 0.15);
+      sg = hi == null || !(lo > 0) ? 0.6 : Math.max(0.2, Math.log(hi / lo) / 2); }
+    if (!(d > 0)) return null;
+    var last = V.lastMs(v), gu = x.g - x.at;
+    function cdf(ms){ var t = (ms - last) / D; return t <= 0 ? 0 : 0.5 * (1 + erf((Math.log(t) - Math.log(d)) / (sg * Math.SQRT2))); }
+    return Math.max(0, cdf(x.at + gu / 0.75) - cdf(x.at + gu / 1.25));
+  }
+  function progress(x, j){
+    var p = winChance(x, j.v), pc = p == null ? null : Math.max(1, Math.min(99, Math.round(p * 100)));
+    var tone = pc == null ? '' : pc >= 60 ? 'hi' : pc >= 30 ? 'mid' : 'lo';
+    return '<div class="og-prg"><div class="og-prgh"><span>목표까지 <b>' + V.fmt(Math.max(0, x.M - j.now)) + '</b> 남음</span>'
+      + '<span class="og-prgv">지금 ' + V.fmt(j.now) + ' / ' + V.fmtM(x.M) + '</span></div>'
+      + '<div class="og-prgp ' + tone + '"><span>예측 성공 확률</span><b>' + (pc == null ? '—' : pc + '%') + '</b></div>'
+      + '<small class="og-prgn">' + (pc == null ? '기록이 조금 더 쌓이면 계산합니다'
+        : '지금 추세로 보면 내 예측이 족집게(정확도 75%) 이상으로 맞을 가능성이에요') + '</small></div>';
   }
   // 기록 카드 [공유하기] → 공유 카드 이미지 (tools/share.js SGShare.oracle). 누른 때 기준으로 고정
   var SHRI = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
