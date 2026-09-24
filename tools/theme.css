@@ -2069,7 +2069,7 @@ html.shr-on{overflow:hidden}
 .og-aik{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#6fe0b3}
 .og-aik i{width:7px;height:7px;border-radius:50%;background:#6fe0b3;box-shadow:0 0 6px rgba(111,224,179,.6)}
 .og-aip b{min-width:0;font-size:13.5px;font-weight:700;color:var(--ink);word-break:keep-all}
-.og-aip small{grid-column:2;font-size:11.5px;color:var(--ink2)}   /* 줄바꿈이 제멋대로 되지 않게: 늘 시각 아랫줄에 */
+.og-aip small{grid-column:2;font-size:13px;color:var(--ink2)}   /* 줄바꿈이 제멋대로 되지 않게: 늘 시각 아랫줄에 */
 
 /* ===== 30일 예측 중인 영상: 예측 현황 아래 100만 단위 돌파 예측 카드 (views.js renderMsx) ===== */
 .vd-msx:not(:empty){margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}

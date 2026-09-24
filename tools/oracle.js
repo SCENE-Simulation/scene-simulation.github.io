@@ -422,12 +422,13 @@
   }
   // 채점 기다림 카드의 조회수 진행 (사용자 요청 "978만 → 1,000만 2% 는 직관성이 떨어짐"):
   //   머리 [목표까지 N 남음 ··· 진행 %] / 막대(예측 당시 → 목표, 채운 곳 = 지금) / 눈금 [예측 당시 · 지금 · 목표]
-  //   / 한 줄: 최근 하루 속도(③ plan.g)로 가면 언제 닿는지와 내 예측보다 빠른지 느린지
+  //   / 한 줄: 최근 하루 속도(③ plan.g)로 닿는 때가 내 예측보다 빠른지 느린지
   function progress(x, j, f){
     var P = V.plan(j.v), rate = P && P.g > 0 ? P.g / D : 0, now = Date.now(), eta = rate ? now + (x.M - j.now) / rate : NaN, gap = eta - x.g;
-    var pace = !rate ? '최근 증가 속도를 아직 계산할 수 없습니다'
-      : '지금 속도라면 <b>' + whenTxt(eta) + '</b>쯤 닿아요' + (Math.abs(gap) < 30 * 60e3 ? '<em class="eq">내 예측과 거의 같아요</em>'
-        : gap < 0 ? '<em class="fast">내 예측보다 ' + durTxt(-gap) + ' 빨라요</em>' : '<em class="slow">내 예측보다 ' + durTxt(gap) + ' 늦어요</em>');
+    // 한 줄로 (사용자 요청 9/24): "예측기는 내 예측보다 N 빨라요 / 늦어요" — 예측기 = 지금 속도(③)로 닿는 때
+    var pace = !rate ? '예측기가 아직 속도를 계산하지 못했어요'
+      : Math.abs(gap) < 30 * 60e3 ? '<em class="eq">예측기와 내 예측이 거의 같아요</em>'
+        : gap < 0 ? '<em class="fast">예측기는 내 예측보다 ' + durTxt(-gap) + ' 빨라요</em>' : '<em class="slow">예측기는 내 예측보다 ' + durTxt(gap) + ' 늦어요</em>';
     return '<div class="og-prg"><div class="og-prgh"><span>목표까지 <b>' + V.fmt(Math.max(0, x.M - j.now)) + '</b> 남음</span><em>' + pct(f) + '</em></div>'
       + '<div class="og-prgb"><i style="width:' + (f * 100).toFixed(1) + '%"></i></div>'
       + '<div class="og-prgs"><span>예측 당시 ' + V.fmtM(x.v0) + '</span><span class="n">지금 ' + V.fmt(j.now) + '</span><span>목표 ' + V.fmtM(x.M) + '</span></div>'
