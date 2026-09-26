@@ -3935,7 +3935,7 @@ html.sb-min .sb-tg .ar{transform:translateX(16px) scaleX(-1);transform-origin:5.
 html.sb-min .sb .nv,html.sb-min .sb .gl{justify-content:center;gap:0;padding:10px 0;font-size:0;border-radius:12px}
 html.sb-min .sb .nv svg,html.sb-min .sb .gl svg{margin:0;flex:none}
 html.sb-min .sb .ntag,html.sb-min .sb .wn,html.sb-min .sb .glbtn,html.sb-min .sb .gl-cv,html.sb-min .sb .ft,html.sb-min .sb .mg-tags,
-html.sb-min .sb .nv.yl,html.sb-min .sb details.yr:not(.mg),html.sb-min .sb .nv.sub:not(.ico),html.sb-min .sb details.mg > summary{display:none!important}
+html.sb-min .sb .nv.yl,html.sb-min .sb details.yr:not(.mg),html.sb-min .sb .nv.sub:not(.ico){display:none!important}
 html.sb-min .sb .grp{margin-top:10px;padding-top:10px}
 html.sb-min .sb details.mg{margin:0;padding:0;border:0;background:none}
 html.sb-min .sb .nv.sub.ico{padding-left:0}
@@ -3968,7 +3968,35 @@ html.sbx-on{overflow:hidden}
 .sbx-i.act{outline:2px solid var(--lav-t);outline-offset:-2px}
 .sbx-i.on{border-color:rgba(233,99,135,.6)!important;background:rgba(233,99,135,.12)}
 .sbx-list{display:flex;flex-direction:column;gap:6px}
-.sbx-none{margin:10px 2px;font-size:13px;color:var(--ink3)}</style>
+.sbx-none{margin:10px 2px;font-size:13px;color:var(--ink3)}
+html.sb-min .sb .nv,html.sb-min .sb .gl{padding-left:0!important;padding-right:0!important;margin-left:0!important;margin-right:0!important;gap:0!important}
+html.sb-min .sb .nv > :not(svg),html.sb-min .sb .gl > :not(svg){display:none!important}
+html.sb-min .sb .gl > svg.gl-cv{display:none!important}
+.sbx-i .ntag{position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:5px;overflow:hidden;pointer-events:none;
+font:700 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.02em;color:#fff}
+.sbx-i .ntag.hot{background:linear-gradient(135deg,#ff8a3d,#ff3b5c);text-shadow:0 1px 0 rgba(120,0,20,.35);box-shadow:0 0 10px rgba(255,72,88,.45),inset 0 0 0 1px rgba(255,255,255,.18)}
+.sbx-i .ntag.new{background:linear-gradient(135deg,#7cf0c2,#34c98f);color:#053b27;box-shadow:0 0 10px rgba(71,209,154,.4),inset 0 0 0 1px rgba(255,255,255,.25)}
+.sbx-i .ntag.ssn{padding:0 6px;font:800 11px/1 "Pretendard Variable","Noto Sans KR",sans-serif;letter-spacing:-.02em;color:#1d1320;
+background:linear-gradient(135deg,#fd70a2,#f573ab);box-shadow:0 0 10px rgba(253,112,162,.45),inset 0 0 0 1px rgba(255,255,255,.25)}
+.sbx-i .ntag.soon{background:linear-gradient(135deg,#9a9aa3,#5d5d66);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.sbx-i .ntag::after{content:"";position:absolute;top:-2px;bottom:-2px;left:0;width:10px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);
+transform:translateX(-14px) skewX(-18deg);animation:ntShine 3.4s ease-in-out infinite}
+.sbx-i .ntag.soon::after{display:none}
+@media (prefers-reduced-motion:reduce){.sbx-i .ntag::after{display:none}}
+html.sb-min .sb details.mg > summary{display:flex!important;justify-content:center;align-items:center;padding:10px 0!important;margin:0!important;border-radius:12px;cursor:pointer;list-style:none}
+html.sb-min .sb details.mg > summary::-webkit-details-marker{display:none}
+html.sb-min .sb details.mg > summary:hover{background:var(--glass)}
+html.sb-min .sb details.mg > summary .cv,html.sb-min .sb details.mg > summary .mg-t,html.sb-min .sb details.mg > summary .mg-tags{display:none!important}
+html.sb-min .sb details.mg > summary .mi{width:18px;height:18px;margin:0;flex:none}
+html.sb-min .sb details.mg[open]{background:rgba(255,255,255,.035);border-radius:12px;box-shadow:inset 0 0 0 1px var(--line)}
+@keyframes rgNew{0%,100%{filter:drop-shadow(0 0 2px rgba(71,209,154,.35))}50%{filter:drop-shadow(0 0 6px rgba(71,209,154,.9))}}
+@keyframes rgSsn{0%,100%{filter:drop-shadow(0 0 2px rgba(253,112,162,.35))}50%{filter:drop-shadow(0 0 6px rgba(253,112,162,.9))}}
+@keyframes rgHot{0%,100%{filter:drop-shadow(0 0 2px rgba(255,72,88,.4))}50%{filter:drop-shadow(0 0 6px rgba(255,72,88,.95))}}
+html.sb-min .sb .nv:has(.ntag.new) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.new) > summary .mi{color:#6fe8b8;animation:rgNew 2.8s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.ssn) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.ssn) > summary .mi{color:#ff8fbb;animation:rgSsn 2.8s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.hot) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.hot) > summary .mi{color:#ff8a6a;animation:rgHot 2.8s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.soon) > svg{opacity:.5}
+@media (prefers-reduced-motion:reduce){html.sb-min .sb .nv > svg,html.sb-min .sb details.mg > summary .mi{animation:none!important}}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
