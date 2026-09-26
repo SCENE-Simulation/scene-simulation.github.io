@@ -3940,7 +3940,7 @@ html.sb-min .sb .nv svg,html.sb-min .sb .gl svg{margin:0;flex:none}
 html.sb-min .sb .ntag,html.sb-min .sb .wn,html.sb-min .sb .glbtn,html.sb-min .sb .gl-cv,html.sb-min .sb .ft,html.sb-min .sb .mg-tags,
 html.sb-min .sb .nv.yl,html.sb-min .sb details.yr:not(.mg),html.sb-min .sb .nv.sub:not(.ico){display:none!important}
 html.sb-min .sb .grp{margin-top:10px;padding-top:10px}
-html.sb-min .sb details.mg{margin:0;padding:0;border:0;background:none}
+html.sb-min .sb details.mg{margin:0;padding:0;border:0;background:none;box-shadow:none!important}
 html.sb-min .sb .nv.sub.ico{padding-left:0}
 html.sb-anim .sb{transition:width .22s ease,padding .22s ease}
 html.sb-anim .mn{transition:margin-left .22s ease}
@@ -3988,7 +3988,8 @@ transform:translateX(-14px) skewX(-18deg);animation:ntShine 3.4s ease-in-out inf
 @media (prefers-reduced-motion:reduce){.sbx-i .ntag::after{display:none}}
 html.sb-min .sb details.mg > summary{display:flex!important;justify-content:center;align-items:center;padding:10px 0!important;margin:0!important;border-radius:12px;cursor:pointer;list-style:none}
 html.sb-min .sb details.mg > summary::-webkit-details-marker{display:none}
-html.sb-min .sb details.mg > summary:hover{background:var(--glass)}
+html.sb-min .sb details.mg > summary{background:none!important}
+html.sb-min .sb details.mg > summary:hover{background:var(--glass)!important}
 html.sb-min .sb details.mg > summary .cv,html.sb-min .sb details.mg > summary .mg-t,html.sb-min .sb details.mg > summary .mg-tags{display:none!important}
 html.sb-min .sb details.mg > summary .mi{width:18px;height:18px;margin:0;flex:none}
 html.sb-min .sb details.mg > :not(summary){display:none!important}
@@ -4000,10 +4001,10 @@ html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn) > svg,html.sb-min .sb det
 html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn)::after,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::after,html.sb-min .sb .grp:has(.nv.sub:not(.ico) :is(.ntag.hot,.ntag.new,.ntag.ssn)) > .gl::after{content:"";position:absolute;z-index:2;left:calc(50% + 7px);top:calc(50% - 17px);width:8px;height:8px;border-radius:2.5px;pointer-events:none;
 background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.9) 50%,transparent 58%) 110% 0/300% 100% no-repeat,
 linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08) 50%,rgba(0,0,0,.14)),linear-gradient(135deg,var(--rg1),var(--rg2));
-box-shadow:0 0 0 2px var(--bg),inset 0 0 0 1px rgba(255,255,255,.3);animation:rgShine 3.4s ease-in-out infinite,rgPing 3.4s ease-out infinite}
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);animation:rgShine 3.4s ease-in-out infinite,rgPing 3.4s ease-out infinite}
 @keyframes rgShine{0%,68%{background-position:110% 0,0 0,0 0}100%{background-position:-10% 0,0 0,0 0}}
-@keyframes rgPing{0%{box-shadow:0 0 0 2px var(--bg),0 0 0 2px rgba(var(--rg),.5),inset 0 0 0 1px rgba(255,255,255,.3)}
-70%,100%{box-shadow:0 0 0 2px var(--bg),0 0 0 8px rgba(var(--rg),0),inset 0 0 0 1px rgba(255,255,255,.3)}}
+@keyframes rgPing{0%{box-shadow:0 0 0 2px rgba(var(--rg),.5),inset 0 0 0 1px rgba(255,255,255,.3)}
+70%,100%{box-shadow:0 0 0 8px rgba(var(--rg),0),inset 0 0 0 1px rgba(255,255,255,.3)}}
 html.sb-min .sb .nv:has(.ntag.soon) > svg{opacity:.5}
 @media (prefers-reduced-motion:reduce){html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn)::after,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::after,html.sb-min .sb .grp:has(.nv.sub:not(.ico) :is(.ntag.hot,.ntag.new,.ntag.ssn)) > .gl::after{animation:none}}
 .sbf{position:fixed;z-index:80;width:250px;max-height:calc(100vh - 16px);overflow-y:auto;padding:8px;border-radius:14px;background:var(--bg);border:1px solid var(--line2);box-shadow:0 16px 40px rgba(0,0,0,.45)}
