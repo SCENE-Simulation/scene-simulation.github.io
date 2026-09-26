@@ -3989,12 +3989,12 @@ html.sb-min .sb details.mg > summary:hover{background:var(--glass)}
 html.sb-min .sb details.mg > summary .cv,html.sb-min .sb details.mg > summary .mg-t,html.sb-min .sb details.mg > summary .mg-tags{display:none!important}
 html.sb-min .sb details.mg > summary .mi{width:18px;height:18px;margin:0;flex:none}
 html.sb-min .sb details.mg[open]{background:rgba(255,255,255,.035);border-radius:12px;box-shadow:inset 0 0 0 1px var(--line)}
-@keyframes rgNew{0%,100%{filter:drop-shadow(0 0 2px rgba(71,209,154,.35))}50%{filter:drop-shadow(0 0 6px rgba(71,209,154,.9))}}
-@keyframes rgSsn{0%,100%{filter:drop-shadow(0 0 2px rgba(253,112,162,.35))}50%{filter:drop-shadow(0 0 6px rgba(253,112,162,.9))}}
-@keyframes rgHot{0%,100%{filter:drop-shadow(0 0 2px rgba(255,72,88,.4))}50%{filter:drop-shadow(0 0 6px rgba(255,72,88,.95))}}
-html.sb-min .sb .nv:has(.ntag.new) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.new) > summary .mi{color:#6fe8b8;animation:rgNew 2.8s ease-in-out infinite}
-html.sb-min .sb .nv:has(.ntag.ssn) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.ssn) > summary .mi{color:#ff8fbb;animation:rgSsn 2.8s ease-in-out infinite}
-html.sb-min .sb .nv:has(.ntag.hot) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.hot) > summary .mi{color:#ff8a6a;animation:rgHot 2.8s ease-in-out infinite}
+@keyframes rgNew{0%,62%,100%{filter:drop-shadow(0 0 2px rgba(71,209,154,.4)) brightness(1)}40%{filter:drop-shadow(0 0 5px rgba(71,209,154,.75)) brightness(1.05)}70%{filter:drop-shadow(0 0 3px rgba(71,209,154,.6)) brightness(1.1)}74%{filter:drop-shadow(0 0 9px rgba(71,209,154,1)) drop-shadow(0 0 2px #fff) brightness(1.9)}80%{filter:drop-shadow(0 0 5px rgba(71,209,154,.8)) brightness(1.2)}}
+@keyframes rgSsn{0%,62%,100%{filter:drop-shadow(0 0 2px rgba(253,112,162,.4)) brightness(1)}40%{filter:drop-shadow(0 0 5px rgba(253,112,162,.75)) brightness(1.05)}70%{filter:drop-shadow(0 0 3px rgba(253,112,162,.6)) brightness(1.1)}74%{filter:drop-shadow(0 0 9px rgba(253,112,162,1)) drop-shadow(0 0 2px #fff) brightness(1.9)}80%{filter:drop-shadow(0 0 5px rgba(253,112,162,.8)) brightness(1.2)}}
+@keyframes rgHot{0%,62%,100%{filter:drop-shadow(0 0 2px rgba(255,72,88,.4)) brightness(1)}40%{filter:drop-shadow(0 0 5px rgba(255,72,88,.75)) brightness(1.05)}70%{filter:drop-shadow(0 0 3px rgba(255,72,88,.6)) brightness(1.1)}74%{filter:drop-shadow(0 0 9px rgba(255,72,88,1)) drop-shadow(0 0 2px #fff) brightness(1.9)}80%{filter:drop-shadow(0 0 5px rgba(255,72,88,.8)) brightness(1.2)}}
+html.sb-min .sb .nv:has(.ntag.new) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.new) > summary .mi{color:#6fe8b8;animation:rgNew 3.4s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.ssn) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.ssn) > summary .mi{color:#ff8fbb;animation:rgSsn 3.4s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.hot) > svg,html.sb-min .sb details.mg:not([open]):has(.ntag.hot) > summary .mi{color:#ff8a6a;animation:rgHot 3.4s ease-in-out infinite}
 html.sb-min .sb .nv:has(.ntag.soon) > svg{opacity:.5}
 @media (prefers-reduced-motion:reduce){html.sb-min .sb .nv > svg,html.sb-min .sb details.mg > summary .mi{animation:none!important}}</style>
 </head>
