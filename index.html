@@ -3992,22 +3992,19 @@ html.sb-min .sb details.mg > summary:hover{background:var(--glass)}
 html.sb-min .sb details.mg > summary .cv,html.sb-min .sb details.mg > summary .mg-t,html.sb-min .sb details.mg > summary .mg-tags{display:none!important}
 html.sb-min .sb details.mg > summary .mi{width:18px;height:18px;margin:0;flex:none}
 html.sb-min .sb details.mg > :not(summary){display:none!important}
-@keyframes rgNew{0%,100%{filter:drop-shadow(0 0 2px rgba(71,209,154,.4))}50%{filter:drop-shadow(0 0 5px rgba(71,209,154,.85))}}
-@keyframes rgSsn{0%,100%{filter:drop-shadow(0 0 2px rgba(253,112,162,.4))}50%{filter:drop-shadow(0 0 5px rgba(253,112,162,.85))}}
-@keyframes rgHot{0%,100%{filter:drop-shadow(0 0 2px rgba(255,72,88,.4))}50%{filter:drop-shadow(0 0 5px rgba(255,72,88,.85))}}
-html.sb-min .sb .nv:has(.ntag.new) > svg,html.sb-min .sb details.mg:has(.ntag.new) > summary .mi{color:#6fe8b8;animation:rgNew 3.4s ease-in-out infinite}
-html.sb-min .sb .nv:has(.ntag.ssn) > svg,html.sb-min .sb details.mg:has(.ntag.ssn) > summary .mi{color:#ff8fbb;animation:rgSsn 3.4s ease-in-out infinite}
-html.sb-min .sb .nv:has(.ntag.hot) > svg,html.sb-min .sb details.mg:has(.ntag.hot) > summary .mi{color:#ff8a6a;animation:rgHot 3.4s ease-in-out infinite}
+html.sb-min .sb .nv:has(.ntag.ssn),html.sb-min .sb details.mg:has(.ntag.ssn) > summary{--rg:253,112,162}
+html.sb-min .sb .nv:has(.ntag.new),html.sb-min .sb details.mg:has(.ntag.new) > summary{--rg:71,209,154}
+html.sb-min .sb .nv:has(.ntag.hot),html.sb-min .sb details.mg:has(.ntag.hot) > summary{--rg:255,112,92}
+html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn),html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary{position:relative}
+html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn) > svg,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary .mi{position:relative;z-index:1;color:rgb(var(--rg));filter:drop-shadow(0 0 3px rgba(var(--rg),.4))}
+html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn)::before,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::before{content:"";position:absolute;left:50%;top:50%;width:32px;height:32px;transform:translate(-50%,-50%);border-radius:10px;pointer-events:none;
+background:rgba(var(--rg),.1);box-shadow:inset 0 0 0 1px rgba(var(--rg),.3);transition:background .15s}
+html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn):hover::before,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary:hover::before{background:rgba(var(--rg),.18)}
+html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn)::after,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::after{content:"";position:absolute;z-index:2;left:calc(50% + 10px);top:calc(50% - 18px);width:7px;height:7px;border-radius:50%;pointer-events:none;
+background:rgb(var(--rg));box-shadow:0 0 0 2px var(--bg);animation:rgPing 2.6s ease-out infinite}
+@keyframes rgPing{0%{box-shadow:0 0 0 2px var(--bg),0 0 0 2px rgba(var(--rg),.55)}70%,100%{box-shadow:0 0 0 2px var(--bg),0 0 0 8px rgba(var(--rg),0)}}
 html.sb-min .sb .nv:has(.ntag.soon) > svg{opacity:.5}
-@media (prefers-reduced-motion:reduce){html.sb-min .sb .nv > svg,html.sb-min .sb details.mg > summary .mi{animation:none!important}}
-@keyframes rgSweep{0%,64%{background-position:160% 0}100%{background-position:-60% 0}}
-html.sb-min .sb .nv:has(.ntag.hot)::after,html.sb-min .sb .nv:has(.ntag.new)::after,html.sb-min .sb .nv:has(.ntag.ssn)::after,
-html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::after{
-content:"";position:absolute;top:50%;left:50%;width:26px;height:26px;transform:translate(-50%,-50%);border-radius:6px;pointer-events:none;
-background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.95) 50%,transparent 62%) no-repeat;background-size:260% 100%;background-position:160% 0;
-mix-blend-mode:color-dodge;animation:rgSweep 3.4s ease-in-out infinite}
-html.sb-min .sb details.mg > summary{position:relative}
-@media (prefers-reduced-motion:reduce){html.sb-min .sb .nv::after,html.sb-min .sb details.mg > summary::after{display:none}}
+@media (prefers-reduced-motion:reduce){html.sb-min .sb .nv:has(.ntag.hot,.ntag.new,.ntag.ssn)::after,html.sb-min .sb details.mg:has(.ntag.hot,.ntag.new,.ntag.ssn) > summary::after{animation:none}}
 .sbf{position:fixed;z-index:80;width:250px;max-height:calc(100vh - 16px);overflow-y:auto;padding:8px;border-radius:14px;background:var(--bg);border:1px solid var(--line2);box-shadow:0 16px 40px rgba(0,0,0,.45)}
 .sbf[hidden]{display:none}
 .sbf-h{display:flex;align-items:center;gap:8px;padding:4px 4px 8px;margin-bottom:4px;border-bottom:1px solid var(--line)}
