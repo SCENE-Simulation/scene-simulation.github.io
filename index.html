@@ -806,7 +806,12 @@ background-size:240% 100%;animation:sheen 3s linear infinite;box-shadow:0 0 18px
 .bdg.holo{--bc:#c1a8ea;border-color:rgba(255,255,255,.35);
 background:linear-gradient(110deg,rgba(255,120,200,.22),rgba(110,230,255,.22),rgba(255,240,140,.22),rgba(180,140,255,.22));background-size:300% 100%;animation:sheen 4s linear infinite}
 .bdg.holo .em{background:conic-gradient(from 20deg,#ff8ad0,#8ee8ff,#fff08c,#b48cff,#ff8ad0)}
-.bdg[data-r="4"]{--bc:#47d19a!important}
+.bdg[data-r="4"]{--bc:#e2fff3!important}
+.bdg[data-r="4"]:not(.lock){border-color:rgba(226,255,243,.85);
+background:linear-gradient(110deg,rgba(226,255,243,.1) 20%,rgba(240,255,249,.34) 40%,rgba(160,240,208,.26) 50%,rgba(226,255,243,.1) 70%);
+background-size:240% 100%;box-shadow:0 0 16px rgba(190,250,225,.3),0 0 3px rgba(226,255,243,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+.bdg[data-r="4"]:not(.lock) .em{background:linear-gradient(160deg,#fff 0%,#f2fff9 35%,#c6f3df 65%,#8ed8b8 100%);box-shadow:0 0 8px #e2fff3}
+.bdg[data-r="4"]:not(.lock) .bt b{color:#f4fffa;text-shadow:0 0 8px rgba(190,250,225,.45)}
 .bdg[data-r="1"]{--bc:#cd8a5a!important}
 .bdg[data-r="2"]{--bc:#c3ccd8!important}
 .bdg[data-r="3"]{--bc:#ecd25b!important}
@@ -3835,7 +3840,7 @@ font-size:18px!important;font-weight:800!important;color:#0f1618!important;backg
 .ud-pk button.me{color:#0f1618!important}.ud-pk .up.me{background:var(--ua)!important}.ud-pk .dn.me{background:var(--ub)!important}
 .ud-pk button:disabled:not(.me){opacity:.35}
 .ud-vs{align-self:center;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;font:800 13px "JetBrains Mono",monospace;color:#0f1618;background:var(--ug)}
-.ud-hint{margin:16px 2px 0;font-size:clamp(16px,2.2vw,20px);font-weight:700;line-height:1.45;letter-spacing:-.01em;color:var(--ink);text-align:center;word-break:keep-all}
+.ud-hint{margin:14px 0 0;padding:16px 20px;border-radius:16px;background:linear-gradient(90deg,rgba(68,215,182,.1),rgba(143,155,255,.08) 50%,rgba(255,107,138,.1)),var(--glass);border:1px solid rgba(143,155,255,.28);box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:clamp(16px,2.2vw,20px);font-weight:700;line-height:1.45;letter-spacing:-.01em;color:var(--ink);text-align:center;word-break:keep-all}
 .ud-hint b{font-family:"JetBrains Mono",monospace;font-weight:800;background:var(--ug);-webkit-background-clip:text;background-clip:text;color:transparent}
 .ud-end{padding:22px;border-radius:20px;text-align:center;background:radial-gradient(420px 200px at 50% 0%,rgba(68,215,182,.14),transparent 70%),var(--glass);border:1px solid var(--line)}
 .ud-end.best{border-color:rgba(255,211,107,.55)}
