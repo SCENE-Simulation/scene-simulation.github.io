@@ -3768,7 +3768,7 @@ background:linear-gradient(90deg,rgba(68,215,182,.16),rgba(255,107,138,.16));bor
 .ud-d{margin:0;max-width:720px;font-size:13px;line-height:1.7;color:var(--ink2);word-break:keep-all}
 .ud-d b{color:var(--ink)}
 .ud-demo{margin:0 0 12px;padding:10px 14px;border-radius:12px;font-size:12.5px;color:#ffe3a8;background:rgba(255,201,77,.08);border:1px solid rgba(255,201,77,.3)}
-.ud-start{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;align-items:start}
+.ud-start{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
 .ud-sc,.ud-board{padding:18px;border-radius:18px;background:var(--glass);border:1px solid var(--line)}
 .ud-mine{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .ud-mine > div{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
@@ -3799,13 +3799,13 @@ font-size:18px!important;font-weight:800!important;color:#0f1618!important;backg
 .ud-top li.r1{background:linear-gradient(90deg,rgba(255,211,107,.16),rgba(255,211,107,.03))}
 .ud-top li.r1 .n{color:#ffd36b}.ud-top li.r2 .n{color:#d6dbe4}.ud-top li.r3 .n{color:#e6a26b}
 .ud-bar{display:flex;align-items:stretch;gap:8px;margin:0 0 12px}
-.ud-st{padding:8px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.ud-st{flex:1 1 0;min-width:0;padding:10px 18px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
 .ud-st small{display:block;font-size:11px;font-weight:700;color:var(--ink3)}
 .ud-st b{font:800 22px/1.2 "JetBrains Mono",monospace;color:var(--ink)}
 .ud-st:first-child b{background:var(--ug);-webkit-background-clip:text;background-clip:text;color:transparent}
 .ud-st b.pop{animation:udPop .45s ease}
 @keyframes udPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
-.ud-quit{margin-left:auto;align-self:center}
+.ud-quit{margin-left:6px;align-self:center;flex:none}
 .ud-arena{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;gap:14px;opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease}
 .ud-arena.in{opacity:1;transform:none}
 .ud-c{display:flex;flex-direction:column;min-width:0;border-radius:18px;overflow:hidden;background:var(--glass);border:1px solid var(--line);transition:border-color .2s,box-shadow .2s}
