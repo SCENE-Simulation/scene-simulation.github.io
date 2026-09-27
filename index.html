@@ -4719,7 +4719,12 @@ button.rc-r{width:100%;border:0!important;background:none;text-align:left;cursor
 .rx-tpv .rx-tx{padding:0 9px}
 .rx-tpv .rx-tx b{font-size:13px;line-height:17px}
 .rx-tpv .rx-tx small{font-size:10px}
-}</style>
+}
+.rx-sh{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 16px}
+.rx-sh .rx-shl{flex:1 1 240px}
+.rx-sh .rx-shr{flex:0 1 auto;margin-left:auto;justify-content:flex-end}
+@media (max-width:760px){.rx-sh .rx-shl{flex-basis:100%}.rx-sh .rx-shr{margin-left:0;justify-content:flex-start}}
+@media (min-width:1101px){.rx-g2.ms3{grid-template-columns:minmax(0,1fr)}}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
