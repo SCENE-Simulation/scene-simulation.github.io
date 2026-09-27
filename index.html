@@ -4880,11 +4880,8 @@ animation:hdDraw var(--dr,80ms) cubic-bezier(.2,.8,.3,1) var(--dl,0ms) forwards,
 @keyframes hdF3{0%{opacity:0}9%{opacity:.95}18%{opacity:.25}27%{opacity:1}41%{opacity:.35}58%{opacity:.9}78%{opacity:.4}100%{opacity:0}}
 .hd-aura{position:absolute;z-index:0;pointer-events:none;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,102,.17),rgba(255,214,102,.06) 62%,rgba(255,214,102,0));animation:hdAura 2.8s ease-in-out infinite}
 @keyframes hdAura{0%,100%{opacity:.65;transform:scale(1)}33%{opacity:1;transform:scale(1.05)}49%{opacity:.75;transform:scale(1.01)}70%{opacity:.95;transform:scale(1.03)}}
-.hd-aura::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,226,140,.9);box-shadow:0 0 18px rgba(255,214,102,.75),inset 0 0 14px rgba(255,214,102,.45);opacity:0}
 .hd-aura.hit{animation:hdAura 2.8s ease-in-out infinite,hdAuraHit .55s ease-out}
-.hd-aura.hit::after{animation:hdWave .75s cubic-bezier(.15,.7,.3,1)}
 @keyframes hdAuraHit{0%{opacity:1;filter:brightness(2.4)}100%{filter:brightness(1)}}
-@keyframes hdWave{0%{opacity:.95;transform:scale(.85)}100%{opacity:0;transform:scale(1.8,2.5)}}
 .hd-spk{position:absolute;z-index:1;width:var(--len,10px);height:2px;margin-top:-1px;border-radius:2px;pointer-events:none;transform-origin:0 50%;
 background:linear-gradient(90deg,#fffaf0,rgba(255,200,90,0));box-shadow:0 0 6px rgba(255,210,110,.9);animation:hdSpk var(--t,450ms) cubic-bezier(.12,.75,.3,1) forwards}
 @keyframes hdSpk{0%{opacity:1;transform:rotate(var(--a)) translateX(0) scaleX(1)}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--d)) scaleX(.3)}}
