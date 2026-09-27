@@ -454,12 +454,11 @@ animation:bdGlow 3.2s ease-in-out infinite}
 @keyframes bdGlow{0%,100%{opacity:.78;text-shadow:0 0 3px rgba(242,138,167,.2)}
 50%{opacity:1;text-shadow:0 0 6px rgba(242,138,167,.75),0 0 14px rgba(233,99,135,.4)}}
 .nv{position:relative}
-.nv-fly{display:grid;place-items:center;flex:none;margin-left:auto;width:24px;height:24px;border-radius:50%;color:var(--ink3);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px var(--line2);
-transition:background .2s,color .2s,box-shadow .2s,transform .2s}
-.nv-fly svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.3,1.4,.5,1)}
-.nv-fly:hover{color:var(--ink);background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.nv-fly{display:grid;place-items:center;flex:none;margin-left:auto;width:18px;height:18px;color:var(--ink3);transition:color .2s}
+.nv-fly svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.3,1.4,.5,1)}
+.nv-fly:hover{color:var(--ink)}
 .nv-fly:hover svg{transform:translateX(1.5px)}
-.nv-fly.on{color:#fff;background:linear-gradient(135deg,#ff7a5c,#e8364b);box-shadow:0 0 0 3px rgba(255,90,90,.2),0 4px 14px rgba(232,54,75,.45);transform:scale(1.08)}
+.nv-fly.on{color:#ff6a5b;filter:drop-shadow(0 0 4px rgba(255,90,90,.7))}
 .nv-fly.on svg,.nv-fly.on:hover svg{transform:rotate(180deg)}
 .sb .nv.fly-on{background:rgba(255,90,90,.08);box-shadow:inset 0 0 0 1px rgba(255,90,90,.4)}
 .sbf.sbf-v{border-color:rgba(255,90,90,.45);box-shadow:0 16px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,90,90,.12);animation:sbfIn .2s ease-out}
@@ -469,7 +468,7 @@ transition:background .2s,color .2s,box-shadow .2s,transform .2s}
 .sbf-inl{margin:2px 0 8px 26px;padding:6px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,90,90,.4);animation:sbfDown .2s ease-out}
 .sbf-inl .sbf-i{padding:10px 10px!important;font-size:14px}
 .sbf-inl .sbf-s{margin:6px 6px 2px}
-.bsheet .nv-fly{width:30px;height:30px}.bsheet .nv-fly svg{width:15px;height:15px}
+.bsheet .nv-fly{width:26px;height:26px}.bsheet .nv-fly svg{width:14px;height:14px}
 .bsheet .nv-fly.on svg{transform:rotate(90deg)}
 @keyframes sbfDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.sbf-inl{animation:none}.sbf.sbf-v{animation:none}.nv-fly,.nv-fly svg{transition:none}}
