@@ -5141,13 +5141,17 @@ box-shadow:0 0 6px 1px rgba(var(--c),.95),0 0 12px rgba(var(--c),.55);animation:
 .up-home .upi path{transform-box:fill-box;transform-origin:center;fill:currentColor;fill-opacity:0}
 .bk-home.up-home .upi .a{animation:upA 3.8s ease-in-out infinite}
 .bk-home.up-home .upi .b{animation:upB 3.8s ease-in-out infinite}
-@keyframes upA{0%,60%,100%{transform:scale(1);fill-opacity:0;filter:none}70%{transform:scale(1.18);fill-opacity:.35;filter:drop-shadow(0 0 4px currentColor)}80%{transform:scale(.96);fill-opacity:.12}88%{transform:scale(1);fill-opacity:0;filter:none}}
-@keyframes upB{0%,66%,100%{transform:scale(1);fill-opacity:0;filter:none}73%{transform:scale(.35)}82%{transform:scale(1.4);fill-opacity:.7;filter:drop-shadow(0 0 4px currentColor)}91%{transform:scale(1);fill-opacity:0;filter:none}}
+@keyframes upA{0%,60%,100%{transform:scale(1);fill-opacity:0}70%{transform:scale(1.18);fill-opacity:.35}80%{transform:scale(.96);fill-opacity:.12}88%{transform:scale(1);fill-opacity:0}}
+@keyframes upB{0%,66%,100%{transform:scale(1);fill-opacity:0}73%{transform:scale(.35)}82%{transform:scale(1.4);fill-opacity:.7}91%{transform:scale(1);fill-opacity:0}}
 .bk-home.up-home:hover .upi .a{animation:upA2 .55s ease-out}
 .bk-home.up-home:hover .upi .b{animation:upB2 .55s .14s ease-out both}
-@keyframes upA2{0%,100%{transform:scale(1);fill-opacity:0}45%{transform:scale(1.22);fill-opacity:.45;filter:drop-shadow(0 0 5px currentColor)}}
-@keyframes upB2{0%,100%{transform:scale(1);fill-opacity:0}35%{transform:scale(.4)}70%{transform:scale(1.45);fill-opacity:.8;filter:drop-shadow(0 0 5px currentColor)}}
-@media (prefers-reduced-motion:reduce){.up-home .upi path{animation:none!important}}
+@keyframes upA2{0%,100%{transform:scale(1);fill-opacity:0}45%{transform:scale(1.22);fill-opacity:.45}}
+@keyframes upB2{0%,100%{transform:scale(1);fill-opacity:0}35%{transform:scale(.4)}70%{transform:scale(1.45);fill-opacity:.8}}
+.bk-home.up-home .upi{animation:upGlow 3.8s ease-in-out infinite}
+@keyframes upGlow{0%,62%,94%,100%{filter:drop-shadow(0 0 0 rgba(111,224,179,0))}72%,86%{filter:drop-shadow(0 0 4px rgba(111,224,179,.85))}}
+.bk-home.up-home:hover .upi{animation:upGlow2 .7s ease-out}
+@keyframes upGlow2{0%,100%{filter:drop-shadow(0 0 0 rgba(111,224,179,0))}50%{filter:drop-shadow(0 0 5px rgba(111,224,179,.9))}}
+@media (prefers-reduced-motion:reduce){.up-home .upi,.up-home .upi path{animation:none!important}}
 .bk-home:not(.up-home) > svg{animation:bkDrop 4.2s ease-in-out 1.2s infinite}
 @keyframes bkDrop{0%,70%,100%{transform:none}76%{transform:translateY(3px)}82%{transform:translateY(-1px)}88%{transform:translateY(2px)}94%{transform:none}}
 .bk-home:not(.up-home):hover > svg{animation:bkIn .6s ease-out}
