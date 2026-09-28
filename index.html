@@ -1719,9 +1719,16 @@ background:rgba(91,180,236,.1);border:1px solid rgba(91,180,236,.45)!important;c
 #v-views .vr-tabs button.on{background:var(--vgrad);color:var(--vg-ink);box-shadow:0 4px 14px rgba(255,77,79,.3)}
 #v-views .vr-tabs button.on b{background:rgba(0,0,0,.22);color:#fff}
 #v-views #vr-tb{position:relative;isolation:isolate}
-#v-views #vr-tb:not(.on)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--vgrad);filter:grayscale(1) brightness(.62);opacity:.55;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);transition:opacity .15s,filter .15s}
+#v-views #vr-tb:not(.on)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--vgrad);filter:grayscale(1) brightness(.62);opacity:.55;transition:opacity .15s,filter .15s}
 #v-views #vr-tb:not(.on){color:#e2e2e7}
 #v-views #vr-tb:not(.on):hover::before{opacity:.75;filter:grayscale(1) brightness(.72)}
+#v-views #vr-tb::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;padding:1.5px;
+background:linear-gradient(110deg,#ff8ad0,#8ee8ff,#fff08c,#b48cff,#ff8ad0);background-size:300% 100%;animation:rxTbSheen 4s linear infinite;
+-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+#v-views #vr-tb{box-shadow:0 0 10px rgba(200,160,255,.28)}
+#v-views #vr-tb.on{box-shadow:0 4px 14px rgba(255,77,79,.3),0 0 12px rgba(200,160,255,.35)}
+@keyframes rxTbSheen{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@media (prefers-reduced-motion:reduce){#v-views #vr-tb::after{animation:none}}
 .mb{margin-top:12px}
 .mb-sum{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 2px 10px;font-size:12.5px;color:var(--ink2)}
 .mb-sum b{font:800 15px "JetBrains Mono",monospace;color:var(--ink)}
