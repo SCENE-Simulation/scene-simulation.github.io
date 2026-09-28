@@ -845,20 +845,20 @@ background-size:240% 100%;box-shadow:0 0 16px rgba(190,250,225,.3),0 0 3px rgba(
 .bdg[data-r="3"]{--bc:#ecd25b!important}
 .bdg[data-r="3"]:not(.lock){position:relative;overflow:hidden;isolation:isolate;border:1.5px solid transparent!important;
 background:linear-gradient(120deg,#3a2408,#4a2d0a 40%,#3a2208) padding-box,linear-gradient(120deg,#ffe7a3,#ffb43c 35%,#e8851c 60%,#ffd76a) border-box;
-box-shadow:0 0 16px rgba(255,170,50,.35),0 4px 14px rgba(232,133,28,.18)}
+box-shadow:0 0 8px rgba(255,170,50,.18)}
 .bdg[data-r="3"]:not(.lock)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
-background:radial-gradient(120px 60px at 18% 50%,rgba(255,200,90,.35),transparent 70%),linear-gradient(120deg,rgba(255,170,60,.22),rgba(255,214,110,.3) 45%,rgba(232,133,28,.2))}
+background:radial-gradient(120px 60px at 18% 50%,rgba(255,200,90,.16),transparent 70%),linear-gradient(120deg,rgba(255,170,60,.1),rgba(255,214,110,.14) 45%,rgba(232,133,28,.08))}
 .bdg[data-r="3"]:not(.lock)::after{content:"";position:absolute;top:-20%;bottom:-20%;left:0;width:38px;z-index:2;pointer-events:none;
-background:linear-gradient(90deg,transparent,rgba(255,247,214,.55),transparent);transform:translateX(-60px) skewX(-20deg);animation:goldSweep 3.6s ease-in-out infinite}
+background:linear-gradient(90deg,transparent,rgba(255,247,214,.22),transparent);transform:translateX(-60px) skewX(-20deg);animation:goldSweep 6s ease-in-out infinite}
 .bdg[data-r="3"]:not(.lock) .em{position:relative;background:radial-gradient(circle at 35% 30%,#fffbe6 0%,#ffe082 28%,#ffb52e 58%,#c96a0e 100%);
-box-shadow:0 0 10px rgba(255,180,60,.75),inset 0 -2px 0 rgba(120,60,0,.35)}
-.bdg[data-r="3"]:not(.lock) .em i{color:#5a2e00;text-shadow:0 1px 0 rgba(255,240,190,.8);animation:goldTwinkle 3.6s ease-in-out infinite}
+box-shadow:0 0 5px rgba(255,180,60,.4),inset 0 -2px 0 rgba(120,60,0,.3)}
+.bdg[data-r="3"]:not(.lock) .em i{color:#5a2e00;text-shadow:0 1px 0 rgba(255,240,190,.8);animation:goldTwinkle 6s ease-in-out infinite}
 .bdg[data-r="3"]:not(.lock) .bt b{background:linear-gradient(90deg,#fff1c2,#ffc85a 45%,#ff9f2e 80%,#ffd98a);-webkit-background-clip:text;background-clip:text;color:transparent;
-filter:drop-shadow(0 0 6px rgba(255,170,50,.35))}
+filter:drop-shadow(0 0 3px rgba(255,170,50,.18))}
 .bdg[data-r="3"]:not(.lock) .bt small{color:#f3d9a8}
-.bdg[data-r="3"]:not(.lock):hover{box-shadow:0 0 22px rgba(255,170,50,.5),0 6px 18px rgba(232,133,28,.25)}
-@keyframes goldSweep{0%,58%{transform:translateX(-60px) skewX(-20deg)}100%{transform:translateX(560px) skewX(-20deg)}}
-@keyframes goldTwinkle{0%,60%,100%{transform:scale(1) rotate(0)}70%{transform:scale(1.35) rotate(20deg)}80%{transform:scale(1) rotate(0)}}
+.bdg[data-r="3"]:not(.lock):hover{box-shadow:0 0 12px rgba(255,170,50,.3)}
+@keyframes goldSweep{0%,75%{transform:translateX(-60px) skewX(-20deg)}100%{transform:translateX(560px) skewX(-20deg)}}
+@keyframes goldTwinkle{0%,78%,100%{transform:scale(1) rotate(0)}85%{transform:scale(1.12) rotate(10deg)}92%{transform:scale(1) rotate(0)}}
 @media (prefers-reduced-motion:reduce){.bdg[data-r="3"]::after,.bdg[data-r="3"] .em i{animation:none}.bdg[data-r="3"]::after{display:none}}
 .bdg-empty{font-size:12.5px;color:var(--ink2)}
 @media (prefers-reduced-motion:reduce){.bdg,.chead2 .m.done b{animation:none}}
