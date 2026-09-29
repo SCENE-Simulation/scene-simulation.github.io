@@ -680,6 +680,13 @@ border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:12
 .cmeta .mt-gift{grid-column:1/-1;order:9}
 @media (max-width:560px){.cmeta .mt-gift ~ .mt{grid-column:1/-1}}
 @media (min-width:561px){.cmeta.has-gift{grid-template-columns:repeat(var(--mtn,3),minmax(0,1fr))}}
+.cmeta .mt-gift .gl{padding:0}
+@media (min-width:561px){
+.cmeta .mt-gift{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 14px}
+.cmeta .mt-gift .mk{flex:none;margin-right:4px}
+.cmeta .mt-gift .gl{flex:none;padding:4px 12px;border-radius:999px;background:rgba(246,185,60,.08);border:1px solid rgba(246,185,60,.25);font-size:12.5px;line-height:1.4;white-space:nowrap}
+.cmeta .mt-gift small{margin:0 0 0 auto}
+}
 .cmeta small{font-size:12px;color:var(--ink2)}
 .sec{position:relative}
 .sec-l{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px}
