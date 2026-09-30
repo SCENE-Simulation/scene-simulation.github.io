@@ -1211,6 +1211,11 @@ background:rgba(255,255,255,.04);border-color:var(--line)!important;color:var(--
 .gsel-info{margin:10px 0 0;font-size:12.5px;color:var(--ink2)}
 .gview{margin:0 0 12px}
 .gview button{font-size:13px;padding:7px 20px}
+@media (max-width:760px){
+.gview{display:flex;width:100%;overflow-x:auto;scrollbar-width:none}.gview::-webkit-scrollbar{display:none}
+.gview button{flex:1 1 auto;justify-content:center;padding:7px 8px;font-size:12.5px;white-space:nowrap}
+}
+@media (max-width:360px){ .gview button{padding:6px 6px;font-size:12px}.gview .gv-luck{gap:4px} }
 .g-go{margin-top:12px;font-size:13px;padding:8px 14px}
 .anote .g-go{margin:0 2px;padding:4px 10px;font-size:12.5px}
 .ahead{margin:18px 0 8px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
