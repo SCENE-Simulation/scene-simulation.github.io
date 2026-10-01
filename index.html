@@ -7213,6 +7213,11 @@ background:rgba(255,255,255,.03)!important;border:1px dashed rgba(255,255,255,.1
 .up-v-u{color:#f0c75e}
 .up-v-n{display:inline-flex;align-items:center;gap:7px;color:#f0c75e}
 .up-v-n::before{content:"";width:1px;height:10px;background:var(--line2)}
+.up-day.last .up-v{position:relative;overflow:hidden;animation:upvEdge 4.2s ease-in-out infinite}
+.up-day.last .up-v::after{content:"";position:absolute;top:-3px;bottom:-3px;left:0;width:20px;background:linear-gradient(90deg,transparent,rgba(255,236,170,.55),transparent);transform:translateX(-32px) skewX(-18deg);animation:upvShine 4.2s ease-in-out infinite;pointer-events:none}
+@keyframes upvShine{0%,70%{transform:translateX(-32px) skewX(-18deg)}100%{transform:translateX(124px) skewX(-18deg)}}
+@keyframes upvEdge{0%,68%,100%{border-color:var(--line2)}84%{border-color:rgba(240,199,94,.6)}}
+@media (prefers-reduced-motion:reduce){.up-day.last .up-v{animation:none}.up-day.last .up-v::after{display:none}}
 @media (max-width:640px){.up-v{margin-top:0;align-self:center}}
 .savp-warn{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;padding:10px 13px;border-radius:11px;background:rgba(233,99,135,.09);border:1px solid rgba(233,99,135,.4)}
 .savp-warn b{font-size:12px;color:var(--pink-t)}
