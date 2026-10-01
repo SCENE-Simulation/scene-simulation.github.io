@@ -7578,7 +7578,28 @@ background:radial-gradient(circle,rgba(var(--sv-rgb),.8),rgba(var(--sv-rgb),0) 6
 #v-views #vr-hof.on .hf-crown{animation:none}
 @keyframes vrCrG{0%,40%,100%{filter:drop-shadow(0 0 4px rgba(240,199,94,.55))}62%{filter:drop-shadow(0 0 7px rgba(255,226,140,1)) brightness(1.15)}}
 @keyframes vrCrJ{0%,44%,100%{fill:rgba(0,0,0,.35)}60%,66%{fill:#fff}}
-@media (prefers-reduced-motion:reduce){#v-views #vr-hof .hf-crown,#v-views #vr-hof .hf-crown circle{animation:none}}</style>
+@media (prefers-reduced-motion:reduce){#v-views #vr-hof .hf-crown,#v-views #vr-hof .hf-crown circle{animation:none}}
+@media (min-width:641px){
+#v-views .vr-head .vr-tabs{display:flex;width:100%;gap:4px}
+#v-views .vr-tabs button,#v-views .vr-tabs .vr-fav{flex:1 1 auto;justify-content:center;margin-left:0}
+}
+.chead2 .sp{display:grid;gap:8px}
+@media (min-width:761px){
+.chead2{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"cnt won own" "sp sp sp" "ach ach ach"}
+.chead2 .sp{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+}
+@media (max-width:760px){
+.chead2 .sp{grid-template-columns:repeat(2,minmax(0,1fr))}
+.chead2 .sp > :nth-child(n+3){grid-column:1 / -1}
+}
+.chead2 .sp > *{min-width:0;margin:0}
+.chead2 .sp button{min-height:44px;width:100%;white-space:nowrap}
+.xt-bar{gap:10px}
+.xt-bar > .xt-b{flex:1 1 0;min-width:0}
+.xt-bar > .xt-b .xv{margin-left:auto}
+@media (max-width:560px){.xt-bar{gap:8px}.xt-bar > .xt-b{flex:1 1 100%}}
+@media (min-width:561px){.xt-bar > .xt-b:only-child{flex:0 1 auto}}
+button,.gs,[role="tab"],summary,.chip,.wx-chip,.seg > *{word-break:keep-all;overflow-wrap:break-word}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
