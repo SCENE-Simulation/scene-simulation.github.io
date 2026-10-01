@@ -7561,7 +7561,10 @@ animation:bdgWv calc(var(--et,4.6s) * .62) linear infinite reverse,bdgEb calc(va
 #v-views .vp-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 #v-views .vp-row .vp-ch{grid-column:span 3}
 #v-views .vp-row .vr-rec{padding:0 10px;min-width:0}
-}</style>
+}
+#v-views #vr-fav .vf-ic{transform-origin:50% 55%;animation:vrSt 2.8s ease-in-out infinite}
+@keyframes vrSt{0%,56%,100%{transform:scale(1)}67%{transform:scale(1.34)}78%{transform:scale(.9)}89%{transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){#v-views #vr-fav .vf-ic{animation:none}}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
