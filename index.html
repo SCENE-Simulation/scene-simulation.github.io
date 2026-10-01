@@ -7562,9 +7562,11 @@ animation:bdgWv calc(var(--et,4.6s) * .62) linear infinite reverse,bdgEb calc(va
 #v-views .vp-row .vp-ch{grid-column:span 3}
 #v-views .vp-row .vr-rec{padding:0 10px;min-width:0}
 }
-#v-views #vr-fav .vf-ic{transform-origin:50% 55%;animation:vrSt 2.8s ease-in-out infinite}
-@keyframes vrSt{0%,56%,100%{transform:scale(1)}67%{transform:scale(1.34)}78%{transform:scale(.9)}89%{transform:scale(1.1)}}
-@media (prefers-reduced-motion:reduce){#v-views #vr-fav .vf-ic{animation:none}}</style>
+#v-views #vr-fav .vf-ic{fill:none;stroke:var(--sv);stroke-width:2.4;stroke-linejoin:round;clip-path:polygon(50.0% 8.3%,61.7% 36.0%,91.7% 38.5%,68.9% 58.2%,75.8% 87.5%,50.0% 72.0%,24.3% 87.5%,31.1% 58.2%,8.3% 38.5%,38.3% 36.0%);
+background:linear-gradient(var(--sv),var(--sv)) 50% 100%/100% 0% no-repeat;animation:vrFill 4.8s ease-in-out infinite}
+#v-views #vr-fav.on .vf-ic{stroke:#2a2f38;background-image:linear-gradient(#2a2f38,#2a2f38)}
+@keyframes vrFill{0%,6%{background-size:100% 0%}72%,90%{background-size:100% 100%}100%{background-size:100% 0%}}
+@media (prefers-reduced-motion:reduce){#v-views #vr-fav .vf-ic{animation:none;background-size:100% 100%}}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
