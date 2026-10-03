@@ -7587,6 +7587,16 @@ animation:bdgWv calc(var(--et,4.6s) * .62) linear infinite reverse,bdgEb calc(va
 .rc-t.rx-gn .rx-gsl{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1px 6px;margin-top:4px;font-size:11px;font-weight:600;line-height:1.3}.rc-t.rx-gn .rx-gsl > span{white-space:nowrap}
 .rc-t.rx-gn .rx-gsl .lg{color:#ff9d9d}.rc-t.rx-gn .rx-gsl .sh{color:var(--ink2)}
 .rc-t.rx-gn .rx-gsl u{text-decoration:none;font:700 11px "JetBrains Mono","Pretendard Variable",monospace}
+.rc-sum.s4 > .rc-t{container:rct / inline-size}
+.rc-sum.s4 > .rc-t:not(.rx-gn){display:flex;flex-direction:column}
+.rc-sum.s4 > .rc-t:not(.rx-gn) > em{margin-top:auto;margin-bottom:auto}
+.rc-sum.s4 > .rc-t.rx-sbt > .rx-gnr:first-of-type{margin-top:auto;padding-top:5px}
+@container rct (max-width:165px){
+.rc-t > em:has(.rx-sgl){flex-direction:column;flex-wrap:nowrap;gap:5px;padding:4px 0}
+.rc-t > em > .rx-sgl{display:flex;align-items:center;justify-content:space-between;font-weight:600;color:var(--ink2)}
+.rc-t.rx-gn .rx-gsl{flex-direction:column;flex-wrap:nowrap;gap:2px;margin-top:5px}
+.rc-t.rx-gn .rx-gsl > span{display:flex;justify-content:space-between}
+}
 .rc-t.rx-sbt .rx-gnr{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:5px}
 .rc-t.rx-sbt .rx-gnr i{font-size:11.5px;font-style:normal;font-weight:600;color:var(--ink2);white-space:nowrap}
 .rc-t.rx-sbt .rx-gnr .rx-sgn{padding:0;border:0!important;background:none!important;box-shadow:none!important;font:800 15px/1.2 "JetBrains Mono","Pretendard Variable",monospace;white-space:nowrap}
