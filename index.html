@@ -7490,7 +7490,13 @@ body.bb-open .nul-ctl{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 #v-views #v-vcup{max-width:none;margin:0;padding:0}
 #v-views #v-vcup > .sec:first-child,#v-views #v-vcup > .cu-hero{display:none}
 #v-views .vcw{margin-top:14px}
-#v-views.cup-on .vx-about{display:none}</style>
+#v-views.cup-on .vx-about{display:none}
+#v-views #vr-cup{color:#8fb4f6}
+#v-views #vr-cup .vr-ic{filter:drop-shadow(0 0 3px rgba(110,160,255,.5));animation:vrCupZ 4.6s ease-in-out infinite}
+#v-views .vr-tabs #vr-cup.on{background:linear-gradient(90deg,#9cc0ff,#5d8ff2 55%,#4263d6);color:#07153a;box-shadow:0 4px 14px rgba(93,143,242,.35)}
+#v-views #vr-cup.on .vr-ic{filter:none;animation:none}
+@keyframes vrCupZ{0%,86%,100%{filter:drop-shadow(0 0 3px rgba(110,160,255,.5))}89%{filter:drop-shadow(0 0 7px rgba(170,205,255,.95))}92%{filter:drop-shadow(0 0 2px rgba(110,160,255,.35))}95%{filter:drop-shadow(0 0 6px rgba(170,205,255,.85))}}
+@media (prefers-reduced-motion:reduce){#v-views #vr-cup .vr-ic{animation:none}}</style>
 </head>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
