@@ -294,6 +294,9 @@ body { background: var(--bg); color: var(--ink); font-family: "Pretendard Variab
 .rv2k .rvt-px::before{animation-timing-function: steps(32);}
 .rv2k.g4 .rvt-in{animation-timing-function: steps(40);}
 .rv2k.kz, .rv2k.kz *, .rv2k.kz ::before, .rv2k.kz ::after{animation-play-state: paused !important;}
+@media (hover: none), (pointer: coarse){.rv2k *, .rv2k ::before, .rv2k ::after{animation-play-state: paused !important;}
+.rv2k:not(.kz) .rvt-gl i, .rv2k:not(.kz) .rv2k-cr i, .rv2k:not(.kz) .rvt-pp svg, .rv2k:not(.kz) .rvt-em, .rv2k:not(.kz) .rv2k-f26s i{animation-play-state: running !important;}
+}
 .rv2k-ds{position: relative; z-index: 1; display: -webkit-box; font-size: 5cqw; line-height: 1.42; color: rgb(236, 236, 240); word-break: keep-all; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: rgba(0, 0, 0, 0.6) 0px 0.3cqw 0.8cqw;}
 .rv2k.k2 .rvt-in{padding: 0px; gap: 0px; justify-content: flex-end;}
 .rv2k.k2 .rvt-art{position: absolute; inset: 0px; flex: 0 0 auto; z-index: 0; border-radius: 0px; box-shadow: none;}
