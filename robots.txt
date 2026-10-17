@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://scene-simulation.github.io/sitemap.xml

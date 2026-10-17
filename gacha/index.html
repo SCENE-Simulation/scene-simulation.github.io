@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>history.replaceState(null,"","/"+(/[?&]tab=/.test(location.search)?location.search:"?tab=gacha")+location.hash)</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리센느 포카 뽑기 · 포카 뽑기 시뮬레이터 | 센둥이 팬에디션</title>
+<meta name="description" content="콜라보별 리센느 포카를 1장 · 10장씩 랜덤 포카 뽑기로 뽑아 보세요. 쓴 돈과 중복 장수, 컴플리트까지 남은 비용을 포카 뽑기 시뮬레이터가 계산해요.">
+<link rel="canonical" href="https://scene-simulation.github.io/gacha/">
+<script>!function(){var e=/[?&]tab=([^&]+)/.exec(location.search);e&&["pulse2026","allcards","allgoods","cu405","views","minigame","gacha","revolve"].indexOf(e[1])>=0&&(document.querySelector('link[rel="canonical"]').href="https://scene-simulation.github.io/"+e[1]+"/")}();</script>
+<meta name="theme-color" content="#1c1c1e">
+<meta name="application-name" content="센둥이 팬에디션">
+<meta name="apple-mobile-web-app-title" content="센둥이 팬에디션">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e96387'/%3E%3Ctext x='32' y='45' font-size='34' font-weight='800' text-anchor='middle' fill='%23fff' font-family='sans-serif'%3E%EC%84%BC%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="센둥이 팬에디션">
+<meta property="og:title" content="리센느 포카 뽑기 · 포카 뽑기 시뮬레이터 | 센둥이 팬에디션">
+<meta property="og:description" content="콜라보별 리센느 포카를 1장 · 10장씩 랜덤 포카 뽑기로 뽑아 보세요. 쓴 돈과 중복 장수, 컴플리트까지 남은 비용을 포카 뽑기 시뮬레이터가 계산해요.">
+<meta property="og:url" content="https://scene-simulation.github.io/gacha/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" integrity="sha384-2nNKoOPayicGa+aRguOQuiZP+RqQ4G3jalfDeOgftkKD7zBM2gJXTwcFqCZltdv0" crossorigin="anonymous">
+<link rel="stylesheet" href="/assets/a973ae4c81b0.css">
+</head>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
+    <symbol id="i-gacha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="11" height="15" rx="2"/><path d="M8 21h10a2 2 0 0 0 2-2V7"/><path d="M10.5 8.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L7.6 10.3l2-.3z"/></symbol>
+    <symbol id="i-disc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M12 5.6a6.4 6.4 0 0 1 6.4 6.4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1.5"/><path d="M5 13v7.5h14V13"/><path d="M12 8v12.5"/><path d="M12 8S10.5 3.5 8 4.2 8.5 8 12 8zM12 8s1.5-4.5 4-3.8S15.5 8 12 8z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21.1l-1.35-1.23C5.5 15.2 2.2 12.2 2.2 8.6 2.2 5.7 4.5 3.4 7.4 3.4c1.63 0 3.2.76 4.22 1.96A5.55 5.55 0 0 1 15.84 3.4c2.9 0 5.2 2.3 5.2 5.2 0 3.6-3.3 6.6-8.45 11.27L12 21.1z"/></symbol>
+    <symbol id="i-toy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-.6-.6H9.6l-.6.6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><path d="M16 11.5h.01M18 13.5h.01"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></symbol><symbol id="i-radar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6.6" opacity=".75"/><circle cx="12" cy="12" r="3.3" opacity=".6"/><path d="M12 12 19.1 4.9" stroke-width="2.2"/><circle cx="16.4" cy="8.4" r="1.3" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 4-6 5 5"/><path d="M3 21h18"/><path d="M17 4h4v4"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="9.5" r="1.8"/><path d="M21 16l-5.5-5.5L5 20"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></symbol>
+    <symbol id="i-news" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v8a2 2 0 0 1-2 2"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h4"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+    <symbol id="i-like" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 10.5V20H4.6a1 1 0 0 1-1-1v-7.5a1 1 0 0 1 1-1z"/><path d="M7.5 10.5l3.7-6.9a1.9 1.9 0 0 1 3.4 1.5l-.8 4.3h5.3a2 2 0 0 1 2 2.3l-1.2 6.6a2 2 0 0 1-2 1.7H7.5"/></symbol><symbol id="i-cmt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5h15A1.5 1.5 0 0 1 21 6v9.5a1.5 1.5 0 0 1-1.5 1.5H10l-4.6 3.6V17h-.9A1.5 1.5 0 0 1 3 15.5V6a1.5 1.5 0 0 1 1.5-1.5z"/><circle cx="8.5" cy="10.8" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="10.8" r=".9" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10.8" r=".9" fill="currentColor" stroke="none"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 2.8 5.2 13.6h6l-1 7.6 8-10.8h-6z"/></symbol><symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17 9.5 11l4 4 7-7.5"/><path d="M15 7.5h5.5V13"/></symbol><symbol id="i-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.8" width="14" height="18.4" rx="2.6"/><rect x="8" y="5.8" width="8" height="3.6" rx="1"/><circle cx="9" cy="13" r=".95" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r=".95" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r=".95" fill="currentColor" stroke="none"/><circle cx="9" cy="17" r=".95" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r=".95" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r=".95" fill="currentColor" stroke="none"/></symbol><symbol id="i-orb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="7"/><path d="M9 6.8a3.6 3.6 0 0 1 3-1.6"/><path d="M8.2 15.9 6.5 20.5h11l-1.7-4.6"/></symbol>
+    <symbol id="i-who" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.5"/><path d="M12 16.8h.01"/></symbol>
+    <symbol id="i-upd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7z"/><path d="M18 14l.9 2.1 2.1.9-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 16.5v2.5A1.5 1.5 0 0 0 5.5 20.5h13A1.5 1.5 0 0 0 20 19v-2.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-vs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2.5 5 13.5h6l-1 8 8.5-11h-6z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7.5 15l3.5-4.5 3 2.5 5-6.5"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5v1.2A3.8 3.8 0 0 0 8.2 11"/><path d="M17 6h2.5v1.2a3.8 3.8 0 0 1-3.7 3.8"/><path d="M12 13.5V17"/><path d="M8.5 20.5h7M9.5 17h5v3.5h-5z"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
+    
+    <symbol id="i-bread" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V11a4 4 0 0 0 1-2.6C20 5.4 16.4 4 12 4S4 5.4 4 8.4A4 4 0 0 0 5 11v7.5A1.5 1.5 0 0 0 6.5 20z"/><path d="M9 11.5v4M12 11.5v4M15 11.5v4"/></symbol>
+    
+    <symbol id="i-door" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="5.2" width="8" height="13.6" rx="1.7"/><path d="M12 9.4l.9 1.9 2 .2-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.2z" stroke-width="1.3"/><path d="M4.4 15.6a8.2 8.2 0 0 1 .5-7.9"/><path d="M2.9 9.3 4.9 7.6l1.6 2.1"/><path d="M19.6 8.4a8.2 8.2 0 0 1-.5 7.9"/><path d="M21.1 14.7l-2 1.7-1.6-2.1"/></symbol>
+    <symbol id="i-updown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20V5M4 9l4-4 4 4M16 4v15M12 15l4 4 4-4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9.3 5 2.6 5 5.8"/></symbol>
+    
+    <symbol id="i-swap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h15"/><path d="M15.5 5l3.5 3.5-3.5 3.5"/><path d="M20 15.5H5"/><path d="M8.5 12 5 15.5 8.5 19"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+  </defs>
+</svg>
+
+<aside class="sb" aria-label="메뉴">
+  
+  <div class="sb-top"><button type="button" class="sb-tb" data-sbx="grid" aria-label="메뉴 한눈에 보기" title="메뉴 한눈에 보기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button><button type="button" class="sb-tb" data-sbx="find" aria-label="메뉴 검색" title="메뉴 검색 (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M4 11h5M4 16h5"/><circle cx="15.5" cy="14.5" r="3.6"/><path d="M18.2 17.2l2.3 2.3"/></svg></button><button type="button" class="sb-tb sb-tg" data-sbt aria-label="메뉴 접기" title="메뉴 접기" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M10 12h10M4 18h16"/><path class="ar" d="M7 9.5L4.5 12 7 14.5"/></svg></button></div>
+  <a class="nv" href="/" data-tab="home"><svg><use href="#i-home"/></svg>홈<span class="nv-up" role="link" tabindex="0" data-up-go aria-label="업데이트 내역 바로가기" title="업데이트 내역"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="a" d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7z"/><path class="b" d="M18 14l.9 2.1 2.1.9-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg>업데이트</span></a>   
+  <a class="nv" href="/?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시리스트<span class="wn" id="wish-n" hidden>0</span></a>
+  <a class="nv" href="/?tab=vfav" data-tab="vfav"><svg><use href="#i-star"/></svg>영상 즐겨찾기<span class="wn vfn" id="vfav-n" hidden>0</span></a>
+  <a class="nv" href="/?tab=backup" data-tab="backup"><svg><use href="#i-save"/></svg>기록 백업</a>
+
+  
+  <div class="grp" id="grp-toy" data-grp="toy">
+    <div class="gl"><svg><use href="#i-toy"/></svg>장난감</div>
+    
+    <a class="nv sub ico" href="/views/" data-tab="views" data-also="vcup"><svg><use href="#i-yt"/></svg>조회수 예측기</a>
+    
+    <details class="yr mg" id="nav-mini" open>
+      <summary><svg class="cv"><use href="#i-chev"/></svg><svg class="mi"><use href="#i-dice"/></svg><span class="mg-t">미니게임</span></summary>
+      <a class="nv sub ico" href="/?tab=worldcup" data-tab="worldcup"><svg><use href="#i-trophy"/></svg>컨텐츠 월드컵</a>
+      
+      <a class="nv sub ico" href="/revolve/" data-tab="revolve"><svg><use href="#i-door"/></svg>데일리 회전문 뽑기</a>
+      <a class="nv sub ico" href="/?tab=whoami" data-tab="whoami"><svg><use href="#i-who"/></svg>나는 누구일까요?</a>
+      <a class="nv sub ico" href="/?tab=updown" data-tab="updown"><svg><use href="#i-updown"/></svg>조회수 업다운</a>
+      
+      <a class="nv sub ico" href="/gacha/" data-tab="gacha" title="포토카드 뽑기 시뮬레이션"><svg><use href="#i-gacha"/></svg>포카 뽑기 시뮬</a>
+      <a class="nv sub ico" href="/minigame/" data-tab="minigame" title="도전! 단일 포카 뽑기 — 원하는 카드 한 장이 몇 번 만에 나오는지 (예전 이름: 뽑기 미니게임)"><svg><use href="#i-target"/></svg>도전! 단일 포카 뽑기</a>
+      
+      <a class="nv sub ico" href="/?tab=oracle" data-tab="oracle"><svg><use href="#i-orb"/></svg>예측의 신</a>
+    </details>
+  </div>
+
+  
+  <div class="grp" id="grp-pc" data-grp="pc">
+    
+    
+    <a class="nv nv-hub" href="/?tab=trade" data-tab="trade"><svg><use href="#i-swap"/></svg>교환 · 중고 장터</a>
+    <a class="nv nv-hub" href="/allcards/" data-tab="allcards" data-also="allgoods members allcol allalbums"><svg><use href="#i-users"/></svg>컬렉션 모아보기</a>
+    
+    <div class="grp grp-in" id="grp-al" data-grp="al">
+      <div class="gl"><svg><use href="#i-disc"/></svg>앨범 컬렉션 북</div>
+      
+      <a class="nv sub" href="/pulse2026/" data-tab="pulse2026">펄스 앨범</a>
+    </div>
+    <div class="gl"><svg><use href="#i-book"/></svg>포카 컬렉션 북</div>
+    <details class="yr" open>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2026 포카</summary>
+      <a class="nv sub" href="/cu405/" data-tab="cu405">CU 405빵 콜라보 시즌1</a>
+    </details>
+    
+    <a class="nv yl" href="/?tab=pc2025" data-tab="pc2025"><svg class="cv"><use href="#i-chev"/></svg>2025 포카</a>
+    <a class="nv yl" href="/?tab=pc2024" data-tab="pc2024"><svg class="cv"><use href="#i-chev"/></svg>2024 포카</a>
+  </div>
+
+  <div class="grp" id="grp-gd" data-grp="gd">
+    <div class="gl"><svg><use href="#i-gift"/></svg>굿즈 컬렉션 북</div>
+    <details class="yr" open>
+      <summary><svg class="cv"><use href="#i-chev"/></svg>2026 굿즈</summary>
+      
+    </details>
+    <a class="nv yl" href="/?tab=goods2025" data-tab="goods2025"><svg class="cv"><use href="#i-chev"/></svg>2025 굿즈</a>
+    <a class="nv yl" href="/?tab=goods2024" data-tab="goods2024"><svg class="cv"><use href="#i-chev"/></svg>2024 굿즈</a>
+  </div>
+
+  
+  <a class="nv nv-hub sb-trade" href="/?tab=trade" data-tab="trade"><svg><use href="#i-swap"/></svg>교환 · 중고 장터</a>
+
+  <div class="ft">MADE BY <b>비효율주의자</b></div>   
+</aside>
+
+<main class="mn">
+<header class="hd">
+  <a href="/" data-tab="home" title="센둥이 팬에디션 (Fan Edition)"><p class="lg">센둥이 <span class="lg-fe"><em>팬에디션</em><span class="lg-v">V 5.5.5</span></span></p></a>   
+</header>
+
+<section class="home" id="v-home">
+  <div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>HOME</div></div>
+  
+  <div class="intro hi">
+    <p class="hi-t">아이돌 그룹 리센느와 관련된 <em>덕질을 더 재미있게</em> 하기 위한 도구를 <span class="hi-nw">모아 둔 사이트입니다.</span></p>
+    
+    <p class="hi-d"><span class="hi-dk">대표적인 기능으로는</span> <span class="hi-cs"><span class="hi-nw"><a class="hi-c" href="/allgoods/" data-tab="allgoods">굿즈</a>,</span> <span class="hi-nw"><a class="hi-c" href="/allcards/" data-tab="allcards">포토카드</a> 컬렉션 북,</span> <span class="hi-nw"><a class="hi-c" href="/views/" data-tab="views">조회수 예측기</a>가 있습니다.</span></span></p>
+    <p class="hi-s"><i aria-hidden="true">✦</i>이외 다양한 미니 게임이나 기능들이 지속적으로 추가될 예정입니다.</p>
+    
+    <form class="hi-nk" id="hi-nk" autocomplete="off">   
+      <div class="hi-nkl"><span class="hi-nkav" aria-hidden="true"><svg class="u"><use href="#i-user"/></svg><svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M2.8 9.3c2.6-1.6 6-1.7 9.2.5 3.2-2.2 6.6-2.1 9.2-.5-.1 3.7-2.1 6.2-4.7 6.2-2 0-3.4-1.2-4.5-2.9-1.1 1.7-2.5 2.9-4.5 2.9-2.6 0-4.6-2.5-4.7-6.2z"/><ellipse cx="7.9" cy="11.2" rx="1.7" ry="1.05" fill="currentColor" stroke="none"/><ellipse cx="16.1" cy="11.2" rx="1.7" ry="1.05" fill="currentColor" stroke="none"/><path d="M20.9 9.6l1.6-1.9"/></svg></span><span><b>공유 카드 닉네임</b><small id="hi-nks" aria-live="polite"></small></span></div>
+      <div class="hi-nkf">
+        <input id="hi-nki" type="text" maxlength="16" placeholder="닉네임 (최대 16자)" aria-label="공유 카드 닉네임" spellcheck="false" enterkeyhint="done">
+        <button type="submit" class="p" id="hi-nkb">저장</button>
+        <button type="button" id="hi-nkx" hidden>지우기</button>
+      </div>
+    </form>
+  </div>
+
+  
+  <div class="hm-links">
+  <a class="bk-home up-home" href="/?tab=updates" data-tab="updates"><svg class="upi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="a" d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7z"/><path class="b" d="M18 14l.9 2.1 2.1.9-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z"/></svg><span><b>업데이트 내역</b><small id="up-home-s">새로 생긴 페이지와 기능을 날짜별로 모았습니다.</small></span><em>→</em></a>
+  <a class="bk-home" href="/?tab=backup" data-tab="backup"><svg><use href="#i-save"/></svg><span><b>기록 백업 · 복원</b><small>컬렉션 기록은 이 브라우저에만 저장됩니다. 가끔 파일로 저장해 두세요.</small></span><em>→</em></a>
+  </div>
+
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg>컬렉션 통합 현황</div></div>
+  <div class="sumrow">
+    <div class="sumc" id="sum-pc"></div>
+    <div class="sumc" id="sum-gd"></div>
+  </div>
+
+  <div class="sec sec2">
+    <div class="sec-l"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북</div><span id="dguide-slot"></span></div>
+    <div class="seg" role="group" aria-label="정렬"><button type="button" data-sort="new" class="on">최신순</button><button type="button" data-sort="diff">난이도순</button></div>
+  </div>
+  <div class="hgrid" id="col-grid">
+    <a class="hc" href="/cu405/" data-tab="cu405" data-col="cu405" style="--c:#47d19a">
+      <div class="k">2026 포카</div>
+      <h2>CU 405빵 콜라보 시즌1</h2>
+      <div class="meta"></div>
+      <p class="cdesc" data-desc="cu405"></p>
+      <div class="st2"><span><b data-mirror="c-own">0/27</b>보유</span><span><b data-mirror="c-cnt">0회</b>구매</span></div>
+      <span class="go">컬렉션 북 열기 →</span>
+    </a>
+  </div>
+
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg>굿즈 컬렉션 북</div></div>
+  <div class="hgrid" id="gd-grid">
+    
+  </div>
+
+  <div class="sec sec2"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감</div></div>
+  <div class="hgrid">
+    <a class="hc" href="/views/" data-tab="views" style="--c:#ff4e5b">
+      <div class="k"><svg><use href="#i-yt"/></svg>VIEW PREDICTOR</div>
+      <h2>조회수 예측기</h2>
+      <p>유튜브 영상 조회수를 5분마다 모아 게시 후 24시간·7일·15일 조회수와 다음 100만 단위 돌파 시점을 예측합니다.</p>
+      <span class="go">예측 보러 가기 →</span>
+    </a>
+    <a class="hc" href="/?tab=oracle" data-tab="oracle" style="--c:#a98bff">
+      <div class="k"><svg><use href="#i-orb"/></svg>PREDICTION GOD</div>
+      <h2>예측의 신</h2>
+      <p>즐겨찾기한 영상이 다음 100만 단위를 언제 넘을지 직접 맞혀 보세요. 실제 기록으로 얼마나 가까웠는지 채점하고, 조회수 예측기와도 겨룹니다.</p>
+      <span class="go">맞히러 가기 →</span>
+    </a>
+    <a class="hc" href="/?tab=vcup" data-tab="vcup" style="--c:#4db2ff">
+      <div class="k"><svg><use href="#i-vs"/></svg>VIEW CLASH</div>
+      <h2>조회수 갈드컵 분석기</h2>
+      <p>안원잘부 영상을 최대 3개까지 골라 조회수 · 좋아요 · 댓글 · 반응 · 속도 · 성장률을 항목별로 겨뤄 보세요. 그래프 비교와 역전 예측, 결과 공유 카드까지 담았습니다.</p>
+      <span class="go">대결 붙이러 가기 →</span>
+    </a>
+    <a class="hc" href="/?tab=worldcup" data-tab="worldcup" style="--c:#ffcf5c">
+      <div class="k"><svg><use href="#i-trophy"/></svg>CONTENTS WORLD CUP</div>
+      <h2>컨텐츠 월드컵</h2>
+      <p>리센느 노래와 안원잘부 영상 · 쇼츠를 두 개씩 겨뤄 최애 하나를 뽑아 보세요. 모든 참여자의 결과를 모은 순위와 우승 공유 카드까지 담았습니다.</p>
+      <span class="go">월드컵 하러 가기 →</span>
+    </a>
+    <a class="hc" href="/gacha/" data-tab="gacha" style="--c:#e96387">
+      <div class="k"><svg><use href="#i-gacha"/></svg>PHOTOCARD GACHA</div>
+      <h2>포토카드 뽑기 시뮬레이션</h2>
+      <p>콜라보별 포토카드를 1장씩 또는 10장씩 뽑아 보세요. 쓴 돈, 중복 장수, 컴플리트까지 남은 예상 비용을 계산하고 그래프로 분석해 줍니다.</p>
+      <span class="go">뽑으러 가기 →</span>
+    </a>
+    <a class="hc" href="/minigame/" data-tab="minigame" style="--c:#a080d0">
+      <div class="k"><svg><use href="#i-target"/></svg>GACHA MINIGAME</div>
+      <h2>뽑기 미니게임</h2>
+      <p>원하는 포토카드 한 장을 골라, 그 카드가 몇 번 만에 나오는지 도전해 보세요. 결과에 원샷 원킬부터 저주받은 손까지 등급을 매겨 줍니다.</p>
+      <span class="go">도전하러 가기 →</span>
+    </a>
+    
+    <a class="hc" href="/revolve/" data-tab="revolve" style="--c:#ff9a62">
+      <div class="k"><svg><use href="#i-door"/></svg>DAILY REVOLVING DOOR</div>
+      <h2>데일리 회전문 뽑기</h2>
+      <p>하루에 한 번 회전문을 돌려 리센느 멤버 카드를 두 장 받아 보세요. 슬롯머신 그림 조합으로 등급이 정해지고, 매일 이어서 뽑으며 시즌 1 카드 100장 도감을 채웁니다.</p>
+      <span class="go">돌리러 가기 →</span>
+    </a>
+    <a class="hc" href="/?tab=whoami" data-tab="whoami" style="--c:#ff6f9f">
+      <div class="k"><svg><use href="#i-who"/></svg>WHO AM I?</div>
+      <h2>나는 누구일까요?</h2>
+      <p>리센느 사진에서 잘라 낸 눈 · 코 · 입 네 조각만 보고 멤버를 맞히고, 어떤 행사 사진인지까지 맞혀 보세요. 문제 은행에서 무작위로 뽑은 35문제 실전 점수로 모든 참여자 중 내 순위를 확인합니다.</p>
+      <span class="go">맞히러 가기 →</span>
+    </a>
+    <a class="hc" href="/?tab=updown" data-tab="updown" style="--c:#44d7b6">
+      <div class="k"><svg><use href="#i-updown"/></svg>VIEWS UP &amp; DOWN</div>
+      <h2>조회수 업다운</h2>
+      <p>왼쪽 영상의 조회수를 보고, 오른쪽 영상이 더 많은지 적은지 골라 보세요. 한 번 틀리면 끝 — 연속으로 맞힌 수로 등급과 전체 순위를 확인합니다.</p>
+      <span class="go">도전하러 가기 →</span>
+    </a>
+  </div>
+</section>
+
+<div class="wrap" id="v-app" hidden>
+<p class="credit">MADE BY <b>비효율주의자</b> OF <b>아이돌 컨텐츠 갤러리</b></p>
+<h1><span class="sub">PHOTOCARD GACHA</span>포토카드 뽑기 시뮬레이터</h1>
+<p class="lead">리센느 카드 27종 구성. 멤버 1인당 서로 다른 4종씩 5명 × 4종 = 20종에, 스페셜 카드 7종을 더해 27종입니다.</p>
+
+<div class="tabs">
+  <button id="tab-col" class="on">실물 컬렉션 북</button>
+  <button id="tab-sim">뽑기 시뮬레이터</button>
+</div>
+<div id="page-sim" hidden>
+<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-toy"/></svg>장난감<span class="cr">›</span><span class="lt">포토카드 뽑기 시뮬레이션</span></div></div>
+<p class="sec-d">콜라보 포토카드를 한 장씩 뽑아 모든 종류를 모을 때까지 드는 비용을 시뮬레이션합니다. 뽑기 화면에서 직접 뽑고, 분석 화면에서 그래프로 내 운과 기대 비용을 확인할 수 있습니다.</p>
+
+</div>
+<div id="page-col" class="k2">
+<div class="sec"><div class="sec-t"><svg viewBox="0 0 24 24"><use href="#i-book"/></svg>포카 컬렉션 북<span class="cr">›</span>2026 포카<span class="cr">›</span><span class="lt">CU 405빵 콜라보 시즌1</span></div><button type="button" class="gs shr-btn" data-shr405 title="지금 수집 기록으로 이미지 카드 만들기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>공유하기</button></div>
+
+  
+  <div class="k2-hero" data-col="cu405"></div>
+  <div class="xt" data-col="cu405"></div>
+  <div class="k2-rec new" id="c-note">
+    <div class="k2-rh"><span class="k2-ri" id="c-note-i" aria-hidden="true">!</span>
+      <div class="k2-rt"><b class="k2-st">내 기록</b><span class="k2-ss" id="c-note-s">기록은 <b>저장</b> 버튼을 눌러야 이 브라우저에 남아요</span></div>
+      <div class="k2-ra"><div id="c-savs" style="display:contents"></div><button type="button" class="k2-rb" id="c-reset">초기화</button><button type="button" class="p k2-sb" id="c-savebtn">저장</button></div></div>
+    <div class="k2-cs"><div class="k2-c"><span>풀세트 클리어 평균 비용</span><b><i>약</i><em id="c-need">262,500</em><i>원</i></b><small id="c-needs">빵 약 105개 · 1개 2,500원</small></div>
+      <div class="k2-c" id="c-wonbox"><span>누적 금액</span><b><em id="c-won">0</em><i>원</i></b><small id="c-wons">아직 금액 기록이 없어요</small></div></div>
+    <div class="k2-own" id="c-ownbox"></div>
+    <div class="k2-ml" id="c-ml">
+      <div class="k2-md main" id="lg-buy"><div class="k2-mt"><b>빵 구매<i>2,500원</i></b><span>빵 1개당 27종 중 1장 랜덤</span></div>
+        <div class="k2-sp"><button type="button" data-k="buy" data-d="-1" aria-label="빵 구매 하나 빼기">−</button><span class="n">0</span><button type="button" class="p" data-k="buy" data-d="1" aria-label="빵 구매 기록 더하기">+</button></div></div>
+      <div class="k2-md" id="lg-trade"><div class="k2-mt"><b>교환</b><span class="k2-tr">교환 가능한 중복 <em id="c-tdup">0</em>장 · 지금까지 교환 <i id="c-tdone">0</i>장</span></div>
+        <div class="k2-sp"><button type="button" data-k="trade" data-d="-1" aria-label="교환 하나 빼기">−</button><span class="n">0</span><button type="button" class="p" data-k="trade" data-d="1" aria-label="교환 기록 더하기">+</button></div></div>
+      <div class="k2-md var" id="lg-used"><div class="k2-mt"><b>중고 구매</b><label class="k2-mp">장당 <input id="c-uprice" type="text" inputmode="numeric" autocomplete="off" value="15,000" aria-label="중고 구매가(장당)">원</label><span class="k2-mw">누적 <em id="c-usedwon">0</em>원</span></div>
+        <div class="k2-sp"><button type="button" data-k="used" data-d="-1" aria-label="중고 구매 하나 빼기">−</button><span class="n">0</span><button type="button" class="p" data-k="used" data-d="1" aria-label="중고 구매 기록 더하기">+</button></div>
+        <button type="button" class="k2-ml2" id="c-usedhint"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg><span>건별 금액은 <u>기록 로그</u>에서 수정할 수 있습니다</span></button></div>
+    </div>
+  </div>
+  
+  <span id="c-own" hidden>0/27</span><span id="c-cnt" hidden>0회</span>
+  <div class="cach k2-ach" id="c-ach"><div class="cach-h"><span class="cach-t">✦ 칭호</span><span class="cach-n" id="c-ach-n">0 / 0</span><div class="k2-am" id="c-badges"></div><button type="button" class="cach-btn" id="c-ach-all" aria-expanded="false">펼치기</button></div><div class="badges all" id="c-badges-all" hidden></div></div>
+  <div class="lgx">
+    <button type="button" class="xt-b" id="c-logbtn" aria-expanded="false" aria-controls="c-logp"><svg class="xi"><use href="#i-log"/></svg>기록 로그<span class="xt-c" id="c-logn">0</span><span class="lgx-h">건별 수정 가능</span><svg class="xv"><use href="#i-chev"/></svg></button>
+    <div class="clog" id="c-logp" hidden><div class="list" id="c-log"><div class="em">기록이 없습니다.</div></div></div>
+  </div>
+  
+  <div class="k2-bh"><b class="k2-st">카드</b>
+  <div class="colbar cb2" style="--p:33.3%">
+    <span class="cb-k">카드 크기</span>
+    <div class="cb-ctl"><button type="button" class="cb-st" data-cbstep="-1" title="크게 보기 — 한 줄 카드 수 줄이기" aria-label="카드 크게">−</button>
+      <div class="cb-rail"><input id="c-cols" type="range" min="2" max="5" step="1" value="4" aria-label="한 줄에 보여 줄 카드 수"><div class="cb-tk"><button type="button" data-cbset="2" tabindex="-1" aria-hidden="true">2</button><button type="button" data-cbset="3" tabindex="-1" aria-hidden="true">3</button><button type="button" data-cbset="4" class="on" tabindex="-1" aria-hidden="true">4</button><button type="button" data-cbset="5" tabindex="-1" aria-hidden="true">5</button></div></div>
+      <button type="button" class="cb-st" data-cbstep="1" title="작게 보기 — 한 줄 카드 수 늘리기" aria-label="카드 작게">+</button></div>
+    <button type="button" class="cb-rs" data-cbreset title="처음 크기로 되돌리기">↺<span> 기본</span></button>
+  </div></div>
+  <div class="k2-uw"><span class="stars" id="sum-stars"></span><div class="k2-us" id="c-sum" style="--un:3"></div></div>
+  <div id="c-body"></div>
+  <p class="csave" id="c-save">기록은 저장 버튼을 눌러야 이 브라우저에 저장됩니다.</p>
+  <div class="sfloat" id="c-float" hidden><span class="sf-t">저장하지 않은 변경 <b id="c-float-n">0</b>건</span><button id="c-revert">되돌리기</button><button class="p" id="c-savebtn2">저장</button></div>
+</div>
+
+</div>
+<footer class="seo-ft" id="seo-ft"><h2 class="seo-h">리센느 포카 뽑기 · 포카 뽑기 시뮬레이터</h2><p>콜라보 포토카드를 한 장씩, 또는 10장씩 뽑아 보는 리센느 포카 뽑기 게임이에요. 랜덤 포카 뽑기로 모든 종류를 모을 때까지 드는 비용과 중복 장수를 계산하고, 그래프로 내 운을 분석해 줘요.</p></footer>
+</main>
+<div class="bsheet" id="bsheet" hidden></div>
+
+<nav class="bb" aria-label="하단 메뉴">
+  <a href="/" data-tab="home"><svg><use href="#i-home"/></svg>홈</a>
+  <a href="/?tab=menu-pc" data-tab="menu-pc" data-open="grp-pc"><svg><use href="#i-book"/></svg>포카</a>
+  <a href="/?tab=menu-gd" data-tab="menu-gd" data-open="grp-gd"><svg><use href="#i-gift"/></svg>굿즈</a>
+  <a href="/?tab=menu-toy" data-tab="menu-toy" data-open="grp-toy"><svg><use href="#i-toy"/></svg>장난감</a>
+  <a href="/?tab=wish" data-tab="wish"><svg><use href="#i-heart"/></svg>위시</a>
+  <a href="/?tab=vfav" data-tab="vfav"><svg><use href="#i-star"/></svg>즐겨찾기</a>
+</nav>
+<div class="mask" id="mask" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <div class="mh"><b id="m-title"></b><span id="m-sub"></span><button id="m-close">닫기</button></div>
+    <div class="mb" id="m-body"></div>
+  </div>
+</div>
+<div id="fxlayer" aria-hidden="true"></div>
+<div id="toasts" aria-live="polite"></div>
+<button id="totop" aria-label="맨 위로" title="맨 위로">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script src="/assets/fbde43b09cb2.js"></script>
+<script>!function(){var t="sg:preview";try{var a=new URLSearchParams(location.search).get("preview");"1"===a?localStorage.setItem(t,"1"):"0"===a&&localStorage.removeItem(t)}catch(t){}try{var e=new URLSearchParams(location.search).get("lab");e&&/^-?[a-z0-9]{1,12}$/.test(e)&&("-"===e.charAt(0)?localStorage.removeItem("sg:lab:"+e.slice(1)):localStorage.setItem("sg:lab:"+e,"1"))}catch(t){}function r(){try{return"1"===localStorage.getItem(t)}catch(t){return!1}}function c(t){return String(t).replace(/[&<>"']/g,function(t){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[t]})}window.SGSoon={on:r,lab:function(t){try{return"1"===localStorage.getItem("sg:lab:"+t)}catch(t){return!1}},chip:function(){return r()?'<span class="sn-pv" title="준비 중인 페이지를 미리 보는 중 — 다른 이용자에게는 준비 중 안내만 보입니다. 끄려면 주소 끝에 &amp;preview=0">미리보기 · SOON</span>':""},page:function(t){return'<div class="sn-box"><div class="sn-b">SOON</div><h2>'+c(t.title)+"</h2><p>"+t.desc+"<br>조금만 기다려 주세요!</p>"+(t.back?'<a class="sn-l" href="/?tab='+c(t.back[0])+'" data-tab="'+c(t.back[0])+'">'+c(t.back[1])+" →</a>":"")+"</div>"}}}();</script>
+<script src="/assets/f426f73f3293.js"></script>
+<script src="/assets/90f593ae3091.js"></script>
+<script src="/assets/d4cb7081f151.js"></script>
+<script src="/assets/0b7801444ab6.js"></script>
+<script src="/assets/572e08b43621.js"></script>
+<script src="/assets/a693ee0dacdb.js"></script>
+<script src="/assets/ea12f3f5bb6e.js"></script>
+<script src="/assets/1377d7b55f41.js"></script>
+<script src="/assets/d84ef62a2758.js"></script>
+<script src="/assets/a7992783ad8e.js"></script>
+<script src="/assets/3c2aa077271b.js"></script>
+<script src="/assets/5ccd3837cd2c.js"></script>
+<script src="/assets/184b9ce4e2e7.js"></script>
+<script src="/assets/8ce520d36e35.js"></script>
+<script src="/assets/9279aa758d17.js"></script>
+<script src="/assets/947a0c36ab94.js"></script>
+<script src="/assets/adb77b2d43c9.js"></script>
+<script src="/assets/2243bd04d62e.js"></script>
+<script src="/assets/42d00f1acb01.js"></script>
+<script src="/assets/5bfd0e3aeec4.js"></script>
+<script src="/assets/de0b32b5162c.js"></script>
+<script src="/assets/5619361a5e32.js"></script>
+<script src="/assets/2a2b27c993bb.js"></script>
+<script src="/assets/c8e2875509e2.js"></script>
+<script src="/assets/5f443eaa80b8.js"></script>
+<script src="/assets/21802d2701f9.js"></script>
+<script src="/assets/cf5aace00f8c.js"></script>
+<script src="/assets/80b2c500b1ab.js"></script>
+<script src="/assets/64717325f82e.js"></script>
+<script src="/assets/b08dd5d69ca3.js"></script>
+<script src="/assets/965e8d8c9096.js"></script>
+<script src="/assets/31b19af70307.js"></script>
+<script src="/assets/2d627350eb97.js"></script>
+<script src="/assets/a91f4402c749.js"></script>
+<script src="/assets/e13f4ba92653.js"></script>
+<script src="/assets/16f0f1a2895a.js"></script>
+<script src="/assets/44e27b072e73.js"></script>
+<script src="/assets/2f9f9ae93bc3.js"></script>
+<script src="/assets/6a9fc42330af.js"></script>
+<script src="/assets/06d8cebb478f.js"></script>
+<script src="/assets/a9020ef7416b.js"></script>
+<script src="/assets/d8f6ecddc862.js"></script>
+<script src="/assets/fe6b4c02fea7.js"></script>
+<script>if("scene-simulation.github.io"===location.hostname){var s=document.createElement("script");s.type="module",s.src="https://static.cloudflareinsights.com/beacon.min.js",s.setAttribute("data-cf-beacon",JSON.stringify({token:"653bae673fea45259bfa0cf3e82f9d92"})),document.body.appendChild(s)}</script>
+<script src="/assets/046814b55fec.js"></script>
+</body>
+</html>
