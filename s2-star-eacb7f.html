@@ -503,7 +503,7 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
   function tick(now){
     if (!S || !S.hub.isConnected){ S = null; return; }
     var dt = S.last ? Math.min(64, now - S.last) : 16; S.last = now;
-    if (S.ph === 'boost') boostStep(S, now); lay(S, dt); fcMove(S, dt); if (S.fly) flyStep(S, now); if (S.spin) spinStep(now);
+    if (S.ph === 'boost') boostStep(S, now); lay(S, dt); fcMove(S, dt); if (S.fly) flyStep(S, now); if (S.morph) morphStep(S, now); if (S.spin) spinStep(now);
     S.raf = window.requestAnimationFrame(tick);
   }
   function stop(){ if (S){ window.cancelAnimationFrame(S.raf); if (S.pk) S.pk.destroy(); if (S.gl) S.gl.destroy(); S = null; } }
@@ -533,6 +533,7 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     s.ph = 'out'; s.spT = .45; f.out = true; s.f = f;
     var g = geo(s), BW = 200 * Math.max(.72, g.k), Y = 64 * g.k, rs = RINGS[f.ring].pk * .62 * g.pk;
     s.Y = Y; s.BW = BW; s.ghosts = [];
+    s.fly0 = { kind: f.kind, tint: f.tint };
     s.fly = { t0: now, r0: Math.max(60 * g.k, Math.hypot(f.x, f.y)), th0: Math.atan2(f.y, f.x), z0: f.z, rs0: rs, rs1: BW * .42, kind: f.kind, tint: f.tint, gl: 0 };
     flyStep(s, now);
   }
@@ -544,7 +545,32 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     s.flyS = { kind: F.kind, tint: F.tint, x: cur.x, y: cur.y, z: cur.z, r: cur.r, ry: cur.ry, rx: cur.rx };
     if (now - F.gl > 42 && t < .96){ F.gl = now; cur.t = now; s.ghosts.push(cur); }
     s.ghosts = s.ghosts.filter(function(g){ g.a = .42 * (1 - (now - g.t) / 380); return g.a > 0; });
-    if (t >= 1){ s.fly = null; s.flyS = null; s.ghosts = []; toGL(s); }
+    if (t >= 1){ s.fly = null; morphGo(s, now, cur); }
+  }
+  // ④ 바뀌기(8차 — 사용자 "별이 날라온 후에 카드로 변환 될 때 조금 부자연스러워 … 별이 날라온 후에 한 1초 정도 별이 막 돌아가다가 자연스러운 효과? 모션?을 추가해서 카드로 변하는 연출"):
+  //   MT(1초) 동안 별이 가운데에서 세로축으로 점점 빨리 돈다(0 → 초당 5.5바퀴 — 카드팩이 돌기 시작하는 빠르기와 같다 → 바뀐 뒤에도 회전이 끊기지 않고 이어진다). 조금 커지고 앞뒤로 살짝 기울며 흔들린다.
+  //   그동안 별 뒤에서 빛(.rv2s-mf — 흰 빛 + 옅은 민트)이 모여 마지막 0.45초에 확 밝아지고, 가운데 별의 조각들도 같이 떨린다.
+  //   다 차면 그 빛이 번쩍 + 퍼지는 고리 둘(.rv2s-mr) + 반짝이 조각 열넷(.rv2s-mp)이 튀는 순간 별이 사라지고 카드팩이 빛 속에서 0.4배에서 커지며 나타나(.rv2s-em) 이어서 돈다. 빛은 0.5초에 걷힌다
+  var MT = 1000;
+  function morphGo(s, now, cur){
+    s.morph = { t0: now, ry: cur.ry, rx: cur.rx, r0: cur.r, last: now };
+    var f = document.createElement('span'); f.className = 'rv2s-mf'; f.style.transform = 'translate(-50%,-50%) translateY(' + s.Y.toFixed(0) + 'px)'; s.hub.appendChild(f); s.mf = f;
+  }
+  function morphStep(s, now){
+    var Mo = s.morph, t = Math.min(1, (now - Mo.t0) / MT), dt = Math.min(64, now - Mo.last); Mo.last = now;
+    Mo.ry += dt / 1000 * Math.PI * 2 * 5.5 * Math.pow(t, 1.4);                         // 점점 빨리(끝 = 초당 5.5바퀴)
+    var sh = t * t * 5;                                                                 // 끝으로 갈수록 떨림
+    s.flyS = { kind: s.fly0.kind, tint: s.fly0.tint, x: Math.sin(now / 23) * sh, y: s.Y + Math.cos(now / 29) * sh * .6, z: 140, r: Mo.r0 * (1 + .28 * t), ry: Mo.ry, rx: Mo.rx * (1 - t) + .22 * Math.sin(now / 90) * t };
+    s.kick = Math.max(s.kick, 6 * t * t);
+    if (s.mf){ var o = t < .55 ? t / .55 * .35 : .35 + .65 * Math.pow((t - .55) / .45, 1.6); s.mf.style.opacity = o.toFixed(3); s.mf.style.transform = 'translate(-50%,-50%) translateY(' + s.Y.toFixed(0) + 'px) scale(' + (.55 + .65 * t).toFixed(3) + ')'; }
+    if (t >= 1){ s.morph = null; s.flyS = null; burst(s); toGL(s); }
+  }
+  function burst(s){                                                                    // 번쩍 · 고리 · 반짝이 조각 — 다 끝나면 스스로 지운다
+    var Y = s.Y.toFixed(0), h = '', k, f = s.mf; s.mf = null;
+    if (f){ f.classList.add('out'); setTimeout(function(){ f.remove(); }, 600); }
+    for (k = 0; k < 14; k++){ var a = k / 14 * Math.PI * 2 + (k % 2) * .2, d = 90 + (k * 37 % 5) * 22; h += '<i style="--x:' + (Math.cos(a) * d).toFixed(0) + 'px;--y:' + (Math.sin(a) * d * .8).toFixed(0) + 'px;--s:' + (7 + (k * 13 % 4) * 3) + 'px;--dl:' + (k % 3) * 40 + 'ms"></i>'; }
+    var b = document.createElement('span'); b.className = 'rv2s-mb'; b.style.transform = 'translateY(' + Y + 'px)'; b.innerHTML = '<span class="rv2s-mr"></span><span class="rv2s-mr r2"></span><span class="rv2s-mp">' + h + '</span>';
+    s.hub.appendChild(b); setTimeout(function(){ b.remove(); }, 1100);
   }
   function toGL(s){                                                                    // ③ 진짜 3D 팩으로: canvas 하나(SGPack — 팩 200 × 292 가 가운데인 340 × 440 그림). 안 되면 납작한 팩 두 면을 CSS 로 돌린다
     var big = document.createElement('span'), cv = document.createElement('canvas'), k = s.BW / 200, pk = null, W = s.BW * CROP[0] / 200;
@@ -554,7 +580,7 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     if (window.SGPack){ big.appendChild(cv); pk = window.SGPack.create(cv, { tint: M[s.seq(0)].c, name: M[s.seq(0)].n, count: 5 }); if (!pk) cv.remove(); }
     if (pk){ s.pk = pk; pk.turn(0); var fl = big.querySelector('.rv2s-fly'); if (fl) fl.remove(); }
     else big.innerHTML = '<span class="rv2s-bi">' + flat(s.seq(0)) + flat(s.seq(1), true) + '</span>';
-    big.classList.add('rv2s-snap'); s.kick = 9;                                        // 꽂히는 순간 팩이 한 번 튀고 별 조각도 튄다
+    big.classList.add('rv2s-em'); s.kick = 12;                                        // 꽂히는 순간 팩이 한 번 튀고 별 조각도 튄다
     s.spin = { t0: 0, T: 3800, A: 360 * s.turns, hk: 0 };
   }
   function spinStep(now){
@@ -586,7 +612,7 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     if (res) res.className = 'rv2s-res';
     s.st.classList.remove('rv2s-done'); s.st.style.removeProperty('--mc');
     if (btn){ btn.querySelector('b').textContent = '카드팩 뽑기'; btn.setAttribute('data-rv2s-go', '1'); }
-    function back(){ if (s.pk){ s.pk.destroy(); s.pk = null; } if (big) big.remove(); s.big = null; if (f) f.out = false; s.ph = 'idle'; s.spT = 1; }
+    function back(){ if (s.mf){ s.mf.remove(); s.mf = null; } if (s.pk){ s.pk.destroy(); s.pk = null; } if (big) big.remove(); s.big = null; if (f) f.out = false; s.ph = 'idle'; s.spT = 1; }
     if (!big || RM || !big.animate){ back(); return; }
     big.animate([{ opacity: 1, transform: 'translate(0px,' + (s.Y || 0).toFixed(0) + 'px) scale(1)' }, { opacity: 0, transform: 'translate(0px,0px) scale(.25)' }], { duration: 420, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' }).onfinish = back;
   }
@@ -617,6 +643,10 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     '.rv2s-pk .rv2s-f,.rv2s-big .rv2s-f{border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)}.rv2s .rv2s-f em{font-size:7px;letter-spacing:.1em}',
     '.rv2s-big{position:absolute;left:0;top:0;z-index:40;perspective:900px}.rv2s-fly,.rv2s-bi{position:absolute;inset:0;transform-style:preserve-3d}.rv2s-bk{transform:rotateY(180deg)}.rv2s-big .rv2s-f em{font-size:13px;bottom:13%}',
     '.rv2s-gh{pointer-events:none}.rv2s-gh::after{display:none}.rv2s-big.rv2s-snap .rv2s-cv{animation:rv2sPop .36s cubic-bezier(.3,1.6,.5,1)}',
+    '.rv2s-mf{position:absolute;left:0;top:0;width:280px;height:280px;border-radius:50%;pointer-events:none;opacity:0;z-index:30;background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(225,255,244,.7) 30%,rgba(170,240,215,.28) 58%,transparent);mix-blend-mode:screen}.rv2s-mf.out{transition:opacity .5s ease-out,transform .5s ease-out;opacity:0!important;transform:translate(-50%,-50%) scale(1.6)!important}',
+    '.rv2s-mb{position:absolute;left:0;top:0;width:0;height:0;z-index:45;pointer-events:none}.rv2s-mr{position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;border:3px solid rgba(235,255,248,.95);box-shadow:0 0 18px rgba(170,240,215,.9);animation:rv2sMr .7s cubic-bezier(.15,.7,.3,1) forwards}.rv2s-mr.r2{animation-delay:.08s;border-width:2px;opacity:0}@keyframes rv2sMr{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(3.2)}}',
+    '.rv2s-mp i{position:absolute;left:0;top:0;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);background:#fff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 4px #c9fff0);animation:rv2sMp .8s cubic-bezier(.15,.7,.3,1) var(--dl) both}@keyframes rv2sMp{0%{opacity:1;transform:translate(0,0) scale(.4) rotate(0)}70%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1.1) rotate(160deg)}}',
+    '.rv2s-big.rv2s-em{animation:rv2sEm .42s cubic-bezier(.2,1.5,.4,1) both}@keyframes rv2sEm{0%{opacity:0;scale:.4;filter:brightness(2.4)}55%{opacity:1}100%{opacity:1;scale:1;filter:none}}',
     '.rv2s-cv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}',
     '.rv2s-big::after{content:"";position:absolute;left:50%;top:50%;width:100%;aspect-ratio:1;border-radius:50%;border:3px solid var(--mc,#fff);transform:translate(-50%,-50%) scale(.4);opacity:0;pointer-events:none}',
     '.rv2s-big.rv2s-hit::after{animation:rv2sHit .9s cubic-bezier(.2,.8,.3,1) forwards}@keyframes rv2sHit{0%{opacity:.95;transform:translate(-50%,-50%) scale(.6)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.6)}}',
@@ -630,7 +660,8 @@ window.SGRV = { MEMBERS: [{ k: 'wn', n: '원이', c: '#f286a8' }, { k: 'lv', n: 
     '@media (prefers-reduced-motion:reduce){.rv2s-s3,.rv2s-fl{animation:none}}'
   ];
   var st = document.createElement('style'); st.id = 'rv2s-css'; st.textContent = css.join('\n'); document.head.appendChild(st);
-  window.SGRV2Star = { go: go, again: again, state: function(){ return S; } };
+  window.SGRV2Star = { go: go, again: again, state: function(){ return S; },
+    step: function(now){ if (!S) return; var dt = S.last ? Math.min(64, now - S.last) : 16; S.last = now; if (S.ph === 'boost') boostStep(S, now); lay(S, dt); fcMove(S, dt); if (S.fly) flyStep(S, now); if (S.morph) morphStep(S, now); if (S.spin) spinStep(now); } };   // step = 확인용(창이 가려져 장면이 멈췄을 때 시각을 직접 넘긴다)
 })();
 
 </script>
