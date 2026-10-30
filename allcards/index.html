@@ -341,6 +341,7 @@
 
 <script src="/assets/5e447838b7a9.js"></script>
 <script>!function(){var t="sg:preview";try{var a=new URLSearchParams(location.search).get("preview");"1"===a?localStorage.setItem(t,"1"):"0"===a&&localStorage.removeItem(t)}catch(t){}try{var e=new URLSearchParams(location.search).get("lab");e&&/^-?[a-z0-9]{1,12}$/.test(e)&&("-"===e.charAt(0)?localStorage.removeItem("sg:lab:"+e.slice(1)):localStorage.setItem("sg:lab:"+e,"1"))}catch(t){}function r(){try{return"1"===localStorage.getItem(t)}catch(t){return!1}}function c(t){return String(t).replace(/[&<>"']/g,function(t){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[t]})}window.SGSoon={on:r,lab:function(t){try{return"1"===localStorage.getItem("sg:lab:"+t)}catch(t){return!1}},chip:function(){return r()?'<span class="sn-pv" title="준비 중인 페이지를 미리 보는 중 — 다른 이용자에게는 준비 중 안내만 보입니다. 끄려면 주소 끝에 &amp;preview=0">미리보기 · SOON</span>':""},page:function(t){return'<div class="sn-box"><div class="sn-b">SOON</div><h2>'+c(t.title)+"</h2><p>"+t.desc+"<br>조금만 기다려 주세요!</p>"+(t.back?'<a class="sn-l" href="/?tab='+c(t.back[0])+'" data-tab="'+c(t.back[0])+'">'+c(t.back[1])+" →</a>":"")+"</div>"}}}();</script>
+<script>!function(){var t="https://sendungi-api.sendungi-api.workers.dev",e=/^(localhost|127\.0\.0\.1)$/.test(location.hostname),n={},a="scene-simulation.github.io"===location.hostname;try{var i=new URLSearchParams(location.search).get("api");if(e){var r=i&&/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(i)?i:localStorage.getItem("sg:api");r&&(t=r,a=!0)}}catch(t){}function o(t,e){return Math.round((Date.parse(e+"T00:00:00Z")-Date.parse(t+"T00:00:00Z"))/864e5)}function c(e,n){var a=JSON.stringify(e);try{if(n&&navigator.sendBeacon&&navigator.sendBeacon(t+"/visit",new Blob([a],{type:"text/plain"})))return;fetch(t+"/visit",{method:"POST",headers:{"Content-Type":"text/plain"},body:a,keepalive:!0,credentials:"omit"}).catch(function(){})}catch(t){}}function s(){for(var t=0;t<localStorage.length;t++){var e=localStorage.key(t);if(/^(col:|sendungi:|bread27|gacha:)/.test(e)||"sg:recent"===e)return!0}return!1}function l(){var t,e,n,a,i=null,r=(a=Date.now(),new Date(a+324e5).toISOString().slice(0,10)),l=(e=r,n=Date.parse(e+"T00:00:00Z"),new Date(n-(new Date(n).getUTCDay()+6)%7*864e5).toISOString().slice(0,10));try{i=JSON.parse(localStorage.getItem("sg:visit")||"null")}catch(t){}try{if(i&&i.l===r)return;(t=i&&"string"==typeof i.l?{s:"ret",g:o(i.l,r),c:i.f}:{s:"old"===(i={f:s()?"old":l}).f?"old":"new",c:i.f}).w=i.w===l?0:1,i.l=r,i.w=l,localStorage.setItem("sg:visit",JSON.stringify(i))}catch(t){return}c({b:t})}function g(){if(Object.keys(n).length){var t=n;n={},c({p:t},!0)}}navigator.webdriver&&(a=!1),window.SGVisit={api:function(){return t},page:function(t){a&&t&&!/-check$|^secret$/.test(t)&&/^[a-z0-9][a-z0-9_-]{0,31}$/.test(t)&&(n[t]=Math.min((n[t]||0)+1,200))}},a&&(l(),document.addEventListener("visibilitychange",function(){"hidden"===document.visibilityState?g():l()}),window.addEventListener("pagehide",g))}();</script>
 <script src="/assets/7177b12f1ff3.js"></script>
 <script src="/assets/76c51379e94b.js"></script>
 <script src="/assets/d4cb7081f151.js"></script>
@@ -368,7 +369,7 @@
 <script src="/assets/de0b32b5162c.js"></script>
 <script src="/assets/f6603e564d38.js"></script>
 <script src="/assets/2a2b27c993bb.js"></script>
-<script src="/assets/4ede10f1aa57.js"></script>
+<script src="/assets/711c7ae6a812.js"></script>
 <script src="/assets/5f443eaa80b8.js"></script>
 <script src="/assets/21802d2701f9.js"></script>
 <script src="/assets/cf5aace00f8c.js"></script>
@@ -380,6 +381,7 @@
 <script src="/assets/2d627350eb97.js"></script>
 <script src="/assets/a91f4402c749.js"></script>
 <script src="/assets/e13f4ba92653.js"></script>
+<script src="/assets/7468b065c221.js"></script>
 <script src="/assets/7a5fba0082b0.js"></script>
 <script src="/assets/3cab542e007a.js"></script>
 <script src="/assets/2f9f9ae93bc3.js"></script>
