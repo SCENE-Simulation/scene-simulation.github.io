@@ -1,6 +1,9 @@
 # 조회수 예측기 수집기: 5분마다 돈다 — 15분에 한 번은 전체 수집(쇼츠 목록도 이때), 그 사이는 모든 영상의 수치만 읽는 빠른 수집(스크립트가 마지막 전체 수집 시각으로 스스로 가린다). data 브랜치의 views.json 에 쌓는다.
 # API 사용량: 전체 수집 한 번에 약 3 → 하루 약 290, 빠른 수집 한 번에 1 → 하루 약 190, 쇼츠 목록 한 번에 약 4 → 하루 약 380 (무료 한도 10,000). 공개 저장소라 Actions 사용 시간도 무료
 # API 키는 저장소 Settings → Secrets and variables → Actions 의 YT_API_KEY (코드·로그에 드러나지 않는다)
+# 팬 쇼츠(11/4): 같은 실행의 다음 단계가 collector/fshorts.js 를 돈다 — 6시간이 안 지났으면 API 없이 바로 끝나고, 돌면 한 번에 약 120 ~ 200단위(하루 4번).
+#   팬 쇼츠가 실패해도 조회수 기록은 올라가게 그 단계만 continue-on-error.
+# 원본: 비공개 저장소 site/tools/collect-views.yml — 공개 저장소 .github/workflows/ 에 그대로 복사한다(배포 때).
 name: 조회수 수집
 
 on:
@@ -44,12 +47,19 @@ jobs:
           FULL: ${{ inputs.full && '1' || '' }}
         run: node site/collector/collect.js store/views.json
 
+      - name: 팬 쇼츠
+        continue-on-error: true
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: node site/collector/fshorts.js store/fshorts.json
+
       - name: 기록 올리기
         working-directory: store
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add views.json
+          if [ -f fshorts.json ]; then git add fshorts.json; fi
           if git diff --cached --quiet; then echo '바뀐 기록 없음'; exit 0; fi
           git commit -q -m "기록 $(date -u +'%Y-%m-%d %H:%M') UTC"
           git push -q
